@@ -17,22 +17,21 @@
 package org.opentravel.schemacompiler.diff;
 
 /**
- * Enumeration of the possible types of changes that can be discovered when comparing
- * two OTM libraries.
+ * Enumeration of the possible types of changes that can be discovered when comparing two OTM libraries.
  */
 public enum LibraryChangeType {
-	
-	NAME_CHANGED,
-	NAMESPACE_CHANGED,
-	PREFIX_CHANGED,
-	VERSION_SCHEME_CHANGED,
-	STATUS_CHANGED,
-	COMMENTS_CHANGED,
-	MEMBER_ADDED,
-	MEMBER_DELETED,
-	MEMBER_CHANGED,
-	RESOURCE_ADDED,
-	RESOURCE_DELETED,
-	RESOURCE_CHANGED,
-	
+
+    NAME_CHANGED,
+    NAMESPACE_CHANGED,
+    PREFIX_CHANGED,
+    VERSION_SCHEME_CHANGED,
+    STATUS_CHANGED,
+    COMMENTS_CHANGED,
+    MEMBER_ADDED,
+    MEMBER_DELETED,
+    MEMBER_CHANGED,
+    RESOURCE_ADDED,
+    RESOURCE_DELETED,
+    RESOURCE_CHANGED,
+
 }

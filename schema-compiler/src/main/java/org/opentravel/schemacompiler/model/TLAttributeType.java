@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.model;
 
 /**
@@ -23,9 +24,8 @@ package org.opentravel.schemacompiler.model;
 public interface TLAttributeType extends TLPropertyType {
 
     /**
-     * Returns the <code>XSDFacetProfile</code> value that indicates which XML schema facets are
-     * applicable to this attribute type. If the correct facet profile cannot be identified, this
-     * method will return null.
+     * Returns the <code>XSDFacetProfile</code> value that indicates which XML schema facets are applicable to this
+     * attribute type. If the correct facet profile cannot be identified, this method will return null.
      * 
      * @return XSDFacetProfile
      */

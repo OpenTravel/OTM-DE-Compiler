@@ -13,11 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.codegen.html.builders;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+package org.opentravel.schemacompiler.codegen.html.builders;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerationException;
 import org.opentravel.schemacompiler.codegen.example.ExampleDocumentBuilder;
@@ -31,93 +28,97 @@ import org.opentravel.schemacompiler.model.TLIndicator;
 import org.opentravel.schemacompiler.model.TLIndicatorOwner;
 import org.opentravel.schemacompiler.validate.ValidationException;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 /**
  * @author Eric.Bronson
  *
  */
-public abstract class AttributeOwnerDocumentationBuilder<T extends TLDocumentationOwner & TLAttributeOwner & TLIndicatorOwner>
-		extends NamedEntityDocumentationBuilder<T> {
+public abstract class AttributeOwnerDocumentationBuilder<
+    T extends TLDocumentationOwner & TLAttributeOwner & TLIndicatorOwner> extends NamedEntityDocumentationBuilder<T> {
 
-	protected List<AttributeDocumentationBuilder> attributes;
+    protected List<AttributeDocumentationBuilder> attributes;
 
-	protected List<IndicatorDocumentationBuilder> indicators;
+    protected List<IndicatorDocumentationBuilder> indicators;
 
-	private String exampleXML;
+    private String exampleXML;
 
-	private String exampleJSON;
+    private String exampleJSON;
 
-	/**
-	 * @param manager
-	 */
-	public AttributeOwnerDocumentationBuilder(T t) {
-		super(t);
-		attributes = new ArrayList<>();
-		indicators = new ArrayList<>();
-		for(TLAttribute attribute : t.getAttributes()){
-			AttributeDocumentationBuilder attBuilder = new AttributeDocumentationBuilder(attribute);
-			attributes.add(attBuilder);
-			attBuilder.setOwner(this);
-		}
-		
-		for(TLIndicator indicator : t.getIndicators()){
-			IndicatorDocumentationBuilder indBuilder = new IndicatorDocumentationBuilder(indicator);
-			indicators.add(indBuilder);
-			indBuilder.setOwner(this);
-		}
-		buildExamples(t);
-	}
-	
-	protected void buildExamples(T t){
-		ExampleGeneratorOptions options = Configuration.getInstance().getExampleOptions();
-		try {
-			ExampleDocumentBuilder exampleBuilder = new ExampleDocumentBuilder(options);
-			exampleBuilder.setModelElement(t);
-			exampleXML = exampleBuilder.buildString();	
-		} catch (ValidationException | CodeGenerationException e) {
-			exampleXML = "";
-		}
-		
-		try {
-			ExampleJsonBuilder exampleBuilder = new ExampleJsonBuilder(options);
-			exampleBuilder.setModelElement(t);
-			
-			exampleJSON = exampleBuilder.buildString();
-		} catch (ValidationException | CodeGenerationException e) {
-			exampleJSON = "";
-		}	
-	}
-	
-	public List<AttributeDocumentationBuilder> getAttributes() {
-		return Collections.unmodifiableList(attributes);
-	}
-	
+    /**
+     * @param t the attribute owner for which to create a builder
+     */
+    public AttributeOwnerDocumentationBuilder(T t) {
+        super( t );
+        attributes = new ArrayList<>();
+        indicators = new ArrayList<>();
+        for (TLAttribute attribute : t.getAttributes()) {
+            AttributeDocumentationBuilder attBuilder = new AttributeDocumentationBuilder( attribute );
+            attributes.add( attBuilder );
+            attBuilder.setOwner( this );
+        }
 
-	public List<IndicatorDocumentationBuilder> getIndicators() {
-		return Collections.unmodifiableList(indicators);
-	}
-	
-	public String getExampleXML() {
-		return exampleXML;
-	}
+        for (TLIndicator indicator : t.getIndicators()) {
+            IndicatorDocumentationBuilder indBuilder = new IndicatorDocumentationBuilder( indicator );
+            indicators.add( indBuilder );
+            indBuilder.setOwner( this );
+        }
+        buildExamples( t );
+    }
 
-	public String getExampleJSON() {
-		return exampleJSON;
-	}
-	
-	/**
-	 * @see org.opentravel.schemacompiler.codegen.html.builders.AbstractDocumentationBuilder#hashCode()
-	 */
-	@Override
-	public int hashCode() {
-		return super.hashCode();
-	}
+    protected void buildExamples(T t) {
+        ExampleGeneratorOptions options = Configuration.getInstance().getExampleOptions();
+        try {
+            ExampleDocumentBuilder exampleBuilder = new ExampleDocumentBuilder( options );
+            exampleBuilder.setModelElement( t );
+            exampleXML = exampleBuilder.buildString();
+        } catch (ValidationException | CodeGenerationException e) {
+            exampleXML = "";
+        }
 
-	/**
-	 * @see org.opentravel.schemacompiler.codegen.html.builders.AbstractDocumentationBuilder#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		return super.equals(obj);
-	}
+        try {
+            ExampleJsonBuilder exampleBuilder = new ExampleJsonBuilder( options );
+            exampleBuilder.setModelElement( t );
+
+            exampleJSON = exampleBuilder.buildString();
+        } catch (ValidationException | CodeGenerationException e) {
+            exampleJSON = "";
+        }
+    }
+
+    public List<AttributeDocumentationBuilder> getAttributes() {
+        return Collections.unmodifiableList( attributes );
+    }
+
+
+    public List<IndicatorDocumentationBuilder> getIndicators() {
+        return Collections.unmodifiableList( indicators );
+    }
+
+    public String getExampleXML() {
+        return exampleXML;
+    }
+
+    public String getExampleJSON() {
+        return exampleJSON;
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.codegen.html.builders.AbstractDocumentationBuilder#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.codegen.html.builders.AbstractDocumentationBuilder#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+        return super.equals( obj );
+    }
 
 }

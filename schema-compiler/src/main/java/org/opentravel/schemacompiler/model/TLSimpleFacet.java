@@ -13,12 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.model;
-
-import java.util.Comparator;
-import java.util.List;
-
-import javax.xml.namespace.QName;
 
 import org.opentravel.schemacompiler.event.ModelEvent;
 import org.opentravel.schemacompiler.event.ModelEventBuilder;
@@ -28,18 +24,22 @@ import org.opentravel.schemacompiler.model.TLEquivalent.EquivalentListManager;
 import org.opentravel.schemacompiler.model.TLExample.ExampleListManager;
 import org.opentravel.schemacompiler.util.XSDFacetProfileLocator;
 
+import java.util.Comparator;
+import java.util.List;
+
+import javax.xml.namespace.QName;
+
 /**
  * Facet type that references a declared simple type for use as a facet on a complex object.
  * 
  * @author S. Livezey
  */
-public class TLSimpleFacet extends TLAbstractFacet implements TLAttributeType, TLEquivalentOwner,
-        TLExampleOwner {
+public class TLSimpleFacet extends TLAbstractFacet implements TLAttributeType, TLEquivalentOwner, TLExampleOwner {
 
     private NamedEntity simpleType;
     private String simpleTypeName;
-    private EquivalentListManager equivalentManager = new EquivalentListManager(this);
-    private ExampleListManager exampleManager = new ExampleListManager(this);
+    private EquivalentListManager equivalentManager = new EquivalentListManager( this );
+    private ExampleListManager exampleManager = new ExampleListManager( this );
 
     /**
      * @see org.opentravel.schemacompiler.model.TLAbstractFacet#declaresContent()
@@ -50,8 +50,8 @@ public class TLSimpleFacet extends TLAbstractFacet implements TLAttributeType, T
     }
 
     /**
-     * Returns true if the simple type assignment is null or 'ota:EMPTY', indicating that the simple
-     * facet is to be omitted from the model.
+     * Returns true if the simple type assignment is null or 'ota:EMPTY', indicating that the simple facet is to be
+     * omitted from the model.
      * 
      * @return boolean
      */
@@ -61,8 +61,8 @@ public class TLSimpleFacet extends TLAbstractFacet implements TLAttributeType, T
         } else {
             QName emptyElementType = SchemaDependency.getEmptyElement().toQName();
 
-            return emptyElementType.getNamespaceURI().equals(simpleType.getNamespace())
-                    && emptyElementType.getLocalPart().equals(simpleType.getLocalName());
+            return emptyElementType.getNamespaceURI().equals( simpleType.getNamespace() )
+                && emptyElementType.getLocalPart().equals( simpleType.getLocalName() );
         }
     }
 
@@ -76,12 +76,12 @@ public class TLSimpleFacet extends TLAbstractFacet implements TLAttributeType, T
         StringBuilder identity = new StringBuilder();
 
         if (owningEntity != null) {
-            identity.append(owningEntity.getValidationIdentity()).append("/");
+            identity.append( owningEntity.getValidationIdentity() ).append( "/" );
         }
         if (facetType == null) {
-            identity.append("[Unnamed Simple Facet]");
+            identity.append( "[Unnamed Simple Facet]" );
         } else {
-            identity.append(facetType.getIdentityName());
+            identity.append( facetType.getIdentityName() );
         }
         return identity.toString();
     }
@@ -98,15 +98,14 @@ public class TLSimpleFacet extends TLAbstractFacet implements TLAttributeType, T
     /**
      * Assigns the value of the 'simpleType' field.
      * 
-     * @param simpleType
-     *            the field value to assign
+     * @param simpleType the field value to assign
      */
     public void setSimpleType(NamedEntity simpleType) {
-        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.TYPE_ASSIGNMENT_MODIFIED, this)
-                .setOldValue(this.simpleType).setNewValue(simpleType).buildEvent();
+        ModelEvent<?> event = new ModelEventBuilder( ModelEventType.TYPE_ASSIGNMENT_MODIFIED, this )
+            .setOldValue( this.simpleType ).setNewValue( simpleType ).buildEvent();
 
         this.simpleType = simpleType;
-        publishEvent(event);
+        publishEvent( event );
     }
 
     /**
@@ -121,8 +120,7 @@ public class TLSimpleFacet extends TLAbstractFacet implements TLAttributeType, T
     /**
      * Assigns the value of the 'simpleTypeName' field.
      * 
-     * @param simpleTypeName
-     *            the field value to assign
+     * @param simpleTypeName the field value to assign
      */
     public void setSimpleTypeName(String simpleTypeName) {
         this.simpleTypeName = simpleTypeName;
@@ -134,8 +132,8 @@ public class TLSimpleFacet extends TLAbstractFacet implements TLAttributeType, T
     @Override
     public XSDFacetProfile getXSDFacetProfile() {
         return (simpleType instanceof TLAttributeType)
-        		? XSDFacetProfileLocator.getXSDFacetProfile( (TLAttributeType) simpleType )
-        				: XSDFacetProfile.FP_UNKNOWN;
+            ? XSDFacetProfileLocator.getXSDFacetProfile( (TLAttributeType) simpleType )
+            : XSDFacetProfile.FP_UNKNOWN;
     }
 
     /**
@@ -151,7 +149,7 @@ public class TLSimpleFacet extends TLAbstractFacet implements TLAttributeType, T
      */
     @Override
     public TLEquivalent getEquivalent(String context) {
-        return equivalentManager.getChild(context);
+        return equivalentManager.getChild( context );
     }
 
     /**
@@ -159,7 +157,7 @@ public class TLSimpleFacet extends TLAbstractFacet implements TLAttributeType, T
      */
     @Override
     public void addEquivalent(TLEquivalent equivalent) {
-        equivalentManager.addChild(equivalent);
+        equivalentManager.addChild( equivalent );
     }
 
     /**
@@ -168,7 +166,7 @@ public class TLSimpleFacet extends TLAbstractFacet implements TLAttributeType, T
      */
     @Override
     public void addEquivalent(int index, TLEquivalent equivalent) {
-        equivalentManager.addChild(index, equivalent);
+        equivalentManager.addChild( index, equivalent );
     }
 
     /**
@@ -176,23 +174,7 @@ public class TLSimpleFacet extends TLAbstractFacet implements TLAttributeType, T
      */
     @Override
     public void removeEquivalent(TLEquivalent equivalent) {
-        equivalentManager.removeChild(equivalent);
-    }
-
-    /**
-     * @see org.opentravel.schemacompiler.model.TLEquivalentOwner#moveUp(org.opentravel.schemacompiler.model.TLEquivalent)
-     */
-    @Override
-    public void moveUp(TLEquivalent equivalent) {
-        equivalentManager.moveUp(equivalent);
-    }
-
-    /**
-     * @see org.opentravel.schemacompiler.model.TLEquivalentOwner#moveDown(org.opentravel.schemacompiler.model.TLEquivalent)
-     */
-    @Override
-    public void moveDown(TLEquivalent equivalent) {
-        equivalentManager.moveDown(equivalent);
+        equivalentManager.removeChild( equivalent );
     }
 
     /**
@@ -200,7 +182,7 @@ public class TLSimpleFacet extends TLAbstractFacet implements TLAttributeType, T
      */
     @Override
     public void sortEquivalents(Comparator<TLEquivalent> comparator) {
-        equivalentManager.sortChildren(comparator);
+        equivalentManager.sortChildren( comparator );
     }
 
     /**
@@ -214,14 +196,14 @@ public class TLSimpleFacet extends TLAbstractFacet implements TLAttributeType, T
      * @see org.opentravel.schemacompiler.model.TLExampleOwner#getExample(java.lang.String)
      */
     public TLExample getExample(String contextId) {
-        return exampleManager.getChild(contextId);
+        return exampleManager.getChild( contextId );
     }
 
     /**
      * @see org.opentravel.schemacompiler.model.TLExampleOwner#addExample(org.opentravel.schemacompiler.model.TLExample)
      */
     public void addExample(TLExample example) {
-        exampleManager.addChild(example);
+        exampleManager.addChild( example );
     }
 
     /**
@@ -229,35 +211,51 @@ public class TLSimpleFacet extends TLAbstractFacet implements TLAttributeType, T
      *      org.opentravel.schemacompiler.model.TLExample)
      */
     public void addExample(int index, TLExample example) {
-        exampleManager.addChild(index, example);
+        exampleManager.addChild( index, example );
     }
 
     /**
      * @see org.opentravel.schemacompiler.model.TLExampleOwner#removeExample(org.opentravel.schemacompiler.model.TLExample)
      */
     public void removeExample(TLExample example) {
-        exampleManager.removeChild(example);
-    }
-
-    /**
-     * @see org.opentravel.schemacompiler.model.TLExampleOwner#moveUp(org.opentravel.schemacompiler.model.TLExample)
-     */
-    public void moveUp(TLExample example) {
-        exampleManager.moveUp(example);
-    }
-
-    /**
-     * @see org.opentravel.schemacompiler.model.TLExampleOwner#moveDown(org.opentravel.schemacompiler.model.TLExample)
-     */
-    public void moveDown(TLExample example) {
-        exampleManager.moveDown(example);
+        exampleManager.removeChild( example );
     }
 
     /**
      * @see org.opentravel.schemacompiler.model.TLExampleOwner#sortExamples(java.util.Comparator)
      */
     public void sortExamples(Comparator<TLExample> comparator) {
-        exampleManager.sortChildren(comparator);
+        exampleManager.sortChildren( comparator );
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.model.TLExampleOwner#moveUp(org.opentravel.schemacompiler.model.TLExample)
+     */
+    public void moveUp(TLExample example) {
+        exampleManager.moveUp( example );
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.model.TLEquivalentOwner#moveUp(org.opentravel.schemacompiler.model.TLEquivalent)
+     */
+    @Override
+    public void moveUp(TLEquivalent equivalent) {
+        equivalentManager.moveUp( equivalent );
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.model.TLExampleOwner#moveDown(org.opentravel.schemacompiler.model.TLExample)
+     */
+    public void moveDown(TLExample example) {
+        exampleManager.moveDown( example );
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.model.TLEquivalentOwner#moveDown(org.opentravel.schemacompiler.model.TLEquivalent)
+     */
+    @Override
+    public void moveDown(TLEquivalent equivalent) {
+        equivalentManager.moveDown( equivalent );
     }
 
 }

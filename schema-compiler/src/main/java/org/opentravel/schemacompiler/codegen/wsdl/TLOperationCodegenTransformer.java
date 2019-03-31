@@ -13,12 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.codegen.wsdl;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.xml.namespace.QName;
 
 import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerContext;
 import org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts;
@@ -41,126 +37,123 @@ import org.xmlsoap.schemas.wsdl.TOperation;
 import org.xmlsoap.schemas.wsdl.TParam;
 import org.xmlsoap.schemas.wsdl.TPart;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.xml.namespace.QName;
+
 /**
- * Performs the translation from <code>TLOperation</code> objects to the JAXB nodes used to produce
- * the WSDL output.
+ * Performs the translation from <code>TLOperation</code> objects to the JAXB nodes used to produce the WSDL output.
  * 
  * @author S. Livezey
  */
-public class TLOperationCodegenTransformer extends
-        AbstractWsdlTransformer<TLOperation, CodegenArtifacts> {
+public class TLOperationCodegenTransformer extends AbstractWsdlTransformer<TLOperation,CodegenArtifacts> {
 
-	private static FacetCodegenDelegateFactory facetDelegateFactory = new FacetCodegenDelegateFactory(null);
-	
+    private static FacetCodegenDelegateFactory facetDelegateFactory = new FacetCodegenDelegateFactory( null );
+
     /**
      * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
      */
     @Override
     public CodegenArtifacts transform(TLOperation source) {
-        TMessage requestMessage = createMessage(source.getRequest());
-        TMessage responseMessage = createMessage(source.getResponse());
-        TMessage notifMessage = createMessage(source.getNotification());
+        TMessage requestMessage = createMessage( source.getRequest() );
+        TMessage responseMessage = createMessage( source.getResponse() );
+        TMessage notifMessage = createMessage( source.getNotification() );
         List<TMessage> faultMessages = new ArrayList<>();
         CodegenArtifacts artifacts = new CodegenArtifacts();
 
-        artifacts.addArtifact(createPortTypeOperation(source, faultMessages));
-        artifacts.addArtifact(requestMessage);
-        artifacts.addArtifact(responseMessage);
-        artifacts.addArtifact(notifMessage);
-        artifacts.addAllArtifacts(faultMessages);
+        artifacts.addArtifact( createPortTypeOperation( source, faultMessages ) );
+        artifacts.addArtifact( requestMessage );
+        artifacts.addArtifact( responseMessage );
+        artifacts.addArtifact( notifMessage );
+        artifacts.addAllArtifacts( faultMessages );
         return artifacts;
     }
 
     /**
      * Creates the JAXB message constructs for the WSDL document.
      * 
-     * @param opFacet
-     *            the operation facet for which to create a message
-     * @return List<TMessage>
+     * @param opFacet the operation facet for which to create a message
+     * @return List&lt;TMessage&gt;
      */
     private TMessage createMessage(TLFacet opFacet) {
-    	FacetCodegenDelegate<TLFacet> facetDelegate = facetDelegateFactory.getDelegate(opFacet);
+        FacetCodegenDelegate<TLFacet> facetDelegate = facetDelegateFactory.getDelegate( opFacet );
         TMessage message = null;
 
         if ((opFacet != null) && facetDelegate.hasContent()) {
             TPart part = new TPart();
 
-            part.setName("body");
-            part.setElement(XsdCodegenUtils.getGlobalElementName(opFacet));
+            part.setName( "body" );
+            part.setElement( XsdCodegenUtils.getGlobalElementName( opFacet ) );
 
             message = new TMessage();
-            message.setName(getMessageName(opFacet));
-            message.getPart().add(part);
+            message.setName( getMessageName( opFacet ) );
+            message.getPart().add( part );
 
             if (wsdlBindings != null) {
-                wsdlBindings.addMessageParts(message);
+                wsdlBindings.addMessageParts( message );
             }
             if (opFacet.getDocumentation() != null) {
-                ObjectTransformer<TLDocumentation, TDocumentation, CodeGenerationTransformerContext> docTransformer = getTransformerFactory()
-                        .getTransformer(TLDocumentation.class, TDocumentation.class);
+                ObjectTransformer<TLDocumentation,TDocumentation,CodeGenerationTransformerContext> docTransformer =
+                    getTransformerFactory().getTransformer( TLDocumentation.class, TDocumentation.class );
 
-                message.setDocumentation(docTransformer.transform(opFacet.getDocumentation()));
+                message.setDocumentation( docTransformer.transform( opFacet.getDocumentation() ) );
             }
         }
         return message;
     }
 
     /**
-     * Creates the 'portType' operation for the WSDL document. If any faults are created as part of
-     * the operation definition, they will be added to the 'faultMessages' list that is passed in
-     * the method parameters.
+     * Creates the 'portType' operation for the WSDL document. If any faults are created as part of the operation
+     * definition, they will be added to the 'faultMessages' list that is passed in the method parameters.
      * 
-     * @param sourceOperation
-     *            the source operation for which a port-type is being generated
-     * @param faultMessages
-     *            the fault messages for the operation
+     * @param sourceOperation the source operation for which a port-type is being generated
+     * @param faultMessages the fault messages for the operation
      * @return TOperation
      */
-    private TOperation createPortTypeOperation(TLOperation sourceOperation,
-            List<TMessage> faultMessages) {
-        String targetNamespace = getTargetNamespace(sourceOperation.getOwningService());
+    private TOperation createPortTypeOperation(TLOperation sourceOperation, List<TMessage> faultMessages) {
+        String targetNamespace = getTargetNamespace( sourceOperation.getOwningService() );
         TOperation operation = new TOperation();
 
-        operation.setName(getOperationName(sourceOperation));
+        operation.setName( getOperationName( sourceOperation ) );
 
-        switch (FacetCodegenUtils.getOperationType(sourceOperation)) {
+        switch (FacetCodegenUtils.getOperationType( sourceOperation )) {
             case ONE_WAY:
-                addInput(operation, sourceOperation.getRequest(), targetNamespace);
+                addInput( operation, sourceOperation.getRequest(), targetNamespace );
                 break;
             case NOTIFICATION:
-                addOutput(operation, sourceOperation.getNotification(), targetNamespace);
+                addOutput( operation, sourceOperation.getNotification(), targetNamespace );
                 break;
             case REQUEST_RESPONSE:
-                addInput(operation, sourceOperation.getRequest(), targetNamespace);
-                addOutput(operation, sourceOperation.getResponse(), targetNamespace);
-                addFaults(operation, sourceOperation.getResponse(), OperationType.REQUEST_RESPONSE,
-                        faultMessages, targetNamespace);
+                addInput( operation, sourceOperation.getRequest(), targetNamespace );
+                addOutput( operation, sourceOperation.getResponse(), targetNamespace );
+                addFaults( operation, sourceOperation.getResponse(), OperationType.REQUEST_RESPONSE, faultMessages,
+                    targetNamespace );
                 break;
             case SOLICIT_NOTIFICATION:
-                addInput(operation, sourceOperation.getRequest(), targetNamespace);
-                addOutput(operation, sourceOperation.getNotification(), targetNamespace);
-                addFaults(operation, sourceOperation.getNotification(),
-                        OperationType.SOLICIT_NOTIFICATION, faultMessages, targetNamespace);
+                addInput( operation, sourceOperation.getRequest(), targetNamespace );
+                addOutput( operation, sourceOperation.getNotification(), targetNamespace );
+                addFaults( operation, sourceOperation.getNotification(), OperationType.SOLICIT_NOTIFICATION,
+                    faultMessages, targetNamespace );
                 break;
             case REQUEST_RESPONSE_WITH_NOTIFICATION:
-                addInput(operation, sourceOperation.getRequest(), targetNamespace);
-                addOutput(operation, sourceOperation.getResponse(), targetNamespace);
-                addFaults(operation, sourceOperation.getResponse(),
-                        OperationType.REQUEST_RESPONSE_WITH_NOTIFICATION, faultMessages,
-                        targetNamespace);
-                // Notification facet is ignored - multiple output elements not supported in WSDL
-                // 1.0
+                addInput( operation, sourceOperation.getRequest(), targetNamespace );
+                addOutput( operation, sourceOperation.getResponse(), targetNamespace );
+                addFaults( operation, sourceOperation.getResponse(), OperationType.REQUEST_RESPONSE_WITH_NOTIFICATION,
+                    faultMessages, targetNamespace );
+                // Notification facet is ignored - multiple output elements not supported in WSDL 1.0
                 break;
             case INVALID:
-            	break;
+                break;
+            default:
+                // No default action required
         }
 
         if (sourceOperation.getDocumentation() != null) {
-            ObjectTransformer<TLDocumentation, TDocumentation, CodeGenerationTransformerContext> docTransformer = getTransformerFactory()
-                    .getTransformer(TLDocumentation.class, TDocumentation.class);
+            ObjectTransformer<TLDocumentation,TDocumentation,CodeGenerationTransformerContext> docTransformer =
+                getTransformerFactory().getTransformer( TLDocumentation.class, TDocumentation.class );
 
-            operation
-                    .setDocumentation(docTransformer.transform(sourceOperation.getDocumentation()));
+            operation.setDocumentation( docTransformer.transform( sourceOperation.getDocumentation() ) );
         }
         return operation;
     }
@@ -168,64 +161,52 @@ public class TLOperationCodegenTransformer extends
     /**
      * Adds an input message to the given operation that is based on the facet provided.
      * 
-     * @param op
-     *            the operation to which the input will be added
-     * @param opFacet
-     *            the operation facet for which the input is being defined
-     * @param targetNamespace
-     *            the target namespace of the WSDL document
+     * @param op the operation to which the input will be added
+     * @param opFacet the operation facet for which the input is being defined
+     * @param targetNamespace the target namespace of the WSDL document
      */
     private void addInput(TOperation op, TLFacet opFacet, String targetNamespace) {
         TParam input = new TParam();
 
-        input.setMessage(new QName(targetNamespace, getMessageName(opFacet)));
-        op.getRest().add(wsdlObjectFactory.createTOperationInput(input));
+        input.setMessage( new QName( targetNamespace, getMessageName( opFacet ) ) );
+        op.getRest().add( wsdlObjectFactory.createTOperationInput( input ) );
     }
 
     /**
      * Adds an input message to the given operation that is based on the facet provided.
      * 
-     * @param op
-     *            the operation to which the input will be added
-     * @param opFacet
-     *            the operation facet for which the input is being defined
-     * @param targetNamespace
-     *            the target namespace of the WSDL document
+     * @param op the operation to which the input will be added
+     * @param opFacet the operation facet for which the input is being defined
+     * @param targetNamespace the target namespace of the WSDL document
      */
     private void addOutput(TOperation op, TLFacet opFacet, String targetNamespace) {
         TParam output = new TParam();
 
-        output.setMessage(new QName(targetNamespace, getMessageName(opFacet)));
-        op.getRest().add(wsdlObjectFactory.createTOperationOutput(output));
+        output.setMessage( new QName( targetNamespace, getMessageName( opFacet ) ) );
+        op.getRest().add( wsdlObjectFactory.createTOperationOutput( output ) );
     }
 
     /**
      * Adds zero or more faults to the given operation, based on the information provided.
      * 
-     * @param op
-     *            the operation to which the fault(s) will be added
-     * @param opFacet
-     *            the operation facet for which the fault(s) are being defined
-     * @param operationType
-     *            the type of operation for which messages are being generated
-     * @param faultMessages
-     *            the list of all fault messages for the operation
-     * @param targetNamespace
-     *            the target namespace of the WSDL document
+     * @param op the operation to which the fault(s) will be added
+     * @param opFacet the operation facet for which the fault(s) are being defined
+     * @param operationType the type of operation for which messages are being generated
+     * @param faultMessages the list of all fault messages for the operation
+     * @param targetNamespace the target namespace of the WSDL document
      */
-    private void addFaults(TOperation op, TLFacet opFacet, OperationType operationType,
-            List<TMessage> faultMessages, String targetNamespace) {
+    private void addFaults(TOperation op, TLFacet opFacet, OperationType operationType, List<TMessage> faultMessages,
+        String targetNamespace) {
         if (wsdlBindings != null) {
-            List<TMessage> faults = wsdlBindings.getFaultMessages(op, operationType,
-                    opFacet.getFacetType());
+            List<TMessage> faults = wsdlBindings.getFaultMessages( op, operationType, opFacet.getFacetType() );
 
             for (TMessage faultMessage : faults) {
                 TFault fault = new TFault();
 
-                fault.setName(faultMessage.getName());
-                fault.setMessage(new QName(targetNamespace, faultMessage.getName()));
-                op.getRest().add(wsdlObjectFactory.createTOperationFault(fault));
-                faultMessages.add(faultMessage);
+                fault.setName( faultMessage.getName() );
+                fault.setMessage( new QName( targetNamespace, faultMessage.getName() ) );
+                op.getRest().add( wsdlObjectFactory.createTOperationFault( fault ) );
+                faultMessages.add( faultMessage );
             }
         }
     }
@@ -233,22 +214,21 @@ public class TLOperationCodegenTransformer extends
     /**
      * Returns the name of the operation to be published in the WSDL document.
      * 
-     * @param op
-     *            the operation for which to return the WSDL document name
+     * @param op the operation for which to return the WSDL document name
      * @return String
      */
     private String getOperationName(TLOperation op) {
-        StringBuilder operationName = new StringBuilder(op.getName());
+        StringBuilder operationName = new StringBuilder( op.getName() );
         try {
             TLLibrary owningLibrary = (TLLibrary) op.getOwningLibrary();
-            TLLibrary priorLibraryVersion = versionHelper.getPriorMinorVersion(owningLibrary);
+            TLLibrary priorLibraryVersion = versionHelper.getPriorMinorVersion( owningLibrary );
 
             if (priorLibraryVersion != null) {
-                VersionScheme vScheme = versionHelper.getVersionScheme(owningLibrary);
+                VersionScheme vScheme = versionHelper.getVersionScheme( owningLibrary );
                 String versionIdentifier = owningLibrary.getVersion();
 
-                operationName.append("_v").append(vScheme.getMajorVersion(versionIdentifier));
-                operationName.append("_").append(vScheme.getMinorVersion(versionIdentifier));
+                operationName.append( "_v" ).append( vScheme.getMajorVersion( versionIdentifier ) );
+                operationName.append( "_" ).append( vScheme.getMinorVersion( versionIdentifier ) );
             }
         } catch (VersionSchemeException e) {
             // Ignore - just return the non-versioned operation name
@@ -259,24 +239,23 @@ public class TLOperationCodegenTransformer extends
     /**
      * Returns the name of the message for the given operation facet.
      * 
-     * @param opFacet
-     *            the operation facet for which to return a name
+     * @param opFacet the operation facet for which to return a name
      * @return String
      */
     private String getMessageName(TLFacet opFacet) {
         TLOperation operation = (TLOperation) opFacet.getOwningEntity();
-        StringBuilder msgName = new StringBuilder(operation.getName());
+        StringBuilder msgName = new StringBuilder( operation.getName() );
 
         try {
             TLLibrary owningLibrary = (TLLibrary) operation.getOwningLibrary();
-            TLLibrary priorLibraryVersion = versionHelper.getPriorMinorVersion(owningLibrary);
+            TLLibrary priorLibraryVersion = versionHelper.getPriorMinorVersion( owningLibrary );
 
             if (priorLibraryVersion != null) {
-                VersionScheme vScheme = versionHelper.getVersionScheme(owningLibrary);
+                VersionScheme vScheme = versionHelper.getVersionScheme( owningLibrary );
                 String versionIdentifier = owningLibrary.getVersion();
 
-                msgName.append("_v").append(vScheme.getMajorVersion(versionIdentifier));
-                msgName.append("_").append(vScheme.getMinorVersion(versionIdentifier));
+                msgName.append( "_v" ).append( vScheme.getMajorVersion( versionIdentifier ) );
+                msgName.append( "_" ).append( vScheme.getMinorVersion( versionIdentifier ) );
             }
         } catch (VersionSchemeException e) {
             // Ignore - just return the non-versioned operation name
@@ -284,16 +263,16 @@ public class TLOperationCodegenTransformer extends
 
         switch (opFacet.getFacetType()) {
             case REQUEST:
-                msgName.append("RQ");
+                msgName.append( "RQ" );
                 break;
             case RESPONSE:
-                msgName.append("RS");
+                msgName.append( "RS" );
                 break;
             case NOTIFICATION:
-                msgName.append("Notif");
+                msgName.append( "Notif" );
                 break;
-			default:
-				break;
+            default:
+                break;
         }
         return msgName.toString();
     }

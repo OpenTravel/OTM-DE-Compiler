@@ -13,15 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.codegen.impl;
 
-import java.io.File;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.TreeMap;
+package org.opentravel.schemacompiler.codegen.impl;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerationContext;
 import org.opentravel.schemacompiler.codegen.CodeGenerationException;
@@ -35,11 +28,19 @@ import org.opentravel.schemacompiler.validate.ValidationException;
 import org.slf4j.Logger;
 import org.slf4j.helpers.NOPLogger;
 
+import java.io.File;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.TreeMap;
+
 /**
- * <code>CodeGenerator</code> base class that provides validation and orchestration functions for
- * the code generation process.
+ * <code>CodeGenerator</code> base class that provides validation and orchestration functions for the code generation
+ * process.
  * 
- * @param <S>  the source type for which output content will be generated
+ * @param <S> the source type for which output content will be generated
  * @author S. Livezey
  */
 public abstract class AbstractCodeGenerator<S extends ModelElement> implements CodeGenerator<S> {
@@ -52,8 +53,7 @@ public abstract class AbstractCodeGenerator<S extends ModelElement> implements C
     /**
      * Default constructor.
      */
-    public AbstractCodeGenerator() {
-    }
+    public AbstractCodeGenerator() {}
 
     /**
      * @see org.opentravel.schemacompiler.codegen.CodeGenerator#getFilter()
@@ -80,7 +80,7 @@ public abstract class AbstractCodeGenerator<S extends ModelElement> implements C
             filenameBuilder = getDefaultFilenameBuilder();
 
             if (filenameBuilder == null) {
-                throw new IllegalStateException("No default filename builder provided.");
+                throw new IllegalStateException( "No default filename builder provided." );
             }
         }
         return filenameBuilder;
@@ -100,58 +100,49 @@ public abstract class AbstractCodeGenerator<S extends ModelElement> implements C
      * Returns the default filename builder implementation for this code generator.
      * 
      * <p>
-     * NOTE: The constructor of this abstract class will throw an
-     * <code>IllegalArgumentException</code> if this method returns null.
+     * NOTE: The constructor of this abstract class will throw an <code>IllegalArgumentException</code> if this method
+     * returns null.
      * 
      * @return CodeGenerationFilenameBuilder
      */
     protected abstract CodeGenerationFilenameBuilder<S> getDefaultFilenameBuilder();
 
     /**
-     * @see org.opentravel.schemacompiler.codegen.CodeGenerator#generateOutput(java.lang.Object,
-     *      org.opentravel.schemacompiler.codegen.CodeGenerationContext)
+     * @see org.opentravel.schemacompiler.codegen.CodeGenerator#generateOutput(java.lang.Object,org.opentravel.schemacompiler.codegen.CodeGenerationContext)
      */
     @Override
     public Collection<File> generateOutput(S source, CodeGenerationContext context)
-            throws ValidationException, CodeGenerationException {
-        if (!isSupportedSourceObject(source)) {
-            throw new IllegalArgumentException("Model element not supported by "
-                    + this.getClass().getSimpleName() + ": " + source.getClass().getName());
+        throws ValidationException, CodeGenerationException {
+        if (!isSupportedSourceObject( source )) {
+            throw new IllegalArgumentException( "Model element not supported by " + this.getClass().getSimpleName()
+                + ": " + source.getClass().getName() );
         }
         generatedFiles.clear();
 
-        if (canGenerateOutput(source, context)) {
-            doGenerateOutput(source, context);
+        if (canGenerateOutput( source, context )) {
+            doGenerateOutput( source, context );
         }
         return getGeneratedFiles();
     }
 
     /**
-     * Performs all tasks necessary to generate the output specified by the 'source' model element
-     * provided. When calling this method, all generated output is directed to the
-     * <code>OutputStream</code> provided.
+     * Performs all tasks necessary to generate the output specified by the 'source' model element provided. When
+     * calling this method, all generated output is directed to the <code>OutputStream</code> provided.
      * 
-     * @param source
-     *            the source element that defines the content to be rendered
-     * @param context
-     *            the code generation context
-     * @throws CodeGenerationException
-     *             thrown if a system or I/O exception occurs during output generation
-     * @throws IllegalArgumentException
-     *             thrown if the code generator instance does not support code generation for the
-     *             type of source element provided
+     * @param source the source element that defines the content to be rendered
+     * @param context the code generation context
+     * @throws CodeGenerationException thrown if a system or I/O exception occurs during output generation
+     * @throws IllegalArgumentException thrown if the code generator instance does not support code generation for the
+     *         type of source element provided
      */
-    public abstract void doGenerateOutput(S source, CodeGenerationContext context)
-            throws CodeGenerationException;
+    public abstract void doGenerateOutput(S source, CodeGenerationContext context) throws CodeGenerationException;
 
     /**
-     * Returns true if the <code>CodeGenerator</code> can proceed with output generation. By
-     * default, this returns true; sub-classes may override to implement target-specific behavior.
+     * Returns true if the <code>CodeGenerator</code> can proceed with output generation. By default, this returns true;
+     * sub-classes may override to implement target-specific behavior.
      * 
-     * @param source
-     *            the source object for the output generation
-     * @param context
-     *            the code generation context
+     * @param source the source object for the output generation
+     * @param context the code generation context
      * @return boolean
      */
     protected boolean canGenerateOutput(S source, CodeGenerationContext context) {
@@ -159,11 +150,9 @@ public abstract class AbstractCodeGenerator<S extends ModelElement> implements C
     }
 
     /**
-     * Returns true if output generation is supported for the given source object by this
-     * <code>CodeGenerator</code>.
+     * Returns true if output generation is supported for the given source object by this <code>CodeGenerator</code>.
      * 
-     * @param source
-     *            the source object to check
+     * @param source the source object to check
      * @return boolean
      */
     protected abstract boolean isSupportedSourceObject(S source);
@@ -171,47 +160,41 @@ public abstract class AbstractCodeGenerator<S extends ModelElement> implements C
     /**
      * Returns the library that owns or is associated with the given source object.
      * 
-     * @param source
-     *            the source object for which to return the associated library
+     * @param source the source object for which to return the associated library
      * @return AbstractLibrary
      */
     protected abstract AbstractLibrary getLibrary(S source);
 
     /**
-     * Returns the absolute file location of the generated output file, including its folder
-     * location as reported by the 'getOutputFolder()' method.
+     * Returns the absolute file location of the generated output file, including its folder location as reported by the
+     * 'getOutputFolder()' method.
      * 
-     * @param source
-     *            the source object for the output generation
-     * @param context
-     *            the code generation context
+     * @param source the source object for the output generation
+     * @param context the code generation context
      * @return OutputStream
      */
     protected abstract File getOutputFile(S source, CodeGenerationContext context);
 
     /**
-     * Returns the output folder to use for file generation. By default, this method obtains the
-     * location from the <code>"schemacompiler.OutputFolder"</code> key of the
-     * <code>CodeGenerationContext</code>. Once identified, this method will check for the existence
-     * of the folder and attempt to create it (and any required parents) if it does not yet exist.
+     * Returns the output folder to use for file generation. By default, this method obtains the location from the
+     * <code>"schemacompiler.OutputFolder"</code> key of the <code>CodeGenerationContext</code>. Once identified, this
+     * method will check for the existence of the folder and attempt to create it (and any required parents) if it does
+     * not yet exist.
      * 
      * <p>
-     * If the expected context key is not defined or the folder does not exist (and cannot be
-     * created), the folder location of the given library URL will be returned.
+     * If the expected context key is not defined or the folder does not exist (and cannot be created), the folder
+     * location of the given library URL will be returned.
      * 
-     * @param context
-     *            the code generator context
-     * @param libraryUrl
-     *            the URL of the library whose folder location will be used as the default return
-     *            value
+     * @param context the code generator context
+     * @param libraryUrl the URL of the library whose folder location will be used as the default return value
      * @return File
      */
     protected File getOutputFolder(CodeGenerationContext context, URL libraryUrl) {
-        String folderPath = context.getValue(CodeGenerationContext.CK_OUTPUT_FOLDER);
+        String folderPath = context.getValue( CodeGenerationContext.CK_OUTPUT_FOLDER );
         File outputFolder = null;
 
         if (folderPath != null) {
-            File folder = new File(folderPath);
+            File folder = new File( folderPath );
 
             if (!folder.exists()) {
                 folder.mkdirs();
@@ -221,68 +204,63 @@ public abstract class AbstractCodeGenerator<S extends ModelElement> implements C
             }
         }
         if (outputFolder == null) {
-            if ((libraryUrl != null) && URLUtils.isFileURL(libraryUrl)) {
-                outputFolder = URLUtils.toFile(libraryUrl).getParentFile();
+            if ((libraryUrl != null) && URLUtils.isFileURL( libraryUrl )) {
+                outputFolder = URLUtils.toFile( libraryUrl ).getParentFile();
             } else {
-                outputFolder = new File(System.getProperty("user.dir"));
+                outputFolder = new File( System.getProperty( "user.dir" ) );
             }
         }
         return outputFolder;
     }
 
     /**
-     * Returns the sub-folder location (relative to the target output folder) where built-in schemas
-     * should be stored during the code generation process. If no sub-folder location is specified
-     * by the code generation context, this method will return null, indicating that built-ins
-     * schemas should be saved in the same target output folder as the user-defined library/service
-     * output.
+     * Returns the sub-folder location (relative to the target output folder) where built-in schemas should be stored
+     * during the code generation process. If no sub-folder location is specified by the code generation context, this
+     * method will return null, indicating that built-ins schemas should be saved in the same target output folder as
+     * the user-defined library/service output.
      * 
-     * @param context
-     *            the code generator context
+     * @param context the code generator context
      * @return String
      */
     protected String getBuiltInSchemaOutputLocation(CodeGenerationContext context) {
-        return context.getValue(CodeGenerationContext.CK_BUILTIN_SCHEMA_FOLDER);
+        return context.getValue( CodeGenerationContext.CK_BUILTIN_SCHEMA_FOLDER );
     }
 
     /**
-     * Returns the sub-folder location (relative to the target output folder) where legacy schemas
-     * should be stored during the code generation process. If no sub-folder location is specified
-     * by the code generation context, this method will return null, indicating that legacy schemas
-     * should be saved in the same target output folder as the user-defined library/service output.
+     * Returns the sub-folder location (relative to the target output folder) where legacy schemas should be stored
+     * during the code generation process. If no sub-folder location is specified by the code generation context, this
+     * method will return null, indicating that legacy schemas should be saved in the same target output folder as the
+     * user-defined library/service output.
      * 
-     * @param context
-     *            the code generator context
+     * @param context the code generator context
      * @return String
      */
     protected String getLegacySchemaOutputLocation(CodeGenerationContext context) {
-        return context.getValue(CodeGenerationContext.CK_LEGACY_SCHEMA_FOLDER);
+        return context.getValue( CodeGenerationContext.CK_LEGACY_SCHEMA_FOLDER );
     }
 
     /**
      * Adds the specified file to the list of artifacts created by this code generator instance.
      * 
-     * @param file
-     *            the generated output file to add
+     * @param file the generated output file to add
      */
     protected void addGeneratedFile(File file) {
         String filePath = (file == null) ? null : file.getAbsolutePath();
 
-        if ((filePath != null) && !generatedFiles.containsKey(filePath)) {
-            generatedFiles.put(filePath, file);
+        if ((filePath != null) && !generatedFiles.containsKey( filePath )) {
+            generatedFiles.put( filePath, file );
         }
     }
 
     /**
      * Adds all of the given files to the list of artifacts created by this code generator instance.
      * 
-     * @param files
-     *            the collection of generated output files to add
+     * @param files the collection of generated output files to add
      */
     protected void addGeneratedFiles(Collection<File> files) {
         if (files != null) {
             for (File file : files) {
-                addGeneratedFile(file);
+                addGeneratedFile( file );
             }
         }
     }
@@ -290,15 +268,15 @@ public abstract class AbstractCodeGenerator<S extends ModelElement> implements C
     /**
      * Returns the collection of all output artifacts created by this code generator instance.
      * 
-     * @return Collection<File>
+     * @return Collection&lt;File&gt;
      */
-	protected Collection<File> getGeneratedFiles() {
-		Collection<File> fileList = new ArrayList<>();
-		
-		for (Entry<String, File> entry : generatedFiles.entrySet()) {
-			fileList.add( entry.getValue() );
-		}
-		return fileList;
-	}
-	
+    protected Collection<File> getGeneratedFiles() {
+        Collection<File> fileList = new ArrayList<>();
+
+        for (Entry<String,File> entry : generatedFiles.entrySet()) {
+            fileList.add( entry.getValue() );
+        }
+        return fileList;
+    }
+
 }

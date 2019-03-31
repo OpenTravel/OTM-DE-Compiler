@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.transform.symbols;
 
 import org.opentravel.schemacompiler.transform.SymbolResolver;
@@ -38,8 +39,7 @@ public class SymbolResolverTransformerContext extends DefaultTransformerContext 
     /**
      * Assigns the symbol resolver instance associated with this context.
      * 
-     * @param symbolResolver
-     *            the symbol resolver to associate with this context
+     * @param symbolResolver the symbol resolver to associate with this context
      */
     public void setSymbolResolver(SymbolResolver symbolResolver) {
         this.symbolResolver = symbolResolver;

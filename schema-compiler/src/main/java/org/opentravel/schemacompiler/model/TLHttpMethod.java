@@ -13,22 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.model;
 
 /**
- * Enumeration that denotes all of the allowable HTTP methods for a REST action
- * request.
+ * Enumeration that denotes all of the allowable HTTP methods for a REST action request.
  * 
  * @author S. Livezey
  */
 public enum TLHttpMethod {
-	
-    GET,
-    PUT,
-    POST,
-    DELETE,
-    OPTIONS,
-    HEAD,
-    PATCH;
-    
+
+    GET, PUT, POST, DELETE, OPTIONS, HEAD, PATCH;
+
 }

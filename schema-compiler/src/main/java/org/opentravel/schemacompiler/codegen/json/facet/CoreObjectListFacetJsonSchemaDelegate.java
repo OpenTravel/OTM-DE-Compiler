@@ -13,32 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.codegen.json.facet;
 
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaNamedReference;
 import org.opentravel.schemacompiler.model.TLListFacet;
 
 /**
- * Code generation delegate for <code>TLListFacet</code> instances with a facet type of
- * <code>INFO</code> and a facet owner of type <code>TLCoreObject</code>.
+ * Code generation delegate for <code>TLListFacet</code> instances with a facet type of <code>INFO</code> and a facet
+ * owner of type <code>TLCoreObject</code>.
  */
 public class CoreObjectListFacetJsonSchemaDelegate extends TLListFacetJsonSchemaDelegate {
-	
+
     /**
      * Constructor that specifies the source facet for which code artifacts are being generated.
      * 
-     * @param sourceFacet  the source facet
+     * @param sourceFacet the source facet
      */
     public CoreObjectListFacetJsonSchemaDelegate(TLListFacet sourceFacet) {
-        super(sourceFacet);
+        super( sourceFacet );
     }
 
-	/**
-	 * @see org.opentravel.schemacompiler.codegen.json.facet.FacetJsonSchemaDelegate#createDefinition()
-	 */
-	@Override
-	protected JsonSchemaNamedReference createDefinition() {
+    /**
+     * @see org.opentravel.schemacompiler.codegen.json.facet.FacetJsonSchemaDelegate#createDefinition()
+     */
+    @Override
+    protected JsonSchemaNamedReference createDefinition() {
         return null; // No type generated for complex list facet types
-	}
-    
+    }
+
 }

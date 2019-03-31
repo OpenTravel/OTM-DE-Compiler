@@ -13,16 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.codegen.example;
 
-import java.io.IOException;
-import java.io.Writer;
+package org.opentravel.schemacompiler.codegen.example;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerationException;
 import org.opentravel.schemacompiler.validate.ValidationException;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+
+import java.io.IOException;
+import java.io.Writer;
 
 /**
  * @author Eric.Bronson
@@ -30,45 +32,38 @@ import com.fasterxml.jackson.databind.SerializationFeature;
  */
 public class ExampleJsonBuilder extends ExampleBuilder<JsonNode> {
 
-	public ExampleJsonBuilder(ExampleGeneratorOptions options) {
-		super(options);
-	}
+    public ExampleJsonBuilder(ExampleGeneratorOptions options) {
+        super( options );
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.opentravel.schemacompiler.codegen.example.ExampleBuilder#buildToStream
-	 * (java.io.Writer)
-	 */
-	@Override
-	public void buildToStream(Writer buffer) throws ValidationException,
-			CodeGenerationException {
-		ObjectMapper mapper = new ObjectMapper();
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.opentravel.schemacompiler.codegen.example.ExampleBuilder#buildToStream (java.io.Writer)
+     */
+    @Override
+    public void buildToStream(Writer buffer) throws ValidationException, CodeGenerationException {
+        ObjectMapper mapper = new ObjectMapper();
 
-		JsonNode node = buildTree();
-		try {
-			mapper.writer(SerializationFeature.INDENT_OUTPUT).writeValue(
-					buffer, node);
-			buffer.flush();
-		} catch (IOException e) {
-			throw new CodeGenerationException(e);
-		}
-	}
+        JsonNode node = buildTree();
+        try {
+            mapper.writer( SerializationFeature.INDENT_OUTPUT ).writeValue( buffer, node );
+            buffer.flush();
+        } catch (IOException e) {
+            throw new CodeGenerationException( e );
+        }
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.opentravel.schemacompiler.codegen.example.ExampleBuilder#buildTree()
-	 */
-	@Override
-	public JsonNode buildTree() throws ValidationException,
-			CodeGenerationException {
-		validateModelElement();
-		JSONExampleVisitor visitor = new JSONExampleVisitor(
-				options.getExampleContext());
-		ExampleNavigator.navigate(modelElement, visitor, options);
-		return visitor.getNode();
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.opentravel.schemacompiler.codegen.example.ExampleBuilder#buildTree()
+     */
+    @Override
+    public JsonNode buildTree() throws ValidationException, CodeGenerationException {
+        validateModelElement();
+        JSONExampleVisitor visitor = new JSONExampleVisitor( options.getExampleContext() );
+        ExampleNavigator.navigate( modelElement, visitor, options );
+        return visitor.getNode();
+    }
 }

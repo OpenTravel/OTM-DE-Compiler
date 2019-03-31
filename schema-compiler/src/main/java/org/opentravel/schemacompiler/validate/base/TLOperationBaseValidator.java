@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.validate.base;
 
 import org.opentravel.schemacompiler.model.TLDocumentation;
@@ -36,36 +37,32 @@ public class TLOperationBaseValidator extends TLValidatorBase<TLOperation> {
      */
     @Override
     protected ValidationFindings validateChildren(TLOperation target) {
-        Validator<TLFacet> facetValidator = getValidatorFactory().getValidatorForClass(
-                TLFacet.class);
-        Validator<TLDocumentation> docValidator = getValidatorFactory().getValidatorForClass(
-                TLDocumentation.class);
-        Validator<TLExtension> extensionValidator = getValidatorFactory().getValidatorForClass(
-                TLExtension.class);
+        Validator<TLFacet> facetValidator = getValidatorFactory().getValidatorForClass( TLFacet.class );
+        Validator<TLDocumentation> docValidator = getValidatorFactory().getValidatorForClass( TLDocumentation.class );
+        Validator<TLExtension> extensionValidator = getValidatorFactory().getValidatorForClass( TLExtension.class );
         ValidationFindings findings = new ValidationFindings();
 
         if (target.getExtension() != null) {
-            findings.addAll(extensionValidator.validate(target.getExtension()));
+            findings.addAll( extensionValidator.validate( target.getExtension() ) );
         }
         if (target.getDocumentation() != null) {
-            findings.addAll(docValidator.validate(target.getDocumentation()));
+            findings.addAll( docValidator.validate( target.getDocumentation() ) );
         }
         if (target.getEquivalents() != null) {
-            Validator<TLEquivalent> equivValidator = getValidatorFactory().getValidatorForClass(
-                    TLEquivalent.class);
+            Validator<TLEquivalent> equivValidator = getValidatorFactory().getValidatorForClass( TLEquivalent.class );
 
             for (TLEquivalent equiv : target.getEquivalents()) {
-                findings.addAll(equivValidator.validate(equiv));
+                findings.addAll( equivValidator.validate( equiv ) );
             }
         }
         if (target.getRequest() != null) {
-            findings.addAll(facetValidator.validate(target.getRequest()));
+            findings.addAll( facetValidator.validate( target.getRequest() ) );
         }
         if (target.getResponse() != null) {
-            findings.addAll(facetValidator.validate(target.getResponse()));
+            findings.addAll( facetValidator.validate( target.getResponse() ) );
         }
         if (target.getNotification() != null) {
-            findings.addAll(facetValidator.validate(target.getNotification()));
+            findings.addAll( facetValidator.validate( target.getNotification() ) );
         }
         return findings;
     }

@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.repository;
 
 /**
- * Defines the interface for components that need to be notified when a <code>Project</code> or one
- * of its <code>ProjectItem</code> members is modified.
+ * Defines the interface for components that need to be notified when a <code>Project</code> or one of its
+ * <code>ProjectItem</code> members is modified.
  * 
  * @author S. Livezey
  */
@@ -26,28 +27,23 @@ public interface ProjectChangeListener {
     /**
      * Called when the identity and/or descriptive information about a project has been modified.
      * 
-     * @param project
-     *            the project that was modified
+     * @param project the project that was modified
      */
     public void projectInformationModified(Project project);
 
     /**
      * Called when a <code>ProjectItem</code> member is added to the specified project.
      * 
-     * @param project
-     *            the project to which the new member was added
-     * @param item
-     *            the project item that was added
+     * @param project the project to which the new member was added
+     * @param item the project item that was added
      */
     public void projectItemAdded(Project project, ProjectItem item);
 
     /**
      * Called when a <code>ProjectItem</code> member is removed from the specified project.
      * 
-     * @param project
-     *            the project from which the new member was removed
-     * @param item
-     *            the project item that was removed
+     * @param project the project from which the new member was removed
+     * @param item the project item that was removed
      */
     public void projectItemRemoved(Project project, ProjectItem item);
 

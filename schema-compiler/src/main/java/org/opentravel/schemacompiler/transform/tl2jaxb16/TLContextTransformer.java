@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.transform.tl2jaxb16;
 
 import org.opentravel.ns.ota2.librarymodel_v01_06.ContextDeclaration;
@@ -24,13 +25,13 @@ import org.opentravel.schemacompiler.transform.symbols.SymbolResolverTransformer
 import org.opentravel.schemacompiler.transform.util.BaseTransformer;
 
 /**
- * Handles the transformation of objects from the <code>TLContext</code> type to the
- * <code>ContextDeclaration</code> type.
+ * Handles the transformation of objects from the <code>TLContext</code> type to the <code>ContextDeclaration</code>
+ * type.
  * 
  * @author S. Livezey
  */
-public class TLContextTransformer extends
-        BaseTransformer<TLContext, ContextDeclaration, SymbolResolverTransformerContext> {
+public class TLContextTransformer
+    extends BaseTransformer<TLContext,ContextDeclaration,SymbolResolverTransformerContext> {
 
     /**
      * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
@@ -39,14 +40,14 @@ public class TLContextTransformer extends
     public ContextDeclaration transform(TLContext source) {
         ContextDeclaration context = new ContextDeclaration();
 
-        context.setContext(source.getContextId());
-        context.setApplicationContext(source.getApplicationContext());
+        context.setContext( source.getContextId() );
+        context.setApplicationContext( source.getApplicationContext() );
 
         if ((source.getDocumentation() != null) && !source.getDocumentation().isEmpty()) {
-            ObjectTransformer<TLDocumentation, Documentation, SymbolResolverTransformerContext> docTransformer = getTransformerFactory()
-                    .getTransformer(TLDocumentation.class, Documentation.class);
+            ObjectTransformer<TLDocumentation,Documentation,SymbolResolverTransformerContext> docTransformer =
+                getTransformerFactory().getTransformer( TLDocumentation.class, Documentation.class );
 
-            context.setDocumentation(docTransformer.transform(source.getDocumentation()));
+            context.setDocumentation( docTransformer.transform( source.getDocumentation() ) );
         }
         return context;
     }

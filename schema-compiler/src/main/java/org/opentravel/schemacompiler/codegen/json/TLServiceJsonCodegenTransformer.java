@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.codegen.json;
 
 import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerContext;
@@ -22,24 +23,23 @@ import org.opentravel.schemacompiler.model.TLService;
 import org.opentravel.schemacompiler.transform.ObjectTransformer;
 
 /**
- * Performs the translation from <code>TLService</code> objects to the JSON schema elements
- * used to produce the output.
+ * Performs the translation from <code>TLService</code> objects to the JSON schema elements used to produce the output.
  */
-public class TLServiceJsonCodegenTransformer extends AbstractJsonSchemaTransformer<TLService, CodegenArtifacts> {
-	
-	/**
-	 * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
-	 */
-	@Override
-	public CodegenArtifacts transform(TLService source) {
-        ObjectTransformer<TLOperation, CodegenArtifacts, CodeGenerationTransformerContext> opTransformer = getTransformerFactory()
-                .getTransformer(TLOperation.class, CodegenArtifacts.class);
+public class TLServiceJsonCodegenTransformer extends AbstractJsonSchemaTransformer<TLService,CodegenArtifacts> {
+
+    /**
+     * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
+     */
+    @Override
+    public CodegenArtifacts transform(TLService source) {
+        ObjectTransformer<TLOperation,CodegenArtifacts,CodeGenerationTransformerContext> opTransformer =
+            getTransformerFactory().getTransformer( TLOperation.class, CodegenArtifacts.class );
         CodegenArtifacts artifacts = new CodegenArtifacts();
 
         for (TLOperation operation : source.getOperations()) {
-            artifacts.addAllArtifacts(opTransformer.transform(operation));
+            artifacts.addAllArtifacts( opTransformer.transform( operation ) );
         }
         return artifacts;
-	}
-	
+    }
+
 }

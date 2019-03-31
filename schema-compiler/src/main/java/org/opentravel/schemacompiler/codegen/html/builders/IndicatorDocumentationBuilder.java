@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.codegen.html.builders;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerationException;
@@ -23,29 +24,28 @@ import org.opentravel.schemacompiler.model.TLIndicator;
  * @author Eric.Bronson
  *
  */
-public class IndicatorDocumentationBuilder extends
-		FieldDocumentationBuilder<TLIndicator> {
-	
-	/**
-	 * @param manager
-	 */
-	public IndicatorDocumentationBuilder(TLIndicator t) {
-		super(t);
-		String indName = t.getName();
-		name = indName;
-		if(!indName.endsWith("Ind")){
-			indName = indName + "Ind";
-		}
-	}
-	
-	@Override
-	public DocumentationBuilderType getDocType() {
-		return DocumentationBuilderType.INDICATOR;
-	}
+public class IndicatorDocumentationBuilder extends FieldDocumentationBuilder<TLIndicator> {
 
-	@Override
-	public void build() throws CodeGenerationException {
-		// No action required
-	}
+    /**
+     * @param t the indicator for which to create a builder
+     */
+    public IndicatorDocumentationBuilder(TLIndicator t) {
+        super( t );
+        String indName = t.getName();
+        name = indName;
+        if (!indName.endsWith( "Ind" )) {
+            indName = indName + "Ind";
+        }
+    }
+
+    @Override
+    public DocumentationBuilderType getDocType() {
+        return DocumentationBuilderType.INDICATOR;
+    }
+
+    @Override
+    public void build() throws CodeGenerationException {
+        // No action required
+    }
 
 }

@@ -13,56 +13,52 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.version;
 
 import org.opentravel.schemacompiler.util.SchemaCompilerException;
 
 /**
- * Exception thrown when an error occurs during the processing of version information associated
- * with and/or encoded within a namespace URI.
+ * Exception thrown when an error occurs during the processing of version information associated with and/or encoded
+ * within a namespace URI.
  * 
  * @author S. Livezey
  */
 public class VersionSchemeException extends SchemaCompilerException {
 
-	private static final long serialVersionUID = -3786911135874100565L;
+    private static final long serialVersionUID = -3786911135874100565L;
 
-	/**
+    /**
      * Default constructor.
      */
-    public VersionSchemeException() {
-    }
+    public VersionSchemeException() {}
 
     /**
      * Constructs an exception with the specified message.
      * 
-     * @param message
-     *            the exception message
+     * @param message the exception message
      */
     public VersionSchemeException(String message) {
-        super(message);
+        super( message );
     }
 
     /**
      * Constructs an exception with the specified underlying cause.
      * 
-     * @param cause
-     *            the underlying exception that caused this one
+     * @param cause the underlying exception that caused this one
      */
     public VersionSchemeException(Throwable cause) {
-        super(cause);
+        super( cause );
     }
 
     /**
      * Constructs an exception with the specified message and underlying cause.
      * 
-     * @param message
-     *            the exception message
-     * @param cause
-     *            the underlying exception that caused this one
+     * @param message the exception message
+     * @param cause the underlying exception that caused this one
      */
     public VersionSchemeException(String message, Throwable cause) {
-        super(message, cause);
+        super( message, cause );
     }
 
 }

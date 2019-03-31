@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.model;
 
 /**
- * Indicates the type of operation, based on the definition of request, response, and/or
- * notification facets for the <code>TLOperation</code> instance.
+ * Indicates the type of operation, based on the definition of request, response, and/or notification facets for the
+ * <code>TLOperation</code> instance.
  * 
  * @author S. Livezey
  */

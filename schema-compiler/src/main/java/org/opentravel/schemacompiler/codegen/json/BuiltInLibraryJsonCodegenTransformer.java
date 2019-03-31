@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.codegen.json;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerationFilter;
@@ -25,48 +26,49 @@ import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.transform.ObjectTransformer;
 
 /**
- * Performs the translation from <code>BuiltInLibrary</code> objects to the <code>JsonSchema</code>
- * objects used to produce the output.
+ * Performs the translation from <code>BuiltInLibrary</code> objects to the <code>JsonSchema</code> objects used to
+ * produce the output.
  */
-public class BuiltInLibraryJsonCodegenTransformer extends AbstractJsonSchemaTransformer<BuiltInLibrary, JsonSchema> {
+public class BuiltInLibraryJsonCodegenTransformer extends AbstractJsonSchemaTransformer<BuiltInLibrary,JsonSchema> {
 
-	/**
-	 * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
-	 */
-	@Override
-	public JsonSchema transform(BuiltInLibrary source) {
+    /**
+     * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
+     */
+    @Override
+    public JsonSchema transform(BuiltInLibrary source) {
         CodeGenerationFilter filter = context.getCodeGenerator().getFilter();
         JsonSchema schema = new JsonSchema( JsonSchema.JSON_SCHEMA_DRAFT4 );
-        
+
         schema.setTitle( source.getName() );
         schema.setLibraryInfo( jsonUtils.getLibraryInfo( source ) );
-        
+
         // Add entries for each non-service term declaration
         for (NamedEntity member : source.getNamedMembers()) {
-            ObjectTransformer<NamedEntity, CodegenArtifacts, CodeGenerationTransformerContext> transformer = getTransformerFactory()
-                    .getTransformer(member, CodegenArtifacts.class);
+            ObjectTransformer<NamedEntity,CodegenArtifacts,CodeGenerationTransformerContext> transformer =
+                getTransformerFactory().getTransformer( member, CodegenArtifacts.class );
 
-            if ((transformer != null) && ((filter == null) || filter.processEntity(member))) {
-                CodegenArtifacts artifacts = transformer.transform(member);
+            if ((transformer != null) && ((filter == null) || filter.processEntity( member ))) {
+                CodegenArtifacts artifacts = transformer.transform( member );
 
                 if (artifacts != null) {
-                    for (JsonSchemaNamedReference schemaDef : artifacts.getArtifactsOfType(JsonSchemaNamedReference.class)) {
+                    for (JsonSchemaNamedReference schemaDef : artifacts
+                        .getArtifactsOfType( JsonSchemaNamedReference.class )) {
                         schema.getDefinitions().add( schemaDef );
                     }
                 }
             }
         }
         return schema;
-	}
+    }
 
-	/**
-	 * @see org.opentravel.schemacompiler.codegen.impl.AbstractCodegenTransformer#getBuiltInSchemaOutputLocation()
-	 */
-	@Override
-	protected String getBuiltInSchemaOutputLocation() {
+    /**
+     * @see org.opentravel.schemacompiler.codegen.impl.AbstractCodegenTransformer#getBuiltInSchemaOutputLocation()
+     */
+    @Override
+    protected String getBuiltInSchemaOutputLocation() {
         // Since we are generating a built-in schema, all imports should be located in the local
         // directory instead of the '/built-ins' sub-folder
         return "";
-	}
-	
+    }
+
 }

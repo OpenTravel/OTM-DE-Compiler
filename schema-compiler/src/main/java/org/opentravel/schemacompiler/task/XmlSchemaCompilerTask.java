@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.task;
 
-import java.util.Collection;
+package org.opentravel.schemacompiler.task;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerationContext;
 import org.opentravel.schemacompiler.codegen.CodeGenerationFilter;
@@ -27,6 +26,8 @@ import org.opentravel.schemacompiler.model.XSDLibrary;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
 import org.opentravel.schemacompiler.util.SchemaCompilerException;
 
+import java.util.Collection;
+
 /**
  * Compiler task used to generate full (non-trimmed) schema output for the libraries of a model.
  * 
@@ -37,7 +38,7 @@ public class XmlSchemaCompilerTask extends AbstractSchemaCompilerTask {
     /**
      * Constructor that specifies the filename of the project for which schemas are being compiled.
      * 
-     * @param projectFilename  the name of the project (.otp) file
+     * @param projectFilename the name of the project (.otp) file
      */
     public XmlSchemaCompilerTask(String projectFilename) {
         this.projectFilename = projectFilename;
@@ -46,11 +47,11 @@ public class XmlSchemaCompilerTask extends AbstractSchemaCompilerTask {
     /**
      * Constructor that specifies the filename of the project for which schemas are being compiled.
      * 
-     * @param projectFilename  the name of the project (.otp) file
-     * @param repositoryManager  the repository manager to use when retrieving managed content
+     * @param projectFilename the name of the project (.otp) file
+     * @param repositoryManager the repository manager to use when retrieving managed content
      */
     public XmlSchemaCompilerTask(String projectFilename, RepositoryManager repositoryManager) {
-    	super( repositoryManager );
+        super( repositoryManager );
         this.projectFilename = projectFilename;
     }
 
@@ -59,18 +60,17 @@ public class XmlSchemaCompilerTask extends AbstractSchemaCompilerTask {
      *      java.util.Collection)
      */
     @Override
-    protected void generateOutput(Collection<TLLibrary> userDefinedLibraries,
-            Collection<XSDLibrary> legacySchemas) throws SchemaCompilerException {
+    protected void generateOutput(Collection<TLLibrary> userDefinedLibraries, Collection<XSDLibrary> legacySchemas)
+        throws SchemaCompilerException {
         CodeGenerationContext context = createContext();
         CodeGenerationFilter filter = null;
 
-        compileXmlSchemas(userDefinedLibraries, legacySchemas, context, null, filter);
+        compileXmlSchemas( userDefinedLibraries, legacySchemas, context, null, filter );
 
         // Generate EXAMPLE files if required
         if (isGenerateExamples()) {
-            generateExampleArtifacts(
-            		userDefinedLibraries, context, new LibraryFilenameBuilder<AbstractLibrary>(),
-            		filter, CodeGeneratorFactory.XML_TARGET_FORMAT);
+            generateExampleArtifacts( userDefinedLibraries, context, new LibraryFilenameBuilder<AbstractLibrary>(),
+                filter, CodeGeneratorFactory.XML_TARGET_FORMAT );
         }
     }
 

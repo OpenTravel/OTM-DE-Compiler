@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.transform.tl2jaxb;
 
 import org.opentravel.schemacompiler.transform.AnonymousEntityFilter;
@@ -29,11 +30,9 @@ public class TL2JaxbLibrarySymbolResolver extends AbstractSymbolResolver {
     private SymbolTable symbolTable;
 
     /**
-     * Constructor that initializes the source and target symbol tables utilized by this
-     * <code>SymbolResolver</code>.
+     * Constructor that initializes the source and target symbol tables utilized by this <code>SymbolResolver</code>.
      * 
-     * @param symbolTable
-     *            the symbol table to use for the transformation process
+     * @param symbolTable the symbol table to use for the transformation process
      */
     public TL2JaxbLibrarySymbolResolver(SymbolTable symbolTable) {
         this.symbolTable = symbolTable;
@@ -45,7 +44,7 @@ public class TL2JaxbLibrarySymbolResolver extends AbstractSymbolResolver {
      */
     @Override
     public Object resolveQualifiedEntity(String namespace, String localName) {
-        return symbolTable.getEntity(namespace, localName);
+        return symbolTable.getEntity( namespace, localName );
     }
 
     /**
@@ -54,7 +53,7 @@ public class TL2JaxbLibrarySymbolResolver extends AbstractSymbolResolver {
      */
     @Override
     protected Object resolveQualifiedOperationEntity(String namespace, String localName) {
-        return symbolTable.getOperationEntity(namespace, localName);
+        return symbolTable.getOperationEntity( namespace, localName );
     }
 
     /**
@@ -62,7 +61,7 @@ public class TL2JaxbLibrarySymbolResolver extends AbstractSymbolResolver {
      */
     @Override
     public String getEntityNamespace(Object entity) {
-        return symbolTable.getNamespaceForEntity(entity);
+        return symbolTable.getNamespaceForEntity( entity );
     }
 
     /**
@@ -73,12 +72,12 @@ public class TL2JaxbLibrarySymbolResolver extends AbstractSymbolResolver {
         // Not required for TL -> JAXB transformation
     }
 
-	/**
-	 * @see org.opentravel.schemacompiler.transform.symbols.AbstractSymbolResolver#displaySymbolTable()
-	 */
-	@Override
-	public void displaySymbolTable() {
-		symbolTable.displayTable();
-	}
+    /**
+     * @see org.opentravel.schemacompiler.transform.symbols.AbstractSymbolResolver#displaySymbolTable()
+     */
+    @Override
+    public void displaySymbolTable() {
+        symbolTable.displayTable();
+    }
 
 }

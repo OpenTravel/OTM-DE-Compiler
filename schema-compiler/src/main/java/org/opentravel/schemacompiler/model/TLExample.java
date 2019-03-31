@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.model;
 
 import org.opentravel.schemacompiler.event.ModelEvent;
@@ -38,12 +39,12 @@ public class TLExample extends TLModelElement implements TLContextReferrer {
         StringBuilder identity = new StringBuilder();
 
         if (owningEntity != null) {
-            identity.append(owningEntity.getValidationIdentity()).append(" : ");
+            identity.append( owningEntity.getValidationIdentity() ).append( " : " );
         }
         if (context == null) {
-            identity.append("[Unnamed Example]");
+            identity.append( "[Unnamed Example]" );
         } else {
-            identity.append("Example:").append(context);
+            identity.append( "Example:" ).append( context );
         }
         return identity.toString();
     }
@@ -81,32 +82,29 @@ public class TLExample extends TLModelElement implements TLContextReferrer {
     /**
      * Assigns the value of the 'owningEntity' field.
      * 
-     * @param owningEntity
-     *            the field value to assign
+     * @param owningEntity the field value to assign
      */
     public void setOwningEntity(TLExampleOwner owningEntity) {
         this.owningEntity = owningEntity;
     }
 
     /**
-     * Moves this equivalent up by one position in the list of equivalents maintained by its owner.
-     * If the owner is null, or this equivalent is already at the front of the list, this method has
-     * no effect.
+     * Moves this equivalent up by one position in the list of equivalents maintained by its owner. If the owner is
+     * null, or this equivalent is already at the front of the list, this method has no effect.
      */
     public void moveUp() {
         if (owningEntity != null) {
-            owningEntity.moveUp(this);
+            owningEntity.moveUp( this );
         }
     }
 
     /**
-     * Moves this equivalent down by one position in the list of equivalents maintained by its
-     * owner. If the owner is null, or this equivalent is already at the end of the list, this
-     * method has no effect.
+     * Moves this equivalent down by one position in the list of equivalents maintained by its owner. If the owner is
+     * null, or this equivalent is already at the end of the list, this method has no effect.
      */
     public void moveDown() {
         if (owningEntity != null) {
-            owningEntity.moveDown(this);
+            owningEntity.moveDown( this );
         }
     }
 
@@ -121,11 +119,11 @@ public class TLExample extends TLModelElement implements TLContextReferrer {
      * @see org.opentravel.schemacompiler.model.TLContextReferrer#setContext(java.lang.String)
      */
     public void setContext(String context) {
-        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.CONTEXT_MODIFIED, this)
-                .setOldValue(this.context).setNewValue(context).buildEvent();
+        ModelEvent<?> event = new ModelEventBuilder( ModelEventType.CONTEXT_MODIFIED, this ).setOldValue( this.context )
+            .setNewValue( context ).buildEvent();
 
         this.context = context;
-        publishEvent(event);
+        publishEvent( event );
     }
 
     /**
@@ -140,15 +138,14 @@ public class TLExample extends TLModelElement implements TLContextReferrer {
     /**
      * Assigns the value of the 'value' field.
      * 
-     * @param value
-     *            the field value to assign
+     * @param value the field value to assign
      */
     public void setValue(String value) {
-        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.EXAMPLE_VALUE_MODIFIED, this)
-                .setOldValue(this.value).setNewValue(value).buildEvent();
+        ModelEvent<?> event = new ModelEventBuilder( ModelEventType.EXAMPLE_VALUE_MODIFIED, this )
+            .setOldValue( this.value ).setNewValue( value ).buildEvent();
 
         this.value = value;
-        publishEvent(event);
+        publishEvent( event );
     }
 
     /**
@@ -156,17 +153,15 @@ public class TLExample extends TLModelElement implements TLContextReferrer {
      * 
      * @author S. Livezey
      */
-    protected static class ExampleListManager extends
-            ChildEntityListManager<TLExample, TLExampleOwner> {
+    protected static class ExampleListManager extends ChildEntityListManager<TLExample,TLExampleOwner> {
 
         /**
          * Constructor that specifies the owner of the unerlying list.
          * 
-         * @param owner
-         *            the owner of the underlying list of children
+         * @param owner the owner of the underlying list of children
          */
         public ExampleListManager(TLExampleOwner owner) {
-            super(owner, ModelEventType.EXAMPLE_ADDED, ModelEventType.EXAMPLE_REMOVED);
+            super( owner, ModelEventType.EXAMPLE_ADDED, ModelEventType.EXAMPLE_REMOVED );
         }
 
         /**
@@ -183,7 +178,7 @@ public class TLExample extends TLModelElement implements TLContextReferrer {
          */
         @Override
         protected void assignOwner(TLExample child, TLExampleOwner owner) {
-            child.setOwningEntity(owner);
+            child.setOwningEntity( owner );
         }
 
         /**
@@ -195,7 +190,7 @@ public class TLExample extends TLModelElement implements TLContextReferrer {
             TLModel owningModel = owner.getOwningModel();
 
             if (owningModel != null) {
-                owningModel.publishEvent(event);
+                owningModel.publishEvent( event );
             }
         }
 

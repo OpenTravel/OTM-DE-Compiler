@@ -13,32 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.codegen.json.facet;
 
 import org.opentravel.schemacompiler.ioc.SchemaDependency;
 import org.opentravel.schemacompiler.model.TLFacet;
 
 /**
- * Code generation delegate for <code>TLFacet</code> instances with a facet type of
- * <code>REQUEST</code>, <code>RESPONSE</code>, or <code>NOTIFICATION</code> and a facet owner of
- * type <code>TLOperation</code>.
+ * Code generation delegate for <code>TLFacet</code> instances with a facet type of <code>REQUEST</code>,
+ * <code>RESPONSE</code>, or <code>NOTIFICATION</code> and a facet owner of type <code>TLOperation</code>.
  */
 public class OperationFacetJsonSchemaDelegate extends TLFacetJsonSchemaDelegate {
-	
+
     /**
      * Constructor that specifies the source facet for which code artifacts are being generated.
      * 
-     * @param sourceFacet  the source facet
+     * @param sourceFacet the source facet
      */
     public OperationFacetJsonSchemaDelegate(TLFacet sourceFacet) {
-        super(sourceFacet);
+        super( sourceFacet );
     }
 
-	/**
-	 * @see org.opentravel.schemacompiler.codegen.json.facet.FacetJsonSchemaDelegate#getLocalBaseFacetDependency()
-	 */
-	@Override
-	protected SchemaDependency getLocalBaseFacetDependency() {
+    /**
+     * @see org.opentravel.schemacompiler.codegen.json.facet.TLFacetJsonSchemaDelegate#getLocalBaseFacetDependency()
+     */
+    @Override
+    protected SchemaDependency getLocalBaseFacetDependency() {
         SchemaDependency messagePayload = null;
 
         switch (getSourceFacet().getFacetType()) {
@@ -51,10 +51,10 @@ public class OperationFacetJsonSchemaDelegate extends TLFacetJsonSchemaDelegate 
             case NOTIFICATION:
                 messagePayload = SchemaDependency.getNotifPayload();
                 break;
-			default:
-				break;
+            default:
+                break;
         }
         return messagePayload;
-	}
-    
+    }
+
 }

@@ -13,16 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.codegen.impl;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.xml.XMLConstants;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerationFilter;
 import org.opentravel.schemacompiler.codegen.wsdl.CodeGenerationWsdlBindings;
@@ -39,15 +31,24 @@ import org.w3._2001.xmlschema.Import;
 import org.w3._2001.xmlschema.OpenAttrs;
 import org.w3._2001.xmlschema.Schema;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.xml.XMLConstants;
+
 /**
- * JAXB namespace prefix mapper that obtains its mappings from the namespace import declarations of
- * a <code>TLLibrary</code> module.
+ * JAXB namespace prefix mapper that obtains its mappings from the namespace import declarations of a
+ * <code>TLLibrary</code> module.
  * 
  * @author S. Livezey
  */
 public class CodegenNamespacePrefixMapper extends NamespacePrefixMapper {
 
-    private Map<String, String> namespacePrefixMappings = new HashMap<>();
+    private Map<String,String> namespacePrefixMappings = new HashMap<>();
     private List<String> uriDeclarations = new ArrayList<>();
     private Set<String> importedNamespaces;
     private AbstractJaxbCodeGenerator<?> codeGenerator;
@@ -55,24 +56,20 @@ public class CodegenNamespacePrefixMapper extends NamespacePrefixMapper {
     /**
      * Constructor that assignes the library from which prefix mapping information will be derived.
      * 
-     * @param library
-     *            the library used to define namespace prefix mappings
-     * @param useWsdlMappings
-     *            flag indicating whether the prefix mappings for WSDL documents (versus XML schema
-     *            documents) should be declared
-     * @param codeGenerator
-     *            the code generator to which schema dependencies should be reported
-     * @param schema
-     *            the XML schema for which xmlns prefix declarations will be created (may be null)
+     * @param library the library used to define namespace prefix mappings
+     * @param useWsdlMappings flag indicating whether the prefix mappings for WSDL documents (versus XML schema
+     *        documents) should be declared
+     * @param codeGenerator the code generator to which schema dependencies should be reported
+     * @param schema the XML schema for which xmlns prefix declarations will be created (may be null)
      */
     public CodegenNamespacePrefixMapper(AbstractLibrary library, boolean useWsdlMappings,
-            AbstractJaxbCodeGenerator<?> codeGenerator, Schema schema) {
+        AbstractJaxbCodeGenerator<?> codeGenerator, Schema schema) {
 
         this.codeGenerator = codeGenerator;
-        this.importedNamespaces = getImportedNamespaces(schema);
+        this.importedNamespaces = getImportedNamespaces( schema );
 
         if (library != null) {
-            addLibraryNamespaceMappings(library, codeGenerator.getFilter());
+            addLibraryNamespaceMappings( library, codeGenerator.getFilter() );
 
             if (useWsdlMappings) {
                 addWsdlMappings();
@@ -83,28 +80,25 @@ public class CodegenNamespacePrefixMapper extends NamespacePrefixMapper {
         addCompileTimeDependencyMappings();
 
         // Add a 'tns' mapping for the schema's target namespace if it has not already been mapped
-        if ((schema != null) && !namespacePrefixMappings.containsKey(schema.getTargetNamespace())) {
-            namespacePrefixMappings.put(schema.getTargetNamespace(), "tns");
-            uriDeclarations.add(schema.getTargetNamespace());
+        if ((schema != null) && !namespacePrefixMappings.containsKey( schema.getTargetNamespace() )) {
+            namespacePrefixMappings.put( schema.getTargetNamespace(), "tns" );
+            uriDeclarations.add( schema.getTargetNamespace() );
         }
     }
 
     /**
-     * Adds all of the namespace prefix mappings required by the import declarations of the given
-     * library.
+     * Adds all of the namespace prefix mappings required by the import declarations of the given library.
      * 
-     * @param library
-     *            the library for which to define prefix mappings
-     * @param filter
-     *            the code generation filter used to remove superfluous prefix mappings
+     * @param library the library for which to define prefix mappings
+     * @param filter the code generation filter used to remove superfluous prefix mappings
      */
     private void addLibraryNamespaceMappings(AbstractLibrary library, CodeGenerationFilter filter) {
-        Map<String, String> importPrefixMappings = new HashMap<>();
+        Map<String,String> importPrefixMappings = new HashMap<>();
         String targetNamespace = library.getNamespace();
 
         // First build a map of pre-assigned prefixes for namespaces that were explicitly imported
         for (TLNamespaceImport nsImport : library.getNamespaceImports()) {
-            importPrefixMappings.put(nsImport.getNamespace(), nsImport.getPrefix());
+            importPrefixMappings.put( nsImport.getNamespace(), nsImport.getPrefix() );
         }
 
         // Build a list of all dependent schemas that require imports
@@ -113,10 +107,9 @@ public class CodegenNamespacePrefixMapper extends NamespacePrefixMapper {
 
             // Skip libraries that are in the target or the XML schema namespaces; also skip
             // chameleon libraries since they cannot be imported
-            if (namespace.equals(targetNamespace)
-                    || namespace.equals(XMLConstants.W3C_XML_SCHEMA_NS_URI)
-                    || AnonymousEntityFilter.ANONYMOUS_PSEUDO_NAMESPACE.equals(namespace)
-                    || !importedNamespaces.contains(namespace)) {
+            if (namespace.equals( targetNamespace ) || namespace.equals( XMLConstants.W3C_XML_SCHEMA_NS_URI )
+                || AnonymousEntityFilter.ANONYMOUS_PSEUDO_NAMESPACE.equals( namespace )
+                || !importedNamespaces.contains( namespace )) {
                 continue;
             }
 
@@ -126,60 +119,71 @@ public class CodegenNamespacePrefixMapper extends NamespacePrefixMapper {
 
             if (!importRequired) {
                 if (lib instanceof XSDLibrary) {
-                    importRequired |= filter.processExtendedLibrary((XSDLibrary) lib);
+                    importRequired |= filter.processExtendedLibrary( (XSDLibrary) lib );
                 }
-                importRequired |= filter.processLibrary(lib);
+                importRequired |= filter.processLibrary( lib );
             }
 
             // Add a prefix mapping for this library's namespace if one is required and does not
             // already exist
-            if (importRequired && !namespacePrefixMappings.containsKey(namespace)) {
-                addPrefixMapping(lib, namespace, importPrefixMappings);
+            if (importRequired && !namespacePrefixMappings.containsKey( namespace )) {
+                addPrefixMapping( lib, namespace, importPrefixMappings );
             }
         }
 
-        if (!AnonymousEntityFilter.ANONYMOUS_PSEUDO_NAMESPACE.equals(targetNamespace)) {
-            uriDeclarations.add(library.getNamespace());
-            namespacePrefixMappings.put(library.getNamespace(), library.getPrefix());
+        if (!AnonymousEntityFilter.ANONYMOUS_PSEUDO_NAMESPACE.equals( targetNamespace )) {
+            uriDeclarations.add( library.getNamespace() );
+            namespacePrefixMappings.put( library.getNamespace(), library.getPrefix() );
         }
     }
 
-	/**
-	 * Adds a prefix mapping for the library's namespace.
-	 * 
-	 * @param lib  the library that will identify the prefix for the namespace
-	 * @param namespace  the namespace to add to the prefix mappings
-	 * @param importPrefixMappings  the prefix mappings structure being populated
-	 */
-	private void addPrefixMapping(AbstractLibrary lib, String namespace, Map<String, String> importPrefixMappings) {
-		// Identify a unique prefix for the imported namespace
-		String prefix = importPrefixMappings.get(namespace);
+    /**
+     * Adds a prefix mapping for the library's namespace.
+     * 
+     * @param lib the library that will identify the prefix for the namespace
+     * @param namespace the namespace to add to the prefix mappings
+     * @param importPrefixMappings the prefix mappings structure being populated
+     */
+    private void addPrefixMapping(AbstractLibrary lib, String namespace, Map<String,String> importPrefixMappings) {
+        // Identify a unique prefix for the imported namespace
+        String prefix = importPrefixMappings.get( namespace );
 
-		if (prefix == null) {
-		    prefix = (lib.getPrefix() == null) ? "ns1" : lib.getPrefix();
-		}
-		if (namespacePrefixMappings.containsValue(prefix)) {
-		    String prefixStart = getPrefixAlphaChars(prefix);
-		    int counter = 1;
+        if (prefix == null) {
+            prefix = (lib.getPrefix() == null) ? "ns1" : lib.getPrefix();
+        }
+        if (namespacePrefixMappings.containsValue( prefix )) {
+            String prefixStart = getPrefixAlphaChars( prefix );
+            int counter = 1;
 
-		    prefix = prefixStart + counter;
+            prefix = prefixStart + counter;
 
-		    while (namespacePrefixMappings.containsKey(prefix)) {
-		        prefix = prefixStart + (counter++);
-		    }
-		}
+            while (namespacePrefixMappings.containsKey( prefix )) {
+                prefix = prefixStart + (counter++);
+            }
+        }
 
-		namespacePrefixMappings.put(namespace, prefix);
-		uriDeclarations.add(namespace);
-	}
+        namespacePrefixMappings.put( namespace, prefix );
+        uriDeclarations.add( namespace );
+    }
 
     /**
-     * Adds namespace/prefix mappings for compile-time dependencies that have been registered with
-     * the code generator.
+     * Adds a namespace mapping for the given schema if one does not already exist.
+     * 
+     * @param schemaDeclaration the schema declaration whose mapping is to be added
+     */
+    private void addPrefixMapping(SchemaDeclaration schemaDeclaration) {
+        if (!uriDeclarations.contains( schemaDeclaration.getNamespace() )) {
+            namespacePrefixMappings.put( schemaDeclaration.getNamespace(), schemaDeclaration.getDefaultPrefix() );
+            uriDeclarations.add( schemaDeclaration.getNamespace() );
+        }
+    }
+
+    /**
+     * Adds namespace/prefix mappings for compile-time dependencies that have been registered with the code generator.
      */
     private void addCompileTimeDependencyMappings() {
         for (SchemaDeclaration schemaDependency : codeGenerator.getCompileTimeDependencies()) {
-            addPrefixMapping(schemaDependency);
+            addPrefixMapping( schemaDependency );
         }
     }
 
@@ -191,27 +195,27 @@ public class CodegenNamespacePrefixMapper extends NamespacePrefixMapper {
 
         // Add namespace mappings required by all WSDL documents
         if (codeGenerator != null) {
-            codeGenerator.addCompileTimeDependency(SchemaDeclarations.OTA2_APPINFO_SCHEMA);
+            codeGenerator.addCompileTimeDependency( SchemaDeclarations.OTA2_APPINFO_SCHEMA );
         }
-        addPrefixMapping(SchemaDeclarations.WSDL_SCHEMA);
-        addPrefixMapping(SchemaDeclarations.SOAP_SCHEMA);
-        addPrefixMapping(SchemaDeclarations.SCHEMA_FOR_SCHEMAS);
-        addPrefixMapping(SchemaDeclarations.OTA2_APPINFO_SCHEMA);
+        addPrefixMapping( SchemaDeclarations.WSDL_SCHEMA );
+        addPrefixMapping( SchemaDeclarations.SOAP_SCHEMA );
+        addPrefixMapping( SchemaDeclarations.SCHEMA_FOR_SCHEMAS );
+        addPrefixMapping( SchemaDeclarations.OTA2_APPINFO_SCHEMA );
 
         // If a WSDL bindings component is defined in the application context, allow it to declare
         // any additional
         // URI declarations and prefix mappings that may be required
-        if (appContext.containsBean(SchemaCompilerApplicationContext.CODE_GENERATION_WSDL_BINDINGS)) {
+        if (appContext.containsBean( SchemaCompilerApplicationContext.CODE_GENERATION_WSDL_BINDINGS )) {
             CodeGenerationWsdlBindings wsdlBindings = (CodeGenerationWsdlBindings) appContext
-                    .getBean(SchemaCompilerApplicationContext.CODE_GENERATION_WSDL_BINDINGS);
+                .getBean( SchemaCompilerApplicationContext.CODE_GENERATION_WSDL_BINDINGS );
 
             for (SchemaDeclaration schemaDeclaration : wsdlBindings.getSchemasImports()) {
-                addPrefixMapping(schemaDeclaration);
+                addPrefixMapping( schemaDeclaration );
             }
 
             if (codeGenerator != null) {
                 for (SchemaDeclaration schemaDeclaration : wsdlBindings.getDependentSchemas()) {
-                    codeGenerator.addCompileTimeDependency(schemaDeclaration);
+                    codeGenerator.addCompileTimeDependency( schemaDeclaration );
                 }
             }
         }
@@ -221,30 +225,15 @@ public class CodegenNamespacePrefixMapper extends NamespacePrefixMapper {
      * Adds the namespace mappings required for XML Schema documents.
      */
     private void addXmlSchemaMappings() {
-        addPrefixMapping(SchemaDeclarations.SCHEMA_FOR_SCHEMAS);
-        addPrefixMapping(SchemaDeclarations.OTA2_APPINFO_SCHEMA);
-    }
-
-    /**
-     * Adds a namespace mapping for the given schema if one does not already exist.
-     * 
-     * @param schemaDeclaration
-     *            the schema declaration whose mapping is to be added
-     */
-    private void addPrefixMapping(SchemaDeclaration schemaDeclaration) {
-        if (!uriDeclarations.contains(schemaDeclaration.getNamespace())) {
-            namespacePrefixMappings.put(schemaDeclaration.getNamespace(),
-                    schemaDeclaration.getDefaultPrefix());
-            uriDeclarations.add(schemaDeclaration.getNamespace());
-        }
+        addPrefixMapping( SchemaDeclarations.SCHEMA_FOR_SCHEMAS );
+        addPrefixMapping( SchemaDeclarations.OTA2_APPINFO_SCHEMA );
     }
 
     /**
      * Returns the set of all namespaces that are imported by the given schema.
      * 
-     * @param schema
-     *            the XML schema to analyze
-     * @return Set<String>
+     * @param schema the XML schema to analyze
+     * @return Set&lt;String&gt;
      */
     private Set<String> getImportedNamespaces(Schema schema) {
         Set<String> nsImports = new HashSet<>();
@@ -255,7 +244,7 @@ public class CodegenNamespacePrefixMapper extends NamespacePrefixMapper {
                     Import schemaImport = (Import) importOrInclude;
 
                     if (schemaImport.getNamespace() != null) {
-                        nsImports.add(schemaImport.getNamespace());
+                        nsImports.add( schemaImport.getNamespace() );
                     }
                 }
             }
@@ -264,11 +253,10 @@ public class CodegenNamespacePrefixMapper extends NamespacePrefixMapper {
     }
 
     /**
-     * Returns the alpha-only characters from the start of the prefix. If the prefix string begins
-     * with a number (or is null), the string "ns" will be returned by this method.
+     * Returns the alpha-only characters from the start of the prefix. If the prefix string begins with a number (or is
+     * null), the string "ns" will be returned by this method.
      * 
-     * @param prefix
-     *            the prefix string to process
+     * @param prefix the prefix string to process
      * @return String
      */
     private String getPrefixAlphaChars(String prefix) {
@@ -276,26 +264,26 @@ public class CodegenNamespacePrefixMapper extends NamespacePrefixMapper {
 
         if (prefix != null) {
             for (char ch : prefix.toCharArray()) {
-                if (Character.isLetter(ch)) {
-                    prefixAlphas.append(ch);
+                if (Character.isLetter( ch )) {
+                    prefixAlphas.append( ch );
                 } else {
                     break;
                 }
             }
         }
         if (prefixAlphas.length() == 0) {
-            prefixAlphas.append("ns");
+            prefixAlphas.append( "ns" );
         }
         return prefixAlphas.toString();
     }
 
     /**
-     * @see com.sun.xml.bind.marshaller.NamespacePrefixMapper#getPreferredPrefix(java.lang.String,
-     *      java.lang.String, boolean)
+     * @see com.sun.xml.bind.marshaller.NamespacePrefixMapper#getPreferredPrefix(java.lang.String, java.lang.String,
+     *      boolean)
      */
     @Override
     public String getPreferredPrefix(String namespaceUri, String suggestion, boolean requirePrefix) {
-        String preferredPrefix = namespacePrefixMappings.get(namespaceUri);
+        String preferredPrefix = namespacePrefixMappings.get( namespaceUri );
 
         return (preferredPrefix == null) ? suggestion : preferredPrefix;
     }
@@ -305,7 +293,7 @@ public class CodegenNamespacePrefixMapper extends NamespacePrefixMapper {
      */
     @Override
     public String[] getPreDeclaredNamespaceUris() {
-        return uriDeclarations.toArray(new String[uriDeclarations.size()]);
+        return uriDeclarations.toArray( new String[uriDeclarations.size()] );
     }
 
 }

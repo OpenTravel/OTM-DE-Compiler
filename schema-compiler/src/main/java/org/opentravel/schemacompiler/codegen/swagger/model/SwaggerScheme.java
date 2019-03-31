@@ -17,56 +17,51 @@
 package org.opentravel.schemacompiler.codegen.swagger.model;
 
 /**
- * Enumeration that specifies the transfer protocols supported for a Swagger
- * API specification document.  The schemes that are defined for this
- * enumeration are the only values allowed by the Swagger specification.
+ * Enumeration that specifies the transfer protocols supported for a Swagger API specification document. The schemes
+ * that are defined for this enumeration are the only values allowed by the Swagger specification.
  */
 public enum SwaggerScheme {
-	
-	HTTP( "http" ),
-	HTTPS( "https" ),
-	WS( "ws" ),
-	WSS( "wss" );
-	
-	private String displayValue;
-	
-	/**
-	 * Constructor that specifies the display value for the enumeration.
-	 * 
-	 * @param displayValue  the display value of the enumeration
-	 */
-	private SwaggerScheme(String displayValue) {
-		this.displayValue = displayValue;
-	}
-	
-	/**
-	 * Returns the display value of the enumeration.
-	 * 
-	 * @return String
-	 */
-	public String getDisplayValue() {
-		return displayValue;
-	}
-	
-	/**
-	 * Returns the correct enumeration for the given display value or null
-	 * if an invalid scheme is provided.
-	 * 
-	 * @param displayValue  the display value of the scheme to return
-	 * @return SwaggerScheme
-	 */
-	public static SwaggerScheme fromDisplayValue(String displayValue) {
-		SwaggerScheme scheme = null;
-		
-		if (displayValue != null) {
-			for (SwaggerScheme s : values()) {
-				if (displayValue.equalsIgnoreCase( s.getDisplayValue() )) {
-					scheme = s;
-					break;
-				}
-			}
-		}
-		return scheme;
-	}
-	
+
+    HTTP("http"), HTTPS("https"), WS("ws"), WSS("wss");
+
+    private String displayValue;
+
+    /**
+     * Constructor that specifies the display value for the enumeration.
+     * 
+     * @param displayValue the display value of the enumeration
+     */
+    private SwaggerScheme(String displayValue) {
+        this.displayValue = displayValue;
+    }
+
+    /**
+     * Returns the display value of the enumeration.
+     * 
+     * @return String
+     */
+    public String getDisplayValue() {
+        return displayValue;
+    }
+
+    /**
+     * Returns the correct enumeration for the given display value or null if an invalid scheme is provided.
+     * 
+     * @param displayValue the display value of the scheme to return
+     * @return SwaggerScheme
+     */
+    public static SwaggerScheme fromDisplayValue(String displayValue) {
+        SwaggerScheme scheme = null;
+
+        if (displayValue != null) {
+            for (SwaggerScheme s : values()) {
+                if (displayValue.equalsIgnoreCase( s.getDisplayValue() )) {
+                    scheme = s;
+                    break;
+                }
+            }
+        }
+        return scheme;
+    }
+
 }

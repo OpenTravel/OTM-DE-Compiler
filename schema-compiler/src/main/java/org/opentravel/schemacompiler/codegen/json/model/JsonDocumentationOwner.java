@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.codegen.json.model;
 
 import java.util.List;
@@ -21,33 +22,33 @@ import java.util.List;
  * Interface for all code generation model objects that contain JSON documentation.
  */
 public interface JsonDocumentationOwner {
-	
-	/**
-	 * Returns the documentation for the owner.
-	 *
-	 * @return JsonDocumentation
-	 */
-	public JsonDocumentation getDocumentation();
-	
-	/**
-	 * Assigns the documentation for the owner.
-	 *
-	 * @param documentation  the documentation item to assign
-	 */
-	public void setDocumentation(JsonDocumentation documentation);
-	
-	/**
-	 * Returns the list of equivalent item definitions for the owner.
-	 *
-	 * @return List<JsonContextualValue>
-	 */
-	public List<JsonContextualValue> getEquivalentItems();
-	
-	/**
-	 * Returns the list of EXAMPLE value definitions for the owner.
-	 *
-	 * @return List<JsonContextualValue>
-	 */
-	public List<JsonContextualValue> getExampleItems();
-	
+
+    /**
+     * Returns the documentation for the owner.
+     *
+     * @return JsonDocumentation
+     */
+    public JsonDocumentation getDocumentation();
+
+    /**
+     * Assigns the documentation for the owner.
+     *
+     * @param documentation the documentation item to assign
+     */
+    public void setDocumentation(JsonDocumentation documentation);
+
+    /**
+     * Returns the list of equivalent item definitions for the owner.
+     *
+     * @return List&lt;JsonContextualValue&gt;
+     */
+    public List<JsonContextualValue> getEquivalentItems();
+
+    /**
+     * Returns the list of EXAMPLE value definitions for the owner.
+     *
+     * @return List&lt;JsonContextualValue&gt;
+     */
+    public List<JsonContextualValue> getExampleItems();
+
 }

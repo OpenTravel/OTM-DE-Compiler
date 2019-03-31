@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.model;
 
 import static org.junit.Assert.assertArrayEquals;
@@ -24,37 +25,41 @@ import org.junit.Test;
  * Verifies the functions of the <code>TLAction</code> class.
  */
 public class TestTLAction extends AbstractModelTest {
-	
-	@Test
-	public void testIdentityFunctions() throws Exception {
-		TLResource resource = addResource( "TestResource", library1 );
-		TLAction action = addAction( "Action", resource );
-		
-		assertEquals( "TestLibrary1.otm : TestResource/Action", action.getValidationIdentity() );
-	}
-	
-	@Test
-	public void testDocumentationFunctions() throws Exception {
-		testDocumentationFunctions( new TLAction() );
-	}
-	
-	@Test
-	public void testActionResponseFunctions() throws Exception {
-		TLResource resource = addResource( "TestResource", library1 );
-		TLAction action = addAction( "Action", resource );
-		TLActionResponse response1 = addActionResponse( 200, null, action );
-		TLActionResponse response2 = addActionResponse( 204, null, action );
-		
-		assertArrayEquals( new String[] { "200", "204" }, getNames( action.getResponses(), r -> r.getStatusCodes().get( 0 ).toString() ) );
-		
-		action.moveDown( response1 );
-		assertArrayEquals( new String[] { "204", "200" }, getNames( action.getResponses(), r -> r.getStatusCodes().get( 0 ).toString() ) );
-		
-		action.moveUp( response1 );
-		assertArrayEquals( new String[] { "200", "204" }, getNames( action.getResponses(), r -> r.getStatusCodes().get( 0 ).toString() ) );
-		
-		action.removeResponse( response2 );
-		assertArrayEquals( new String[] { "200" }, getNames( action.getResponses(), r -> r.getStatusCodes().get( 0 ).toString() ) );
-	}
-	
+
+    @Test
+    public void testIdentityFunctions() throws Exception {
+        TLResource resource = addResource( "TestResource", library1 );
+        TLAction action = addAction( "Action", resource );
+
+        assertEquals( "TestLibrary1.otm : TestResource/Action", action.getValidationIdentity() );
+    }
+
+    @Test
+    public void testDocumentationFunctions() throws Exception {
+        testDocumentationFunctions( new TLAction() );
+    }
+
+    @Test
+    public void testActionResponseFunctions() throws Exception {
+        TLResource resource = addResource( "TestResource", library1 );
+        TLAction action = addAction( "Action", resource );
+        TLActionResponse response1 = addActionResponse( 200, null, action );
+        TLActionResponse response2 = addActionResponse( 204, null, action );
+
+        assertArrayEquals( new String[] {"200", "204"},
+            getNames( action.getResponses(), r -> r.getStatusCodes().get( 0 ).toString() ) );
+
+        action.moveDown( response1 );
+        assertArrayEquals( new String[] {"204", "200"},
+            getNames( action.getResponses(), r -> r.getStatusCodes().get( 0 ).toString() ) );
+
+        action.moveUp( response1 );
+        assertArrayEquals( new String[] {"200", "204"},
+            getNames( action.getResponses(), r -> r.getStatusCodes().get( 0 ).toString() ) );
+
+        action.removeResponse( response2 );
+        assertArrayEquals( new String[] {"200"},
+            getNames( action.getResponses(), r -> r.getStatusCodes().get( 0 ).toString() ) );
+    }
+
 }

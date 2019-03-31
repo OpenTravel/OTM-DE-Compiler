@@ -13,14 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.model;
 
-import javax.xml.XMLConstants;
-import javax.xml.namespace.QName;
+package org.opentravel.schemacompiler.model;
 
 import org.w3._2001.xmlschema.Restriction;
 import org.w3._2001.xmlschema.SimpleType;
 import org.w3._2001.xmlschema.TopLevelSimpleType;
+
+import javax.xml.XMLConstants;
+import javax.xml.namespace.QName;
 
 /**
  * Library member that represents a simple type declaration from a legacy XML schema.
@@ -35,13 +36,10 @@ public class XSDSimpleType extends TLLibraryMember implements TLAttributeType {
     private boolean isInitialized = false;
 
     /**
-     * Constructor that specifies the name of this model element and the underlying JAXB type from
-     * which it was created.
+     * Constructor that specifies the name of this model element and the underlying JAXB type from which it was created.
      * 
-     * @param name
-     *            the name of the model element
-     * @param jaxbType
-     *            the JAXB type that was used to create this element
+     * @param name the name of the model element
+     * @param jaxbType the JAXB type that was used to create this element
      */
     public XSDSimpleType(String name, TopLevelSimpleType jaxbType) {
         this.name = name;
@@ -57,12 +55,12 @@ public class XSDSimpleType extends TLLibraryMember implements TLAttributeType {
         StringBuilder identity = new StringBuilder();
 
         if (owningLibrary != null) {
-            identity.append(owningLibrary.getValidationIdentity()).append(" : ");
+            identity.append( owningLibrary.getValidationIdentity() ).append( " : " );
         }
         if (name == null) {
-            identity.append("[Unnamed XSD Simple Type]");
+            identity.append( "[Unnamed XSD Simple Type]" );
         } else {
-            identity.append(name);
+            identity.append( name );
         }
         return identity.toString();
     }
@@ -109,17 +107,16 @@ public class XSDSimpleType extends TLLibraryMember implements TLAttributeType {
      */
     private void initializeTypeCharacteristics() {
         if ((getOwningModel() != null) && (getOwningLibrary() != null)) {
-            String rootTypename = getRootXmlTypename(getNamespace(), jaxbType);
+            String rootTypename = getRootXmlTypename( getNamespace(), jaxbType );
 
-            xsdFacetProfile = XSDFacetProfile.toFacetProfile(rootTypename);
+            xsdFacetProfile = XSDFacetProfile.toFacetProfile( rootTypename );
             isInitialized = true;
         }
     }
 
     /**
-     * Navigates the assigned type(s) of the given simple type until an extension or restriction of
-     * a primitive XML type is discovered. If no such type can be identified, this method will
-     * return null.
+     * Navigates the assigned type(s) of the given simple type until an extension or restriction of a primitive XML type
+     * is discovered. If no such type can be identified, this method will return null.
      * 
      * @return String
      */
@@ -127,21 +124,20 @@ public class XSDSimpleType extends TLLibraryMember implements TLAttributeType {
         String rootTypename = null;
 
         if (namespace != null) {
-            if (namespace.equals(XMLConstants.W3C_XML_SCHEMA_NS_URI)) {
+            if (namespace.equals( XMLConstants.W3C_XML_SCHEMA_NS_URI )) {
                 rootTypename = (jaxbType == null) ? name : jaxbType.getName();
 
             } else if (jaxbType.getRestriction() != null) {
                 Restriction restriction = jaxbType.getRestriction();
 
                 if (restriction.getBase() != null) {
-                    SimpleType baseType = findJaxbType(restriction.getBase());
+                    SimpleType baseType = findJaxbType( restriction.getBase() );
 
                     if (baseType != null) {
-                        rootTypename = getRootXmlTypename(restriction.getBase().getNamespaceURI(),
-                                baseType);
+                        rootTypename = getRootXmlTypename( restriction.getBase().getNamespaceURI(), baseType );
                     }
                 } else if (restriction.getSimpleType() != null) {
-                    rootTypename = getRootXmlTypename(namespace, restriction.getSimpleType());
+                    rootTypename = getRootXmlTypename( namespace, restriction.getSimpleType() );
                 }
             }
         }
@@ -149,19 +145,17 @@ public class XSDSimpleType extends TLLibraryMember implements TLAttributeType {
     }
 
     /**
-     * Searches the model for an <code>XSDSimpleType</code> with the specified Q-Name, and returns
-     * its underlying JAXB object.
+     * Searches the model for an <code>XSDSimpleType</code> with the specified Q-Name, and returns its underlying JAXB
+     * object.
      * 
-     * @param simpleTypeQName
-     *            the qualified name of the XML simple type to find
+     * @param simpleTypeQName the qualified name of the XML simple type to find
      * @return SimpleType
      */
     private SimpleType findJaxbType(QName simpleTypeQName) {
         SimpleType result = null;
 
-        for (AbstractLibrary library : getOwningModel().getLibrariesForNamespace(
-                simpleTypeQName.getNamespaceURI())) {
-            LibraryMember member = library.getNamedMember(simpleTypeQName.getLocalPart());
+        for (AbstractLibrary library : getOwningModel().getLibrariesForNamespace( simpleTypeQName.getNamespaceURI() )) {
+            LibraryMember member = library.getNamedMember( simpleTypeQName.getLocalPart() );
 
             if (member instanceof XSDSimpleType) {
                 result = ((XSDSimpleType) member).getJaxbType();

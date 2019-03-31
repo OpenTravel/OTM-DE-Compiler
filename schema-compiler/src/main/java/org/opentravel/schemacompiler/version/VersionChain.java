@@ -23,108 +23,105 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 /**
- * Container for a series of OTM model objects that are assigned the same base
- * namespace and name.
+ * Container for a series of OTM model objects that are assigned the same base namespace and name.
  *
- * @param <T>  the type of item managed by the chain
+ * @param <T> the type of item managed by the chain
  */
 public class VersionChain<T> {
-	
-	private String baseNS;
-	private String name;
-	private SortedSet<T> versions;
-	
-	/**
-	 * Constructor that specifies the base namespace and item name for this chain.
-	 * 
-	 * @param baseNS  the base namespace of all items in the chain
-	 * @param name  the name of all items in the chain
-	 * @param comparator  used to sort items in ascending version order
-	 */
-	public VersionChain(String baseNS, String name, Comparator<T> comparator) {
-		this.baseNS = baseNS;
-		this.name = name;
-		this.versions = new TreeSet<>( comparator );
-	}
 
-	/**
-	 * Returns the base namespace of all items in the chain.
-	 *
-	 * @return String
-	 */
-	public String getBaseNS() {
-		return baseNS;
-	}
+    private String baseNS;
+    private String name;
+    private SortedSet<T> versions;
 
-	/**
-	 * Returns the name of all items in the chain.
-	 *
-	 * @return String
-	 */
-	public String getName() {
-		return name;
-	}
+    /**
+     * Constructor that specifies the base namespace and item name for this chain.
+     * 
+     * @param baseNS the base namespace of all items in the chain
+     * @param name the name of all items in the chain
+     * @param comparator used to sort items in ascending version order
+     */
+    public VersionChain(String baseNS, String name, Comparator<T> comparator) {
+        this.baseNS = baseNS;
+        this.name = name;
+        this.versions = new TreeSet<>( comparator );
+    }
 
-	/**
-	 * Returns collection of item versions sorted in ascending version order.
-	 *
-	 * @return List<T>
-	 */
-	public List<T> getVersions() {
-		return new ArrayList<>( versions );
-	}
-	
-	/**
-	 * Adds the given version to this chain.
-	 * 
-	 * @param version  the versioned item to add
-	 */
-	protected void addVersion(T version) {
-		versions.add( version );
-	}
-	
-	/**
-	 * Returns the next version of the given item or null if no later version exists.
-	 * 
-	 * @param item  the item for which to return the next version
-	 * @return T
-	 * @throws IllegalArgumentException  thrown if the given item is not assigned to this version chain
-	 */
-	public T getNextVersion(T item) {
-		List<T> versionList = new ArrayList<>( versions );
-		int itemIdx = versionList.indexOf( item );
-		T nextVersion = null;
-		
-		if (itemIdx < 0) {
-			throw new IllegalArgumentException(
-					"The given item is not assigned to this version chain");
-		}
-		if ((itemIdx + 1) < versionList.size()) {
-			nextVersion = versionList.get( itemIdx + 1 );
-		}
-		return nextVersion;
-	}
-	
-	/**
-	 * Returns the previous version of the given item or null if no earlier version exists.
-	 * 
-	 * @param item  the item for which to return the previous version
-	 * @return T
-	 * @throws IllegalArgumentException  thrown if the given item is not assigned to this version chain
-	 */
-	public T getPreviousVersion(T item) {
-		List<T> versionList = new ArrayList<>( versions );
-		int itemIdx = versionList.indexOf( item );
-		T nextVersion = null;
-		
-		if (itemIdx < 0) {
-			throw new IllegalArgumentException(
-					"The given item is not assigned to this version chain");
-		}
-		if (itemIdx > 0) {
-			nextVersion = versionList.get( itemIdx - 1 );
-		}
-		return nextVersion;
-	}
-	
+    /**
+     * Returns the base namespace of all items in the chain.
+     *
+     * @return String
+     */
+    public String getBaseNS() {
+        return baseNS;
+    }
+
+    /**
+     * Returns the name of all items in the chain.
+     *
+     * @return String
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * Returns collection of item versions sorted in ascending version order.
+     *
+     * @return List&lt;T&gt;
+     */
+    public List<T> getVersions() {
+        return new ArrayList<>( versions );
+    }
+
+    /**
+     * Adds the given version to this chain.
+     * 
+     * @param version the versioned item to add
+     */
+    protected void addVersion(T version) {
+        versions.add( version );
+    }
+
+    /**
+     * Returns the next version of the given item or null if no later version exists.
+     * 
+     * @param item the item for which to return the next version
+     * @return T
+     * @throws IllegalArgumentException thrown if the given item is not assigned to this version chain
+     */
+    public T getNextVersion(T item) {
+        List<T> versionList = new ArrayList<>( versions );
+        int itemIdx = versionList.indexOf( item );
+        T nextVersion = null;
+
+        if (itemIdx < 0) {
+            throw new IllegalArgumentException( "The given item is not assigned to this version chain" );
+        }
+        if ((itemIdx + 1) < versionList.size()) {
+            nextVersion = versionList.get( itemIdx + 1 );
+        }
+        return nextVersion;
+    }
+
+    /**
+     * Returns the previous version of the given item or null if no earlier version exists.
+     * 
+     * @param item the item for which to return the previous version
+     * @return T
+     * @throws IllegalArgumentException thrown if the given item is not assigned to this version chain
+     */
+    public T getPreviousVersion(T item) {
+        List<T> versionList = new ArrayList<>( versions );
+        int itemIdx = versionList.indexOf( item );
+        T nextVersion = null;
+
+        if (itemIdx < 0) {
+            throw new IllegalArgumentException( "The given item is not assigned to this version chain" );
+        }
+        if (itemIdx > 0) {
+            nextVersion = versionList.get( itemIdx - 1 );
+        }
+        return nextVersion;
+    }
+
 }

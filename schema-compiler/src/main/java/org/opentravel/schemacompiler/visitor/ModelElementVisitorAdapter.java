@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.visitor;
 
 import org.opentravel.schemacompiler.model.BuiltInLibrary;
@@ -58,8 +59,7 @@ import org.opentravel.schemacompiler.model.XSDLibrary;
 import org.opentravel.schemacompiler.model.XSDSimpleType;
 
 /**
- * Adapter class that provides empty implementations for all methods of the
- * <code>ModelElementVisitor</code> interface.
+ * Adapter class that provides empty implementations for all methods of the <code>ModelElementVisitor</code> interface.
  * 
  * @author S. Livezey
  */
@@ -138,14 +138,14 @@ public abstract class ModelElementVisitorAdapter implements ModelElementVisitor 
     }
 
     /**
-	 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitor#visitChoiceObject(org.opentravel.schemacompiler.model.TLChoiceObject)
-	 */
-	@Override
-	public boolean visitChoiceObject(TLChoiceObject choiceObject) {
-		return true;
-	}
+     * @see org.opentravel.schemacompiler.visitor.ModelElementVisitor#visitChoiceObject(org.opentravel.schemacompiler.model.TLChoiceObject)
+     */
+    @Override
+    public boolean visitChoiceObject(TLChoiceObject choiceObject) {
+        return true;
+    }
 
-	/**
+    /**
      * @see org.opentravel.schemacompiler.visitor.ModelElementVisitor#visitCoreObject(org.opentravel.schemacompiler.model.TLCoreObject)
      */
     @Override
@@ -170,14 +170,14 @@ public abstract class ModelElementVisitorAdapter implements ModelElementVisitor 
     }
 
     /**
-	 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitor#visitContextualFacet(org.opentravel.schemacompiler.model.TLContextualFacet)
-	 */
-	@Override
-	public boolean visitContextualFacet(TLContextualFacet facet) {
-		return true;
-	}
+     * @see org.opentravel.schemacompiler.visitor.ModelElementVisitor#visitContextualFacet(org.opentravel.schemacompiler.model.TLContextualFacet)
+     */
+    @Override
+    public boolean visitContextualFacet(TLContextualFacet facet) {
+        return true;
+    }
 
-	/**
+    /**
      * @see org.opentravel.schemacompiler.visitor.ModelElementVisitor#visitService(org.opentravel.schemacompiler.model.TLService)
      */
     @Override
@@ -194,62 +194,62 @@ public abstract class ModelElementVisitorAdapter implements ModelElementVisitor 
     }
 
     /**
-	 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitor#visitResource(org.opentravel.schemacompiler.model.TLResource)
-	 */
-	@Override
-	public boolean visitResource(TLResource resource) {
-		return true;
-	}
+     * @see org.opentravel.schemacompiler.visitor.ModelElementVisitor#visitResource(org.opentravel.schemacompiler.model.TLResource)
+     */
+    @Override
+    public boolean visitResource(TLResource resource) {
+        return true;
+    }
 
-	/**
-	 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitor#visitResourceParentRef(org.opentravel.schemacompiler.model.TLResourceParentRef)
-	 */
-	@Override
-	public boolean visitResourceParentRef(TLResourceParentRef parentRef) {
-		return true;
-	}
+    /**
+     * @see org.opentravel.schemacompiler.visitor.ModelElementVisitor#visitResourceParentRef(org.opentravel.schemacompiler.model.TLResourceParentRef)
+     */
+    @Override
+    public boolean visitResourceParentRef(TLResourceParentRef parentRef) {
+        return true;
+    }
 
-	/**
-	 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitor#visitParamGroup(org.opentravel.schemacompiler.model.TLParamGroup)
-	 */
-	@Override
-	public boolean visitParamGroup(TLParamGroup paramGroup) {
-		return true;
-	}
+    /**
+     * @see org.opentravel.schemacompiler.visitor.ModelElementVisitor#visitParamGroup(org.opentravel.schemacompiler.model.TLParamGroup)
+     */
+    @Override
+    public boolean visitParamGroup(TLParamGroup paramGroup) {
+        return true;
+    }
 
-	/**
-	 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitor#visitParameter(org.opentravel.schemacompiler.model.TLParameter)
-	 */
-	@Override
-	public boolean visitParameter(TLParameter parameter) {
-		return true;
-	}
+    /**
+     * @see org.opentravel.schemacompiler.visitor.ModelElementVisitor#visitParameter(org.opentravel.schemacompiler.model.TLParameter)
+     */
+    @Override
+    public boolean visitParameter(TLParameter parameter) {
+        return true;
+    }
 
-	/**
-	 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitor#visitAction(org.opentravel.schemacompiler.model.TLAction)
-	 */
-	@Override
-	public boolean visitAction(TLAction action) {
-		return true;
-	}
+    /**
+     * @see org.opentravel.schemacompiler.visitor.ModelElementVisitor#visitAction(org.opentravel.schemacompiler.model.TLAction)
+     */
+    @Override
+    public boolean visitAction(TLAction action) {
+        return true;
+    }
 
-	/**
-	 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitor#visitActionRequest(org.opentravel.schemacompiler.model.TLActionRequest)
-	 */
-	@Override
-	public boolean visitActionRequest(TLActionRequest actionRequest) {
-		return true;
-	}
+    /**
+     * @see org.opentravel.schemacompiler.visitor.ModelElementVisitor#visitActionRequest(org.opentravel.schemacompiler.model.TLActionRequest)
+     */
+    @Override
+    public boolean visitActionRequest(TLActionRequest actionRequest) {
+        return true;
+    }
 
-	/**
-	 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitor#visitActionResponse(org.opentravel.schemacompiler.model.TLActionResponse)
-	 */
-	@Override
-	public boolean visitActionResponse(TLActionResponse actionResponse) {
-		return true;
-	}
+    /**
+     * @see org.opentravel.schemacompiler.visitor.ModelElementVisitor#visitActionResponse(org.opentravel.schemacompiler.model.TLActionResponse)
+     */
+    @Override
+    public boolean visitActionResponse(TLActionResponse actionResponse) {
+        return true;
+    }
 
-	/**
+    /**
      * @see org.opentravel.schemacompiler.visitor.ModelElementVisitor#visitExtensionPointFacet(org.opentravel.schemacompiler.model.TLExtensionPointFacet)
      */
     @Override
@@ -289,13 +289,13 @@ public abstract class ModelElementVisitorAdapter implements ModelElementVisitor 
         return true;
     }
 
-	/**
-	 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitor#visitActionFacet(org.opentravel.schemacompiler.model.TLActionFacet)
-	 */
-	@Override
-	public boolean visitActionFacet(TLActionFacet facet) {
-		return true;
-	}
+    /**
+     * @see org.opentravel.schemacompiler.visitor.ModelElementVisitor#visitActionFacet(org.opentravel.schemacompiler.model.TLActionFacet)
+     */
+    @Override
+    public boolean visitActionFacet(TLActionFacet facet) {
+        return true;
+    }
 
     /**
      * @see org.opentravel.schemacompiler.visitor.ModelElementVisitor#visitSimpleFacet(org.opentravel.schemacompiler.model.TLSimpleFacet)

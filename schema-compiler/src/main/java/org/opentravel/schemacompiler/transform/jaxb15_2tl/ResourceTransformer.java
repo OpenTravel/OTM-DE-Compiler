@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.transform.jaxb15_2tl;
 
 import org.opentravel.ns.ota2.librarymodel_v01_05.Action;
@@ -33,61 +34,60 @@ import org.opentravel.schemacompiler.transform.ObjectTransformer;
 import org.opentravel.schemacompiler.transform.symbols.DefaultTransformerContext;
 
 /**
- * Handles the transformation of objects from the <code>Resource</code> type to the
- * <code>TLResource</code> type.
+ * Handles the transformation of objects from the <code>Resource</code> type to the <code>TLResource</code> type.
  *
  * @author S. Livezey
  */
 public class ResourceTransformer extends ComplexTypeTransformer<Resource,TLResource> {
-	
-	/**
-	 * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
-	 */
-	@Override
-	public TLResource transform(Resource source) {
-        ObjectTransformer<ResourceParentRef, TLResourceParentRef, DefaultTransformerContext> parentRefTransformer =
-        		getTransformerFactory().getTransformer(ResourceParentRef.class, TLResourceParentRef.class);
-        ObjectTransformer<ParamGroup, TLParamGroup, DefaultTransformerContext> paramGroupTransformer =
-        		getTransformerFactory().getTransformer(ParamGroup.class, TLParamGroup.class);
-        ObjectTransformer<FacetAction, TLActionFacet, DefaultTransformerContext> actionFacetTransformer =
-        		getTransformerFactory().getTransformer(FacetAction.class, TLActionFacet.class);
-        ObjectTransformer<Action, TLAction, DefaultTransformerContext> actionTransformer =
-        		getTransformerFactory().getTransformer(Action.class, TLAction.class);
-		TLResource resource = new TLResource();
-		
-		resource.setName(trimString(source.getName()));
-		resource.setBasePath(trimString(source.getBasePath()));
-		resource.setAbstract(source.isAbstract());
-		resource.setFirstClass(source.isFirstClass());
-		resource.setBusinessObjectRefName(source.getBusinessObjectRef());
+
+    /**
+     * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
+     */
+    @Override
+    public TLResource transform(Resource source) {
+        ObjectTransformer<ResourceParentRef,TLResourceParentRef,DefaultTransformerContext> parentRefTransformer =
+            getTransformerFactory().getTransformer( ResourceParentRef.class, TLResourceParentRef.class );
+        ObjectTransformer<ParamGroup,TLParamGroup,DefaultTransformerContext> paramGroupTransformer =
+            getTransformerFactory().getTransformer( ParamGroup.class, TLParamGroup.class );
+        ObjectTransformer<FacetAction,TLActionFacet,DefaultTransformerContext> actionFacetTransformer =
+            getTransformerFactory().getTransformer( FacetAction.class, TLActionFacet.class );
+        ObjectTransformer<Action,TLAction,DefaultTransformerContext> actionTransformer =
+            getTransformerFactory().getTransformer( Action.class, TLAction.class );
+        TLResource resource = new TLResource();
+
+        resource.setName( trimString( source.getName() ) );
+        resource.setBasePath( trimString( source.getBasePath() ) );
+        resource.setAbstract( source.isAbstract() );
+        resource.setFirstClass( source.isFirstClass() );
+        resource.setBusinessObjectRefName( source.getBusinessObjectRef() );
 
         if (source.getDocumentation() != null) {
-            ObjectTransformer<Documentation, TLDocumentation, DefaultTransformerContext> docTransformer = getTransformerFactory()
-                    .getTransformer(Documentation.class, TLDocumentation.class);
+            ObjectTransformer<Documentation,TLDocumentation,DefaultTransformerContext> docTransformer =
+                getTransformerFactory().getTransformer( Documentation.class, TLDocumentation.class );
 
-            resource.setDocumentation(docTransformer.transform(source.getDocumentation()));
+            resource.setDocumentation( docTransformer.transform( source.getDocumentation() ) );
         }
 
         if (source.getExtension() != null) {
-            ObjectTransformer<Extension, TLExtension, DefaultTransformerContext> extensionTransformer = getTransformerFactory()
-                    .getTransformer(Extension.class, TLExtension.class);
+            ObjectTransformer<Extension,TLExtension,DefaultTransformerContext> extensionTransformer =
+                getTransformerFactory().getTransformer( Extension.class, TLExtension.class );
 
-            resource.setExtension(extensionTransformer.transform(source.getExtension()));
+            resource.setExtension( extensionTransformer.transform( source.getExtension() ) );
         }
-        
+
         for (ResourceParentRef sourceParentRef : source.getResourceParentRef()) {
-        	resource.addParentRef(parentRefTransformer.transform(sourceParentRef));
+            resource.addParentRef( parentRefTransformer.transform( sourceParentRef ) );
         }
         for (ParamGroup sourceParamGroup : source.getParamGroup()) {
-        	resource.addParamGroup(paramGroupTransformer.transform(sourceParamGroup));
+            resource.addParamGroup( paramGroupTransformer.transform( sourceParamGroup ) );
         }
         for (FacetAction sourceFacet : source.getActionFacet()) {
-        	resource.addActionFacet(actionFacetTransformer.transform(sourceFacet));
+            resource.addActionFacet( actionFacetTransformer.transform( sourceFacet ) );
         }
         for (Action sourceAction : source.getAction()) {
-        	resource.addAction(actionTransformer.transform(sourceAction));
+            resource.addAction( actionTransformer.transform( sourceAction ) );
         }
         return resource;
-	}
-	
+    }
+
 }

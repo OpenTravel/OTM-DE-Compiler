@@ -13,44 +13,45 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.version.handlers;
 
-import java.util.Collections;
-import java.util.List;
+package org.opentravel.schemacompiler.version.handlers;
 
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLOpenEnumeration;
 import org.opentravel.schemacompiler.model.TLPatchableFacet;
 
+import java.util.Collections;
+import java.util.List;
+
 /**
- * <code>VersionHandler</code> implementation for <code>TLOpenEnumeration</code>
- * model entities.
+ * <code>VersionHandler</code> implementation for <code>TLOpenEnumeration</code> model entities.
  *
  * @author S. Livezey
  */
 public class TLOpenEnumerationVersionHandler extends TLAbstractEnumerationVersionHandler<TLOpenEnumeration> {
-	
-	/**
-	 * @see org.opentravel.schemacompiler.version.handlers.VersionHandler#createNewVersion(org.opentravel.schemacompiler.version.Versioned, org.opentravel.schemacompiler.model.TLLibrary)
-	 */
-	@Override
-	public TLOpenEnumeration createNewVersion(TLOpenEnumeration origVersion, TLLibrary targetLibrary) {
-		TLOpenEnumeration newVersion = new TLOpenEnumeration();
+
+    /**
+     * @see org.opentravel.schemacompiler.version.handlers.VersionHandler#createNewVersion(org.opentravel.schemacompiler.version.Versioned,
+     *      org.opentravel.schemacompiler.model.TLLibrary)
+     */
+    @Override
+    public TLOpenEnumeration createNewVersion(TLOpenEnumeration origVersion, TLLibrary targetLibrary) {
+        TLOpenEnumeration newVersion = new TLOpenEnumeration();
 
         newVersion.setName( origVersion.getName() );
         newVersion.setDocumentation( getCloner( origVersion ).clone( origVersion.getDocumentation() ) );
         setExtension( newVersion, origVersion );
         targetLibrary.addNamedMember( newVersion );
-        
+
         return newVersion;
-	}
-	
-	/**
-	 * @see org.opentravel.schemacompiler.version.handlers.VersionHandler#getPatchableFacets(org.opentravel.schemacompiler.version.Versioned)
-	 */
-	@Override
-	public List<TLPatchableFacet> getPatchableFacets(TLOpenEnumeration entity) {
-		return Collections.emptyList();
-	}
-	
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.version.handlers.VersionHandler#getPatchableFacets(org.opentravel.schemacompiler.version.Versioned)
+     */
+    @Override
+    public List<TLPatchableFacet> getPatchableFacets(TLOpenEnumeration entity) {
+        return Collections.emptyList();
+    }
+
 }

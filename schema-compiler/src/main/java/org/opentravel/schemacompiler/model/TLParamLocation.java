@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.model;
 
 /**
@@ -21,9 +22,7 @@ package org.opentravel.schemacompiler.model;
  * @author S. Livezey
  */
 public enum TLParamLocation {
-	
-	PATH,
-	QUERY,
-	HEADER;
-	
+
+    PATH, QUERY, HEADER;
+
 }

@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.repository;
 
-import java.util.List;
-
 import org.opentravel.schemacompiler.model.AbstractLibrary;
+
+import java.util.List;
 
 /**
  * Represents a <code>RepositoryItem</code> component that is accessible from a local model project.
@@ -36,7 +37,7 @@ public interface ProjectItem extends RepositoryItem {
     /**
      * Returns the list of projects of which this <code>ProjectItem</code> is a member.
      * 
-     * @return List<Project>
+     * @return List&lt;Project&gt;
      */
     public List<Project> memberOfProjects();
 
@@ -48,8 +49,7 @@ public interface ProjectItem extends RepositoryItem {
     public AbstractLibrary getContent();
 
     /**
-     * Returns true if the project item's content is to be considered read-only by an editor
-     * application.
+     * Returns true if the project item's content is to be considered read-only by an editor application.
      * 
      * @return boolean
      */

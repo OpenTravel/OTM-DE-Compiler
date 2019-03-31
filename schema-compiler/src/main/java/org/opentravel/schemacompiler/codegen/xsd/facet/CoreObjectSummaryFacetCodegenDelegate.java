@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.codegen.xsd.facet;
 
-import javax.xml.namespace.QName;
+package org.opentravel.schemacompiler.codegen.xsd.facet;
 
 import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
 import org.opentravel.schemacompiler.codegen.xsd.TLDocumentationCodegenTransformer;
@@ -26,9 +25,11 @@ import org.opentravel.schemacompiler.model.TLDocumentationOwner;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.w3._2001.xmlschema.Annotation;
 
+import javax.xml.namespace.QName;
+
 /**
- * Code generation delegate for <code>TLFacet</code> instances with a facet type of
- * <code>SUMMARY</code> and a facet owner of type <code>TLCoreObject</code>.
+ * Code generation delegate for <code>TLFacet</code> instances with a facet type of <code>SUMMARY</code> and a facet
+ * owner of type <code>TLCoreObject</code>.
  * 
  * @author S. Livezey
  */
@@ -37,11 +38,10 @@ public class CoreObjectSummaryFacetCodegenDelegate extends CoreObjectFacetCodege
     /**
      * Constructor that specifies the source facet for which code artifacts are being generated.
      * 
-     * @param sourceFacet
-     *            the source facet
+     * @param sourceFacet the source facet
      */
     public CoreObjectSummaryFacetCodegenDelegate(TLFacet sourceFacet) {
-        super(sourceFacet);
+        super( sourceFacet );
     }
 
     /**
@@ -49,7 +49,7 @@ public class CoreObjectSummaryFacetCodegenDelegate extends CoreObjectFacetCodege
      */
     @Override
     protected boolean hasSubstitutionGroupElement() {
-        return !XsdCodegenUtils.isSimpleCoreObject(getSourceFacet().getOwningEntity());
+        return !XsdCodegenUtils.isSimpleCoreObject( getSourceFacet().getOwningEntity() );
     }
 
     /**
@@ -57,7 +57,7 @@ public class CoreObjectSummaryFacetCodegenDelegate extends CoreObjectFacetCodege
      */
     @Override
     public boolean hasNonSubstitutableElement() {
-        return !XsdCodegenUtils.isSimpleCoreObject(getSourceFacet().getOwningEntity());
+        return !XsdCodegenUtils.isSimpleCoreObject( getSourceFacet().getOwningEntity() );
     }
 
     /**
@@ -65,8 +65,8 @@ public class CoreObjectSummaryFacetCodegenDelegate extends CoreObjectFacetCodege
      */
     @Override
     protected QName getSubstitutionGroup(TLAlias facetAlias) {
-        return XsdCodegenUtils.isSimpleCoreObject(getSourceFacet().getOwningEntity()) ? null
-                : super.getSubstitutionGroup(facetAlias);
+        return XsdCodegenUtils.isSimpleCoreObject( getSourceFacet().getOwningEntity() ) ? null
+            : super.getSubstitutionGroup( facetAlias );
     }
 
     /**
@@ -82,18 +82,18 @@ public class CoreObjectSummaryFacetCodegenDelegate extends CoreObjectFacetCodege
      */
     @Override
     public QName getExtensionPointElement() {
-    	TLCoreObject core = (TLCoreObject) getSourceFacet().getOwningEntity();
+        TLCoreObject core = (TLCoreObject) getSourceFacet().getOwningEntity();
         SchemaDependency extensionPoint;
         QName extensionPointQName;
-        
+
         if (declaresOrInheritsFacetContent( core.getDetailFacet() )) {
-        	extensionPoint = SchemaDependency.getExtensionPointSummaryElement();
-        	
+            extensionPoint = SchemaDependency.getExtensionPointSummaryElement();
+
         } else {
-        	extensionPoint = SchemaDependency.getExtensionPointElement();
+            extensionPoint = SchemaDependency.getExtensionPointElement();
         }
         extensionPointQName = extensionPoint.toQName();
-        addCompileTimeDependency(extensionPoint);
+        addCompileTimeDependency( extensionPoint );
         return extensionPointQName;
     }
 
@@ -107,18 +107,16 @@ public class CoreObjectSummaryFacetCodegenDelegate extends CoreObjectFacetCodege
         if (entity instanceof TLFacet) {
             TLFacet sourceFacet = (TLFacet) entity;
 
-            if (XsdCodegenUtils.isSimpleCoreObject(sourceFacet.getOwningEntity())) {
-                Annotation ownerAnnotation = super
-                        .createJaxbDocumentation((TLDocumentationOwner) sourceFacet
-                                .getOwningEntity());
-                Annotation facetAnnotation = super.createJaxbDocumentation(sourceFacet);
+            if (XsdCodegenUtils.isSimpleCoreObject( sourceFacet.getOwningEntity() )) {
+                Annotation ownerAnnotation =
+                    super.createJaxbDocumentation( (TLDocumentationOwner) sourceFacet.getOwningEntity() );
+                Annotation facetAnnotation = super.createJaxbDocumentation( sourceFacet );
 
-                annotation = TLDocumentationCodegenTransformer.mergeDocumentation(ownerAnnotation,
-                        facetAnnotation);
+                annotation = TLDocumentationCodegenTransformer.mergeDocumentation( ownerAnnotation, facetAnnotation );
             }
         }
         if (annotation == null) {
-            annotation = super.createJaxbDocumentation(entity);
+            annotation = super.createJaxbDocumentation( entity );
         }
         return annotation;
     }

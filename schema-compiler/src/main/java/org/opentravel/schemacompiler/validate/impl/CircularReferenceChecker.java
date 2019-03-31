@@ -13,11 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.validate.impl;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+package org.opentravel.schemacompiler.validate.impl;
 
 import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.ResourceCodegenUtils;
@@ -40,81 +37,109 @@ import org.opentravel.schemacompiler.model.TLSimple;
 import org.opentravel.schemacompiler.model.TLSimpleFacet;
 import org.opentravel.schemacompiler.model.TLValueWithAttributes;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 /**
- * Component that recursively analyzes references between simple types to identify any circular
- * references among model components.
+ * Component that recursively analyzes references between simple types to identify any circular references among model
+ * components.
  * 
  * @author S. Livezey
  */
 public class CircularReferenceChecker {
-	
-	/**
-	 * Private constructor to prevent instantiation.
-	 */
-	private CircularReferenceChecker() {}
-	
+
     /**
-     * Performs a recursive check to determine whether any circular references exist for the given
-     * model element.
+     * Private constructor to prevent instantiation.
+     */
+    private CircularReferenceChecker() {}
+
+    /**
+     * Performs a recursive check to determine whether any circular references exist for the given model element.
      * 
-     * @param simple
-     *            the simple type to be analyzed
+     * @param simple the simple type to be analyzed
      * @return boolean
      */
     public static boolean hasCircularReference(TLSimple simple) {
-        return checkCircularReference(simple.getParentType(), simple, new HashSet<NamedEntity>());
+        return checkCircularReference( simple.getParentType(), simple, new HashSet<NamedEntity>() );
     }
 
     /**
-     * Performs a recursive check to determine whether any circular references exist for the given
-     * model element.
+     * Performs a recursive check to determine whether any circular references exist for the given model element.
      * 
-     * @param simpleFacet
-     *            the simple facet to be analyzed
+     * @param simpleFacet the simple facet to be analyzed
      * @return boolean
      */
     public static boolean hasCircularReference(TLSimpleFacet simpleFacet) {
-        return checkCircularReference(simpleFacet.getSimpleType(), simpleFacet,
-                new HashSet<NamedEntity>());
+        return checkCircularReference( simpleFacet.getSimpleType(), simpleFacet, new HashSet<NamedEntity>() );
     }
 
     /**
-     * Recursive method that searches the dependency tree to identify circular references for the
-     * given entity.
+     * Performs a recursive check to determine whether any circular references exist for the given VWA.
      * 
-     * @param referencedEntity
-     *            the referenced entity to be analyzed
-     * @param originalEntity
-     *            the original element that is being checked for circular references
-     * @param visitedEntities
-     *            the set of entities that have already been checked
+     * @param vwa the value-with-attributes to be analyzed
      * @return boolean
      */
-    private static boolean checkCircularReference(NamedEntity referencedEntity,
-            NamedEntity originalEntity, Set<NamedEntity> visitedEntities) {
+    public static boolean hasCircularReference(TLValueWithAttributes vwa) {
+        return checkCircularReference( vwa, vwa, new HashSet<TLValueWithAttributes>() );
+    }
+
+    /**
+     * Performs a recursive check to determine whether any circular references exist in the owning entity relationship
+     * of the given contextual facet.
+     * 
+     * @param facet the contextual facet to be analyzed
+     * @return boolean
+     */
+    public static boolean hasCircularReference(TLContextualFacet facet) {
+        return checkCircularReference( facet, facet, new HashSet<TLContextualFacet>() );
+    }
+
+    /**
+     * Performs a recursive check to determine whether any circular references exist for the given facet property.
+     * Normally, circular references are allowed for complex types. Such recursive references are only illegal when a
+     * cycle exists in which all of the referenced properties are mandatory. In those cases, a valid XML document can
+     * never be constructed even though the resulting schema may be valid.
+     * 
+     * @param element the facet property to be analyzed
+     * @return boolean
+     */
+    public static boolean hasCircularReference(TLProperty element) {
+        return element.isMandatory()
+            && checkCircularReference( element.getType(), element.getOwner(), new HashSet<TLPropertyType>() );
+    }
+
+    /**
+     * Recursive method that searches the dependency tree to identify circular references for the given entity.
+     * 
+     * @param referencedEntity the referenced entity to be analyzed
+     * @param originalEntity the original element that is being checked for circular references
+     * @param visitedEntities the set of entities that have already been checked
+     * @return boolean
+     */
+    private static boolean checkCircularReference(NamedEntity referencedEntity, NamedEntity originalEntity,
+        Set<NamedEntity> visitedEntities) {
         boolean result = false;
 
         if (referencedEntity != null) {
             if (referencedEntity == originalEntity) {
                 result = true;
 
-            } else if (!visitedEntities.contains(referencedEntity)) {
+            } else if (!visitedEntities.contains( referencedEntity )) {
 
-                visitedEntities.add(referencedEntity);
+                visitedEntities.add( referencedEntity );
 
                 if (referencedEntity instanceof TLSimple) {
-                    result = checkCircularReference(((TLSimple) referencedEntity).getParentType(),
-                            originalEntity, visitedEntities);
+                    result = checkCircularReference( ((TLSimple) referencedEntity).getParentType(), originalEntity,
+                        visitedEntities );
 
                 } else if (referencedEntity instanceof TLSimpleFacet) {
-                    result = checkCircularReference(
-                            ((TLSimpleFacet) referencedEntity).getSimpleType(), originalEntity,
-                            visitedEntities);
+                    result = checkCircularReference( ((TLSimpleFacet) referencedEntity).getSimpleType(), originalEntity,
+                        visitedEntities );
 
                 } else if (referencedEntity instanceof TLCoreObject) {
-                    result = checkCircularReference(
-                            ((TLCoreObject) referencedEntity).getSimpleFacet(), originalEntity,
-                            visitedEntities);
+                    result = checkCircularReference( ((TLCoreObject) referencedEntity).getSimpleFacet(), originalEntity,
+                        visitedEntities );
                 }
             }
         }
@@ -122,281 +147,238 @@ public class CircularReferenceChecker {
     }
 
     /**
-     * Performs a recursive check to determine whether any circular references exist for the given
-     * VWA.
+     * Recursive method that searches the dependency tree to identify circular references for the given VWA.
      * 
-     * @param vwa
-     *            the value-with-attributes to be analyzed
+     * @param referencedEntity the VWA to be analyzed
+     * @param originalEntity the original VWA that is being checked for circular references
+     * @param visitedEntities the set of VWA's that have already been checked
      * @return boolean
      */
-    public static boolean hasCircularReference(TLValueWithAttributes vwa) {
-        return checkCircularReference(vwa, vwa, new HashSet<TLValueWithAttributes>());
-    }
+    private static boolean checkCircularReference(TLValueWithAttributes referencedEntity,
+        TLValueWithAttributes originalEntity, Set<TLValueWithAttributes> visitedEntities) {
+        boolean result = false;
 
-    /**
-     * Recursive method that searches the dependency tree to identify circular references for the
-     * given VWA.
-     * 
-     * @param referencedEntity  the VWA to be analyzed
-     * @param originalEntity  the original VWA that is being checked for circular references
-     * @param visitedEntities  the set of VWA's that have already been checked
-     * @return boolean
-     */
-	private static boolean checkCircularReference(TLValueWithAttributes referencedEntity,
-			TLValueWithAttributes originalEntity, Set<TLValueWithAttributes> visitedEntities) {
-		boolean result = false;
-		
-		if (referencedEntity != null) {
-			if (visitedEntities.contains(referencedEntity)) {
-				if (referencedEntity == originalEntity) {
-					result = true;
-				}
-				
-			} else {
-				visitedEntities.add(referencedEntity);
-				result = checkNestedCircularReferences(referencedEntity,
-						originalEntity, visitedEntities);
-			}
-		}
-		return result;
-	}
-
-	/**
-	 * Checks the VWA parent type and all attributes for circular references.
-	 * 
-     * @param referencedEntity  the VWA to be analyzed
-     * @param originalEntity  the original VWA that is being checked for circular references
-     * @param visitedEntities  the set of VWA's that have already been checked
-	 * @return boolean
-	 */
-	private static boolean checkNestedCircularReferences(TLValueWithAttributes referencedEntity,
-			TLValueWithAttributes originalEntity, Set<TLValueWithAttributes> visitedEntities) {
-		boolean result = false;
-		
-		if (referencedEntity.getParentType() instanceof TLValueWithAttributes) {
-			result = checkCircularReference((TLValueWithAttributes) referencedEntity.getParentType(),
-					originalEntity, visitedEntities);
-		}
-		if (!result) {
-			for (TLAttribute attribute : referencedEntity.getAttributes()) {
-				if (attribute.getType() instanceof TLValueWithAttributes) {
-					result = checkCircularReference((TLValueWithAttributes) attribute.getType(),
-							originalEntity, visitedEntities);
-				}
-				if (result) break;
-			}
-		}
-		return result;
-	}
-	
-    /**
-     * Performs a recursive check to determine whether any circular references exist in the
-     * owning entity relationship of the given contextual facet.
-     * 
-     * @param vwa  the contextual facet to be analyzed
-     * @return boolean
-     */
-    public static boolean hasCircularReference(TLContextualFacet facet) {
-        return checkCircularReference(facet, facet, new HashSet<TLContextualFacet>());
-    }
-
-    /**
-     * Recursive method that searches the owning entity relationship to identify circular
-     * references for the given contextual facet.
-     * 
-     * @param referencedFacet  the contextual facet to be analyzed
-     * @param originalFacet  the original facet that is being checked for circular references
-     * @param visitedFacets  the set of contextual facetsthat have already been checked
-     * @return boolean
-     */
-    private static boolean checkCircularReference(TLContextualFacet referencedFacet,
-    		TLContextualFacet originalFacet, Set<TLContextualFacet> visitedFacets) {
-    	boolean result = false;
-    	
-    	if (referencedFacet != null) {
-            if (visitedFacets.contains(referencedFacet)) {
-            	if (referencedFacet == originalFacet) {
+        if (referencedEntity != null) {
+            if (visitedEntities.contains( referencedEntity )) {
+                if (referencedEntity == originalEntity) {
                     result = true;
-            	}
+                }
 
             } else {
-            	visitedFacets.add(referencedFacet);
+                visitedEntities.add( referencedEntity );
+                result = checkNestedCircularReferences( referencedEntity, originalEntity, visitedEntities );
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Recursive method that searches the owning entity relationship to identify circular references for the given
+     * contextual facet.
+     * 
+     * @param referencedFacet the contextual facet to be analyzed
+     * @param originalFacet the original facet that is being checked for circular references
+     * @param visitedFacets the set of contextual facetsthat have already been checked
+     * @return boolean
+     */
+    private static boolean checkCircularReference(TLContextualFacet referencedFacet, TLContextualFacet originalFacet,
+        Set<TLContextualFacet> visitedFacets) {
+        boolean result = false;
+
+        if (referencedFacet != null) {
+            if (visitedFacets.contains( referencedFacet )) {
+                if (referencedFacet == originalFacet) {
+                    result = true;
+                }
+
+            } else {
+                visitedFacets.add( referencedFacet );
 
                 if (referencedFacet.getOwningEntity() instanceof TLContextualFacet) {
-                    result = checkCircularReference(
-                            (TLContextualFacet) referencedFacet.getOwningEntity(),
-                            originalFacet, visitedFacets);
+                    result = checkCircularReference( (TLContextualFacet) referencedFacet.getOwningEntity(),
+                        originalFacet, visitedFacets );
                 }
             }
-    	}
-    	return result;
-    }
-    
-    /**
-     * Performs a recursive check to determine whether any circular references exist for the given
-     * facet property. Normally, circular references are allowed for complex types. Such recursive
-     * references are only illegal when a cycle exists in which all of the referenced properties are
-     * mandatory. In those cases, a valid XML document can never be constructed even though the
-     * resulting schema may be valid.
-     * 
-     * @param element
-     *            the facet property to be analyzed
-     * @return boolean
-     */
-    public static boolean hasCircularReference(TLProperty element) {
-        return element.isMandatory() && checkCircularReference(element.getType(),
-                element.getOwner(), new HashSet<TLPropertyType>());
+        }
+        return result;
     }
 
     /**
-     * Recursive method that searches the dependency tree to identify circular references for the
-     * owner of the given element type.
+     * Recursive method that searches the dependency tree to identify circular references for the owner of the given
+     * element type.
      * 
-     * @param elementType  the type of the model element that is being checked for circular references
-     * @param originalElementOwner  the original element's owner that is being checked for circular references
-     * @param visitedEntities  the set of extension owners that have already been checked
+     * @param elementType the type of the model element that is being checked for circular references
+     * @param originalElementOwner the original element's owner that is being checked for circular references
+     * @param visitedEntities the set of extension owners that have already been checked
      * @return boolean
      */
-	@SuppressWarnings("unlikely-arg-type")
-	private static boolean checkCircularReference(TLPropertyType elementType, TLPropertyOwner originalElementOwner,
-			Set<TLPropertyType> visitedEntities) {
-		boolean result = false;
-		
-		if ((elementType != null) && (originalElementOwner != null)) {
-			if (elementType.equals(originalElementOwner)) {
-				result = true;
-				
-			} else if (!visitedEntities.contains(elementType)) {
-				visitedEntities.add(elementType);
-				result = checkNestedCircularReference(elementType, originalElementOwner, visitedEntities);
-			}
-		}
-		return result;
-	}
+    @SuppressWarnings("unlikely-arg-type")
+    private static boolean checkCircularReference(TLPropertyType elementType, TLPropertyOwner originalElementOwner,
+        Set<TLPropertyType> visitedEntities) {
+        boolean result = false;
 
-	/**
-	 * Checks all member properties of the given element type for circular references.
-	 * 
-     * @param elementType  the type of the model element that is being checked for circular references
-     * @param originalElementOwner  the original element's owner that is being checked for circular references
-     * @param visitedEntities  the set of extension owners that have already been checked
-	 * @return boolean
-	 */
-	private static boolean checkNestedCircularReference(TLPropertyType elementType,
-			TLPropertyOwner originalElementOwner, Set<TLPropertyType> visitedEntities) {
-		List<TLProperty> referencedElements = null;
-		boolean result = false;
-		
-		// If the referenced type is an alias, find its owner
-		if (elementType instanceof TLAlias) {
-			TLAliasOwner aliasOwner = ((TLAlias) elementType).getOwningEntity();
-			
-			if (aliasOwner instanceof TLPropertyType) {
-				elementType = (TLPropertyType) aliasOwner;
-				visitedEntities.add(elementType);
-				
-			} else {
-				elementType = null;
-			}
-		}
-		
-		// If the referenced type is a business object or core, find its
-		// summary facet
-		if (elementType instanceof TLBusinessObject) {
-			elementType = ((TLBusinessObject) elementType).getSummaryFacet();
-			visitedEntities.add(elementType);
-			
-		} else if (elementType instanceof TLCoreObject) {
-			elementType = ((TLCoreObject) elementType).getSummaryFacet();
-			visitedEntities.add(elementType);
-		}
-		
-		// If the resolve element type is a TLFacet, obtain a list of
-		// its inherited properties
-		if (elementType instanceof TLFacet) {
-			referencedElements = PropertyCodegenUtils.getInheritedProperties((TLFacet) elementType);
-		}
-		
-		// If we are dealing with a complex facet type, check each inherited element for
-		// circular references
-		if (referencedElements != null) {
-			result = checkCircularReferences(referencedElements, originalElementOwner, visitedEntities);
-		}
-		return result;
-	}
+        if ((elementType != null) && (originalElementOwner != null)) {
+            if (elementType.equals( originalElementOwner )) {
+                result = true;
 
-	/**
-	 * Checks each of the elements provided for circular references.
-	 * 
-	 * @param referencedElements  the list of referenced elements to check for circular references
-     * @param originalElementOwner  the original element's owner that is being checked for circular references
-     * @param visitedEntities  the set of extension owners that have already been checked
-	 * @return  boolean
-	 */
-	private static boolean checkCircularReferences(List<TLProperty> referencedElements,
-			TLPropertyOwner originalElementOwner, Set<TLPropertyType> visitedEntities) {
-		boolean result = false;
-		
-		for (TLProperty referencedElement : referencedElements) {
-			// optional elements cannot cause circular reference errors in complex types
-			if (referencedElement.isMandatory()) {
-				result = checkCircularReference(referencedElement.getType(), originalElementOwner,
-						visitedEntities);
-				if (result)
-					break; // stop looking if we found a circular reference
-			}
-		}
-		return result;
-	}
-	
+            } else if (!visitedEntities.contains( elementType )) {
+                visitedEntities.add( elementType );
+                result = checkNestedCircularReference( elementType, originalElementOwner, visitedEntities );
+            }
+        }
+        return result;
+    }
+
     /**
-     * Performs a recursive check to determine whether any circular extension references exist for
-     * the owner of the given extension.
+     * Checks each of the elements provided for circular references.
      * 
-     * @param extension
-     *            the entity extension to be analyzed
+     * @param referencedElements the list of referenced elements to check for circular references
+     * @param originalElementOwner the original element's owner that is being checked for circular references
+     * @param visitedEntities the set of extension owners that have already been checked
+     * @return boolean
+     */
+    private static boolean checkCircularReferences(List<TLProperty> referencedElements,
+        TLPropertyOwner originalElementOwner, Set<TLPropertyType> visitedEntities) {
+        boolean result = false;
+
+        for (TLProperty referencedElement : referencedElements) {
+            // optional elements cannot cause circular reference errors in complex types
+            if (referencedElement.isMandatory()) {
+                result = checkCircularReference( referencedElement.getType(), originalElementOwner, visitedEntities );
+
+                if (result) {
+                    break; // stop looking if we found a circular reference
+                }
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Checks the VWA parent type and all attributes for circular references.
+     * 
+     * @param referencedEntity the VWA to be analyzed
+     * @param originalEntity the original VWA that is being checked for circular references
+     * @param visitedEntities the set of VWA's that have already been checked
+     * @return boolean
+     */
+    private static boolean checkNestedCircularReferences(TLValueWithAttributes referencedEntity,
+        TLValueWithAttributes originalEntity, Set<TLValueWithAttributes> visitedEntities) {
+        boolean result = false;
+
+        if (referencedEntity.getParentType() instanceof TLValueWithAttributes) {
+            result = checkCircularReference( (TLValueWithAttributes) referencedEntity.getParentType(), originalEntity,
+                visitedEntities );
+        }
+        if (!result) {
+            for (TLAttribute attribute : referencedEntity.getAttributes()) {
+                if (attribute.getType() instanceof TLValueWithAttributes) {
+                    result = checkCircularReference( (TLValueWithAttributes) attribute.getType(), originalEntity,
+                        visitedEntities );
+                }
+                if (result) {
+                    break;
+                }
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Checks all member properties of the given element type for circular references.
+     * 
+     * @param elementType the type of the model element that is being checked for circular references
+     * @param originalElementOwner the original element's owner that is being checked for circular references
+     * @param visitedEntities the set of extension owners that have already been checked
+     * @return boolean
+     */
+    private static boolean checkNestedCircularReference(TLPropertyType elementType,
+        TLPropertyOwner originalElementOwner, Set<TLPropertyType> visitedEntities) {
+        List<TLProperty> referencedElements = null;
+        boolean result = false;
+
+        // If the referenced type is an alias, find its owner
+        if (elementType instanceof TLAlias) {
+            TLAliasOwner aliasOwner = ((TLAlias) elementType).getOwningEntity();
+
+            if (aliasOwner instanceof TLPropertyType) {
+                elementType = (TLPropertyType) aliasOwner;
+                visitedEntities.add( elementType );
+
+            } else {
+                elementType = null;
+            }
+        }
+
+        // If the referenced type is a business object or core, find its
+        // summary facet
+        if (elementType instanceof TLBusinessObject) {
+            elementType = ((TLBusinessObject) elementType).getSummaryFacet();
+            visitedEntities.add( elementType );
+
+        } else if (elementType instanceof TLCoreObject) {
+            elementType = ((TLCoreObject) elementType).getSummaryFacet();
+            visitedEntities.add( elementType );
+        }
+
+        // If the resolve element type is a TLFacet, obtain a list of
+        // its inherited properties
+        if (elementType instanceof TLFacet) {
+            referencedElements = PropertyCodegenUtils.getInheritedProperties( (TLFacet) elementType );
+        }
+
+        // If we are dealing with a complex facet type, check each inherited element for
+        // circular references
+        if (referencedElements != null) {
+            result = checkCircularReferences( referencedElements, originalElementOwner, visitedEntities );
+        }
+        return result;
+    }
+
+    /**
+     * Performs a recursive check to determine whether any circular extension references exist for the owner of the
+     * given extension.
+     * 
+     * @param extension the entity extension to be analyzed
      * @return boolean
      */
     public static boolean hasCircularExtension(TLExtension extension) {
         boolean result = false;
 
         if (extension != null) {
-            result = checkCircularExtension(extension.getExtendsEntity(), extension.getOwner(),
-                    new HashSet<NamedEntity>());
+            result = checkCircularExtension( extension.getExtendsEntity(), extension.getOwner(),
+                new HashSet<NamedEntity>() );
         }
         return result;
     }
 
     /**
-     * Recursive method that searches the dependency tree to identify circular references for the
-     * owner of the given extension.
+     * Recursive method that searches the dependency tree to identify circular references for the owner of the given
+     * extension.
      * 
-     * @param extendedEntity
-     *            the entity that is referenced by an extension
-     * @param originalExtensionOwner
-     *            the original extension owner that is being checked for circular references
-     * @param visitedEntities
-     *            the set of extension owners that have already been checked
+     * @param extendedEntity the entity that is referenced by an extension
+     * @param originalExtensionOwner the original extension owner that is being checked for circular references
+     * @param visitedEntities the set of extension owners that have already been checked
      * @return boolean
      */
-    private static boolean checkCircularExtension(NamedEntity extendedEntity,
-            TLExtensionOwner originalEntity, Set<NamedEntity> visitedEntities) {
+    private static boolean checkCircularExtension(NamedEntity extendedEntity, TLExtensionOwner originalEntity,
+        Set<NamedEntity> visitedEntities) {
         boolean result = false;
 
         if (extendedEntity != null) {
             if (extendedEntity == originalEntity) {
                 result = true;
 
-            } else if (!visitedEntities.contains(extendedEntity)) {
+            } else if (!visitedEntities.contains( extendedEntity )) {
 
-                visitedEntities.add(extendedEntity);
+                visitedEntities.add( extendedEntity );
 
                 if (extendedEntity instanceof TLExtensionOwner) {
                     TLExtension extension = ((TLExtensionOwner) extendedEntity).getExtension();
 
                     if (extension != null) {
-                        result = checkCircularExtension(extension.getExtendsEntity(),
-                                originalEntity, visitedEntities);
+                        result =
+                            checkCircularExtension( extension.getExtendsEntity(), originalEntity, visitedEntities );
                     }
                 }
             }
@@ -405,57 +387,49 @@ public class CircularReferenceChecker {
     }
 
     /**
-     * Performs a recursive check to determine whether any circular parent references exist for
-     * the given parent-ref.
+     * Performs a recursive check to determine whether any circular parent references exist for the given parent-ref.
      * 
-     * @param parentRef
-     *            the resource parent reference to be analyzed
+     * @param parentRef the resource parent reference to be analyzed
      * @return boolean
      */
     public static boolean hasCircularParentRef(TLResourceParentRef parentRef) {
         boolean result = false;
 
         if (parentRef != null) {
-            result = checkCircularParentRef(parentRef.getParentResource(), parentRef,
-                    new HashSet<TLResource>());
+            result = checkCircularParentRef( parentRef.getParentResource(), parentRef, new HashSet<TLResource>() );
         }
         return result;
     }
 
     /**
-     * Recursive method that searches the dependency tree to identify circular references for the
-     * owner of the given extension.
+     * Recursive method that searches the dependency tree to identify circular references for the owner of the given
+     * extension.
      * 
-     * @param referencedResource
-     *            the resource that is referenced by an parent reference
-     * @param originalParentRef
-     *            the original parent reference that is being checked for circular references
-     * @param visitedResources
-     *            the set of referenced parents that have already been checked
+     * @param referencedResource the resource that is referenced by an parent reference
+     * @param originalParentRef the original parent reference that is being checked for circular references
+     * @param visitedResources the set of referenced parents that have already been checked
      * @return boolean
      */
-    private static boolean checkCircularParentRef(TLResource referencedResource,
-    		TLResourceParentRef originalParentRef, Set<TLResource> visitedResources) {
-    	boolean result = false;
-    	
-    	if (referencedResource != null) {
-    		List<TLResourceParentRef> refList =
-    				ResourceCodegenUtils.getInheritedParentRefs( referencedResource );
-    		
-    		if (refList.contains( originalParentRef )) {
-    			result = true;
-    			
-    		} else if (!visitedResources.contains( referencedResource )){
-    			
-    			visitedResources.add( referencedResource );
-    			
-    			for (TLResourceParentRef ref : refList) {
-    				result = checkCircularParentRef(
-    						ref.getParentResource(), originalParentRef, visitedResources );
-    			}
-    		}
-    	}
-    	return result;
+    private static boolean checkCircularParentRef(TLResource referencedResource, TLResourceParentRef originalParentRef,
+        Set<TLResource> visitedResources) {
+        boolean result = false;
+
+        if (referencedResource != null) {
+            List<TLResourceParentRef> refList = ResourceCodegenUtils.getInheritedParentRefs( referencedResource );
+
+            if (refList.contains( originalParentRef )) {
+                result = true;
+
+            } else if (!visitedResources.contains( referencedResource )) {
+
+                visitedResources.add( referencedResource );
+
+                for (TLResourceParentRef ref : refList) {
+                    result = checkCircularParentRef( ref.getParentResource(), originalParentRef, visitedResources );
+                }
+            }
+        }
+        return result;
     }
-    
+
 }

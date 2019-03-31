@@ -13,10 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.ioc;
 
-import java.util.Collection;
-import java.util.Collections;
+package org.opentravel.schemacompiler.ioc;
 
 import org.opentravel.schemacompiler.event.ModelElementListener;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
@@ -24,9 +22,11 @@ import org.opentravel.schemacompiler.model.LibraryElement;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLModel;
 
+import java.util.Collection;
+import java.util.Collections;
+
 /**
- * Adapter that allows a <code>SchemaDependency</code> object to behave as an OTA2.0
- * <code>NamedEntity</code>.
+ * Adapter that allows a <code>SchemaDependency</code> object to behave as an OTA2.0 <code>NamedEntity</code>.
  * 
  * @author S. Livezey
  */
@@ -87,28 +87,28 @@ public class SchemaDependencyNamedEntityAdapter implements NamedEntity {
         return null;
     }
 
-	/**
-	 * @see org.opentravel.schemacompiler.model.ModelElement#addListener(org.opentravel.schemacompiler.event.ModelElementListener)
-	 */
-	@Override
-	public void addListener(ModelElementListener listener) {
-		// No action required - listeners not supported
-	}
+    /**
+     * @see org.opentravel.schemacompiler.model.ModelElement#addListener(org.opentravel.schemacompiler.event.ModelElementListener)
+     */
+    @Override
+    public void addListener(ModelElementListener listener) {
+        // No action required - listeners not supported
+    }
 
-	/**
-	 * @see org.opentravel.schemacompiler.model.ModelElement#removeListener(org.opentravel.schemacompiler.event.ModelElementListener)
-	 */
-	@Override
-	public void removeListener(ModelElementListener listener) {
-		// No action required - listeners not supported
-	}
+    /**
+     * @see org.opentravel.schemacompiler.model.ModelElement#removeListener(org.opentravel.schemacompiler.event.ModelElementListener)
+     */
+    @Override
+    public void removeListener(ModelElementListener listener) {
+        // No action required - listeners not supported
+    }
 
-	/**
-	 * @see org.opentravel.schemacompiler.model.ModelElement#getListeners()
-	 */
-	@Override
-	public Collection<ModelElementListener> getListeners() {
-		return Collections.emptyList();
-	}
+    /**
+     * @see org.opentravel.schemacompiler.model.ModelElement#getListeners()
+     */
+    @Override
+    public Collection<ModelElementListener> getListeners() {
+        return Collections.emptyList();
+    }
 
 }

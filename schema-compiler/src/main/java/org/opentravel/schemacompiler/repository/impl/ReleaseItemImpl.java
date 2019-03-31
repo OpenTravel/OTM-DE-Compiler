@@ -13,11 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.repository.impl;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
+package org.opentravel.schemacompiler.repository.impl;
 
 import org.opentravel.ns.ota2.release_v01_00.ReleaseStatus;
 import org.opentravel.schemacompiler.model.TLLibraryStatus;
@@ -30,67 +27,71 @@ import org.opentravel.schemacompiler.repository.RepositoryItemState;
 import org.opentravel.schemacompiler.util.SchemaCompilerRuntimeException;
 import org.opentravel.schemacompiler.version.VersionSchemeFactory;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+
 /**
  * Implementation of the <code>ReleaseItem</code> interface.
  */
 public class ReleaseItemImpl extends RepositoryItemImpl implements ReleaseItem {
-	
-	private ReleaseManager releaseManager;
-	
-	/**
-	 * Constructor that supplies the content and owning manager for the release item.
-	 * 
-	 * @param releaseManager  the release manager that owns this release item
-	 */
-	ReleaseItemImpl(ReleaseManager releaseManager) {
-		this.releaseManager = releaseManager;
-	}
-	
-	/**
-	 * Creates a new release item for the current release of the given manager.
-	 * 
-	 * @param releaseManager  the release manager that owns the new item
-	 * @return ReleaseItem
-	 */
-	public static ReleaseItem newUnmanagedItem(ReleaseManager releaseManager) {
-		ReleaseItemImpl item = new ReleaseItemImpl( releaseManager );
-		
-		item.setState( RepositoryItemState.UNMANAGED );
-		return item;
-	}
-	
-	/**
-	 * Creates a new release item for the current release of the given manager.
-	 * 
-     * @param repositoryItem  the repository item for which to create a managed release item
-	 * @param releaseManager  the release manager that owns the new item
-	 * @return ReleaseItem
-	 */
-	public static ReleaseItem newManagedItem(RepositoryItem repositoryItem, ReleaseManager releaseManager) {
-		ReleaseItemImpl item = new ReleaseItemImpl( releaseManager );
-		
+
+    private ReleaseManager releaseManager;
+
+    /**
+     * Constructor that supplies the content and owning manager for the release item.
+     * 
+     * @param releaseManager the release manager that owns this release item
+     */
+    ReleaseItemImpl(ReleaseManager releaseManager) {
+        this.releaseManager = releaseManager;
+    }
+
+    /**
+     * Creates a new release item for the current release of the given manager.
+     * 
+     * @param releaseManager the release manager that owns the new item
+     * @return ReleaseItem
+     */
+    public static ReleaseItem newUnmanagedItem(ReleaseManager releaseManager) {
+        ReleaseItemImpl item = new ReleaseItemImpl( releaseManager );
+
+        item.setState( RepositoryItemState.UNMANAGED );
+        return item;
+    }
+
+    /**
+     * Creates a new release item for the current release of the given manager.
+     * 
+     * @param repositoryItem the repository item for which to create a managed release item
+     * @param releaseManager the release manager that owns the new item
+     * @return ReleaseItem
+     */
+    public static ReleaseItem newManagedItem(RepositoryItem repositoryItem, ReleaseManager releaseManager) {
+        ReleaseItemImpl item = new ReleaseItemImpl( releaseManager );
+
         item.setRepository( repositoryItem.getRepository() );
         item.setState( repositoryItem.getState() );
         item.setLockedByUser( repositoryItem.getLockedByUser() );
         return item;
-	}
-	
-	/**
-	 * @see org.opentravel.schemacompiler.repository.ReleaseItem#getReleaseManager()
-	 */
-	@Override
-	public ReleaseManager getReleaseManager() {
-		return releaseManager;
-	}
-	
-	/**
-	 * @see org.opentravel.schemacompiler.repository.ReleaseItem#getContent()
-	 */
-	@Override
-	public Release getContent() {
-		return releaseManager.getRelease();
-	}
-	
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.repository.ReleaseItem#getReleaseManager()
+     */
+    @Override
+    public ReleaseManager getReleaseManager() {
+        return releaseManager;
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.repository.ReleaseItem#getContent()
+     */
+    @Override
+    public Release getContent() {
+        return releaseManager.getRelease();
+    }
+
     /**
      * @see org.opentravel.schemacompiler.repository.impl.RepositoryItemImpl#getRepository()
      */
@@ -104,7 +105,7 @@ public class ReleaseItemImpl extends RepositoryItemImpl implements ReleaseItem {
      */
     @Override
     public String getNamespace() {
-    	return releaseManager.getRelease().getNamespace();
+        return releaseManager.getRelease().getNamespace();
     }
 
     /**
@@ -112,8 +113,7 @@ public class ReleaseItemImpl extends RepositoryItemImpl implements ReleaseItem {
      */
     @Override
     public void setNamespace(String namespace) {
-        throw new UnsupportedOperationException(
-                "Method 'setNamespace()' not supported for project items.");
+        throw new UnsupportedOperationException( "Method 'setNamespace()' not supported for project items." );
     }
 
     /**
@@ -121,7 +121,7 @@ public class ReleaseItemImpl extends RepositoryItemImpl implements ReleaseItem {
      */
     @Override
     public String getBaseNamespace() {
-    	return releaseManager.getRelease().getBaseNamespace();
+        return releaseManager.getRelease().getBaseNamespace();
     }
 
     /**
@@ -129,8 +129,7 @@ public class ReleaseItemImpl extends RepositoryItemImpl implements ReleaseItem {
      */
     @Override
     public void setBaseNamespace(String baseNamespace) {
-        throw new UnsupportedOperationException(
-                "Method 'setBaseNamespace()' not supported for project items.");
+        throw new UnsupportedOperationException( "Method 'setBaseNamespace()' not supported for project items." );
     }
 
     /**
@@ -138,21 +137,21 @@ public class ReleaseItemImpl extends RepositoryItemImpl implements ReleaseItem {
      */
     @Override
     public String getFilename() {
-    	Release release = getContent();
+        Release release = getContent();
         URL releaseUrl = (release == null) ? null : release.getReleaseUrl();
         String filename = null;
-        
+
         if (releaseUrl != null) {
             String urlString = releaseUrl.toExternalForm();
 
-            if (urlString.endsWith("/")) {
+            if (urlString.endsWith( "/" )) {
                 filename = null;
 
             } else {
-                int idx = urlString.lastIndexOf('/');
-                filename = (idx < 0) ? urlString : urlString.substring(idx + 1);
+                int idx = urlString.lastIndexOf( '/' );
+                filename = (idx < 0) ? urlString : urlString.substring( idx + 1 );
             }
-        	
+
         }
         return filename;
     }
@@ -162,8 +161,7 @@ public class ReleaseItemImpl extends RepositoryItemImpl implements ReleaseItem {
      */
     @Override
     public void setFilename(String filename) {
-        throw new UnsupportedOperationException(
-                "Method 'setFilename()' not supported for project items.");
+        throw new UnsupportedOperationException( "Method 'setFilename()' not supported for project items." );
     }
 
     /**
@@ -179,8 +177,7 @@ public class ReleaseItemImpl extends RepositoryItemImpl implements ReleaseItem {
      */
     @Override
     public void setLibraryName(String libraryName) {
-        throw new UnsupportedOperationException(
-                "Method 'setLibraryName()' not supported for project items.");
+        throw new UnsupportedOperationException( "Method 'setLibraryName()' not supported for project items." );
     }
 
     /**
@@ -188,7 +185,7 @@ public class ReleaseItemImpl extends RepositoryItemImpl implements ReleaseItem {
      */
     @Override
     public String getVersion() {
-    	return releaseManager.getRelease().getVersion();
+        return releaseManager.getRelease().getVersion();
     }
 
     /**
@@ -196,8 +193,7 @@ public class ReleaseItemImpl extends RepositoryItemImpl implements ReleaseItem {
      */
     @Override
     public void setVersion(String version) {
-        throw new UnsupportedOperationException(
-                "Method 'setVersion()' not supported for project items.");
+        throw new UnsupportedOperationException( "Method 'setVersion()' not supported for project items." );
     }
 
     /**
@@ -213,8 +209,7 @@ public class ReleaseItemImpl extends RepositoryItemImpl implements ReleaseItem {
      */
     @Override
     public void setVersionScheme(String versionScheme) {
-        throw new UnsupportedOperationException(
-                "Method 'setVersionScheme()' not supported for project items.");
+        throw new UnsupportedOperationException( "Method 'setVersionScheme()' not supported for project items." );
     }
 
     /**
@@ -222,8 +217,8 @@ public class ReleaseItemImpl extends RepositoryItemImpl implements ReleaseItem {
      */
     @Override
     public TLLibraryStatus getStatus() {
-    	return (releaseManager.getRelease().getStatus() == ReleaseStatus.DRAFT) ?
-    			TLLibraryStatus.DRAFT : TLLibraryStatus.FINAL;
+        return (releaseManager.getRelease().getStatus() == ReleaseStatus.DRAFT) ? TLLibraryStatus.DRAFT
+            : TLLibraryStatus.FINAL;
     }
 
     /**
@@ -231,8 +226,7 @@ public class ReleaseItemImpl extends RepositoryItemImpl implements ReleaseItem {
      */
     @Override
     public void setStatus(TLLibraryStatus status) {
-        throw new UnsupportedOperationException(
-                "Method 'setStatus()' not supported for project items.");
+        throw new UnsupportedOperationException( "Method 'setStatus()' not supported for project items." );
     }
 
     /**
@@ -248,10 +242,10 @@ public class ReleaseItemImpl extends RepositoryItemImpl implements ReleaseItem {
 
             } catch (URISyntaxException e) {
                 // Should never happen; throw a runtime exception just in case
-                throw new SchemaCompilerRuntimeException(e);
+                throw new SchemaCompilerRuntimeException( e );
             }
         } else {
-            uri = super.toURI(fullyQualified);
+            uri = super.toURI( fullyQualified );
         }
         return uri;
     }
@@ -269,13 +263,13 @@ public class ReleaseItemImpl extends RepositoryItemImpl implements ReleaseItem {
      */
     @Override
     public boolean equals(Object obj) {
-    	boolean result = false;
-    	
+        boolean result = false;
+
         if (obj instanceof ReleaseItemImpl) {
-        	Release otherRelease = ((ReleaseItemImpl) obj).getReleaseManager().getRelease();
-        	Release thisRelease = releaseManager.getRelease();
-        	
-        	result = (thisRelease == otherRelease);
+            Release otherRelease = ((ReleaseItemImpl) obj).getReleaseManager().getRelease();
+            Release thisRelease = releaseManager.getRelease();
+
+            result = (thisRelease == otherRelease);
         }
         return result;
     }

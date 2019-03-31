@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.codegen.json.facet;
 
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchema;
@@ -22,36 +23,36 @@ import org.opentravel.schemacompiler.codegen.json.model.JsonType;
 import org.opentravel.schemacompiler.model.TLListFacet;
 
 /**
- * Code generation delegate for <code>TLListFacet</code> instances with a facet type of
- * <code>SIMPLE</code> and a facet owner of type <code>TLCoreObject</code>.
+ * Code generation delegate for <code>TLListFacet</code> instances with a facet type of <code>SIMPLE</code> and a facet
+ * owner of type <code>TLCoreObject</code>.
  */
 public class CoreObjectListSimpleFacetJsonSchemaDelegate extends TLListFacetJsonSchemaDelegate {
-	
+
     /**
      * Constructor that specifies the source facet for which code artifacts are being generated.
      * 
-     * @param sourceFacet  the source facet
+     * @param sourceFacet the source facet
      */
     public CoreObjectListSimpleFacetJsonSchemaDelegate(TLListFacet sourceFacet) {
-        super(sourceFacet);
+        super( sourceFacet );
     }
-    
-	/**
-	 * @see org.opentravel.schemacompiler.codegen.json.facet.FacetJsonSchemaDelegate#createDefinition()
-	 */
-	@Override
-	protected JsonSchemaNamedReference createDefinition() {
-		JsonSchemaNamedReference definition = new JsonSchemaNamedReference();
-		JsonSchemaReference itemSchemaRef = new JsonSchemaReference();
-		JsonSchema arraySchema = new JsonSchema();
+
+    /**
+     * @see org.opentravel.schemacompiler.codegen.json.facet.FacetJsonSchemaDelegate#createDefinition()
+     */
+    @Override
+    protected JsonSchemaNamedReference createDefinition() {
+        JsonSchemaNamedReference definition = new JsonSchemaNamedReference();
+        JsonSchemaReference itemSchemaRef = new JsonSchemaReference();
+        JsonSchema arraySchema = new JsonSchema();
         TLListFacet sourceFacet = getSourceFacet();
-		
+
         arraySchema.setType( JsonType.JSON_ARRAY );
-		arraySchema.setItems( itemSchemaRef );
+        arraySchema.setItems( itemSchemaRef );
         itemSchemaRef.setSchemaPath( jsonUtils.getSchemaReferencePath( sourceFacet.getItemFacet(), sourceFacet ) );
-		definition.setName( getDefinitionName( sourceFacet ) );
-		definition.setSchema( new JsonSchemaReference( arraySchema ) );
-		return definition;
-	}
-    
+        definition.setName( getDefinitionName( sourceFacet ) );
+        definition.setSchema( new JsonSchemaReference( arraySchema ) );
+        return definition;
+    }
+
 }

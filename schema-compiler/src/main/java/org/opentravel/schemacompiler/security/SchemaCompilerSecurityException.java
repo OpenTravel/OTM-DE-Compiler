@@ -13,56 +13,52 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.security;
 
 import org.opentravel.schemacompiler.util.SchemaCompilerException;
 
 /**
- * Thrown if an error occurs while attempting to determine whether a user should have write access
- * to a protected namespace.
+ * Thrown if an error occurs while attempting to determine whether a user should have write access to a protected
+ * namespace.
  * 
  * @author S. Livezey
  */
 public class SchemaCompilerSecurityException extends SchemaCompilerException {
 
-	private static final long serialVersionUID = -2691125837157085834L;
+    private static final long serialVersionUID = -2691125837157085834L;
 
-	/**
+    /**
      * Default constructor.
      */
-    public SchemaCompilerSecurityException() {
-    }
+    public SchemaCompilerSecurityException() {}
 
     /**
      * Constructs an exception with the specified message.
      * 
-     * @param message
-     *            the exception message
+     * @param message the exception message
      */
     public SchemaCompilerSecurityException(String message) {
-        super(message);
+        super( message );
     }
 
     /**
      * Constructs an exception with the specified underlying cause.
      * 
-     * @param cause
-     *            the underlying exception that caused this one
+     * @param cause the underlying exception that caused this one
      */
     public SchemaCompilerSecurityException(Throwable cause) {
-        super(cause);
+        super( cause );
     }
 
     /**
      * Constructs an exception with the specified message and underlying cause.
      * 
-     * @param message
-     *            the exception message
-     * @param cause
-     *            the underlying exception that caused this one
+     * @param message the exception message
+     * @param cause the underlying exception that caused this one
      */
     public SchemaCompilerSecurityException(String message, Throwable cause) {
-        super(message, cause);
+        super( message, cause );
     }
 
 }

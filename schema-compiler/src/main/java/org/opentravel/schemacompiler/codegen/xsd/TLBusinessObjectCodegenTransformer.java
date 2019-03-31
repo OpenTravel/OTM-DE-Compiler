@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.codegen.xsd;
 
 import org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts;
@@ -23,41 +24,40 @@ import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLFacetType;
 
 /**
- * Performs the translation from <code>TLBusinessObject</code> objects to the JAXB nodes used to
- * produce the schema output.
+ * Performs the translation from <code>TLBusinessObject</code> objects to the JAXB nodes used to produce the schema
+ * output.
  * 
  * @author S. Livezey
  */
-public class TLBusinessObjectCodegenTransformer extends
-        AbstractXsdTransformer<TLBusinessObject, CodegenArtifacts> {
+public class TLBusinessObjectCodegenTransformer extends AbstractXsdTransformer<TLBusinessObject,CodegenArtifacts> {
 
     /**
      * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
      */
     @Override
     public CodegenArtifacts transform(TLBusinessObject source) {
-        FacetCodegenDelegateFactory delegateFactory = new FacetCodegenDelegateFactory(context);
+        FacetCodegenDelegateFactory delegateFactory = new FacetCodegenDelegateFactory( context );
         FacetCodegenElements elementArtifacts = new FacetCodegenElements();
         CodegenArtifacts otherArtifacts = new CodegenArtifacts();
 
-        generateFacetArtifacts(delegateFactory.getDelegate(source.getIdFacet()), elementArtifacts,
-                otherArtifacts, false);
-        generateFacetArtifacts(delegateFactory.getDelegate(source.getSummaryFacet()),
-                elementArtifacts, otherArtifacts, false);
-        generateFacetArtifacts(delegateFactory.getDelegate(source.getDetailFacet()),
-                elementArtifacts, otherArtifacts, false);
+        generateFacetArtifacts( delegateFactory.getDelegate( source.getIdFacet() ), elementArtifacts, otherArtifacts,
+            false );
+        generateFacetArtifacts( delegateFactory.getDelegate( source.getSummaryFacet() ), elementArtifacts,
+            otherArtifacts, false );
+        generateFacetArtifacts( delegateFactory.getDelegate( source.getDetailFacet() ), elementArtifacts,
+            otherArtifacts, false );
 
-        generateContextualFacetArtifacts(source.getCustomFacets(), delegateFactory, elementArtifacts, otherArtifacts);
-        generateContextualFacetArtifacts(FacetCodegenUtils.findGhostFacets(source, TLFacetType.CUSTOM),
-        		delegateFactory, elementArtifacts, otherArtifacts);
-        generateContextualFacetArtifacts(source.getQueryFacets(), delegateFactory, elementArtifacts, otherArtifacts);
-        generateContextualFacetArtifacts(FacetCodegenUtils.findGhostFacets(source, TLFacetType.QUERY),
-        		delegateFactory, elementArtifacts, otherArtifacts);
-        generateContextualFacetArtifacts(source.getUpdateFacets(), delegateFactory, elementArtifacts, otherArtifacts);
-        generateContextualFacetArtifacts(FacetCodegenUtils.findGhostFacets(source, TLFacetType.UPDATE),
-        		delegateFactory, elementArtifacts, otherArtifacts);
-        
-        return buildCorrelatedArtifacts(source, elementArtifacts, otherArtifacts);
+        generateContextualFacetArtifacts( source.getCustomFacets(), delegateFactory, elementArtifacts, otherArtifacts );
+        generateContextualFacetArtifacts( FacetCodegenUtils.findGhostFacets( source, TLFacetType.CUSTOM ),
+            delegateFactory, elementArtifacts, otherArtifacts );
+        generateContextualFacetArtifacts( source.getQueryFacets(), delegateFactory, elementArtifacts, otherArtifacts );
+        generateContextualFacetArtifacts( FacetCodegenUtils.findGhostFacets( source, TLFacetType.QUERY ),
+            delegateFactory, elementArtifacts, otherArtifacts );
+        generateContextualFacetArtifacts( source.getUpdateFacets(), delegateFactory, elementArtifacts, otherArtifacts );
+        generateContextualFacetArtifacts( FacetCodegenUtils.findGhostFacets( source, TLFacetType.UPDATE ),
+            delegateFactory, elementArtifacts, otherArtifacts );
+
+        return buildCorrelatedArtifacts( source, elementArtifacts, otherArtifacts );
     }
-    
+
 }

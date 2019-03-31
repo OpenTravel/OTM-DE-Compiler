@@ -13,27 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.task;
 
 /**
- * Interface that defines the options that are specific to the REST resource
- * code generation task.
+ * Interface that defines the options that are specific to the REST resource code generation task.
  */
 public interface ResourceCompilerTaskOptions extends CommonCompilerTaskOptions, ExampleCompilerTaskOptions {
-	
-	/**
-	 * Returns true if the compiler should suppress all 'x-otm-' extensions in the
-	 * generated swagger document(s) and JSON schemas.
-	 * 
-	 * @return boolean
-	 */
-	public boolean isSuppressOtmExtensions();
-	
-	/**
-	 * Returns the base URL path for all generated REST resource endpoints.
-	 * 
-	 * @return String
-	 */
-	public String getResourceBaseUrl();
-	
+
+    /**
+     * Returns true if the compiler should suppress all 'x-otm-' extensions in the generated swagger document(s) and
+     * JSON schemas.
+     * 
+     * @return boolean
+     */
+    public boolean isSuppressOtmExtensions();
+
+    /**
+     * Returns the base URL path for all generated REST resource endpoints.
+     * 
+     * @return String
+     */
+    public String getResourceBaseUrl();
+
 }

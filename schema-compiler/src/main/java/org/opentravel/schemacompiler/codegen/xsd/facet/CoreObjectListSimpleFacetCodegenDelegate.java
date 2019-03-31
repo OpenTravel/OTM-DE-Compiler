@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.codegen.xsd.facet;
 
-import javax.xml.namespace.QName;
+package org.opentravel.schemacompiler.codegen.xsd.facet;
 
 import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
 import org.opentravel.schemacompiler.model.TLListFacet;
@@ -24,9 +23,11 @@ import org.w3._2001.xmlschema.List;
 import org.w3._2001.xmlschema.SimpleType;
 import org.w3._2001.xmlschema.TopLevelSimpleType;
 
+import javax.xml.namespace.QName;
+
 /**
- * Code generation delegate for <code>TLListFacet</code> instances with a facet type of
- * <code>SIMPLE</code> and a facet owner of type <code>TLCoreObject</code>.
+ * Code generation delegate for <code>TLListFacet</code> instances with a facet type of <code>SIMPLE</code> and a facet
+ * owner of type <code>TLCoreObject</code>.
  * 
  * @author S. Livezey
  */
@@ -35,11 +36,10 @@ public class CoreObjectListSimpleFacetCodegenDelegate extends TLListFacetCodegen
     /**
      * Constructor that specifies the source facet for which code artifacts are being generated.
      * 
-     * @param sourceFacet
-     *            the source facet
+     * @param sourceFacet the source facet
      */
     public CoreObjectListSimpleFacetCodegenDelegate(TLListFacet sourceFacet) {
-        super(sourceFacet);
+        super( sourceFacet );
     }
 
     /**
@@ -52,10 +52,10 @@ public class CoreObjectListSimpleFacetCodegenDelegate extends TLListFacetCodegen
         SimpleType type = null;
 
         type = new TopLevelSimpleType();
-        type.setName(XsdCodegenUtils.getGlobalTypeName(sourceFacet));
-        type.setList(xsdList);
-        xsdList.setItemType(new QName(sourceFacet.getNamespace(), XsdCodegenUtils
-                .getGlobalTypeName(sourceFacet.getItemFacet())));
+        type.setName( XsdCodegenUtils.getGlobalTypeName( sourceFacet ) );
+        type.setList( xsdList );
+        xsdList.setItemType(
+            new QName( sourceFacet.getNamespace(), XsdCodegenUtils.getGlobalTypeName( sourceFacet.getItemFacet() ) ) );
         return type;
     }
 

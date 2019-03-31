@@ -13,15 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.codegen.example;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.xml.namespace.QName;
 
 import org.opentravel.schemacompiler.codegen.util.AliasCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.EnumCodegenUtils;
@@ -57,6 +50,14 @@ import org.opentravel.schemacompiler.model.XSDSimpleType;
 import org.springframework.context.ApplicationContext;
 import org.w3._2001.xmlschema.SimpleType;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.xml.namespace.QName;
+
 /**
  * Returns example values for simple types based on a preferred context.
  * 
@@ -65,15 +66,15 @@ import org.w3._2001.xmlschema.SimpleType;
 public class ExampleValueGenerator {
 
     private static final String SCHEMA_FOR_SCHEMA_EXAMPLES = "/ota2-context/built-ins/s4s-examples.properties";
-    private static final String OTA_BUILT_INS_EXAMPLES     = "/ota2-context/built-ins/ota-examples.properties";
+    private static final String OTA_BUILT_INS_EXAMPLES = "/ota2-context/built-ins/ota-examples.properties";
     private static final String UNKNOWN_EXAMPLE_VALUE = "???";
 
     private enum ExampleSearchMode {
         PREFERRED_EXAMPLE, ANY_EXAMPLE, LEGACY_VALUE
     }
 
-    private Map<String, LegacyTypeExampleProvider> legacyExampleProviders;
-    private Map<String, Map<String, List<String>>> enumerationExamples = new HashMap<>();
+    private Map<String,LegacyTypeExampleProvider> legacyExampleProviders;
+    private Map<String,Map<String,List<String>>> enumerationExamples = new HashMap<>();
     private MessageIdFactory idFactory = new MessageIdFactory();
     private String preferredContext;
 
@@ -81,38 +82,36 @@ public class ExampleValueGenerator {
      * Default constructor.
      */
     public ExampleValueGenerator() {
-        setLegacyExampleProviders(null);
+        setLegacyExampleProviders( null );
     }
 
     /**
      * Returns a new instance of the example generator from the compiler's application context.
      * 
-     * @param preferredContext
-     *            the context ID to assign for the new example generator instance
+     * @param preferredContext the context ID to assign for the new example generator instance
      * @return ExampleValueGenerator
      */
     public static ExampleValueGenerator getInstance(String preferredContext) {
         ApplicationContext appContext = SchemaCompilerApplicationContext.getContext();
-        ExampleValueGenerator generator = (ExampleValueGenerator) appContext
-                .getBean(SchemaCompilerApplicationContext.EXAMPLE_GENERATOR);
+        ExampleValueGenerator generator =
+            (ExampleValueGenerator) appContext.getBean( SchemaCompilerApplicationContext.EXAMPLE_GENERATOR );
 
-        generator.setPreferredContext(preferredContext);
+        generator.setPreferredContext( preferredContext );
         return generator;
     }
 
     /**
-     * Assigns the list of <code>LegacyTypeExampleProviders</code> that will be used to produce
-     * examples for legacy simple types.
+     * Assigns the list of <code>LegacyTypeExampleProviders</code> that will be used to produce examples for legacy
+     * simple types.
      * 
-     * @param exampleProviders
-     *            the list of legacy example providers to assign
+     * @param exampleProviders the list of legacy example providers to assign
      */
     public void setLegacyExampleProviders(Collection<LegacyTypeExampleProvider> exampleProviders) {
         initExampleProviders();
 
         if (exampleProviders != null) {
             for (LegacyTypeExampleProvider exampleProvider : exampleProviders) {
-                legacyExampleProviders.put(exampleProvider.getNamespace(), exampleProvider);
+                legacyExampleProviders.put( exampleProvider.getNamespace(), exampleProvider );
             }
         }
     }
@@ -129,8 +128,7 @@ public class ExampleValueGenerator {
     /**
      * Assigns the preferred context ID to assign for example generation.
      * 
-     * @param preferredContext
-     *            the context ID to assign
+     * @param preferredContext the context ID to assign
      */
     public void setPreferredContext(String preferredContext) {
         this.preferredContext = preferredContext;
@@ -139,24 +137,23 @@ public class ExampleValueGenerator {
     /**
      * Returns an example value for the given <code>TLSimple</code> entity.
      * 
-     * @param simple
-     *            the simple type for which to return an example value
+     * @param simple the simple type for which to return an example value
      * @return String
      */
     public String getExampleValue(TLSimple simple) {
         String exampleValue = null;
 
-        if (!isEmptyValueType(simple) && !isEmptyValueType(simple.getParentType())) {
-            exampleValue = getExampleValue(simple, ExampleSearchMode.PREFERRED_EXAMPLE);
+        if (!isEmptyValueType( simple ) && !isEmptyValueType( simple.getParentType() )) {
+            exampleValue = getExampleValue( simple, ExampleSearchMode.PREFERRED_EXAMPLE );
 
             if (exampleValue == null) {
-                exampleValue = getExampleValue(simple, ExampleSearchMode.PREFERRED_EXAMPLE);
+                exampleValue = getExampleValue( simple, ExampleSearchMode.PREFERRED_EXAMPLE );
             }
             if (exampleValue == null) {
-                exampleValue = getExampleValue(simple, ExampleSearchMode.ANY_EXAMPLE);
+                exampleValue = getExampleValue( simple, ExampleSearchMode.ANY_EXAMPLE );
             }
             if (exampleValue == null) {
-                exampleValue = getExampleValue(simple, ExampleSearchMode.LEGACY_VALUE);
+                exampleValue = getExampleValue( simple, ExampleSearchMode.LEGACY_VALUE );
             }
             if (exampleValue == null) {
                 exampleValue = UNKNOWN_EXAMPLE_VALUE;
@@ -168,24 +165,23 @@ public class ExampleValueGenerator {
     /**
      * Returns an example value for the given <code>TLSimpleFacet</code> entity.
      * 
-     * @param simpleFacet
-     *            the simple facet for which to return an example value
+     * @param simpleFacet the simple facet for which to return an example value
      * @return String
      */
     public String getExampleValue(TLSimpleFacet simpleFacet) {
         String exampleValue = null;
 
-        if ((simpleFacet != null) && !isEmptyValueType(simpleFacet.getSimpleType())) {
-            exampleValue = getExampleValue(simpleFacet, ExampleSearchMode.PREFERRED_EXAMPLE);
+        if ((simpleFacet != null) && !isEmptyValueType( simpleFacet.getSimpleType() )) {
+            exampleValue = getExampleValue( simpleFacet, ExampleSearchMode.PREFERRED_EXAMPLE );
 
             if (exampleValue == null) {
-                exampleValue = getExampleValue(simpleFacet, ExampleSearchMode.PREFERRED_EXAMPLE);
+                exampleValue = getExampleValue( simpleFacet, ExampleSearchMode.PREFERRED_EXAMPLE );
             }
             if (exampleValue == null) {
-                exampleValue = getExampleValue(simpleFacet, ExampleSearchMode.ANY_EXAMPLE);
+                exampleValue = getExampleValue( simpleFacet, ExampleSearchMode.ANY_EXAMPLE );
             }
             if (exampleValue == null) {
-                exampleValue = getExampleValue(simpleFacet, ExampleSearchMode.LEGACY_VALUE);
+                exampleValue = getExampleValue( simpleFacet, ExampleSearchMode.LEGACY_VALUE );
             }
             if (exampleValue == null) {
                 exampleValue = UNKNOWN_EXAMPLE_VALUE;
@@ -197,15 +193,14 @@ public class ExampleValueGenerator {
     /**
      * Returns an example value for the given <code>TLValueWithAttributes</code> entity.
      * 
-     * @param valueWithAttributes
-     *            the value-with-attributes for which to return an example value
+     * @param valueWithAttributes the value-with-attributes for which to return an example value
      * @return String
      */
     public String getExampleValue(TLValueWithAttributes valueWithAttributes) {
         String exampleValue = null;
 
-        if ((valueWithAttributes != null) && !isEmptyValueType(valueWithAttributes.getParentType())) {
-            exampleValue = getExampleValue(valueWithAttributes, valueWithAttributes.getParentType());
+        if ((valueWithAttributes != null) && !isEmptyValueType( valueWithAttributes.getParentType() )) {
+            exampleValue = getExampleValue( valueWithAttributes, valueWithAttributes.getParentType() );
         }
         return exampleValue;
     }
@@ -213,25 +208,24 @@ public class ExampleValueGenerator {
     /**
      * Returns an example value for the given <code>TLAttribute</code> entity.
      * 
-     * @param attribute
-     *            the attribute for which to return an example value
-     * @param owner  the owner that declared or inherited the attribute
+     * @param attribute the attribute for which to return an example value
+     * @param owner the owner that declared or inherited the attribute
      * @return String
      */
     public String getExampleValue(TLAttribute attribute, NamedEntity owner) {
         String exampleValue = null;
 
-        if ((attribute != null) && !isEmptyValueType(attribute.getType())) {
-            if (XsdCodegenUtils.isIdType(attribute.getType())) {
+        if ((attribute != null) && !isEmptyValueType( attribute.getType() )) {
+            if (XsdCodegenUtils.isIdType( attribute.getType() )) {
                 NamedEntity ownerBase = getBaseEntity( (owner != null) ? owner : attribute.getOwner() );
                 String localName = ownerBase.getLocalName();
-                
+
                 if (ownerBase instanceof TLActionFacet) {
-                	localName = ((TLActionFacet) ownerBase).getName();
+                    localName = ((TLActionFacet) ownerBase).getName();
                 }
-                exampleValue = idFactory.getMessageId(ownerBase.getNamespace(), localName);
+                exampleValue = idFactory.getMessageId( ownerBase.getNamespace(), localName );
             } else {
-                exampleValue = getExampleValue((TLExampleOwner) attribute, attribute.getType());
+                exampleValue = getExampleValue( (TLExampleOwner) attribute, attribute.getType() );
             }
         }
         return exampleValue;
@@ -243,36 +237,393 @@ public class ExampleValueGenerator {
      * <p>
      * NOTE: Values will only be returned for elements that are assigned as simple types.
      * 
-     * @param element
-     *            the element for which to return an example value
-     * @param owner  the owner that declared or inherited the element
+     * @param element the element for which to return an example value
+     * @param owner the owner that declared or inherited the element
      * @return String
      */
     public String getExampleValue(TLProperty element, NamedEntity owner) {
         String exampleValue = null;
 
-        if ((element != null) && !isEmptyValueType(element.getType())) {
-            if (XsdCodegenUtils.isIdType(element.getType())) {
+        if ((element != null) && !isEmptyValueType( element.getType() )) {
+            if (XsdCodegenUtils.isIdType( element.getType() )) {
                 NamedEntity ownerBase = getBaseEntity( (owner != null) ? owner : element.getOwner() );
                 String localName = ownerBase.getLocalName();
-                
+
                 if (ownerBase instanceof TLActionFacet) {
-                	localName = ((TLActionFacet) ownerBase).getName();
+                    localName = ((TLActionFacet) ownerBase).getName();
                 }
-                exampleValue = idFactory.getMessageId(ownerBase.getNamespace(), localName);
+                exampleValue = idFactory.getMessageId( ownerBase.getNamespace(), localName );
             } else {
-                exampleValue = getExampleValue((TLExampleOwner) element, element.getType());
+                exampleValue = getExampleValue( (TLExampleOwner) element, element.getType() );
             }
         }
         return exampleValue;
     }
 
     /**
-     * Returns the base of the given entity. If the entity is a facet (or facet alias), the owning
-     * core or business object (or its alias) will be returned.
+     * Returns an example value for the given <code>XSDSimpleType</code> entity.
      * 
-     * @param entity
-     *            the entity for which to return the base
+     * @param xsdSimple the XSD simple type for which to return an example value
+     * @return String
+     */
+    public String getExampleValue(XSDSimpleType xsdSimple) {
+        String exampleValue = getExampleValue( xsdSimple.getName(), xsdSimple.getNamespace(), xsdSimple.getJaxbType(),
+            xsdSimple.getOwningModel() );
+
+        if (exampleValue == null) {
+            exampleValue = UNKNOWN_EXAMPLE_VALUE;
+        }
+        return exampleValue;
+    }
+
+    /**
+     * Returns an example value for the given <code>TLClosedEnumeration</code> entity.
+     * 
+     * @param enumeration the enumeration for which to return an example value
+     * @return String
+     */
+    public String getExampleValue(TLClosedEnumeration enumeration) {
+        return getEnumExample( enumeration );
+    }
+
+    /**
+     * Returns an example value for the given <code>TLClosedEnumeration</code> entity.
+     * 
+     * @param enumeration the enumeration for which to return an example value
+     * @return String
+     */
+    public String getExampleValue(TLOpenEnumeration enumeration) {
+        return getEnumExample( enumeration );
+    }
+
+    /**
+     * Returns an example value for the given <code>TLRoleEnumeration</code> entity.
+     * 
+     * @param enumeration the enumeration for which to return an example value
+     * @return String
+     */
+    public String getExampleValue(TLRoleEnumeration enumeration) {
+        return getRoleEnumExample( enumeration );
+    }
+
+    /**
+     * Attempts to locate an example value from the specified example owner or one of the examples from its parent type.
+     * If a suitable example value cannot be found, a legacy example value will be returned.
+     * 
+     * @param exampleOwner the entity for which an example is to be generated
+     * @param parentType the parent type for the exampleOwner entity
+     * @return String
+     */
+    private String getExampleValue(TLExampleOwner exampleOwner, NamedEntity parentType) {
+        String exampleValue = getPreferredExample( exampleOwner );
+
+        if (exampleValue == null) {
+            exampleValue = getExampleValue( parentType, ExampleSearchMode.PREFERRED_EXAMPLE );
+        }
+        if (exampleValue == null) {
+            exampleValue = getAnyExample( exampleOwner );
+        }
+        if (exampleValue == null) {
+            exampleValue = getExampleValue( parentType, ExampleSearchMode.ANY_EXAMPLE );
+        }
+        if (exampleValue == null) {
+            exampleValue = getExampleValue( parentType, ExampleSearchMode.LEGACY_VALUE );
+        }
+        if (exampleValue == null) {
+            exampleValue = UNKNOWN_EXAMPLE_VALUE;
+        }
+        return exampleValue;
+    }
+
+    /**
+     * Searches for an example value for the given parent type using the indicated search mode. If a suitable example
+     * cannot be identified, this method will return null.
+     * 
+     * @param parentType the parent type for which to return an example
+     * @param searchMode the mode to use when attempting to lookup example values
+     * @return String
+     */
+    private String getExampleValue(NamedEntity parentType, ExampleSearchMode searchMode) {
+        String exampleValue = null;
+
+        if (parentType instanceof TLSimple) {
+            exampleValue = getExampleValue( (TLSimple) parentType, searchMode );
+
+        } else if (parentType instanceof TLSimpleFacet) {
+            exampleValue = getExampleValue( (TLSimpleFacet) parentType, searchMode );
+
+        } else if (parentType instanceof TLListFacet) {
+            exampleValue = getExampleValue( (TLListFacet) parentType, searchMode );
+
+        } else if (parentType instanceof TLCoreObject) {
+            exampleValue = getExampleValue( ((TLCoreObject) parentType).getSimpleFacet(), searchMode );
+
+        } else if (parentType instanceof TLRole) {
+            exampleValue = getExampleValue(
+                ((TLRole) parentType).getRoleEnumeration().getOwningEntity().getSimpleFacet(), searchMode );
+
+        } else if (parentType instanceof TLValueWithAttributes) {
+            exampleValue = getExampleValue( (TLValueWithAttributes) parentType, searchMode );
+
+        } else if (parentType instanceof TLAbstractEnumeration) {
+            exampleValue = getEnumExample( (TLAbstractEnumeration) parentType );
+
+        } else if (parentType instanceof TLRoleEnumeration) {
+            exampleValue = getRoleEnumExample( (TLRoleEnumeration) parentType );
+
+        } else if ((parentType instanceof XSDSimpleType) && (searchMode == ExampleSearchMode.LEGACY_VALUE)) {
+            exampleValue = getExampleValue( (XSDSimpleType) parentType );
+        }
+        return exampleValue;
+    }
+
+    /**
+     * Attempts to return an example value for the given <code>TLSimple</code> entity using the specified search mode.
+     * 
+     * @param simple the simple type for which to return an example value
+     * @param searchMode the mode to use when attempting to lookup example values
+     * @return String
+     */
+    private String getExampleValue(TLSimple simple, ExampleSearchMode searchMode) {
+        String exampleValue = null;
+
+        if (simple != null) {
+            switch (searchMode) {
+                case PREFERRED_EXAMPLE:
+                    exampleValue = getPreferredExample( simple );
+                    break;
+                case ANY_EXAMPLE:
+                    exampleValue = getAnyExample( simple );
+                    break;
+                default:
+                    break;
+            }
+            if (exampleValue == null) {
+                exampleValue = buildExampleValue( simple, searchMode );
+            }
+        }
+        return exampleValue;
+    }
+
+    /**
+     * Attempts to return an example value for the given <code>TLSimpleFacet</code> entity using the specified search
+     * mode.
+     * 
+     * @param simpleFacet the simple facet for which to return an example value
+     * @param searchMode the mode to use when attempting to lookup example values
+     * @return String
+     */
+    private String getExampleValue(TLSimpleFacet simpleFacet, ExampleSearchMode searchMode) {
+        String exampleValue = null;
+
+        if (simpleFacet != null) {
+            switch (searchMode) {
+                case PREFERRED_EXAMPLE:
+                    exampleValue = getPreferredExample( simpleFacet );
+                    break;
+                case ANY_EXAMPLE:
+                    exampleValue = getAnyExample( simpleFacet );
+                    break;
+                default:
+                    break;
+            }
+            if (exampleValue == null) {
+                NamedEntity parentType = simpleFacet.getSimpleType();
+
+                if (parentType instanceof TLSimpleFacet) {
+                    exampleValue = getExampleValue( (TLSimpleFacet) parentType, searchMode );
+
+                } else if (parentType instanceof TLSimple) {
+                    exampleValue = getExampleValue( (TLSimple) parentType, searchMode );
+
+                } else if (parentType instanceof TLCoreObject) {
+                    exampleValue = getExampleValue( ((TLCoreObject) parentType).getSimpleFacet(), searchMode );
+
+                } else if (parentType instanceof TLAbstractEnumeration) {
+                    exampleValue = getEnumExample( (TLAbstractEnumeration) parentType );
+
+                } else if ((parentType instanceof XSDSimpleType) && (searchMode == ExampleSearchMode.LEGACY_VALUE)) {
+                    exampleValue = getExampleValue( (XSDSimpleType) parentType );
+                }
+            }
+        }
+        return exampleValue;
+    }
+
+    /**
+     * Attempts to return an example value for the given <code>TLSimple</code> entity using the specified search mode.
+     * 
+     * @param valueWithAttributes the VWA type for which to return an example value
+     * @param searchMode the mode to use when attempting to lookup example values
+     * @return String
+     */
+    private String getExampleValue(TLValueWithAttributes valueWithAttributes, ExampleSearchMode searchMode) {
+        String exampleValue = null;
+
+        if (valueWithAttributes != null) {
+            switch (searchMode) {
+                case PREFERRED_EXAMPLE:
+                    exampleValue = getPreferredExample( valueWithAttributes );
+                    break;
+                case ANY_EXAMPLE:
+                    exampleValue = getAnyExample( valueWithAttributes );
+                    break;
+                default:
+                    break;
+            }
+            if (exampleValue == null) {
+                TLAttributeType parentType = valueWithAttributes.getParentType();
+
+                if (parentType instanceof TLValueWithAttributes) {
+                    exampleValue = getExampleValue( (TLValueWithAttributes) parentType, searchMode );
+
+                } else if (parentType instanceof TLSimple) {
+                    exampleValue = getExampleValue( (TLSimple) parentType, searchMode );
+
+                } else if (parentType instanceof TLCoreObject) {
+                    exampleValue = getExampleValue( ((TLCoreObject) parentType).getSimpleFacet(), searchMode );
+
+                } else if (parentType instanceof TLAbstractEnumeration) {
+                    exampleValue = getEnumExample( (TLAbstractEnumeration) parentType );
+
+                } else if ((parentType instanceof XSDSimpleType) && (searchMode == ExampleSearchMode.LEGACY_VALUE)) {
+                    exampleValue = getExampleValue( (XSDSimpleType) parentType );
+                }
+            }
+        }
+        return exampleValue;
+    }
+
+    /**
+     * Attempts to return an example value for the given <code>TLListFacet</code> entity using the specified search
+     * mode.
+     * 
+     * <p>
+     * NOTE: This method will only return an example value if the underlying item facet of the list facet is a
+     * <code>TLSimpleFacet</code> instance.
+     * 
+     * @param listFacet the lsit simple facet for which to return an example value
+     * @param searchMode the mode to use when attempting to lookup example values
+     * @return String
+     */
+    private String getExampleValue(TLListFacet listFacet, ExampleSearchMode searchMode) {
+        String exampleValue = null;
+
+        if (listFacet.getItemFacet() instanceof TLSimpleFacet) {
+            TLSimpleFacet itemFacet = (TLSimpleFacet) listFacet.getItemFacet();
+            StringBuilder exampleList = new StringBuilder();
+
+            for (int i = 0; i < 3; i++) {
+                String ex = getExampleValue( itemFacet, searchMode );
+
+                if (ex != null) {
+                    if (exampleList.length() > 0) {
+                        exampleList.append( " " );
+                    }
+                    exampleList.append( ex );
+                }
+            }
+            exampleValue = (exampleList.length() == 0) ? null : exampleList.toString();
+        }
+        return exampleValue;
+    }
+
+    /**
+     * Performs a recursive search of the JAXB simple type instance, attempting to find a model element with an example
+     * data set.
+     * 
+     * @param xsdSimple the JAXB simple type for which to return an example value
+     * @return String
+     */
+    private String getExampleValue(String simpleTypeName, String namespace, SimpleType xsdSimple, TLModel model) {
+        LegacyTypeExampleProvider legacyProvider = legacyExampleProviders.get( namespace );
+        String exampleValue = null;
+
+        if (legacyProvider != null) {
+            exampleValue = legacyProvider.getExampleValue( simpleTypeName );
+        }
+        if ((exampleValue == null) && (xsdSimple != null)) {
+            exampleValue = getXsdExampleValue( xsdSimple, model );
+        }
+        return exampleValue;
+    }
+
+    /**
+     * Returns the example value for the specified XSD simple type.
+     * 
+     * @param xsdSimple the XSD simple type
+     * @param model the model for which examples are being generated
+     * @return String
+     */
+    private String getXsdExampleValue(SimpleType xsdSimple, TLModel model) {
+        String exampleValue = null;
+
+        if (xsdSimple.getRestriction() != null) {
+            QName parentTypeName = xsdSimple.getRestriction().getBase();
+            SimpleType parentType = (parentTypeName == null) ? null : findSimpleType( parentTypeName, model );
+
+            if (parentType != null) {
+                exampleValue =
+                    getExampleValue( parentType.getName(), parentTypeName.getNamespaceURI(), parentType, model );
+            }
+
+        } else if ((xsdSimple.getUnion() != null) && !xsdSimple.getUnion().getMemberTypes().isEmpty()) {
+            for (QName parentTypeName : xsdSimple.getUnion().getMemberTypes()) {
+                SimpleType parentType = findSimpleType( parentTypeName, model );
+
+                if (parentType != null) {
+                    exampleValue =
+                        getExampleValue( parentType.getName(), parentTypeName.getNamespaceURI(), parentType, model );
+                }
+                if (exampleValue != null) {
+                    break;
+                }
+            }
+        }
+        return exampleValue;
+    }
+
+    /**
+     * Returns an example value to use as an attribute value for the given core object's role.
+     * 
+     * @param coreObject the core object for which to return an example role value
+     * @return Stirng
+     */
+    public String getExampleRoleValue(TLCoreObject coreObject) {
+        Map<String,List<String>> localEnumExamples = enumerationExamples.get( coreObject.getNamespace() );
+        String exampleValue = null;
+        List<String> roleExamples;
+
+        // Create the list of example data values if this is our first time generating examples
+        // for this enumeration
+        if (localEnumExamples == null) {
+            localEnumExamples = new HashMap<>();
+            enumerationExamples.put( coreObject.getNamespace(), localEnumExamples );
+        }
+        roleExamples = localEnumExamples.get( coreObject.getLocalName() );
+
+        if (roleExamples == null) {
+            roleExamples = new ArrayList<>();
+            localEnumExamples.put( coreObject.getLocalName(), roleExamples );
+
+            for (TLRole roleValue : coreObject.getRoleEnumeration().getRoles()) {
+                roleExamples.add( roleValue.getName() );
+            }
+        }
+
+        // Get the next example in the list
+        if (!roleExamples.isEmpty()) {
+            exampleValue = roleExamples.remove( 0 );
+            roleExamples.add( exampleValue );
+        }
+        return (exampleValue == null) ? UNKNOWN_EXAMPLE_VALUE : exampleValue;
+    }
+
+    /**
+     * Returns the base of the given entity. If the entity is a facet (or facet alias), the owning core or business
+     * object (or its alias) will be returned.
+     * 
+     * @param entity the entity for which to return the base
      * @return NamedEntity
      */
     private NamedEntity getBaseEntity(NamedEntity entity) {
@@ -283,7 +634,7 @@ public class ExampleValueGenerator {
             TLAliasOwner aliasOwner = alias.getOwningEntity();
 
             if (aliasOwner instanceof TLFacet) {
-                baseEntity = AliasCodegenUtils.getOwnerAlias(alias);
+                baseEntity = AliasCodegenUtils.getOwnerAlias( alias );
             } else {
                 baseEntity = alias;
             }
@@ -297,453 +648,59 @@ public class ExampleValueGenerator {
     }
 
     /**
-     * Returns an example value for the given <code>XSDSimpleType</code> entity.
+     * Constructs an example value for the specified simple type.
      * 
-     * @param xsdSimple
-     *            the XSD simple type for which to return an example value
+     * @param simple the simple type for which to create an example value
+     * @param searchMode the mode to use when attempting to lookup example values
      * @return String
      */
-    public String getExampleValue(XSDSimpleType xsdSimple) {
-        String exampleValue = getExampleValue(xsdSimple.getName(), xsdSimple.getNamespace(),
-                xsdSimple.getJaxbType(), xsdSimple.getOwningModel());
-
-        if (exampleValue == null) {
-            exampleValue = UNKNOWN_EXAMPLE_VALUE;
-        }
-        return exampleValue;
-    }
-
-    /**
-     * Returns an example value for the given <code>TLClosedEnumeration</code> entity.
-     * 
-     * @param enumeration
-     *            the enumeration for which to return an example value
-     * @return String
-     */
-    public String getExampleValue(TLClosedEnumeration enumeration) {
-        return getEnumExample(enumeration);
-    }
-
-    /**
-     * Returns an example value for the given <code>TLClosedEnumeration</code> entity.
-     * 
-     * @param enumeration
-     *            the enumeration for which to return an example value
-     * @return String
-     */
-    public String getExampleValue(TLOpenEnumeration enumeration) {
-        return getEnumExample(enumeration);
-    }
-
-    /**
-     * Returns an example value for the given <code>TLRoleEnumeration</code> entity.
-     * 
-     * @param enumeration
-     *            the enumeration for which to return an example value
-     * @return String
-     */
-    public String getExampleValue(TLRoleEnumeration enumeration) {
-        return getRoleEnumExample(enumeration);
-    }
-
-    /**
-     * Returns an example value to use as an attribute value for the given core object's role.
-     * 
-     * @param coreObject
-     *            the core object for which to return an example role value
-     * @return Stirng
-     */
-    public String getExampleRoleValue(TLCoreObject coreObject) {
-        Map<String, List<String>> localEnumExamples = enumerationExamples.get(coreObject
-                .getNamespace());
+    private String buildExampleValue(TLSimple simple, ExampleSearchMode searchMode) {
+        TLAttributeType parentType = simple.getParentType();
+        int repeatCount = simple.isListTypeInd() ? 3 : 1;
+        StringBuilder exampleStr = new StringBuilder();
         String exampleValue = null;
-        List<String> roleExamples;
 
-        // Create the list of example data values if this is our first time generating examples
-        // for this enumeration
-        if (localEnumExamples == null) {
-            localEnumExamples = new HashMap<>();
-            enumerationExamples.put(coreObject.getNamespace(), localEnumExamples);
-        }
-        roleExamples = localEnumExamples.get(coreObject.getLocalName());
+        for (int i = 0; i < repeatCount; i++) {
+            String exValue = null;
 
-        if (roleExamples == null) {
-            roleExamples = new ArrayList<>();
-            localEnumExamples.put(coreObject.getLocalName(), roleExamples);
+            if (parentType instanceof TLSimple) {
+                exValue = getExampleValue( (TLSimple) parentType, searchMode );
 
-            for (TLRole roleValue : coreObject.getRoleEnumeration().getRoles()) {
-                roleExamples.add(roleValue.getName());
+            } else if (parentType instanceof TLClosedEnumeration) {
+                exValue = getExampleValue( (TLClosedEnumeration) parentType, searchMode );
+
+            } else if ((parentType instanceof XSDSimpleType) && (searchMode == ExampleSearchMode.LEGACY_VALUE)) {
+                exValue = getExampleValue( (XSDSimpleType) parentType );
             }
-        }
 
-        // Get the next example in the list
-        if (!roleExamples.isEmpty()) {
-            exampleValue = roleExamples.remove(0);
-            roleExamples.add(exampleValue);
-        }
-        return (exampleValue == null) ? UNKNOWN_EXAMPLE_VALUE : exampleValue;
-    }
-
-    /**
-     * Attempts to locate an example value from the specified example owner or one of the examples
-     * from its parent type. If a suitable example value cannot be found, a legacy example value
-     * will be returned.
-     * 
-     * @param exampleOwner
-     *            the entity for which an example is to be generated
-     * @param parentType
-     *            the parent type for the exampleOwner entity
-     * @return String
-     */
-    private String getExampleValue(TLExampleOwner exampleOwner, NamedEntity parentType) {
-        String exampleValue = getPreferredExample(exampleOwner);
-
-        if (exampleValue == null) {
-            exampleValue = getExampleValue(parentType, ExampleSearchMode.PREFERRED_EXAMPLE);
-        }
-        if (exampleValue == null) {
-            exampleValue = getAnyExample(exampleOwner);
-        }
-        if (exampleValue == null) {
-            exampleValue = getExampleValue(parentType, ExampleSearchMode.ANY_EXAMPLE);
-        }
-        if (exampleValue == null) {
-            exampleValue = getExampleValue(parentType, ExampleSearchMode.LEGACY_VALUE);
-        }
-        if (exampleValue == null) {
-            exampleValue = UNKNOWN_EXAMPLE_VALUE;
-        }
-        return exampleValue;
-    }
-
-    /**
-     * Searches for an example value for the given parent type using the indicated search mode. If a
-     * suitable example cannot be identified, this method will return null.
-     * 
-     * @param parentType
-     *            the parent type for which to return an example
-     * @param searchMode
-     *            the mode to use when attempting to lookup example values
-     * @return String
-     */
-    private String getExampleValue(NamedEntity parentType, ExampleSearchMode searchMode) {
-        String exampleValue = null;
-
-        if (parentType instanceof TLSimple) {
-            exampleValue = getExampleValue((TLSimple) parentType, searchMode);
-
-        } else if (parentType instanceof TLSimpleFacet) {
-            exampleValue = getExampleValue((TLSimpleFacet) parentType, searchMode);
-
-        } else if (parentType instanceof TLListFacet) {
-            exampleValue = getExampleValue((TLListFacet) parentType, searchMode);
-
-        } else if (parentType instanceof TLCoreObject) {
-            exampleValue = getExampleValue(((TLCoreObject) parentType).getSimpleFacet(), searchMode);
-
-        } else if (parentType instanceof TLRole) {
-            exampleValue = getExampleValue(((TLRole) parentType).getRoleEnumeration()
-                    .getOwningEntity().getSimpleFacet(), searchMode);
-
-        } else if (parentType instanceof TLValueWithAttributes) {
-            exampleValue = getExampleValue((TLValueWithAttributes) parentType, searchMode);
-
-        } else if (parentType instanceof TLAbstractEnumeration) {
-            exampleValue = getEnumExample((TLAbstractEnumeration) parentType);
-
-        } else if (parentType instanceof TLRoleEnumeration) {
-            exampleValue = getRoleEnumExample((TLRoleEnumeration) parentType);
-
-        } else if ((parentType instanceof XSDSimpleType)
-                && (searchMode == ExampleSearchMode.LEGACY_VALUE)) {
-            exampleValue = getExampleValue((XSDSimpleType) parentType);
-        }
-        return exampleValue;
-    }
-
-    /**
-     * Attempts to return an example value for the given <code>TLSimple</code> entity using the
-     * specified search mode.
-     * 
-     * @param simple
-     *            the simple type for which to return an example value
-     * @param searchMode
-     *            the mode to use when attempting to lookup example values
-     * @return String
-     */
-	private String getExampleValue(TLSimple simple, ExampleSearchMode searchMode) {
-		String exampleValue = null;
-		
-		if (simple != null) {
-			switch (searchMode) {
-				case PREFERRED_EXAMPLE:
-					exampleValue = getPreferredExample(simple);
-					break;
-				case ANY_EXAMPLE:
-					exampleValue = getAnyExample(simple);
-					break;
-				default:
-					break;
-			}
-			if (exampleValue == null) {
-				exampleValue = buildExampleValue(simple, searchMode);
-			}
-		}
-		return exampleValue;
-	}
-
-	/**
-	 * Constructs an example value for the specified simple type.
-	 * 
-	 * @param simple  the simple type for which to create an example value
-	 * @param searchMode  the mode to use when attempting to lookup example values
-	 * @return String
-	 */
-	private String buildExampleValue(TLSimple simple, ExampleSearchMode searchMode) {
-		TLAttributeType parentType = simple.getParentType();
-		int repeatCount = simple.isListTypeInd() ? 3 : 1;
-		StringBuilder exampleStr = new StringBuilder();
-		String exampleValue = null;
-		
-		for (int i = 0; i < repeatCount; i++) {
-			String exValue = null;
-			
-			if (parentType instanceof TLSimple) {
-				exValue = getExampleValue((TLSimple) parentType, searchMode);
-				
-			} else if (parentType instanceof TLClosedEnumeration) {
-				exValue = getExampleValue((TLClosedEnumeration) parentType, searchMode);
-				
-			} else if ((parentType instanceof XSDSimpleType)
-					&& (searchMode == ExampleSearchMode.LEGACY_VALUE)) {
-				exValue = getExampleValue((XSDSimpleType) parentType);
-			}
-			
-			if (exValue != null) {
-				if (exampleStr.length() > 0) {
-					exampleStr.append(" ");
-				}
-				exampleStr.append(exValue);
-			}
-		}
-		
-		if (exampleStr.length() > 0) {
-			exampleValue = exampleStr.toString();
-		}
-		return exampleValue;
-	}
-	
-    /**
-     * Attempts to return an example value for the given <code>TLSimpleFacet</code> entity using the
-     * specified search mode.
-     * 
-     * @param simpleFacet
-     *            the simple facet for which to return an example value
-     * @param searchMode
-     *            the mode to use when attempting to lookup example values
-     * @return String
-     */
-    private String getExampleValue(TLSimpleFacet simpleFacet, ExampleSearchMode searchMode) {
-        String exampleValue = null;
-
-        if (simpleFacet != null) {
-            switch (searchMode) {
-                case PREFERRED_EXAMPLE:
-                    exampleValue = getPreferredExample(simpleFacet);
-                    break;
-                case ANY_EXAMPLE:
-                    exampleValue = getAnyExample(simpleFacet);
-                    break;
-				default:
-					break;
-            }
-            if (exampleValue == null) {
-                NamedEntity parentType = simpleFacet.getSimpleType();
-
-                if (parentType instanceof TLSimpleFacet) {
-                    exampleValue = getExampleValue((TLSimpleFacet) parentType, searchMode);
-
-                } else if (parentType instanceof TLSimple) {
-                    exampleValue = getExampleValue((TLSimple) parentType, searchMode);
-
-                } else if (parentType instanceof TLCoreObject) {
-                    exampleValue = getExampleValue(((TLCoreObject) parentType).getSimpleFacet(),
-                            searchMode);
-
-                } else if (parentType instanceof TLAbstractEnumeration) {
-                    exampleValue = getEnumExample((TLAbstractEnumeration) parentType);
-
-                } else if ((parentType instanceof XSDSimpleType)
-                        && (searchMode == ExampleSearchMode.LEGACY_VALUE)) {
-                    exampleValue = getExampleValue((XSDSimpleType) parentType);
+            if (exValue != null) {
+                if (exampleStr.length() > 0) {
+                    exampleStr.append( " " );
                 }
+                exampleStr.append( exValue );
             }
+        }
+
+        if (exampleStr.length() > 0) {
+            exampleValue = exampleStr.toString();
         }
         return exampleValue;
     }
 
     /**
-     * Attempts to return an example value for the given <code>TLSimple</code> entity using the
-     * specified search mode.
+     * Attempts to locate a simple type from the model with the specified namespace and name combination.
      * 
-     * @param valueWithAttributes
-     *            the VWA type for which to return an example value
-     * @param searchMode
-     *            the mode to use when attempting to lookup example values
-     * @return String
-     */
-    private String getExampleValue(TLValueWithAttributes valueWithAttributes,
-            ExampleSearchMode searchMode) {
-        String exampleValue = null;
-
-        if (valueWithAttributes != null) {
-            switch (searchMode) {
-                case PREFERRED_EXAMPLE:
-                    exampleValue = getPreferredExample(valueWithAttributes);
-                    break;
-                case ANY_EXAMPLE:
-                    exampleValue = getAnyExample(valueWithAttributes);
-                    break;
-				default:
-					break;
-            }
-            if (exampleValue == null) {
-                TLAttributeType parentType = valueWithAttributes.getParentType();
-
-                if (parentType instanceof TLValueWithAttributes) {
-                    exampleValue = getExampleValue((TLValueWithAttributes) parentType, searchMode);
-
-                } else if (parentType instanceof TLSimple) {
-                    exampleValue = getExampleValue((TLSimple) parentType, searchMode);
-
-                } else if (parentType instanceof TLCoreObject) {
-                    exampleValue = getExampleValue(((TLCoreObject) parentType).getSimpleFacet(),
-                            searchMode);
-
-                } else if (parentType instanceof TLAbstractEnumeration) {
-                    exampleValue = getEnumExample((TLAbstractEnumeration) parentType);
-
-                } else if ((parentType instanceof XSDSimpleType)
-                        && (searchMode == ExampleSearchMode.LEGACY_VALUE)) {
-                    exampleValue = getExampleValue((XSDSimpleType) parentType);
-                }
-            }
-        }
-        return exampleValue;
-    }
-
-    /**
-     * Attempts to return an example value for the given <code>TLListFacet</code> entity using the
-     * specified search mode.
-     * 
-     * <p>
-     * NOTE: This method will only return an example value if the underlying item facet of the list
-     * facet is a <code>TLSimpleFacet</code> instance.
-     * 
-     * @param listFacet
-     *            the lsit simple facet for which to return an example value
-     * @param searchMode
-     *            the mode to use when attempting to lookup example values
-     * @return String
-     */
-    private String getExampleValue(TLListFacet listFacet, ExampleSearchMode searchMode) {
-        String exampleValue = null;
-
-        if (listFacet.getItemFacet() instanceof TLSimpleFacet) {
-            TLSimpleFacet itemFacet = (TLSimpleFacet) listFacet.getItemFacet();
-            StringBuilder exampleList = new StringBuilder();
-
-            for (int i = 0; i < 3; i++) {
-                String ex = getExampleValue(itemFacet, searchMode);
-
-                if (ex != null) {
-                    if (exampleList.length() > 0)
-                        exampleList.append(" ");
-                    exampleList.append(ex);
-                }
-            }
-            exampleValue = (exampleList.length() == 0) ? null : exampleList.toString();
-        }
-        return exampleValue;
-    }
-
-    /**
-     * Performs a recursive search of the JAXB simple type instance, attempting to find a model
-     * element with an example data set.
-     * 
-     * @param xsdSimple
-     *            the JAXB simple type for which to return an example value
-     * @return String
-     */
-    private String getExampleValue(String simpleTypeName, String namespace, SimpleType xsdSimple,
-            TLModel model) {
-        LegacyTypeExampleProvider legacyProvider = legacyExampleProviders.get(namespace);
-        String exampleValue = null;
-
-        if (legacyProvider != null) {
-            exampleValue = legacyProvider.getExampleValue(simpleTypeName);
-        }
-        if ((exampleValue == null) && (xsdSimple != null)) {
-            exampleValue = getXsdExampleValue(xsdSimple, model);
-        }
-        return exampleValue;
-    }
-
-	/**
-	 * Returns the example value for the specified XSD simple type.
-	 * 
-	 * @param xsdSimple  the XSD simple type
-	 * @param model  the model for which examples are being generated
-	 * @return String
-	 */
-	private String getXsdExampleValue(SimpleType xsdSimple, TLModel model) {
-		String exampleValue = null;
-		
-		if (xsdSimple.getRestriction() != null) {
-		    QName parentTypeName = xsdSimple.getRestriction().getBase();
-		    SimpleType parentType = (parentTypeName == null) ? null : findSimpleType(
-		            parentTypeName, model);
-
-		    if (parentType != null) {
-		        exampleValue = getExampleValue(parentType.getName(),
-		                parentTypeName.getNamespaceURI(), parentType, model);
-		    }
-
-		} else if ((xsdSimple.getUnion() != null)
-		        && !xsdSimple.getUnion().getMemberTypes().isEmpty()) {
-		    for (QName parentTypeName : xsdSimple.getUnion().getMemberTypes()) {
-		        SimpleType parentType = findSimpleType(parentTypeName, model);
-
-		        if (parentType != null) {
-		            exampleValue = getExampleValue(parentType.getName(),
-		                    parentTypeName.getNamespaceURI(), parentType, model);
-		        }
-		        if (exampleValue != null) {
-		            break;
-		        }
-		    }
-		}
-		return exampleValue;
-	}
-
-    /**
-     * Attempts to locate a simple type from the model with the specified namespace and name
-     * combination.
-     * 
-     * @param simpleTypeName
-     *            the qualified name of the simple type to search for
-     * @param model
-     *            the model to be searched
+     * @param simpleTypeName the qualified name of the simple type to search for
+     * @param model the model to be searched
      * @return SimpleType
      */
     private SimpleType findSimpleType(QName simpleTypeName, TLModel model) {
         SimpleType simpleType = null;
 
-        for (AbstractLibrary library : model.getLibrariesForNamespace(simpleTypeName
-                .getNamespaceURI())) {
+        for (AbstractLibrary library : model.getLibrariesForNamespace( simpleTypeName.getNamespaceURI() )) {
             for (LibraryMember member : library.getNamedMembers()) {
                 if ((member instanceof XSDSimpleType)
-                        && member.getLocalName().equals(simpleTypeName.getLocalPart())) {
+                    && member.getLocalName().equals( simpleTypeName.getLocalPart() )) {
                     simpleType = ((XSDSimpleType) member).getJaxbType();
                     break;
                 }
@@ -756,12 +713,10 @@ public class ExampleValueGenerator {
     }
 
     /**
-     * Returns an example value from one of the examples that is explicitly defined for the given
-     * example owner. If an example is not defined for the preferred context, this method will
-     * return null.
+     * Returns an example value from one of the examples that is explicitly defined for the given example owner. If an
+     * example is not defined for the preferred context, this method will return null.
      * 
-     * @param exampleOwner
-     *            the example owner for which to retrieve an example value
+     * @param exampleOwner the example owner for which to retrieve an example value
      * @return String
      */
     private String getPreferredExample(TLExampleOwner exampleOwner) {
@@ -769,7 +724,7 @@ public class ExampleValueGenerator {
 
         if (preferredContext != null) {
             for (TLExample example : exampleOwner.getExamples()) {
-                if (preferredContext.equals(example.getContext())) {
+                if (preferredContext.equals( example.getContext() )) {
                     exampleValue = example.getValue();
                 }
             }
@@ -778,13 +733,11 @@ public class ExampleValueGenerator {
     }
 
     /**
-     * Returns an example value from one of the examples that is explicitly defined for the given
-     * example owner. If an example is not defined for the preferred context, this method will an
-     * example from the first available context that is defined. If no examples have been defined,
-     * this method will return null.
+     * Returns an example value from one of the examples that is explicitly defined for the given example owner. If an
+     * example is not defined for the preferred context, this method will an example from the first available context
+     * that is defined. If no examples have been defined, this method will return null.
      * 
-     * @param exampleOwner
-     *            the example owner for which to retrieve an example value
+     * @param exampleOwner the example owner for which to retrieve an example value
      * @return String
      */
     private String getAnyExample(TLExampleOwner exampleOwner) {
@@ -795,7 +748,7 @@ public class ExampleValueGenerator {
             if (firstExample == null) {
                 firstExample = example.getValue();
             }
-            if ((preferredContext != null) && preferredContext.equals(example.getContext())) {
+            if ((preferredContext != null) && preferredContext.equals( example.getContext() )) {
                 exampleValue = example.getValue();
             }
         }
@@ -808,8 +761,7 @@ public class ExampleValueGenerator {
     /**
      * Returns an example value for the given enumeration.
      * 
-     * @param enumeration
-     *            the enumeration for which to return an example value
+     * @param enumeration the enumeration for which to return an example value
      * @return String
      */
     private String getEnumExample(TLAbstractEnumeration enumeration) {
@@ -817,7 +769,7 @@ public class ExampleValueGenerator {
 
         if (enumeration != null) {
             synchronized (enumerationExamples) {
-                Map<String, List<String>> localEnumExamples = enumerationExamples.get(enumeration.getNamespace());
+                Map<String,List<String>> localEnumExamples = enumerationExamples.get( enumeration.getNamespace() );
                 List<String> enumExamples;
 
                 // Create the list of example data values if this is our first time generating
@@ -825,23 +777,23 @@ public class ExampleValueGenerator {
                 // for this enumeration
                 if (localEnumExamples == null) {
                     localEnumExamples = new HashMap<>();
-                    enumerationExamples.put(enumeration.getNamespace(), localEnumExamples);
+                    enumerationExamples.put( enumeration.getNamespace(), localEnumExamples );
                 }
-                enumExamples = localEnumExamples.get(enumeration.getLocalName());
+                enumExamples = localEnumExamples.get( enumeration.getLocalName() );
 
                 if (enumExamples == null) {
                     enumExamples = new ArrayList<>();
-                    localEnumExamples.put(enumeration.getLocalName(), enumExamples);
+                    localEnumExamples.put( enumeration.getLocalName(), enumExamples );
 
                     for (TLEnumValue enumValue : EnumCodegenUtils.getInheritedValues( enumeration )) {
-                        enumExamples.add(enumValue.getLiteral());
+                        enumExamples.add( enumValue.getLiteral() );
                     }
                 }
 
                 // Get the next example in the list
                 if (!enumExamples.isEmpty()) {
-                    exampleValue = enumExamples.remove(0);
-                    enumExamples.add(exampleValue);
+                    exampleValue = enumExamples.remove( 0 );
+                    enumExamples.add( exampleValue );
                 }
             }
         }
@@ -851,8 +803,7 @@ public class ExampleValueGenerator {
     /**
      * Returns an example value for the given role-enumeration.
      * 
-     * @param roleEnum
-     *            the enumeration for which to return an example value
+     * @param roleEnum the enumeration for which to return an example value
      * @return String
      */
     private String getRoleEnumExample(TLRoleEnumeration roleEnum) {
@@ -860,8 +811,7 @@ public class ExampleValueGenerator {
 
         if (roleEnum != null) {
             synchronized (enumerationExamples) {
-                Map<String, List<String>> localEnumExamples = enumerationExamples.get(roleEnum
-                        .getNamespace());
+                Map<String,List<String>> localEnumExamples = enumerationExamples.get( roleEnum.getNamespace() );
                 List<String> enumExamples;
 
                 // Create the list of example data values if this is our first time generating
@@ -869,24 +819,23 @@ public class ExampleValueGenerator {
                 // for this enumeration
                 if (localEnumExamples == null) {
                     localEnumExamples = new HashMap<>();
-                    enumerationExamples.put(roleEnum.getNamespace(), localEnumExamples);
+                    enumerationExamples.put( roleEnum.getNamespace(), localEnumExamples );
                 }
-                enumExamples = localEnumExamples.get(roleEnum.getLocalName());
+                enumExamples = localEnumExamples.get( roleEnum.getLocalName() );
 
                 if (enumExamples == null) {
                     enumExamples = new ArrayList<>();
-                    localEnumExamples.put(roleEnum.getLocalName(), enumExamples);
+                    localEnumExamples.put( roleEnum.getLocalName(), enumExamples );
 
-                    for (TLRole roleValue : PropertyCodegenUtils.getInheritedRoles(roleEnum
-                            .getOwningEntity())) {
-                        enumExamples.add(roleValue.getName());
+                    for (TLRole roleValue : PropertyCodegenUtils.getInheritedRoles( roleEnum.getOwningEntity() )) {
+                        enumExamples.add( roleValue.getName() );
                     }
                 }
 
                 // Get the next example in the list
                 if (!enumExamples.isEmpty()) {
-                    exampleValue = enumExamples.remove(0);
-                    enumExamples.add(exampleValue);
+                    exampleValue = enumExamples.remove( 0 );
+                    enumExamples.add( exampleValue );
                 }
             }
         }
@@ -894,34 +843,30 @@ public class ExampleValueGenerator {
     }
 
     /**
-     * Returns true if the given entity matches the empty element type of the built-in library. If
-     * the given entity is null, this method will assume that a match to the empty element and
-     * return true.
+     * Returns true if the given entity matches the empty element type of the built-in library. If the given entity is
+     * null, this method will assume that a match to the empty element and return true.
      * 
-     * @param entity
-     *            the named entity to analyze
+     * @param entity the named entity to analyze
      * @return boolean
      */
     private boolean isEmptyValueType(NamedEntity entity) {
         SchemaDependency emptyElement = SchemaDependency.getEmptyElement();
 
-        return (entity == null)
-                || (emptyElement.getSchemaDeclaration().getNamespace()
-                        .equals(entity.getNamespace()) && emptyElement.getLocalName().equals(
-                        entity.getLocalName()));
+        return (entity == null) || (emptyElement.getSchemaDeclaration().getNamespace().equals( entity.getNamespace() )
+            && emptyElement.getLocalName().equals( entity.getLocalName() ));
     }
 
     /**
-     * Initializes the map used for <code>LegacyTypeExampleProvider</code> lookups. The initial list
-     * is seeded with the examples required by the schema-for-schemas simple types.
+     * Initializes the map used for <code>LegacyTypeExampleProvider</code> lookups. The initial list is seeded with the
+     * examples required by the schema-for-schemas simple types.
      */
     private void initExampleProviders() {
-        LegacyTypeExampleProvider s4sExampleProvider = new LegacyTypeExampleProvider(SCHEMA_FOR_SCHEMA_EXAMPLES);
-        LegacyTypeExampleProvider otaExampleProvider = new LegacyTypeExampleProvider(OTA_BUILT_INS_EXAMPLES);
+        LegacyTypeExampleProvider s4sExampleProvider = new LegacyTypeExampleProvider( SCHEMA_FOR_SCHEMA_EXAMPLES );
+        LegacyTypeExampleProvider otaExampleProvider = new LegacyTypeExampleProvider( OTA_BUILT_INS_EXAMPLES );
 
         legacyExampleProviders = new HashMap<>();
-        legacyExampleProviders.put(s4sExampleProvider.getNamespace(), s4sExampleProvider);
-        legacyExampleProviders.put(otaExampleProvider.getNamespace(), otaExampleProvider);
+        legacyExampleProviders.put( s4sExampleProvider.getNamespace(), s4sExampleProvider );
+        legacyExampleProviders.put( otaExampleProvider.getNamespace(), otaExampleProvider );
     }
 
 }

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.validate.compile;
 
 import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
@@ -35,39 +36,38 @@ public class TLFacetCompileValidator extends TLFacetBaseValidator {
 
     public static final String ERROR_EXTENSIBILITY_NOT_ALLOWED = "EXTENSIBILITY_NOT_ALLOWED";
     public static final String ERROR_CONTEXT_OR_LABEL_REQUIRED = "CONTEXT_OR_LABEL_REQUIRED";
-    public static final String ERROR_MULTIPLE_ID_MEMBERS       = "MULTIPLE_ID_MEMBERS";
+    public static final String ERROR_MULTIPLE_ID_MEMBERS = "MULTIPLE_ID_MEMBERS";
 
     /**
      * @see org.opentravel.schemacompiler.validate.impl.TLValidatorBase#validateFields(org.opentravel.schemacompiler.validate.Validatable)
      */
     @Override
     protected ValidationFindings validateFields(TLFacet target) {
-        TLValidationBuilder builder = newValidationBuilder(target);
+        TLValidationBuilder builder = newValidationBuilder( target );
 
-        builder.setProperty("facetType", target.getFacetType()).setFindingType(FindingType.ERROR)
-                .assertNotNull();
+        builder.setProperty( "facetType", target.getFacetType() ).setFindingType( FindingType.ERROR ).assertNotNull();
 
-        builder.setProperty("aliases", target.getAliases()).setFindingType(FindingType.ERROR)
-                .assertNotNull().assertContainsNoNullElements();
+        builder.setProperty( "aliases", target.getAliases() ).setFindingType( FindingType.ERROR ).assertNotNull()
+            .assertContainsNoNullElements();
 
-        builder.setProperty("attributes", target.getAttributes()).setFindingType(FindingType.ERROR)
-                .assertNotNull().assertContainsNoNullElements();
+        builder.setProperty( "attributes", target.getAttributes() ).setFindingType( FindingType.ERROR ).assertNotNull()
+            .assertContainsNoNullElements();
 
-        builder.setProperty("elements", target.getElements()).setFindingType(FindingType.ERROR)
-                .assertNotNull().assertContainsNoNullElements();
+        builder.setProperty( "elements", target.getElements() ).setFindingType( FindingType.ERROR ).assertNotNull()
+            .assertContainsNoNullElements();
 
-        builder.setProperty("indicators", target.getIndicators()).setFindingType(FindingType.ERROR)
-                .assertNotNull().assertContainsNoNullElements();
+        builder.setProperty( "indicators", target.getIndicators() ).setFindingType( FindingType.ERROR ).assertNotNull()
+            .assertContainsNoNullElements();
 
-        if (ValidatorUtils.hasMultipleIdMembers(target)) {
-            builder.addFinding(FindingType.ERROR, "members", ERROR_MULTIPLE_ID_MEMBERS);
+        if (ValidatorUtils.hasMultipleIdMembers( target )) {
+            builder.addFinding( FindingType.ERROR, "members", ERROR_MULTIPLE_ID_MEMBERS );
         }
 
         if (target.getOwningEntity() instanceof TLBusinessObject) {
-            validateBusinessObjectFacet(target, builder);
+            validateBusinessObjectFacet( target, builder );
         }
 
-        checkSchemaNamingConflicts(target, builder);
+        checkSchemaNamingConflicts( target, builder );
 
         return builder.getFindings();
     }
@@ -75,19 +75,19 @@ public class TLFacetCompileValidator extends TLFacetBaseValidator {
     /**
      * Performs specialized checks for facets that are owned by business objects.
      * 
-     * @param target  the target facet to validate
-     * @param builder  the validation builder used to collect any findings that are discovered
+     * @param target the target facet to validate
+     * @param builder the validation builder used to collect any findings that are discovered
      */
     private void validateBusinessObjectFacet(TLFacet target, TLValidationBuilder builder) {
         TLBusinessObject businessObject = (TLBusinessObject) target.getOwningEntity();
-        TLFacetOwner baseEntity = FacetCodegenUtils.getFacetOwnerExtension(businessObject);
+        TLFacetOwner baseEntity = FacetCodegenUtils.getFacetOwnerExtension( businessObject );
         TLFacetType facetType = target.getFacetType();
 
         // ID facets must define at least one attribute or property (unless the owning business
         // object is an extension of another one).
         if ((facetType == TLFacetType.ID) && (baseEntity == null)) {
-            builder.setProperty("ID.members", ValidatorUtils.getMembers(target, false))
-                    .setFindingType(FindingType.ERROR).assertMinimumSize(1);
+            builder.setProperty( "ID.members", ValidatorUtils.getMembers( target, false ) )
+                .setFindingType( FindingType.ERROR ).assertMinimumSize( 1 );
         }
     }
 

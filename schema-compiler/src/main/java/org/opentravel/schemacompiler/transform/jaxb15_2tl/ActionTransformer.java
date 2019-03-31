@@ -13,10 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.transform.jaxb15_2tl;
 
-import java.util.ArrayList;
-import java.util.List;
+package org.opentravel.schemacompiler.transform.jaxb15_2tl;
 
 import org.opentravel.ns.ota2.librarymodel_v01_05.Action;
 import org.opentravel.ns.ota2.librarymodel_v01_05.ActionRequest;
@@ -31,88 +29,90 @@ import org.opentravel.schemacompiler.model.TLMimeType;
 import org.opentravel.schemacompiler.transform.ObjectTransformer;
 import org.opentravel.schemacompiler.transform.symbols.DefaultTransformerContext;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- * Handles the transformation of objects from the <code>Action</code> type to the
- * <code>TLAction</code> type.
+ * Handles the transformation of objects from the <code>Action</code> type to the <code>TLAction</code> type.
  *
  * @author S. Livezey
  */
 public class ActionTransformer extends ComplexTypeTransformer<Action,TLAction> {
-	
-	/**
-	 * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
-	 */
-	@Override
-	public TLAction transform(Action source) {
-        ObjectTransformer<ActionResponse, TLActionResponse, DefaultTransformerContext> responseTransformer =
-        		getTransformerFactory().getTransformer(ActionResponse.class, TLActionResponse.class);
-		TLAction action = new TLAction();
-		
-		action.setActionId(trimString(source.getActionId()));
-		action.setCommonAction(source.isCommon());
-		
-		if (source.getActionRequest() != null) {
-	        ObjectTransformer<ActionRequest, TLActionRequest, DefaultTransformerContext> requestTransformer =
-	        		getTransformerFactory().getTransformer(ActionRequest.class, TLActionRequest.class);
-	        
-	        action.setRequest(requestTransformer.transform(source.getActionRequest()));
-		}
-		
+
+    /**
+     * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
+     */
+    @Override
+    public TLAction transform(Action source) {
+        ObjectTransformer<ActionResponse,TLActionResponse,DefaultTransformerContext> responseTransformer =
+            getTransformerFactory().getTransformer( ActionResponse.class, TLActionResponse.class );
+        TLAction action = new TLAction();
+
+        action.setActionId( trimString( source.getActionId() ) );
+        action.setCommonAction( source.isCommon() );
+
+        if (source.getActionRequest() != null) {
+            ObjectTransformer<ActionRequest,TLActionRequest,DefaultTransformerContext> requestTransformer =
+                getTransformerFactory().getTransformer( ActionRequest.class, TLActionRequest.class );
+
+            action.setRequest( requestTransformer.transform( source.getActionRequest() ) );
+        }
+
         if (source.getDocumentation() != null) {
-            ObjectTransformer<Documentation, TLDocumentation, DefaultTransformerContext> docTransformer =
-            		getTransformerFactory().getTransformer(Documentation.class, TLDocumentation.class);
-            
-            action.setDocumentation(docTransformer.transform(source.getDocumentation()));
+            ObjectTransformer<Documentation,TLDocumentation,DefaultTransformerContext> docTransformer =
+                getTransformerFactory().getTransformer( Documentation.class, TLDocumentation.class );
+
+            action.setDocumentation( docTransformer.transform( source.getDocumentation() ) );
         }
-        
+
         for (ActionResponse sourceResponse : source.getActionResponse()) {
-        	action.addResponse(responseTransformer.transform(sourceResponse));
+            action.addResponse( responseTransformer.transform( sourceResponse ) );
         }
-        
-		return action;
-	}
-	
-	/**
-	 * Transforms the list of JAXB MIME types.
-	 * 
-	 * @param sourceMimeTypes  the list of JAXB MIME types to transform
-	 * @return List<TLMimeType>
-	 */
-	protected static List<TLMimeType> transformMimeTypes(List<MimeType> sourceMimeTypes) {
-		List<TLMimeType> mimeTypes = new ArrayList<>();
-		
-		if (sourceMimeTypes != null) {
-			for (MimeType sourceMimeType : sourceMimeTypes) {
-				TLMimeType mimeType;
-				
-				if (sourceMimeType != null) {
-					switch (sourceMimeType) {
-						case APPLICATION_XML:
-							mimeType = TLMimeType.APPLICATION_XML;
-							break;
-						case TEXT_XML:
-							mimeType = TLMimeType.TEXT_XML;
-							break;
-						case APPLICATION_JSON:
-							mimeType = TLMimeType.APPLICATION_JSON;
-							break;
-						case TEXT_JSON:
-							mimeType = TLMimeType.TEXT_JSON;
-							break;
-						default:
-							mimeType = null;
-							break;
-					}
-				} else {
-					mimeType = null;
-				}
-				
-				if ((mimeType != null) && !mimeTypes.contains(mimeType)) {
-					mimeTypes.add(mimeType);
-				}
-			}
-		}
-		return mimeTypes;
-	}
-	
+
+        return action;
+    }
+
+    /**
+     * Transforms the list of JAXB MIME types.
+     * 
+     * @param sourceMimeTypes the list of JAXB MIME types to transform
+     * @return List&lt;TLMimeType&gt;
+     */
+    protected static List<TLMimeType> transformMimeTypes(List<MimeType> sourceMimeTypes) {
+        List<TLMimeType> mimeTypes = new ArrayList<>();
+
+        if (sourceMimeTypes != null) {
+            for (MimeType sourceMimeType : sourceMimeTypes) {
+                TLMimeType mimeType;
+
+                if (sourceMimeType != null) {
+                    switch (sourceMimeType) {
+                        case APPLICATION_XML:
+                            mimeType = TLMimeType.APPLICATION_XML;
+                            break;
+                        case TEXT_XML:
+                            mimeType = TLMimeType.TEXT_XML;
+                            break;
+                        case APPLICATION_JSON:
+                            mimeType = TLMimeType.APPLICATION_JSON;
+                            break;
+                        case TEXT_JSON:
+                            mimeType = TLMimeType.TEXT_JSON;
+                            break;
+                        default:
+                            mimeType = null;
+                            break;
+                    }
+                } else {
+                    mimeType = null;
+                }
+
+                if ((mimeType != null) && !mimeTypes.contains( mimeType )) {
+                    mimeTypes.add( mimeType );
+                }
+            }
+        }
+        return mimeTypes;
+    }
+
 }

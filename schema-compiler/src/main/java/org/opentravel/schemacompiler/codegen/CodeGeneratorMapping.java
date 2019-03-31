@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.codegen;
 
 /**
- * Specifies the <code>CodeGenerator</code> to be used for a specific source-type and target-format
- * combination.
+ * Specifies the <code>CodeGenerator</code> to be used for a specific source-type and target-format combination.
  * 
  * @author S. Livezey
  */
@@ -30,7 +30,7 @@ public class CodeGeneratorMapping {
     /**
      * Returns the source-type of this mapping entry.
      * 
-     * @return Class<?>
+     * @return Class&lt;?&gt;
      */
     public Class<?> getSourceType() {
         return sourceType;
@@ -39,8 +39,7 @@ public class CodeGeneratorMapping {
     /**
      * Assigns the source-type of this mapping entry.
      * 
-     * @param sourceType
-     *            the source type value to assign
+     * @param sourceType the source type value to assign
      */
     public void setSourceType(Class<?> sourceType) {
         this.sourceType = sourceType;
@@ -58,8 +57,7 @@ public class CodeGeneratorMapping {
     /**
      * Assigns the target-format of this mapping entry.
      * 
-     * @param targetFormat
-     *            the target format value to assign
+     * @param targetFormat the target format value to assign
      */
     public void setTargetFormat(String targetFormat) {
         this.targetFormat = targetFormat;
@@ -68,7 +66,7 @@ public class CodeGeneratorMapping {
     /**
      * Returns the type of code generator to use for the source-type / target-format combination.
      * 
-     * @return Class<?>
+     * @return Class&lt;?&gt;
      */
     public Class<?> getCodeGenerator() {
         return codeGenerator;
@@ -77,8 +75,7 @@ public class CodeGeneratorMapping {
     /**
      * Assigns the type of code generator to use for the source-type / target-format combination.
      * 
-     * @param codeGenerator
-     *            the code generator to assign for this mapping
+     * @param codeGenerator the code generator to assign for this mapping
      */
     public void setCodeGenerator(Class<?> codeGenerator) {
         this.codeGenerator = codeGenerator;

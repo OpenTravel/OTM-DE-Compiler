@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.validate;
 
 import java.util.ResourceBundle;
@@ -36,10 +37,8 @@ public enum FindingType {
     /**
      * Constructor that assigns the resource key and display name for an enum value.
      * 
-     * @param resourceKey
-     *            the resource key for the value
-     * @param displayName
-     *            the display name for the value
+     * @param resourceKey the resource key for the value
+     * @param displayName the display name for the value
      */
     private FindingType(String resourceKey, String displayName) {
         this.resourceKey = resourceKey;
@@ -67,15 +66,14 @@ public enum FindingType {
     /**
      * Returns the display name for the value.
      * 
-     * @param bundle
-     *            the resource bundle to use for display name lookups
+     * @param bundle the resource bundle to use for display name lookups
      * @return String
      */
     public String getDisplayName(ResourceBundle bundle) {
         String result = displayName;
 
-        if ((bundle != null) && bundle.containsKey(resourceKey)) {
-            result = bundle.getString(resourceKey);
+        if ((bundle != null) && bundle.containsKey( resourceKey )) {
+            result = bundle.getString( resourceKey );
         }
         return result;
     }

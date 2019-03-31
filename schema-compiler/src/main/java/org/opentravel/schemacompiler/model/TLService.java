@@ -13,10 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.model;
 
-import java.util.Comparator;
-import java.util.List;
+package org.opentravel.schemacompiler.model;
 
 import org.opentravel.schemacompiler.event.ModelEvent;
 import org.opentravel.schemacompiler.event.ModelEventBuilder;
@@ -24,18 +22,20 @@ import org.opentravel.schemacompiler.event.ModelEventType;
 import org.opentravel.schemacompiler.model.TLEquivalent.EquivalentListManager;
 import org.opentravel.schemacompiler.model.TLOperation.OperationListManager;
 
+import java.util.Comparator;
+import java.util.List;
+
 /**
  * Service definition for a type library.
  * 
  * @author S. Livezey
  */
-public class TLService extends TLLibraryMember implements NamedEntity, TLDocumentationOwner,
-        TLEquivalentOwner {
+public class TLService extends TLLibraryMember implements NamedEntity, TLDocumentationOwner, TLEquivalentOwner {
 
     private String name;
     private TLDocumentation documentation;
-    private EquivalentListManager equivalentManager = new EquivalentListManager(this);
-    private OperationListManager operationManager = new OperationListManager(this);
+    private EquivalentListManager equivalentManager = new EquivalentListManager( this );
+    private OperationListManager operationManager = new OperationListManager( this );
 
     /**
      * @see org.opentravel.schemacompiler.validate.Validatable#getValidationIdentity()
@@ -46,12 +46,12 @@ public class TLService extends TLLibraryMember implements NamedEntity, TLDocumen
         StringBuilder identity = new StringBuilder();
 
         if (owningLibrary != null) {
-            identity.append(owningLibrary.getValidationIdentity()).append(" : ");
+            identity.append( owningLibrary.getValidationIdentity() ).append( " : " );
         }
         if (name == null) {
-            identity.append("[Unnamed Service]");
+            identity.append( "[Unnamed Service]" );
         } else {
-            identity.append(name);
+            identity.append( name );
         }
         return identity.toString();
     }
@@ -68,15 +68,14 @@ public class TLService extends TLLibraryMember implements NamedEntity, TLDocumen
     /**
      * Assigns the value of the 'name' field.
      * 
-     * @param name
-     *            the field value to assign
+     * @param name the field value to assign
      */
     public void setName(String name) {
-        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.NAME_MODIFIED, this)
-                .setOldValue(this.name).setNewValue(name).buildEvent();
+        ModelEvent<?> event = new ModelEventBuilder( ModelEventType.NAME_MODIFIED, this ).setOldValue( this.name )
+            .setNewValue( name ).buildEvent();
 
         this.name = name;
-        publishEvent(event);
+        publishEvent( event );
     }
 
     /**
@@ -100,7 +99,7 @@ public class TLService extends TLLibraryMember implements NamedEntity, TLDocumen
      */
     @Override
     public TLEquivalent getEquivalent(String context) {
-        return equivalentManager.getChild(context);
+        return equivalentManager.getChild( context );
     }
 
     /**
@@ -108,7 +107,7 @@ public class TLService extends TLLibraryMember implements NamedEntity, TLDocumen
      */
     @Override
     public void addEquivalent(TLEquivalent equivalent) {
-        equivalentManager.addChild(equivalent);
+        equivalentManager.addChild( equivalent );
     }
 
     /**
@@ -117,7 +116,7 @@ public class TLService extends TLLibraryMember implements NamedEntity, TLDocumen
      */
     @Override
     public void addEquivalent(int index, TLEquivalent equivalent) {
-        equivalentManager.addChild(index, equivalent);
+        equivalentManager.addChild( index, equivalent );
     }
 
     /**
@@ -125,23 +124,7 @@ public class TLService extends TLLibraryMember implements NamedEntity, TLDocumen
      */
     @Override
     public void removeEquivalent(TLEquivalent equivalent) {
-        equivalentManager.removeChild(equivalent);
-    }
-
-    /**
-     * @see org.opentravel.schemacompiler.model.TLEquivalentOwner#moveUp(org.opentravel.schemacompiler.model.TLEquivalent)
-     */
-    @Override
-    public void moveUp(TLEquivalent equivalent) {
-        equivalentManager.moveUp(equivalent);
-    }
-
-    /**
-     * @see org.opentravel.schemacompiler.model.TLEquivalentOwner#moveDown(org.opentravel.schemacompiler.model.TLEquivalent)
-     */
-    @Override
-    public void moveDown(TLEquivalent equivalent) {
-        equivalentManager.moveDown(equivalent);
+        equivalentManager.removeChild( equivalent );
     }
 
     /**
@@ -149,7 +132,7 @@ public class TLService extends TLLibraryMember implements NamedEntity, TLDocumen
      */
     @Override
     public void sortEquivalents(Comparator<TLEquivalent> comparator) {
-        equivalentManager.sortChildren(comparator);
+        equivalentManager.sortChildren( comparator );
     }
 
     /**
@@ -164,24 +147,24 @@ public class TLService extends TLLibraryMember implements NamedEntity, TLDocumen
      */
     public void setDocumentation(TLDocumentation documentation) {
         if (documentation != this.documentation) {
-            ModelEvent<?> event = new ModelEventBuilder(ModelEventType.DOCUMENTATION_MODIFIED, this)
-                    .setOldValue(this.documentation).setNewValue(documentation).buildEvent();
+            ModelEvent<?> event = new ModelEventBuilder( ModelEventType.DOCUMENTATION_MODIFIED, this )
+                .setOldValue( this.documentation ).setNewValue( documentation ).buildEvent();
 
             if (documentation != null) {
-                documentation.setOwner(this);
+                documentation.setOwner( this );
             }
             if (this.documentation != null) {
-                this.documentation.setOwner(null);
+                this.documentation.setOwner( null );
             }
             this.documentation = documentation;
-            publishEvent(event);
+            publishEvent( event );
         }
     }
 
     /**
      * Returns the value of the 'operations' field.
      * 
-     * @return List<TLOperation>
+     * @return List&lt;TLOperation&gt;
      */
     public List<TLOperation> getOperations() {
         return operationManager.getChildren();
@@ -190,78 +173,85 @@ public class TLService extends TLLibraryMember implements NamedEntity, TLDocumen
     /**
      * Returns the operation with the specified name.
      * 
-     * @param operationName
-     *            the name of the operation to return
+     * @param operationName the name of the operation to return
      * @return TLOperation
      */
     public TLOperation getOperation(String operationName) {
-        return operationManager.getChild(operationName);
+        return operationManager.getChild( operationName );
     }
 
     /**
      * Adds an operation element to the current list.
      * 
-     * @param operation
-     *            the operation element value to add
+     * @param operation the operation element value to add
      */
     public void addOperation(TLOperation operation) {
-        operationManager.addChild(operation);
+        operationManager.addChild( operation );
     }
 
     /**
      * Adds an operation element to the current list.
      * 
-     * @param index
-     *            the index at which the given operation should be added
-     * @param operation
-     *            the operation value to add
-     * @throws IndexOutOfBoundsException
-     *             thrown if the index is out of range (index < 0 || index > size())
+     * @param index the index at which the given operation should be added
+     * @param operation the operation value to add
+     * @throws IndexOutOfBoundsException thrown if the index is out of range (index &lt; 0 || index &gt; size())
      */
     public void addOperation(int index, TLOperation operation) {
-        operationManager.addChild(index, operation);
+        operationManager.addChild( index, operation );
     }
 
     /**
      * Removes an operation element from the current list.
      * 
-     * @param operation
-     *            the operation element value to remove
+     * @param operation the operation element value to remove
      */
     public void removeOperation(TLOperation operation) {
-        operationManager.removeChild(operation);
-    }
-
-    /**
-     * Moves this operation up by one position in the list. If the operation is not owned by this
-     * object or it is already at the front of the list, this method has no effect.
-     * 
-     * @param operation
-     *            the operation to move
-     */
-    public void moveUp(TLOperation operation) {
-        operationManager.moveUp(operation);
-    }
-
-    /**
-     * Moves this operation down by one position in the list. If the operation is not owned by this
-     * object or it is already at the end of the list, this method has no effect.
-     * 
-     * @param operation
-     *            the operation to move
-     */
-    public void moveDown(TLOperation operation) {
-        operationManager.moveDown(operation);
+        operationManager.removeChild( operation );
     }
 
     /**
      * Sorts the list of attributes using the comparator provided.
      * 
-     * @param comparator
-     *            the comparator to use when sorting the list
+     * @param comparator the comparator to use when sorting the list
      */
     public void sortOperations(Comparator<TLOperation> comparator) {
-        operationManager.sortChildren(comparator);
+        operationManager.sortChildren( comparator );
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.model.TLEquivalentOwner#moveUp(org.opentravel.schemacompiler.model.TLEquivalent)
+     */
+    @Override
+    public void moveUp(TLEquivalent equivalent) {
+        equivalentManager.moveUp( equivalent );
+    }
+
+    /**
+     * Moves this operation up by one position in the list. If the operation is not owned by this object or it is
+     * already at the front of the list, this method has no effect.
+     * 
+     * @param operation the operation to move
+     */
+    public void moveUp(TLOperation operation) {
+        operationManager.moveUp( operation );
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.model.TLEquivalentOwner#moveDown(org.opentravel.schemacompiler.model.TLEquivalent)
+     */
+    @Override
+    public void moveDown(TLEquivalent equivalent) {
+        equivalentManager.moveDown( equivalent );
+    }
+
+    /**
+     * Moves this operation down by one position in the list. If the operation is not owned by this object or it is
+     * already at the end of the list, this method has no effect.
+     * 
+     * @param operation the operation to move
+     */
+    public void moveDown(TLOperation operation) {
+        operationManager.moveDown( operation );
     }
 
 }

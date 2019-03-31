@@ -13,47 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/*
- * Copyright (c) 1997, 2011, Oracle and/or its affiliates. All rights reserved.
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
- *
- * This code is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Oracle designates this
- * particular file as subject to the "Classpath" exception as provided
- * by Oracle in the LICENSE file that accompanied this code.
- *
- * This code is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
- * version 2 for more details (a copy is included in the LICENSE file that
- * accompanied this code).
- *
- * You should have received a copy of the GNU General Public License version
- * 2 along with this work; if not, write to the Free Software Foundation,
- * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
- *
- * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
- * or visit www.oracle.com if you need additional information or have any
- * questions.
- */
 
 package org.opentravel.schemacompiler.codegen.html;
+
+import org.opentravel.schemacompiler.util.SchemaCompilerRuntimeException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
-import org.opentravel.schemacompiler.util.SchemaCompilerRuntimeException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
- * Utility for integrating with javadoc tools and for localization.
- * Handle Resources. Access to error and warning counts.
- * Message formatting.
- * <br>
+ * Utility for integrating with javadoc tools and for localization. Handle Resources. Access to error and warning
+ * counts. Message formatting. <br>
  * Also provides implementation for DocErrorReporter.
  *
  * @see java.util.ResourceBundle
@@ -61,23 +35,27 @@ import org.slf4j.LoggerFactory;
  * @author Neal Gafter (rewrite)
  */
 public class Messager {
-	
-    private static final Logger log = LoggerFactory.getLogger(Messager.class);
-	
-    /** The maximum number of errors/warnings that are reported.
+
+    private static final Logger log = LoggerFactory.getLogger( Messager.class );
+
+    /**
+     * The maximum number of errors/warnings that are reported.
      */
     public final int maxErrors;
     public final int maxWarnings;
-    
-    /** The number of errors encountered so far.
+
+    /**
+     * The number of errors encountered so far.
      */
     private int nerrors = 0;
 
-    /** The number of warnings encountered so far.
+    /**
+     * The number of warnings encountered so far.
      */
     private int nwarnings = 0;
-    
-    /** Switch: prompt user on each error.
+
+    /**
+     * Switch: prompt user on each error.
      */
     private boolean promptOnError;
 
@@ -87,11 +65,12 @@ public class Messager {
 
     final String programName;
 
-    private ResourceBundle messageRB = null;
+    private ResourceBundle messageBundle = null;
 
     /**
      * Constructor
-     * @param programName  Name of the program (for error messages).
+     * 
+     * @param programName Name of the program (for error messages).
      */
     public Messager(String programName) {
         this.programName = programName;
@@ -103,25 +82,24 @@ public class Messager {
         return Integer.MAX_VALUE;
     }
 
-  
+
     protected int getDefaultMaxWarnings() {
         return Integer.MAX_VALUE;
     }
 
     /**
-     * Get string from ResourceBundle, initialize ResourceBundle
-     * if needed.
+     * Get string from ResourceBundle, initialize ResourceBundle if needed.
      */
     private String getString(String key) {
-        if (messageRB == null) {
+        if (messageBundle == null) {
             try {
-                messageRB = ResourceBundle.getBundle(
-                          "org.opentravel.schemacompiler.codegen.html.resources.javadoc");
+                messageBundle =
+                    ResourceBundle.getBundle( "org.opentravel.schemacompiler.codegen.html.resources.javadoc" );
             } catch (MissingResourceException e) {
-                throw new SchemaCompilerRuntimeException("Fatal: Resource for javadoc is missing", e);
+                throw new SchemaCompilerRuntimeException( "Fatal: Resource for javadoc is missing", e );
             }
         }
-        return messageRB.getString(key);
+        return messageBundle.getString( key );
     }
 
     /**
@@ -130,7 +108,7 @@ public class Messager {
      * @param key selects message from resource
      */
     String getText(String key) {
-        return getText(key, (String)null);
+        return getText( key, (String) null );
     }
 
     /**
@@ -140,7 +118,7 @@ public class Messager {
      * @param a1 first argument
      */
     String getText(String key, String a1) {
-        return getText(key, a1, null);
+        return getText( key, a1, null );
     }
 
     /**
@@ -151,7 +129,7 @@ public class Messager {
      * @param a2 second argument
      */
     String getText(String key, String a1, String a2) {
-        return getText(key, a1, a2, null);
+        return getText( key, a1, a2, null );
     }
 
     /**
@@ -163,7 +141,7 @@ public class Messager {
      * @param a3 third argument
      */
     String getText(String key, String a1, String a2, String a3) {
-        return getText(key, a1, a2, a3, null);
+        return getText( key, a1, a2, a3, null );
     }
 
     /**
@@ -175,35 +153,31 @@ public class Messager {
      * @param a3 third argument
      * @param a4 fourth argument
      */
-    String getText(String key, String a1, String a2, String a3,
-                          String a4) {
+    String getText(String key, String a1, String a2, String a3, String a4) {
         try {
-            String message = getString(key);
+            String message = getString( key );
             String[] args = new String[4];
             args[0] = a1;
             args[1] = a2;
             args[2] = a3;
             args[3] = a4;
-            return MessageFormat.format(message, (Object[])args);
+            return MessageFormat.format( message, (Object[]) args );
         } catch (MissingResourceException e) {
-            return "********** Resource for javadoc is broken. There is no " +
-                key + " key in resource.";
+            return "********** Resource for javadoc is broken. There is no " + key + " key in resource.";
         }
     }
 
     /**
-     * Print error message, increment error count.
-     * Part of DocErrorReporter.
+     * Print error message, increment error count. Part of DocErrorReporter.
      *
      * @param msg message to print
      */
     public void printError(String msg) {
-        printError(null, msg);
+        printError( null, msg );
     }
 
     /**
-     * Print error message, increment error count.
-     * Part of DocErrorReporter.
+     * Print error message, increment error count. Part of DocErrorReporter.
      *
      * @param pos the position where the error occurs
      * @param msg message to print
@@ -211,25 +185,23 @@ public class Messager {
     public void printError(SourcePosition pos, String msg) {
         if (log.isErrorEnabled() && (getNerrors() < maxErrors)) {
             String prefix = (pos == null) ? programName : pos.toString();
-            log.error( String.format("%s: %s - %s", prefix, getText("javadoc.error"), msg));
+            log.error( String.format( "%s: %s - %s", prefix, getText( "javadoc.error" ), msg ) );
             prompt();
-            setNerrors(getNerrors() + 1);
+            setNerrors( getNerrors() + 1 );
         }
     }
 
     /**
-     * Print warning message, increment warning count.
-     * Part of DocErrorReporter.
+     * Print warning message, increment warning count. Part of DocErrorReporter.
      *
      * @param msg message to print
      */
     public void printWarning(String msg) {
-        printWarning(null, msg);
+        printWarning( null, msg );
     }
 
     /**
-     * Print warning message, increment warning count.
-     * Part of DocErrorReporter.
+     * Print warning message, increment warning count. Part of DocErrorReporter.
      *
      * @param pos the position where the error occurs
      * @param msg message to print
@@ -237,121 +209,125 @@ public class Messager {
     public void printWarning(SourcePosition pos, String msg) {
         if (log.isWarnEnabled() && (getNwarnings() < maxWarnings)) {
             String prefix = (pos == null) ? programName : pos.toString();
-            log.warn( String.format("%s: %s - %s", prefix, getText("javadoc.warning"), msg));
-            setNwarnings(getNwarnings() + 1);
+            log.warn( String.format( "%s: %s - %s", prefix, getText( "javadoc.warning" ), msg ) );
+            setNwarnings( getNwarnings() + 1 );
         }
     }
 
     /**
-     * Print a message.
-     * Part of DocErrorReporter.
+     * Print a message. Part of DocErrorReporter.
      *
      * @param msg message to print
      */
     public void printNotice(String msg) {
-        printNotice(null, msg);
+        printNotice( null, msg );
     }
 
     /**
-     * Print a message.
-     * Part of DocErrorReporter.
+     * Print a message. Part of DocErrorReporter.
      *
      * @param pos the position where the error occurs
      * @param msg message to print
      */
     public void printNotice(SourcePosition pos, String msg) {
-    	if (log.isInfoEnabled()) {
-            if (pos == null)
-                log.info(msg);
-            else
-            	log.info( String.format("%s: %s", pos, msg) );
-    	}
+        if (log.isInfoEnabled()) {
+            if (pos == null) {
+                log.info( msg );
+            } else {
+                log.info( String.format( "%s: %s", pos, msg ) );
+            }
+        }
     }
 
     /**
      * Print error message, increment error count.
      *
+     * @param pos the source position where the error occurred
      * @param key selects message from resource
      */
     public void error(SourcePosition pos, String key) {
-        printError(pos, getText(key));
+        printError( pos, getText( key ) );
     }
 
-    /** Prompt user after an error.
+    /**
+     * Prompt user after an error.
      */
     public void prompt() {
         if (isPromptOnError()) {
-           log.error("resume.abort");// localize?
+            log.error( "resume.abort" );// localize?
             try {
                 while (true) {
                     switch (System.in.read()) {
-                    case 'a': case 'A':
-                        System.exit(-1);
-                        return;
-                    case 'r': case 'R':
-                        return;
-                    case 'x': case 'X':
-                        throw new AssertionError("user abort");
-                    default:
+                        case 'a':
+                        case 'A':
+                            System.exit( -1 );
+                            return;
+                        case 'r':
+                        case 'R':
+                            return;
+                        case 'x':
+                        case 'X':
+                            throw new AssertionError( "user abort" );
+                        default:
                     }
                 }
             } catch (IOException e) {
-            	log.warn("Error reading from standard input.");
+                log.warn( "Error reading from standard input." );
             }
         }
     }
 
-	/**
-	 * Returns the value of the 'nerrors' field.
-	 *
-	 * @return int
-	 */
-	public int getNerrors() {
-		return nerrors;
-	}
+    /**
+     * Returns the value of the 'nerrors' field.
+     *
+     * @return int
+     */
+    public int getNerrors() {
+        return nerrors;
+    }
 
-	/**
-	 * Assigns the value of the 'nerrors' field.
-	 *
-	 * @param nerrors  the field value to assign
-	 */
-	public void setNerrors(int nerrors) {
-		this.nerrors = nerrors;
-	}
+    /**
+     * Assigns the value of the 'nerrors' field.
+     *
+     * @param nerrors the field value to assign
+     */
+    public void setNerrors(int nerrors) {
+        this.nerrors = nerrors;
+    }
 
-	/**
-	 * Returns the value of the 'nwarnings' field.
-	 *
-	 * @return int
-	 */
-	public int getNwarnings() {
-		return nwarnings;
-	}
+    /**
+     * Returns the value of the 'nwarnings' field.
+     *
+     * @return int
+     */
+    public int getNwarnings() {
+        return nwarnings;
+    }
 
-	/**
-	 * Assigns the value of the 'nwarnings' field.
-	 *
-	 * @param nwarnings  the field value to assign
-	 */
-	public void setNwarnings(int nwarnings) {
-		this.nwarnings = nwarnings;
-	}
+    /**
+     * Assigns the value of the 'nwarnings' field.
+     *
+     * @param nwarnings the field value to assign
+     */
+    public void setNwarnings(int nwarnings) {
+        this.nwarnings = nwarnings;
+    }
 
-	/**
-	 * Returns the value of the 'promptOnError' field.
-	 *
-	 * @return boolean
-	 */
-	public boolean isPromptOnError() {
-		return promptOnError;
-	}
+    /**
+     * Returns the value of the 'promptOnError' field.
+     *
+     * @return boolean
+     */
+    public boolean isPromptOnError() {
+        return promptOnError;
+    }
 
-	/**
-	 * Assigns the value of the 'promptOnError' field.
-	 *
-	 * @param promptOnError  the field value to assign
-	 */
-	public void setPromptOnError(boolean promptOnError) {
-		this.promptOnError = promptOnError;
-	}
+    /**
+     * Assigns the value of the 'promptOnError' field.
+     *
+     * @param promptOnError the field value to assign
+     */
+    public void setPromptOnError(boolean promptOnError) {
+        this.promptOnError = promptOnError;
+    }
 }

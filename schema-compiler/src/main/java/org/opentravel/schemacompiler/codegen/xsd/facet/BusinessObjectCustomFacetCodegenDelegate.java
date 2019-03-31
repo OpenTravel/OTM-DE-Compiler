@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.codegen.xsd.facet;
 
-import javax.xml.namespace.QName;
+package org.opentravel.schemacompiler.codegen.xsd.facet;
 
 import org.opentravel.schemacompiler.ioc.SchemaDependency;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
@@ -23,9 +22,11 @@ import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLFacetOwner;
 
+import javax.xml.namespace.QName;
+
 /**
- * Code generation delegate for <code>TLFacet</code> instances with a facet type of
- * <code>CUSTOM</code> and a facet owner of type <code>TLBusinessObject</code>.
+ * Code generation delegate for <code>TLFacet</code> instances with a facet type of <code>CUSTOM</code> and a facet
+ * owner of type <code>TLBusinessObject</code>.
  * 
  * @author S. Livezey
  */
@@ -34,11 +35,10 @@ public class BusinessObjectCustomFacetCodegenDelegate extends BusinessObjectFace
     /**
      * Constructor that specifies the source facet for which code artifacts are being generated.
      * 
-     * @param sourceFacet
-     *            the source facet
+     * @param sourceFacet the source facet
      */
     public BusinessObjectCustomFacetCodegenDelegate(TLFacet sourceFacet) {
-        super(sourceFacet);
+        super( sourceFacet );
     }
 
     /**
@@ -46,29 +46,29 @@ public class BusinessObjectCustomFacetCodegenDelegate extends BusinessObjectFace
      */
     @Override
     public TLFacet getLocalBaseFacet() {
-        FacetCodegenDelegateFactory factory = new FacetCodegenDelegateFactory(transformerContext);
+        FacetCodegenDelegateFactory factory = new FacetCodegenDelegateFactory( transformerContext );
         TLFacet sourceFacet = getSourceFacet();
         TLFacetOwner facetOwner = sourceFacet.getOwningEntity();
         TLFacet baseFacet = null;
 
         while ((baseFacet == null) && (facetOwner instanceof TLContextualFacet)) {
-        	TLContextualFacet owningFacet = (TLContextualFacet) facetOwner;
-        	
-        	if (factory.getDelegate(owningFacet).hasContent()) {
-        		baseFacet = owningFacet;
-        		
-        	} else {
-        		facetOwner = owningFacet.getOwningEntity();
-        	}
+            TLContextualFacet owningFacet = (TLContextualFacet) facetOwner;
+
+            if (factory.getDelegate( owningFacet ).hasContent()) {
+                baseFacet = owningFacet;
+
+            } else {
+                facetOwner = owningFacet.getOwningEntity();
+            }
         }
         if ((baseFacet == null) && (sourceFacet.getOwningEntity() instanceof TLBusinessObject)) {
             TLBusinessObject businessObject = (TLBusinessObject) sourceFacet.getOwningEntity();
             TLFacet parentFacet = businessObject.getSummaryFacet();
 
-            if (!factory.getDelegate(parentFacet).hasContent()) {
+            if (!factory.getDelegate( parentFacet ).hasContent()) {
                 parentFacet = businessObject.getIdFacet();
             }
-            if (factory.getDelegate(parentFacet).hasContent()) {
+            if (factory.getDelegate( parentFacet ).hasContent()) {
                 baseFacet = parentFacet;
             }
         }
@@ -80,24 +80,24 @@ public class BusinessObjectCustomFacetCodegenDelegate extends BusinessObjectFace
      */
     @Override
     public QName getExtensionPointElement() {
-    	TLFacetOwner facetOwner = getSourceFacet().getOwningEntity();
+        TLFacetOwner facetOwner = getSourceFacet().getOwningEntity();
         QName extensionPointQName;
-    	
+
         if (facetOwner instanceof TLBusinessObject) {
-        	TLBusinessObject bo = (TLBusinessObject) facetOwner;
+            TLBusinessObject bo = (TLBusinessObject) facetOwner;
             SchemaDependency extensionPoint;
-            
+
             if (declaresOrInheritsFacetContent( bo.getSummaryFacet() )) {
-            	extensionPoint = SchemaDependency.getExtensionPointCustomElement();
-            	
+                extensionPoint = SchemaDependency.getExtensionPointCustomElement();
+
             } else {
-            	extensionPoint = SchemaDependency.getExtensionPointElement();
+                extensionPoint = SchemaDependency.getExtensionPointElement();
             }
             extensionPointQName = extensionPoint.toQName();
-            addCompileTimeDependency(extensionPoint);
-            
+            addCompileTimeDependency( extensionPoint );
+
         } else {
-        	extensionPointQName = null;
+            extensionPointQName = null;
         }
         return extensionPointQName;
     }

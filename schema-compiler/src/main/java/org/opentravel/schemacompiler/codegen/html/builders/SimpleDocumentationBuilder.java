@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.codegen.html.builders;
 
-import java.io.IOException;
+package org.opentravel.schemacompiler.codegen.html.builders;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerationException;
 import org.opentravel.schemacompiler.codegen.html.Content;
@@ -23,52 +22,52 @@ import org.opentravel.schemacompiler.codegen.html.writers.NamedEntityWriter;
 import org.opentravel.schemacompiler.model.TLAttributeType;
 import org.opentravel.schemacompiler.model.TLSimple;
 
+import java.io.IOException;
+
 /**
  * @author Eric.Bronson
  *
  */
-public class SimpleDocumentationBuilder extends
-		NamedEntityDocumentationBuilder<TLSimple> {
+public class SimpleDocumentationBuilder extends NamedEntityDocumentationBuilder<TLSimple> {
 
-	/**
-	 * @param manager
-	 */
-	public SimpleDocumentationBuilder(TLSimple t) {
-		super(t);
-		TLAttributeType parentType = t.getParentType();
-		
-		if (parentType != null) {
-			superType = DocumentationBuilderFactory.getInstance()
-					.getDocumentationBuilder(parentType);
-		}
-	}
+    /**
+     * @param t the simple type for which to create a builder
+     */
+    public SimpleDocumentationBuilder(TLSimple t) {
+        super( t );
+        TLAttributeType parentType = t.getParentType();
 
-	@Override
-	public void build() throws CodeGenerationException {
-		try {
-			NamedEntityWriter<SimpleDocumentationBuilder> writer = new NamedEntityWriter<>(this, prev, next);
-			Content contentTree = writer.getHeader();
-			writer.addMemberInheritanceTree(contentTree);
-			Content classContentTree = writer.getContentHeader();
-			Content tree = writer.getMemberTree(classContentTree);
+        if (parentType != null) {
+            superType = DocumentationBuilderFactory.getInstance().getDocumentationBuilder( parentType );
+        }
+    }
 
-			Content classInfoTree = writer.getMemberInfoItemTree();
-			writer.addDocumentationInfo(classInfoTree);
-			tree.addContent(classInfoTree);
+    @Override
+    public void build() throws CodeGenerationException {
+        try {
+            NamedEntityWriter<SimpleDocumentationBuilder> writer = new NamedEntityWriter<>( this, prev, next );
+            Content contentTree = writer.getHeader();
+            writer.addMemberInheritanceTree( contentTree );
+            Content classContentTree = writer.getContentHeader();
+            Content tree = writer.getMemberTree( classContentTree );
 
-			classContentTree.addContent(tree);
-			contentTree.addContent(classContentTree);
-			writer.addFooter(contentTree);
-			writer.printDocument(contentTree);
-			writer.close();
-			
-		} catch (IOException e) {
-			throw new CodeGenerationException("Error creating doclet writer", e);
-		}
-	}
+            Content classInfoTree = writer.getMemberInfoItemTree();
+            writer.addDocumentationInfo( classInfoTree );
+            tree.addContent( classInfoTree );
 
-	@Override
-	public DocumentationBuilderType getDocType() {
-		return DocumentationBuilderType.SIMPLE;
-	}
+            classContentTree.addContent( tree );
+            contentTree.addContent( classContentTree );
+            writer.addFooter( contentTree );
+            writer.printDocument( contentTree );
+            writer.close();
+
+        } catch (IOException e) {
+            throw new CodeGenerationException( "Error creating doclet writer", e );
+        }
+    }
+
+    @Override
+    public DocumentationBuilderType getDocType() {
+        return DocumentationBuilderType.SIMPLE;
+    }
 }

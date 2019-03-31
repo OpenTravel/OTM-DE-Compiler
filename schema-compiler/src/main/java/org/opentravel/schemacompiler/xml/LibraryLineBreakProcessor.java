@@ -13,14 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.xml;
 
-import java.util.Arrays;
-import java.util.List;
+package org.opentravel.schemacompiler.xml;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * The line-break processor used to format XML Schema documents.
@@ -29,11 +30,10 @@ import org.w3c.dom.Node;
  */
 public class LibraryLineBreakProcessor extends PrettyPrintLineBreakProcessor {
 
-    private static final String[] LINE_BREAK_ELEMENTS = { "Simple", "ValueWithAttrs",
-            "Enumeration_Closed", "Enumeration_Open", "CoreObject", "BusinessObject",
-            "ExtensionPointFacet", "Service", "VersionScheme" };
+    private static final String[] LINE_BREAK_ELEMENTS = {"Simple", "ValueWithAttrs", "Enumeration_Closed",
+        "Enumeration_Open", "CoreObject", "BusinessObject", "ExtensionPointFacet", "Service", "VersionScheme"};
 
-    private static final List<String> lineBreakElements = Arrays.asList(LINE_BREAK_ELEMENTS);
+    private static final List<String> lineBreakElements = Arrays.asList( LINE_BREAK_ELEMENTS );
 
     /**
      * @see org.opentravel.schemacompiler.xml.PrettyPrintLineBreakProcessor#insertLineBreakTokens(org.w3c.dom.Document)
@@ -48,18 +48,17 @@ public class LibraryLineBreakProcessor extends PrettyPrintLineBreakProcessor {
                 continue;
             }
             String elementName = topLevelNode.getNodeName();
-            int colonIdx = elementName.indexOf(':');
+            int colonIdx = elementName.indexOf( ':' );
 
             if (colonIdx >= 0) {
-                elementName = elementName.substring(colonIdx + 1);
+                elementName = elementName.substring( colonIdx + 1 );
             }
-            if (lineBreakElements.contains(elementName)) {
-                topLevelNode.getParentNode().insertBefore(document.createComment(LINE_BREAK_TOKEN),
-                        topLevelNode);
+            if (lineBreakElements.contains( elementName )) {
+                topLevelNode.getParentNode().insertBefore( document.createComment( LINE_BREAK_TOKEN ), topLevelNode );
             }
             topLevelNode = topLevelNode.getNextSibling();
         }
-        rootElement.appendChild(document.createComment(LINE_BREAK_TOKEN));
+        rootElement.appendChild( document.createComment( LINE_BREAK_TOKEN ) );
     }
 
 }

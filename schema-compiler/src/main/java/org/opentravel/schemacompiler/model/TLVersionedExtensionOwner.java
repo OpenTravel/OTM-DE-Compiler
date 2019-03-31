@@ -13,16 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.model;
 
 import org.opentravel.schemacompiler.version.Versioned;
 
 /**
- * Interface that specifies a union of the <code>Versioned</code> and <code>TLExtensionOwner</code>
- * contracts.
+ * Interface that specifies a union of the <code>Versioned</code> and <code>TLExtensionOwner</code> contracts.
  *
  * @author S. Livezey
  */
 public interface TLVersionedExtensionOwner extends Versioned, TLExtensionOwner {
-	
+
 }

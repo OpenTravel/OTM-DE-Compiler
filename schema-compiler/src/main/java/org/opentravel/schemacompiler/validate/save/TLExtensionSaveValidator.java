@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.validate.save;
 
 import org.opentravel.schemacompiler.model.TLExtension;
@@ -32,7 +33,7 @@ public class TLExtensionSaveValidator extends TLValidatorBase<TLExtension> {
      */
     @Override
     protected ValidationFindings validateFields(TLExtension target) {
-        TLValidationBuilder builder = newValidationBuilder(target);
+        TLValidationBuilder builder = newValidationBuilder( target );
 
         // No validation checks required for save operations
 

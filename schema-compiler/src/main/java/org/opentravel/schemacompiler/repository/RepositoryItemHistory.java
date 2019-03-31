@@ -26,46 +26,45 @@ import java.util.List;
  * @author S. Livezey
  */
 public class RepositoryItemHistory {
-	
-	private RepositoryItem item;
-	private List<RepositoryItemCommit> commitHistory = new ArrayList<>();
-	
-	/**
-	 * Constructor that initializes the <code>RepositoryItem</code> to which
-	 * this history applies.
-	 * 
-	 * @param item  the repository item to which this history applies
-	 */
-	public RepositoryItemHistory(RepositoryItem item) {
-		this.item = item;
-	}
-	
-	/**
-	 * Returns the <code>RepositoryItem</code> to which this history applies.
-	 * 
-	 * @return RepositoryItem
-	 */
-	public RepositoryItem getRepositoryItem() {
-		return item;
-	}
-	
-	/**
-	 * Returns the detailed commit history for this repository item.
-	 *
-	 * @return List<RepositoryItemCommit>
-	 */
-	public List<RepositoryItemCommit> getCommitHistory() {
-		return commitHistory;
-	}
-	
-	/**
-	 * Assigns the detailed commit history for this repository item.
-	 *
-	 * @param commitHistory  the field value to assign
-	 */
-	public void setCommitHistory(List<RepositoryItemCommit> commitHistory) {
-		this.commitHistory = Collections.unmodifiableList(
-				(commitHistory == null) ? new ArrayList<RepositoryItemCommit>() : commitHistory );
-	}
-	
+
+    private RepositoryItem item;
+    private List<RepositoryItemCommit> commitHistory = new ArrayList<>();
+
+    /**
+     * Constructor that initializes the <code>RepositoryItem</code> to which this history applies.
+     * 
+     * @param item the repository item to which this history applies
+     */
+    public RepositoryItemHistory(RepositoryItem item) {
+        this.item = item;
+    }
+
+    /**
+     * Returns the <code>RepositoryItem</code> to which this history applies.
+     * 
+     * @return RepositoryItem
+     */
+    public RepositoryItem getRepositoryItem() {
+        return item;
+    }
+
+    /**
+     * Returns the detailed commit history for this repository item.
+     *
+     * @return List&lt;RepositoryItemCommit&gt;
+     */
+    public List<RepositoryItemCommit> getCommitHistory() {
+        return commitHistory;
+    }
+
+    /**
+     * Assigns the detailed commit history for this repository item.
+     *
+     * @param commitHistory the field value to assign
+     */
+    public void setCommitHistory(List<RepositoryItemCommit> commitHistory) {
+        this.commitHistory = Collections
+            .unmodifiableList( (commitHistory == null) ? new ArrayList<RepositoryItemCommit>() : commitHistory );
+    }
+
 }

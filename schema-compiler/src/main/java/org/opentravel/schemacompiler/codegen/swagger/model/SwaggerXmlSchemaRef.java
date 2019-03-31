@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.codegen.swagger.model;
 
 import org.opentravel.schemacompiler.codegen.json.model.JsonModelObject;
@@ -20,53 +21,52 @@ import org.opentravel.schemacompiler.codegen.json.model.JsonModelObject;
 import com.google.gson.JsonObject;
 
 /**
- * Class that defines the meta-model for a non-standard XML schema reference
- * within a Swagger document.
+ * Class that defines the meta-model for a non-standard XML schema reference within a Swagger document.
  */
 public class SwaggerXmlSchemaRef implements JsonModelObject {
-	
-	private String schemaPath;
 
-	/**
-	 * Default constructor.
-	 */
-	public SwaggerXmlSchemaRef() {}
-	
-	/**
-	 * Constructor that initializes the XML schema reference path.
-	 * 
-	 * @param schemaPath  the schema path to assign
-	 */
-	public SwaggerXmlSchemaRef(String schemaPath) {
-		this.schemaPath = schemaPath;
-	}
-	
-	/**
-	 * Returns the value of the 'schemaPath' field.
-	 *
-	 * @return String
-	 */
-	public String getSchemaPath() {
-		return schemaPath;
-	}
+    private String schemaPath;
 
-	/**
-	 * Assigns the value of the 'schemaPath' field.
-	 *
-	 * @param schemaPath  the field value to assign
-	 */
-	public void setSchemaPath(String schemaPath) {
-		this.schemaPath = schemaPath;
-	}
-	
-	/**
-	 * @see org.opentravel.schemacompiler.codegen.json.model.JsonModelObject#toJson()
-	 */
-	public JsonObject toJson() {
-		JsonObject json = new JsonObject();
-		
-		addProperty( json, "$ref", schemaPath );
-		return json;
-	}
-	
+    /**
+     * Default constructor.
+     */
+    public SwaggerXmlSchemaRef() {}
+
+    /**
+     * Constructor that initializes the XML schema reference path.
+     * 
+     * @param schemaPath the schema path to assign
+     */
+    public SwaggerXmlSchemaRef(String schemaPath) {
+        this.schemaPath = schemaPath;
+    }
+
+    /**
+     * Returns the value of the 'schemaPath' field.
+     *
+     * @return String
+     */
+    public String getSchemaPath() {
+        return schemaPath;
+    }
+
+    /**
+     * Assigns the value of the 'schemaPath' field.
+     *
+     * @param schemaPath the field value to assign
+     */
+    public void setSchemaPath(String schemaPath) {
+        this.schemaPath = schemaPath;
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.codegen.json.model.JsonModelObject#toJson()
+     */
+    public JsonObject toJson() {
+        JsonObject json = new JsonObject();
+
+        addProperty( json, "$ref", schemaPath );
+        return json;
+    }
+
 }

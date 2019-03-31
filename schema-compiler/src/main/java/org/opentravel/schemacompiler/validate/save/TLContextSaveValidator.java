@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.validate.save;
 
 import org.opentravel.schemacompiler.model.TLContext;
@@ -33,13 +34,12 @@ public class TLContextSaveValidator extends TLContextBaseValidator {
      */
     @Override
     protected ValidationFindings validateFields(TLContext target) {
-        TLValidationBuilder builder = newValidationBuilder(target);
+        TLValidationBuilder builder = newValidationBuilder( target );
 
-        builder.setProperty("contextId", target.getContextId()).setFindingType(FindingType.WARNING)
-                .assertNotNull();
+        builder.setProperty( "contextId", target.getContextId() ).setFindingType( FindingType.WARNING ).assertNotNull();
 
-        builder.setProperty("applicationContext", target.getApplicationContext())
-                .setFindingType(FindingType.WARNING).assertNotNull();
+        builder.setProperty( "applicationContext", target.getApplicationContext() )
+            .setFindingType( FindingType.WARNING ).assertNotNull();
 
         return builder.getFindings();
     }

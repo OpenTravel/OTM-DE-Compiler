@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.model;
 
 import org.opentravel.schemacompiler.event.ModelEvent;
@@ -37,12 +38,12 @@ public class TLInclude implements Validatable {
         StringBuilder identity = new StringBuilder();
 
         if (owningLibrary != null) {
-            identity.append(owningLibrary.getValidationIdentity()).append(" : ");
+            identity.append( owningLibrary.getValidationIdentity() ).append( " : " );
         }
         if (path == null) {
-            identity.append("[Undefined Library Include]");
+            identity.append( "[Undefined Library Include]" );
         } else {
-            identity.append(path);
+            identity.append( path );
         }
         return identity.toString();
     }
@@ -59,8 +60,7 @@ public class TLInclude implements Validatable {
     /**
      * Assigns the value of the 'owningLibrary' field.
      * 
-     * @param owningLibrary
-     *            the field value to assign
+     * @param owningLibrary the field value to assign
      */
     public void setOwningLibrary(AbstractLibrary owningLibrary) {
         this.owningLibrary = owningLibrary;
@@ -78,8 +78,7 @@ public class TLInclude implements Validatable {
     /**
      * Assigns the value of the 'path' field.
      * 
-     * @param path
-     *            the field value to assign
+     * @param path the field value to assign
      */
     public void setPath(String path) {
         this.path = path;
@@ -94,8 +93,7 @@ public class TLInclude implements Validatable {
 
         if (obj instanceof TLInclude) {
             TLInclude otherInclude = (TLInclude) obj;
-            result = (otherInclude.path == null) ? (this.path == null) : otherInclude.path
-                    .equals(this.path);
+            result = (otherInclude.path == null) ? (this.path == null) : otherInclude.path.equals( this.path );
         }
         return result;
     }
@@ -113,17 +111,15 @@ public class TLInclude implements Validatable {
      * 
      * @author S. Livezey
      */
-    protected static class IncludeListManager extends
-            ChildEntityListManager<TLInclude, AbstractLibrary> {
+    protected static class IncludeListManager extends ChildEntityListManager<TLInclude,AbstractLibrary> {
 
         /**
          * Constructor that specifies the owner of the unerlying list.
          * 
-         * @param owner
-         *            the owner of the underlying list of children
+         * @param owner the owner of the underlying list of children
          */
         public IncludeListManager(AbstractLibrary owner) {
-            super(owner, ModelEventType.INCLUDE_ADDED, ModelEventType.INCLUDE_REMOVED);
+            super( owner, ModelEventType.INCLUDE_ADDED, ModelEventType.INCLUDE_REMOVED );
         }
 
         /**
@@ -140,7 +136,7 @@ public class TLInclude implements Validatable {
          */
         @Override
         protected void assignOwner(TLInclude child, AbstractLibrary owner) {
-            child.setOwningLibrary(owner);
+            child.setOwningLibrary( owner );
         }
 
         /**
@@ -152,7 +148,7 @@ public class TLInclude implements Validatable {
             TLModel owningModel = owner.getOwningModel();
 
             if (owningModel != null) {
-                owningModel.publishEvent(event);
+                owningModel.publishEvent( event );
             }
         }
 

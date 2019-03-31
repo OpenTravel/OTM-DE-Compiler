@@ -13,13 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.codegen.impl;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
-import javax.xml.namespace.QName;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerationFilter;
 import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
@@ -63,97 +58,91 @@ import org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter;
 import org.opentravel.schemacompiler.visitor.SchemaDependencyNavigator;
 import org.springframework.context.ApplicationContext;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+import javax.xml.namespace.QName;
+
 /**
- * Builer that uses a dependency navigator and visitor to construct instances
- * <code>CodeGenerationFilter</code> that will restrict the generation of any libraries and member
- * entities that are not required by a single library member.
+ * Builer that uses a dependency navigator and visitor to construct instances <code>CodeGenerationFilter</code> that
+ * will restrict the generation of any libraries and member entities that are not required by a single library member.
  * 
  * @author S. Livezey
  */
 public class DependencyFilterBuilder {
 
     private DependencyVisitor visitor = new DependencyVisitor();
-    private AbstractNavigator<NamedEntity> navigator = new SchemaDependencyNavigator(visitor);
+    private AbstractNavigator<NamedEntity> navigator = new SchemaDependencyNavigator( visitor );
     private boolean includeExtendedLegacySchemas = false;
     private boolean includeEntityExtensions = false;
 
     /**
      * Default constructor.
      */
-    public DependencyFilterBuilder() {
-    }
+    public DependencyFilterBuilder() {}
 
     /**
-     * Constructor that assigns a single library member for which the dependency filter will be
-     * generated.
+     * Constructor that assigns a single library member for which the dependency filter will be generated.
      * 
-     * @param libraryMember
-     *            the library member for which filters will be generated
+     * @param libraryMember the library member for which filters will be generated
      */
     public DependencyFilterBuilder(NamedEntity libraryMember) {
-        addLibraryMember(libraryMember);
+        addLibraryMember( libraryMember );
     }
 
     /**
      * Constructor that assigns a single library for which the dependency filter will be generated.
      * 
-     * @param library
-     *            the library for which filters will be generated
+     * @param library the library for which filters will be generated
      */
     public DependencyFilterBuilder(AbstractLibrary library) {
-        addLibrary(library);
+        addLibrary( library );
     }
 
     /**
-     * Constructor that assigns a collection of libraries for which the dependency filter will be
-     * generated.
+     * Constructor that assigns a collection of libraries for which the dependency filter will be generated.
      * 
-     * @param libraries
-     *            the collection of libraries for which filters will be generated
+     * @param libraries the collection of libraries for which filters will be generated
      */
     public DependencyFilterBuilder(Collection<? extends AbstractLibrary> libraries) {
         for (AbstractLibrary library : libraries) {
-            addLibrary(library);
+            addLibrary( library );
         }
     }
 
     /**
-     * Assigns the navigator to use when traversing the model for dependencies. By default, a
-     * standard <code>DependencyNavigator</code> instance is used.
+     * Assigns the navigator to use when traversing the model for dependencies. By default, a standard
+     * <code>DependencyNavigator</code> instance is used.
      * 
-     * @param navigator
-     *            the navigator instance to assign
+     * @param navigator the navigator instance to assign
      * @return DependencyFilterBuilder
      */
     public DependencyFilterBuilder setNavigator(DependencyNavigator navigator) {
-        navigator.setVisitor(visitor);
+        navigator.setVisitor( visitor );
         this.navigator = navigator;
         return this;
     }
 
     /**
-     * Assigns the flag indicating whether the filter produced by this builder should include legacy
-     * schemas that are indirectly referenced through other legacy XSD files (default is false).
+     * Assigns the flag indicating whether the filter produced by this builder should include legacy schemas that are
+     * indirectly referenced through other legacy XSD files (default is false).
      * 
-     * @param includeExtendedLegacySchemas
-     *            flag indicating whether to include indirectly referenced schemas
+     * @param includeExtendedLegacySchemas flag indicating whether to include indirectly referenced schemas
      * @return DependencyFilterBuilder
      */
-    public DependencyFilterBuilder setIncludeExtendedLegacySchemas(
-            boolean includeExtendedLegacySchemas) {
+    public DependencyFilterBuilder setIncludeExtendedLegacySchemas(boolean includeExtendedLegacySchemas) {
         this.includeExtendedLegacySchemas = includeExtendedLegacySchemas;
         return this;
     }
 
     /**
-     * Assigns the flag indicating whether the filter produced by this builder should include
-     * entities that are referenced by <code>TLExtension</code> items. By default, this option is
-     * false because the schema generator makes a local copy of all inherited properties,
-     * attributes, and indicators.
+     * Assigns the flag indicating whether the filter produced by this builder should include entities that are
+     * referenced by <code>TLExtension</code> items. By default, this option is false because the schema generator makes
+     * a local copy of all inherited properties, attributes, and indicators.
      * 
-     * @param includeEntityExtensions
-     *            flag indicating whether to include entities that are referenced by
-     *            <code>TLExtension</code>
+     * @param includeEntityExtensions flag indicating whether to include entities that are referenced by
+     *        <code>TLExtension</code>
      * @return DependencyFilterBuilder
      */
     public DependencyFilterBuilder setIncludeEntityExtensions(boolean includeEntityExtensions) {
@@ -164,30 +153,28 @@ public class DependencyFilterBuilder {
     /**
      * Adds an additional library member for which the dependency filter will be generated.
      * 
-     * @param libraryMember
-     *            the library member for which filters will be generated
+     * @param libraryMember the library member for which filters will be generated
      * @return DependencyFilterBuilder
      */
     public DependencyFilterBuilder addLibraryMember(NamedEntity libraryMember) {
-        navigator.navigate(libraryMember);
+        navigator.navigate( libraryMember );
         return this;
     }
 
     /**
      * Adds an additional library for which the dependency filter will be generated.
      * 
-     * @param library
-     *            the library for which filters will be generated
+     * @param library the library for which filters will be generated
      * @return DependencyFilterBuilder
      */
     public DependencyFilterBuilder addLibrary(AbstractLibrary library) {
-        navigator.navigateLibrary(library);
+        navigator.navigateLibrary( library );
         return this;
     }
 
     /**
-     * Constructs a new code generation filter that will allow processing only for the libraries and
-     * member entities required by the currently-assigned service.
+     * Constructs a new code generation filter that will allow processing only for the libraries and member entities
+     * required by the currently-assigned service.
      * 
      * @return CodeGenerationFilter
      */
@@ -198,44 +185,38 @@ public class DependencyFilterBuilder {
     /**
      * Recursive method that locates all of the extended dependencies for a library.
      * 
-     * @param library
-     *            the library for which to identify dependencies
-     * @param builtInDependencies
-     *            the list of built-in dependencies being constructed
+     * @param library the library for which to identify dependencies
+     * @param builtInDependencies the list of built-in dependencies being constructed
      */
-    private void findBuiltInDependencies(BuiltInLibrary library,
-            List<BuiltInLibrary> builtInDependencies) {
+    private void findBuiltInDependencies(BuiltInLibrary library, List<BuiltInLibrary> builtInDependencies) {
         if ((library != null) && (library.getSchemaDeclaration() != null)) {
             List<String> dependencyIds = library.getSchemaDeclaration().getDependencies();
 
             for (String dependencyId : dependencyIds) {
-                BuiltInLibrary dependency = getBuiltInLibrary(dependencyId,
-                        library.getOwningModel());
+                BuiltInLibrary dependency = getBuiltInLibrary( dependencyId, library.getOwningModel() );
 
-                if ((dependency != null) && !builtInDependencies.contains(dependency)) {
-                    builtInDependencies.add(dependency);
-                    findBuiltInDependencies(dependency, builtInDependencies);
+                if ((dependency != null) && !builtInDependencies.contains( dependency )) {
+                    builtInDependencies.add( dependency );
+                    findBuiltInDependencies( dependency, builtInDependencies );
                 }
             }
         }
     }
 
     /**
-     * Returns the built-in library from the model whose <code>SchemaDeclaration</code> bean ID
-     * matches the one provided.
+     * Returns the built-in library from the model whose <code>SchemaDeclaration</code> bean ID matches the one
+     * provided.
      * 
-     * @param declarationId
-     *            the application context ID of the schema declaration for a built-in library
-     * @param model
-     *            the model to which the built-in library belongs
+     * @param declarationId the application context ID of the schema declaration for a built-in library
+     * @param model the model to which the built-in library belongs
      * @return BuiltInLibrary
      */
     private BuiltInLibrary getBuiltInLibrary(String declarationId, TLModel model) {
         ApplicationContext appContext = SchemaCompilerApplicationContext.getContext();
         BuiltInLibrary builtIn = null;
 
-        if (appContext.containsBean(declarationId)) {
-            SchemaDeclaration sd = (SchemaDeclaration) appContext.getBean(declarationId);
+        if (appContext.containsBean( declarationId )) {
+            SchemaDeclaration sd = (SchemaDeclaration) appContext.getBean( declarationId );
 
             for (BuiltInLibrary lib : model.getBuiltInLibraries()) {
                 if (lib.getSchemaDeclaration() == sd) {
@@ -248,8 +229,7 @@ public class DependencyFilterBuilder {
     }
 
     /**
-     * Model element visitor that captures all named entities that are required by the
-     * currently-assigned service.
+     * Model element visitor that captures all named entities that are required by the currently-assigned service.
      * 
      * @author S. Livezey
      */
@@ -267,11 +247,10 @@ public class DependencyFilterBuilder {
         }
 
         /**
-         * Internal visitor method that adds the given library element and it's owning library to
-         * the filter that is being populated.
+         * Internal visitor method that adds the given library element and it's owning library to the filter that is
+         * being populated.
          * 
-         * @param entity
-         *            the library element being visited
+         * @param entity the library element being visited
          */
         private void visitLibraryElement(LibraryElement entity) {
             AbstractLibrary library = entity.getOwningLibrary();
@@ -279,11 +258,11 @@ public class DependencyFilterBuilder {
             if (library instanceof BuiltInLibrary) {
                 List<BuiltInLibrary> builtInDependencies = new ArrayList<>();
 
-                findBuiltInDependencies((BuiltInLibrary) library, builtInDependencies);
+                findBuiltInDependencies( (BuiltInLibrary) library, builtInDependencies );
                 builtInDependencies.forEach( d -> filter.addProcessedLibrary( d ) );
             }
-            filter.addProcessedLibrary(library);
-            filter.addProcessedElement(entity);
+            filter.addProcessedLibrary( library );
+            filter.addProcessedElement( entity );
         }
 
         /**
@@ -291,7 +270,7 @@ public class DependencyFilterBuilder {
          */
         @Override
         public boolean visitLegacySchemaLibrary(XSDLibrary library) {
-            filter.addProcessedLibrary(library);
+            filter.addProcessedLibrary( library );
             return includeExtendedLegacySchemas;
         }
 
@@ -300,7 +279,7 @@ public class DependencyFilterBuilder {
          */
         @Override
         public boolean visitUserDefinedLibrary(TLLibrary library) {
-            filter.addProcessedLibrary(library);
+            filter.addProcessedLibrary( library );
             return true;
         }
 
@@ -309,7 +288,7 @@ public class DependencyFilterBuilder {
          */
         @Override
         public boolean visitSimple(TLSimple simple) {
-            visitLibraryElement(simple);
+            visitLibraryElement( simple );
             return true;
         }
 
@@ -319,10 +298,9 @@ public class DependencyFilterBuilder {
         @Override
         public boolean visitValueWithAttributes(TLValueWithAttributes valueWithAttributes) {
             if (valueWithAttributes.getParentType() == null) {
-                visitSchemaDependency(SchemaDependency.getEmptyElement(),
-                        valueWithAttributes.getOwningModel());
+                visitSchemaDependency( SchemaDependency.getEmptyElement(), valueWithAttributes.getOwningModel() );
             }
-            visitLibraryElement(valueWithAttributes);
+            visitLibraryElement( valueWithAttributes );
             return true;
         }
 
@@ -331,7 +309,7 @@ public class DependencyFilterBuilder {
          */
         @Override
         public boolean visitClosedEnumeration(TLClosedEnumeration enumeration) {
-            visitLibraryElement(enumeration);
+            visitLibraryElement( enumeration );
             return true;
         }
 
@@ -340,8 +318,8 @@ public class DependencyFilterBuilder {
          */
         @Override
         public boolean visitOpenEnumeration(TLOpenEnumeration enumeration) {
-            visitSchemaDependency(SchemaDependency.getEnumExtension(), enumeration.getOwningModel());
-            visitLibraryElement(enumeration);
+            visitSchemaDependency( SchemaDependency.getEnumExtension(), enumeration.getOwningModel() );
+            visitLibraryElement( enumeration );
             return true;
         }
 
@@ -350,7 +328,7 @@ public class DependencyFilterBuilder {
          */
         @Override
         public boolean visitCoreObject(TLCoreObject coreObject) {
-            visitLibraryElement(coreObject);
+            visitLibraryElement( coreObject );
             return true;
         }
 
@@ -359,72 +337,69 @@ public class DependencyFilterBuilder {
          */
         @Override
         public boolean visitBusinessObject(TLBusinessObject businessObject) {
-            visitLibraryElement(businessObject);
+            visitLibraryElement( businessObject );
             return true;
         }
 
         /**
-		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitChoiceObject(org.opentravel.schemacompiler.model.TLChoiceObject)
-		 */
-		@Override
-		public boolean visitChoiceObject(TLChoiceObject choiceObject) {
-            visitLibraryElement(choiceObject);
+         * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitChoiceObject(org.opentravel.schemacompiler.model.TLChoiceObject)
+         */
+        @Override
+        public boolean visitChoiceObject(TLChoiceObject choiceObject) {
+            visitLibraryElement( choiceObject );
             return true;
-		}
+        }
 
-		/**
-		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitParamGroup(org.opentravel.schemacompiler.model.TLParamGroup)
-		 */
-		@Override
-		public boolean visitParamGroup(TLParamGroup paramGroup) {
-			return false; // Do not follow - REST parameters do not contribute to schema dependencies
-		}
+        /**
+         * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitParamGroup(org.opentravel.schemacompiler.model.TLParamGroup)
+         */
+        @Override
+        public boolean visitParamGroup(TLParamGroup paramGroup) {
+            return false; // Do not follow - REST parameters do not contribute to schema dependencies
+        }
 
-		/**
-		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitParameter(org.opentravel.schemacompiler.model.TLParameter)
-		 */
-		@Override
-		public boolean visitParameter(TLParameter parameter) {
-			return false; // Do not follow - REST parameters do not contribute to schema dependencies
-		}
+        /**
+         * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitParameter(org.opentravel.schemacompiler.model.TLParameter)
+         */
+        @Override
+        public boolean visitParameter(TLParameter parameter) {
+            return false; // Do not follow - REST parameters do not contribute to schema dependencies
+        }
 
-		/**
+        /**
          * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitExtensionPointFacet(org.opentravel.schemacompiler.model.TLExtensionPointFacet)
          */
         @Override
         public boolean visitExtensionPointFacet(TLExtensionPointFacet extensionPointFacet) {
-            visitLibraryElement(extensionPointFacet);
+            visitLibraryElement( extensionPointFacet );
             return true;
         }
 
         /**
-		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitAlias(org.opentravel.schemacompiler.model.TLAlias)
-		 */
-		@Override
-		public boolean visitAlias(TLAlias alias) {
-            visitLibraryElement(alias);
+         * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitAlias(org.opentravel.schemacompiler.model.TLAlias)
+         */
+        @Override
+        public boolean visitAlias(TLAlias alias) {
+            visitLibraryElement( alias );
             return true;
-		}
+        }
 
-		/**
-         * When the compiled XSD includes an implied dependency on a built-in type, this method
-         * ensures it will be imported, even though it is not directly referenced by the source
-         * library.
+        /**
+         * When the compiled XSD includes an implied dependency on a built-in type, this method ensures it will be
+         * imported, even though it is not directly referenced by the source library.
          * 
-         * @param model
-         *            the model that contains the built-in libraries to be searched
+         * @param model the model that contains the built-in libraries to be searched
          */
         private void visitSchemaDependency(SchemaDependency dependency, TLModel model) {
             if ((dependency != null) && (model != null)) {
                 QName dependencyQName = dependency.toQName();
 
                 for (BuiltInLibrary library : model.getBuiltInLibraries()) {
-                    if (library.getNamespace().equals(dependencyQName.getNamespaceURI())) {
-                    	NamedEntity builtInType = library.getNamedMember(dependencyQName
-                                .getLocalPart());
+                    if (library.getNamespace().equals( dependencyQName.getNamespaceURI() )) {
+                        NamedEntity builtInType = library.getNamedMember( dependencyQName.getLocalPart() );
 
                         if (builtInType != null) {
-                            visitLibraryElement(builtInType);
+                            visitLibraryElement( builtInType );
                         }
                     }
                 }
@@ -436,7 +411,7 @@ public class DependencyFilterBuilder {
          */
         @Override
         public boolean visitXSDSimpleType(XSDSimpleType xsdSimple) {
-            visitLibraryElement(xsdSimple);
+            visitLibraryElement( xsdSimple );
             return true;
         }
 
@@ -445,7 +420,7 @@ public class DependencyFilterBuilder {
          */
         @Override
         public boolean visitXSDComplexType(XSDComplexType xsdComplex) {
-            visitLibraryElement(xsdComplex);
+            visitLibraryElement( xsdComplex );
             return true;
         }
 
@@ -454,7 +429,7 @@ public class DependencyFilterBuilder {
          */
         @Override
         public boolean visitXSDElement(XSDElement xsdElement) {
-            visitLibraryElement(xsdElement);
+            visitLibraryElement( xsdElement );
             return true;
         }
 
@@ -470,7 +445,7 @@ public class DependencyFilterBuilder {
                 XSDComplexType propertyType = (XSDComplexType) element.getType();
 
                 if (propertyType.getIdentityAlias() != null) {
-                    visitLibraryElement(propertyType.getIdentityAlias());
+                    visitLibraryElement( propertyType.getIdentityAlias() );
                     navigateChildren = false;
 
                 } else {
@@ -482,8 +457,8 @@ public class DependencyFilterBuilder {
                         // generate an extension schema for the type. Therefore, we should create a
                         // dependency
                         // on the extension schema instead of the legacy schema itself.
-                        filter.addExtensionLibrary((XSDLibrary) propertyType.getOwningLibrary());
-                        filter.addProcessedElement(propertyType);
+                        filter.addExtensionLibrary( (XSDLibrary) propertyType.getOwningLibrary() );
+                        filter.addProcessedElement( propertyType );
                         navigateChildren = false;
                     }
                 }
@@ -499,29 +474,29 @@ public class DependencyFilterBuilder {
             TLFacetOwner facetOwner = facet.getOwningEntity();
 
             if (facetOwner instanceof LibraryMember) {
-                visitLibraryElement((LibraryMember) facetOwner);
+                visitLibraryElement( (LibraryMember) facetOwner );
             }
-            visitLibraryElement(facet);
+            visitLibraryElement( facet );
             return true;
         }
 
-		/**
-		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitContextualFacet(org.opentravel.schemacompiler.model.TLContextualFacet)
-		 */
-		@Override
-		public boolean visitContextualFacet(TLContextualFacet facet) {
-			return visitFacet(facet);
-		}
+        /**
+         * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitContextualFacet(org.opentravel.schemacompiler.model.TLContextualFacet)
+         */
+        @Override
+        public boolean visitContextualFacet(TLContextualFacet facet) {
+            return visitFacet( facet );
+        }
 
-		/**
-		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitActionFacet(org.opentravel.schemacompiler.model.TLActionFacet)
-		 */
-		@Override
-		public boolean visitActionFacet(TLActionFacet facet) {
-            visitLibraryElement(facet.getOwningResource());
-            visitLibraryElement(facet);
+        /**
+         * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitActionFacet(org.opentravel.schemacompiler.model.TLActionFacet)
+         */
+        @Override
+        public boolean visitActionFacet(TLActionFacet facet) {
+            visitLibraryElement( facet.getOwningResource() );
+            visitLibraryElement( facet );
             return true;
-		}
+        }
 
         /**
          * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitSimpleFacet(org.opentravel.schemacompiler.model.TLSimpleFacet)
@@ -531,9 +506,9 @@ public class DependencyFilterBuilder {
             NamedEntity facetOwner = simpleFacet.getOwningEntity();
 
             if (facetOwner instanceof LibraryMember) {
-                visitLibraryElement((LibraryMember) facetOwner);
+                visitLibraryElement( (LibraryMember) facetOwner );
             }
-            visitLibraryElement(simpleFacet);
+            visitLibraryElement( simpleFacet );
             return true;
         }
 
@@ -545,9 +520,9 @@ public class DependencyFilterBuilder {
             NamedEntity facetOwner = listFacet.getOwningEntity();
 
             if (facetOwner instanceof LibraryMember) {
-                visitLibraryElement((LibraryMember) facetOwner);
+                visitLibraryElement( (LibraryMember) facetOwner );
             }
-            visitLibraryElement(listFacet);
+            visitLibraryElement( listFacet );
             return true;
         }
 
@@ -556,7 +531,7 @@ public class DependencyFilterBuilder {
          */
         @Override
         public boolean visitService(TLService service) {
-            visitLibraryElement(service);
+            visitLibraryElement( service );
             return true;
         }
 
@@ -565,8 +540,8 @@ public class DependencyFilterBuilder {
          */
         @Override
         public boolean visitOperation(TLOperation operation) {
-            visitService(operation.getOwningService());
-            visitLibraryElement(operation);
+            visitService( operation.getOwningService() );
+            visitLibraryElement( operation );
             return true;
         }
 

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.loader;
 
 import org.opentravel.schemacompiler.model.BuiltInLibrary;
@@ -25,11 +26,10 @@ import org.opentravel.schemacompiler.model.BuiltInLibrary;
 public interface BuiltInLibraryLoader {
 
     /**
-     * Loads and returs a single built-in library to be incorporated in a new <code>TLModel</code>
-     * instance.
+     * Loads and returs a single built-in library to be incorporated in a new <code>TLModel</code> instance.
      * 
      * @return BuiltInLibrary
-     * @throws LibraryLoaderException
+     * @throws LibraryLoaderException thrown if the built-in library cannot be loaded
      */
     public BuiltInLibrary loadBuiltInLibrary() throws LibraryLoaderException;
 

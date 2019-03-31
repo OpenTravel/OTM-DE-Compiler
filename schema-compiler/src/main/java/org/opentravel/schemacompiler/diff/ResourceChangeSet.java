@@ -19,27 +19,27 @@ package org.opentravel.schemacompiler.diff;
 import org.opentravel.schemacompiler.model.TLResource;
 
 /**
- * Container for all change items identified during the comparison of two resources, as
- * well as the change sets for their member components.
+ * Container for all change items identified during the comparison of two resources, as well as the change sets for
+ * their member components.
  */
 public class ResourceChangeSet extends ChangeSet<TLResource,ResourceChangeItem> {
-	
-	/**
-	 * Constructor that assigns the old and new version of a resource that was modified.
-	 * 
-	 * @param oldResource  the old version of the resource
-	 * @param newResource  the new version of the resource
-	 */
-	public ResourceChangeSet(TLResource oldResource, TLResource newResource) {
-		super( oldResource, newResource );
-	}
 
-	/**
-	 * @see org.opentravel.schemacompiler.diff.ChangeSet#getBookmarkId()
-	 */
-	@Override
-	public String getBookmarkId() {
-		return getBookmarkId( (getNewVersion() != null) ? getNewVersion() : getOldVersion() );
-	}
-	
+    /**
+     * Constructor that assigns the old and new version of a resource that was modified.
+     * 
+     * @param oldResource the old version of the resource
+     * @param newResource the new version of the resource
+     */
+    public ResourceChangeSet(TLResource oldResource, TLResource newResource) {
+        super( oldResource, newResource );
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.diff.ChangeSet#getBookmarkId()
+     */
+    @Override
+    public String getBookmarkId() {
+        return getBookmarkId( (getNewVersion() != null) ? getNewVersion() : getOldVersion() );
+    }
+
 }

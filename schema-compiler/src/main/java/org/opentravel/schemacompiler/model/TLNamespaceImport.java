@@ -13,19 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.model;
 
-import java.util.ArrayList;
-import java.util.List;
+package org.opentravel.schemacompiler.model;
 
 import org.opentravel.schemacompiler.event.ModelEvent;
 import org.opentravel.schemacompiler.event.ModelEventBuilder;
 import org.opentravel.schemacompiler.event.ModelEventType;
 import org.opentravel.schemacompiler.util.FileHintUtils;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- * Encapsulates a library namespace import that includes the namespace itself and a referencable
- * prefix.
+ * Encapsulates a library namespace import that includes the namespace itself and a referencable prefix.
  * 
  * @author S. Livezey
  */
@@ -39,10 +39,8 @@ public class TLNamespaceImport extends TLModelElement {
     /**
      * Full constructor.
      * 
-     * @param prefix
-     *            the referencable prefix for the imported namespace
-     * @param namespace
-     *            the imported namespace
+     * @param prefix the referencable prefix for the imported namespace
+     * @param namespace the imported namespace
      */
     public TLNamespaceImport(String prefix, String namespace) {
         this.prefix = prefix;
@@ -66,12 +64,12 @@ public class TLNamespaceImport extends TLModelElement {
         StringBuilder identity = new StringBuilder();
 
         if (owningLibrary != null) {
-            identity.append(owningLibrary.getValidationIdentity()).append(" : ");
+            identity.append( owningLibrary.getValidationIdentity() ).append( " : " );
         }
         if (prefix == null) {
-            identity.append("[Un-prefixed namespace import]");
+            identity.append( "[Un-prefixed namespace import]" );
         } else {
-            identity.append(prefix);
+            identity.append( prefix );
         }
         return identity.toString();
     }
@@ -79,8 +77,7 @@ public class TLNamespaceImport extends TLModelElement {
     /**
      * Assigns the value of the 'owningLibrary' field.
      * 
-     * @param owningLibrary
-     *            the field value to assign
+     * @param owningLibrary the field value to assign
      */
     public void setOwningLibrary(AbstractLibrary owningLibrary) {
         this.owningLibrary = owningLibrary;
@@ -95,24 +92,22 @@ public class TLNamespaceImport extends TLModelElement {
     }
 
     /**
-     * Moves this namespace import up by one position in the list of namespace imports maintained by
-     * its owner. If the owner is null, or this namespace import is already at the front of the
-     * list, this method has no effect.
+     * Moves this namespace import up by one position in the list of namespace imports maintained by its owner. If the
+     * owner is null, or this namespace import is already at the front of the list, this method has no effect.
      */
     public void moveUp() {
         if (owningLibrary != null) {
-            owningLibrary.moveUp(this);
+            owningLibrary.moveUp( this );
         }
     }
 
     /**
-     * Moves this namespace import down by one position in the list of namespace imports maintained
-     * by its owner. If the owner is null, or this namespace import is already at the end of the
-     * list, this method has no effect.
+     * Moves this namespace import down by one position in the list of namespace imports maintained by its owner. If the
+     * owner is null, or this namespace import is already at the end of the list, this method has no effect.
      */
     public void moveDown() {
         if (owningLibrary != null) {
-            owningLibrary.moveDown(this);
+            owningLibrary.moveDown( this );
         }
     }
 
@@ -128,15 +123,14 @@ public class TLNamespaceImport extends TLModelElement {
     /**
      * Assigns the value of the 'prefix' field.
      * 
-     * @param prefix
-     *            the field value to assign
+     * @param prefix the field value to assign
      */
     public void setPrefix(String prefix) {
-        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.PREFIX_MODIFIED, this)
-                .setOldValue(this.prefix).setNewValue(prefix).buildEvent();
+        ModelEvent<?> event = new ModelEventBuilder( ModelEventType.PREFIX_MODIFIED, this ).setOldValue( this.prefix )
+            .setNewValue( prefix ).buildEvent();
 
         this.prefix = prefix;
-        publishEvent(event);
+        publishEvent( event );
     }
 
     /**
@@ -151,13 +145,12 @@ public class TLNamespaceImport extends TLModelElement {
     /**
      * Assigns the value of the 'namespace' field.
      * 
-     * @param namespace
-     *            the field value to assign
+     * @param namespace the field value to assign
      */
     public void setNamespace(String namespace) {
         if (this.namespace != null) {
             throw new IllegalStateException(
-                    "Once assigned, the namespace value of an import cannot be modified (deleted and re-create instead).");
+                "Once assigned, the namespace value of an import cannot be modified (deleted and re-create instead)." );
         }
         this.namespace = namespace;
     }
@@ -165,14 +158,14 @@ public class TLNamespaceImport extends TLModelElement {
     /**
      * Returns the value of the 'fileHints' field.
      * 
-     * @return List<String>
+     * @return List&lt;String&gt;
      */
     public synchronized List<String> getFileHints() {
         if (owningLibrary != null) {
-            List<String> oldHints = new ArrayList<>(fileHints);
+            List<String> oldHints = new ArrayList<>( fileHints );
 
             fileHints.clear();
-            fileHints.addAll(FileHintUtils.resolveHints(oldHints, owningLibrary.getLibraryUrl()));
+            fileHints.addAll( FileHintUtils.resolveHints( oldHints, owningLibrary.getLibraryUrl() ) );
         }
         return fileHints;
     }
@@ -182,17 +175,16 @@ public class TLNamespaceImport extends TLModelElement {
      * 
      * @author S. Livezey
      */
-    protected static class NamespaceImportListManager extends
-            ChildEntityListManager<TLNamespaceImport, AbstractLibrary> {
+    protected static class NamespaceImportListManager
+        extends ChildEntityListManager<TLNamespaceImport,AbstractLibrary> {
 
         /**
          * Constructor that specifies the owner of the unerlying list.
          * 
-         * @param owner
-         *            the owner of the underlying list of children
+         * @param owner the owner of the underlying list of children
          */
         public NamespaceImportListManager(AbstractLibrary owner) {
-            super(owner, ModelEventType.IMPORT_ADDED, ModelEventType.IMPORT_REMOVED);
+            super( owner, ModelEventType.IMPORT_ADDED, ModelEventType.IMPORT_REMOVED );
         }
 
         /**
@@ -209,7 +201,7 @@ public class TLNamespaceImport extends TLModelElement {
          */
         @Override
         protected void assignOwner(TLNamespaceImport child, AbstractLibrary owner) {
-            child.setOwningLibrary(owner);
+            child.setOwningLibrary( owner );
         }
 
         /**
@@ -221,7 +213,7 @@ public class TLNamespaceImport extends TLModelElement {
             TLModel owningModel = owner.getOwningModel();
 
             if (owningModel != null) {
-                owningModel.publishEvent(event);
+                owningModel.publishEvent( event );
             }
         }
 

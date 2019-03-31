@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.transform.library_01_04;
 
 import org.opentravel.schemacompiler.transform.AbstractTestTransformers;
@@ -29,7 +30,7 @@ public abstract class Abstract_1_4_TestTransformers extends AbstractTestTransfor
      */
     @Override
     protected String getBaseLocation() {
-        return System.getProperty("user.dir") + "/src/test/resources/libraries_1_4";
+        return System.getProperty( "user.dir" ) + "/src/test/resources/libraries_1_4";
     }
 
 }

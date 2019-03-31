@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.codegen.xsd.facet;
 
-import javax.xml.namespace.QName;
+package org.opentravel.schemacompiler.codegen.xsd.facet;
 
 import org.opentravel.schemacompiler.ioc.SchemaDependency;
 import org.opentravel.schemacompiler.model.TLChoiceObject;
@@ -23,9 +22,11 @@ import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLFacetOwner;
 
+import javax.xml.namespace.QName;
+
 /**
- * Code generation delegate for <code>TLFacet</code> instances with a facet type of
- * <code>CHOICE</code> and a facet owner of type <code>TLChoiceObject</code>.
+ * Code generation delegate for <code>TLFacet</code> instances with a facet type of <code>CHOICE</code> and a facet
+ * owner of type <code>TLChoiceObject</code>.
  * 
  * @author S. Livezey
  */
@@ -34,11 +35,10 @@ public class ChoiceObjectChoiceFacetCodegenDelegate extends ChoiceObjectFacetCod
     /**
      * Constructor that specifies the source facet for which code artifacts are being generated.
      * 
-     * @param sourceFacet
-     *            the source facet
+     * @param sourceFacet the source facet
      */
     public ChoiceObjectChoiceFacetCodegenDelegate(TLFacet sourceFacet) {
-        super(sourceFacet);
+        super( sourceFacet );
     }
 
     /**
@@ -46,20 +46,20 @@ public class ChoiceObjectChoiceFacetCodegenDelegate extends ChoiceObjectFacetCod
      */
     @Override
     public TLFacet getLocalBaseFacet() {
-        FacetCodegenDelegateFactory factory = new FacetCodegenDelegateFactory(transformerContext);
+        FacetCodegenDelegateFactory factory = new FacetCodegenDelegateFactory( transformerContext );
         TLFacet sourceFacet = getSourceFacet();
         TLFacetOwner facetOwner = sourceFacet.getOwningEntity();
         TLFacet baseFacet = null;
-        
+
         while ((baseFacet == null) && (facetOwner instanceof TLContextualFacet)) {
-        	TLContextualFacet owningFacet = (TLContextualFacet) facetOwner;
-        	
-        	if (factory.getDelegate(owningFacet).hasContent()) {
-        		baseFacet = owningFacet;
-        		
-        	} else {
-        		facetOwner = owningFacet.getOwningEntity();
-        	}
+            TLContextualFacet owningFacet = (TLContextualFacet) facetOwner;
+
+            if (factory.getDelegate( owningFacet ).hasContent()) {
+                baseFacet = owningFacet;
+
+            } else {
+                facetOwner = owningFacet.getOwningEntity();
+            }
         }
         if ((baseFacet == null) && (facetOwner instanceof TLChoiceObject)) {
             baseFacet = ((TLChoiceObject) facetOwner).getSharedFacet();
@@ -72,17 +72,17 @@ public class ChoiceObjectChoiceFacetCodegenDelegate extends ChoiceObjectFacetCod
      */
     @Override
     public QName getExtensionPointElement() {
-    	TLFacetOwner facetOwner = getSourceFacet().getOwningEntity();
+        TLFacetOwner facetOwner = getSourceFacet().getOwningEntity();
         QName extensionPointQName;
-    	
+
         if (facetOwner instanceof TLChoiceObject) {
             SchemaDependency extensionPoint = SchemaDependency.getExtensionPointElement();
-            
+
             extensionPointQName = extensionPoint.toQName();
-            addCompileTimeDependency(extensionPoint);
-            
+            addCompileTimeDependency( extensionPoint );
+
         } else {
-        	extensionPointQName = null;
+            extensionPointQName = null;
         }
         return extensionPointQName;
     }

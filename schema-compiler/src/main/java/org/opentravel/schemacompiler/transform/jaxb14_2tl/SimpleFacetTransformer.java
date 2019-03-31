@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.transform.jaxb14_2tl;
 
 import org.opentravel.ns.ota2.librarymodel_v01_04.Documentation;
@@ -28,40 +29,38 @@ import org.opentravel.schemacompiler.transform.symbols.DefaultTransformerContext
 import org.opentravel.schemacompiler.transform.util.BaseTransformer;
 
 /**
- * Handles the transformation of objects from the <code>SimpleFacet</code> type to the
- * <code>TLSimpleFacet</code> type.
+ * Handles the transformation of objects from the <code>SimpleFacet</code> type to the <code>TLSimpleFacet</code> type.
  * 
  * @author S. Livezey
  */
-public class SimpleFacetTransformer extends
-        BaseTransformer<SimpleFacet, TLSimpleFacet, DefaultTransformerContext> {
+public class SimpleFacetTransformer extends BaseTransformer<SimpleFacet,TLSimpleFacet,DefaultTransformerContext> {
 
     /**
      * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
      */
     @Override
     public TLSimpleFacet transform(SimpleFacet source) {
-        ObjectTransformer<Equivalent, TLEquivalent, DefaultTransformerContext> equivTransformer = getTransformerFactory()
-                .getTransformer(Equivalent.class, TLEquivalent.class);
-        ObjectTransformer<Example, TLExample, DefaultTransformerContext> exampleTransformer = getTransformerFactory()
-                .getTransformer(Example.class, TLExample.class);
+        ObjectTransformer<Equivalent,TLEquivalent,DefaultTransformerContext> equivTransformer =
+            getTransformerFactory().getTransformer( Equivalent.class, TLEquivalent.class );
+        ObjectTransformer<Example,TLExample,DefaultTransformerContext> exampleTransformer =
+            getTransformerFactory().getTransformer( Example.class, TLExample.class );
         final TLSimpleFacet facet = new TLSimpleFacet();
 
-        facet.setSimpleTypeName(trimString(source.getType()));
+        facet.setSimpleTypeName( trimString( source.getType() ) );
 
         if (source.getDocumentation() != null) {
-            ObjectTransformer<Documentation, TLDocumentation, DefaultTransformerContext> docTransformer = getTransformerFactory()
-                    .getTransformer(Documentation.class, TLDocumentation.class);
+            ObjectTransformer<Documentation,TLDocumentation,DefaultTransformerContext> docTransformer =
+                getTransformerFactory().getTransformer( Documentation.class, TLDocumentation.class );
 
-            facet.setDocumentation(docTransformer.transform(source.getDocumentation()));
+            facet.setDocumentation( docTransformer.transform( source.getDocumentation() ) );
         }
 
         for (Equivalent sourceEquiv : source.getEquivalent()) {
-            facet.addEquivalent(equivTransformer.transform(sourceEquiv));
+            facet.addEquivalent( equivTransformer.transform( sourceEquiv ) );
         }
 
         for (Example sourceExample : source.getExample()) {
-            facet.addExample(exampleTransformer.transform(sourceExample));
+            facet.addExample( exampleTransformer.transform( sourceExample ) );
         }
 
         return facet;

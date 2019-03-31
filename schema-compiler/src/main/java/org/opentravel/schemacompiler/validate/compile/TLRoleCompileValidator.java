@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.validate.compile;
 
 import org.opentravel.schemacompiler.model.TLRole;
@@ -33,14 +34,13 @@ public class TLRoleCompileValidator extends TLRoleBaseValidator {
      */
     @Override
     protected ValidationFindings validateFields(TLRole target) {
-        TLValidationBuilder builder = newValidationBuilder(target);
+        TLValidationBuilder builder = newValidationBuilder( target );
 
-        builder.setProperty("name", target.getName()).setFindingType(FindingType.ERROR)
-                .assertNotNullOrBlank().assertPatternMatch(NAME_XML_PATTERN);
+        builder.setProperty( "name", target.getName() ).setFindingType( FindingType.ERROR ).assertNotNullOrBlank()
+            .assertPatternMatch( NAME_XML_PATTERN );
 
-        builder.setProperty("name", target.getRoleEnumeration().getRoles())
-                .setFindingType(FindingType.ERROR)
-                .assertNoDuplicates( e -> (e == null) ? null : ((TLRole) e).getName() );
+        builder.setProperty( "name", target.getRoleEnumeration().getRoles() ).setFindingType( FindingType.ERROR )
+            .assertNoDuplicates( e -> (e == null) ? null : ((TLRole) e).getName() );
 
         return builder.getFindings();
     }

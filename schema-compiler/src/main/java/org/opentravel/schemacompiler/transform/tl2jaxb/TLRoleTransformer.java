@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.transform.tl2jaxb;
 
 import org.opentravel.ns.ota2.librarymodel_v01_05.Documentation;
@@ -24,13 +25,11 @@ import org.opentravel.schemacompiler.transform.symbols.SymbolResolverTransformer
 import org.opentravel.schemacompiler.transform.util.BaseTransformer;
 
 /**
- * Handles the transformation of objects from the <code>TLRole</code> type to the <code>Role</code>
- * type.
+ * Handles the transformation of objects from the <code>TLRole</code> type to the <code>Role</code> type.
  * 
  * @author S. Livezey
  */
-public class TLRoleTransformer extends
-        BaseTransformer<TLRole, Role, SymbolResolverTransformerContext> {
+public class TLRoleTransformer extends BaseTransformer<TLRole,Role,SymbolResolverTransformerContext> {
 
     /**
      * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
@@ -39,13 +38,13 @@ public class TLRoleTransformer extends
     public Role transform(TLRole source) {
         Role role = new Role();
 
-        role.setValue(source.getName());
+        role.setValue( source.getName() );
 
         if ((source.getDocumentation() != null) && !source.getDocumentation().isEmpty()) {
-            ObjectTransformer<TLDocumentation, Documentation, SymbolResolverTransformerContext> docTransformer = getTransformerFactory()
-                    .getTransformer(TLDocumentation.class, Documentation.class);
+            ObjectTransformer<TLDocumentation,Documentation,SymbolResolverTransformerContext> docTransformer =
+                getTransformerFactory().getTransformer( TLDocumentation.class, Documentation.class );
 
-            role.setDocumentation(docTransformer.transform(source.getDocumentation()));
+            role.setDocumentation( docTransformer.transform( source.getDocumentation() ) );
         }
         return role;
     }

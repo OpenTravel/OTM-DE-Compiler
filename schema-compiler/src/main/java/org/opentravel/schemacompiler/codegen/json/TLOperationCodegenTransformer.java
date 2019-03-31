@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.codegen.json;
 
 import org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts;
@@ -21,24 +22,24 @@ import org.opentravel.schemacompiler.codegen.json.facet.FacetJsonSchemaDelegateF
 import org.opentravel.schemacompiler.model.TLOperation;
 
 /**
- * Performs the translation from <code>TLOperation</code> objects to the JSON schema elements
- * used to produce the output.
+ * Performs the translation from <code>TLOperation</code> objects to the JSON schema elements used to produce the
+ * output.
  */
-public class TLOperationCodegenTransformer extends AbstractJsonSchemaTransformer<TLOperation, CodegenArtifacts> {
-	
-	/**
-	 * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
-	 */
-	@Override
-	public CodegenArtifacts transform(TLOperation source) {
-		FacetJsonSchemaDelegateFactory delegateFactory = new FacetJsonSchemaDelegateFactory( context );
+public class TLOperationCodegenTransformer extends AbstractJsonSchemaTransformer<TLOperation,CodegenArtifacts> {
+
+    /**
+     * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
+     */
+    @Override
+    public CodegenArtifacts transform(TLOperation source) {
+        FacetJsonSchemaDelegateFactory delegateFactory = new FacetJsonSchemaDelegateFactory( context );
         CorrelatedCodegenArtifacts artifacts = new CorrelatedCodegenArtifacts();
 
         artifacts.addAllArtifacts( delegateFactory.getDelegate( source.getRequest() ).generateArtifacts() );
         artifacts.addAllArtifacts( delegateFactory.getDelegate( source.getResponse() ).generateArtifacts() );
         artifacts.addAllArtifacts( delegateFactory.getDelegate( source.getNotification() ).generateArtifacts() );
-        
+
         return artifacts.getConsolidatedArtifacts();
-	}
-	
+    }
+
 }

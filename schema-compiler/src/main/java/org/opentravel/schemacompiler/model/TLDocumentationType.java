@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.model;
 
 /**
@@ -22,16 +23,19 @@ package org.opentravel.schemacompiler.model;
  */
 public enum TLDocumentationType {
 
-    DEPRECATION("Deprecation"), DESCRIPTION("Description"), REFERENCE("Reference"), IMPLEMENTER(
-            "Implementer"), MORE_INFO("More Info"), OTHER_DOC("Other Doc");
+    DEPRECATION("Deprecation"),
+    DESCRIPTION("Description"),
+    REFERENCE("Reference"),
+    IMPLEMENTER("Implementer"),
+    MORE_INFO("More Info"),
+    OTHER_DOC("Other Doc");
 
     private String displayIdentity;
 
     /**
      * Constructor that specifies the display identity of the value.
      * 
-     * @param displayIdentity
-     *            the display identity string
+     * @param displayIdentity the display identity string
      */
     private TLDocumentationType(String displayIdentity) {
         this.displayIdentity = displayIdentity;

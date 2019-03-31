@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.diff;
 
 import static org.junit.Assert.assertNotNull;
@@ -26,60 +27,59 @@ import org.opentravel.schemacompiler.util.ModelComparator;
 import org.opentravel.schemacompiler.version.AbstractVersionHelperTests;
 
 /**
- * Verifies the operation of the <code>LibraryComparator</code> and its
- * associated utility classes.
+ * Verifies the operation of the <code>LibraryComparator</code> and its associated utility classes.
  */
 public class TestLibraryComparator extends AbstractVersionHelperTests {
-	
-	@Test
-	public void testLibraryComparison() throws Exception {
-        TLModel model = loadTestModel(FILE_VERSION_1_2_2);
-        TLLibrary oldLibrary = (TLLibrary) model.getLibrary(NS_VERSION_1, TEST_LIBRARY_NAME);
-        TLLibrary newLibrary = (TLLibrary) model.getLibrary(NS_VERSION_1_2, TEST_LIBRARY_NAME);
-        
+
+    @Test
+    public void testLibraryComparison() throws Exception {
+        TLModel model = loadTestModel( FILE_VERSION_1_2_2 );
+        TLLibrary oldLibrary = (TLLibrary) model.getLibrary( NS_VERSION_1, TEST_LIBRARY_NAME );
+        TLLibrary newLibrary = (TLLibrary) model.getLibrary( NS_VERSION_1_2, TEST_LIBRARY_NAME );
+
         ModelComparator comparator = new ModelComparator( ModelCompareOptions.getDefaultOptions() );
         LibraryChangeSet changeSet;
-        
+
         changeSet = comparator.compareLibraries( oldLibrary, newLibrary );
         comparator.compareLibraries( oldLibrary, newLibrary, new ByteArrayOutputStream() );
         assertNotNull( changeSet );
         assertTrue( changeSet.getChangeItems().size() > 0 );
-        
+
         changeSet = comparator.compareLibraries( newLibrary, oldLibrary );
         comparator.compareLibraries( newLibrary, oldLibrary, new ByteArrayOutputStream() );
         assertNotNull( changeSet );
         assertTrue( changeSet.getChangeItems().size() > 0 );
-	}
-	
-	@Test
-	public void testLibraryMinorVersionComparison() throws Exception {
-        TLModel model = loadTestModel(FILE_VERSION_1_2_2);
-        TLLibrary oldLibrary = (TLLibrary) model.getLibrary(NS_VERSION_1, TEST_LIBRARY_NAME);
-        TLLibrary newLibrary = (TLLibrary) model.getLibrary(NS_VERSION_1_2, TEST_LIBRARY_NAME);
+    }
+
+    @Test
+    public void testLibraryMinorVersionComparison() throws Exception {
+        TLModel model = loadTestModel( FILE_VERSION_1_2_2 );
+        TLLibrary oldLibrary = (TLLibrary) model.getLibrary( NS_VERSION_1, TEST_LIBRARY_NAME );
+        TLLibrary newLibrary = (TLLibrary) model.getLibrary( NS_VERSION_1_2, TEST_LIBRARY_NAME );
         ModelCompareOptions options = ModelCompareOptions.getDefaultOptions();
-        
+
         options.setSuppressFieldVersionChanges( true );
         ModelComparator comparator = new ModelComparator( options );
         LibraryChangeSet changeSet;
-        
+
         changeSet = comparator.compareLibraries( oldLibrary, newLibrary );
         comparator.compareLibraries( newLibrary, oldLibrary, new ByteArrayOutputStream() );
         assertNotNull( changeSet );
         assertTrue( changeSet.getChangeItems().size() > 0 );
-	}
-	
-	@Test
-	public void testLibraryNoChangeComparison() throws Exception {
-        TLModel model = loadTestModel(FILE_VERSION_1_2_2);
-        TLLibrary library = (TLLibrary) model.getLibrary(NS_VERSION_1_2, TEST_LIBRARY_NAME);
-        
+    }
+
+    @Test
+    public void testLibraryNoChangeComparison() throws Exception {
+        TLModel model = loadTestModel( FILE_VERSION_1_2_2 );
+        TLLibrary library = (TLLibrary) model.getLibrary( NS_VERSION_1_2, TEST_LIBRARY_NAME );
+
         ModelComparator comparator = new ModelComparator( ModelCompareOptions.getDefaultOptions() );
         LibraryChangeSet changeSet;
-        
+
         changeSet = comparator.compareLibraries( library, library );
         comparator.compareLibraries( library, library, new ByteArrayOutputStream() );
         assertNotNull( changeSet );
         assertTrue( changeSet.getChangeItems().size() == 0 );
-	}
-	
+    }
+
 }

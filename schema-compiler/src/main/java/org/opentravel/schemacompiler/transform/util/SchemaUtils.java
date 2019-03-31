@@ -13,11 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.transform.util;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+package org.opentravel.schemacompiler.transform.util;
 
 import org.opentravel.schemacompiler.loader.LibraryModuleImport;
 import org.w3._2001.xmlschema.Import;
@@ -25,25 +22,28 @@ import org.w3._2001.xmlschema.Include;
 import org.w3._2001.xmlschema.OpenAttrs;
 import org.w3._2001.xmlschema.Schema;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * Static utility methods used for the transformation of XML schema imports and includes.
  * 
  * @author S. Livezey
  */
 public class SchemaUtils {
-	
-	/**
-	 * Private constructor to prevent instantiation.
-	 */
-	private SchemaUtils() {}
-	
+
     /**
-     * Constructs a list of standard library <code>TLNamespaceImport</code> objects using the import
-     * and prefix information from the XML schema provided.
+     * Private constructor to prevent instantiation.
+     */
+    private SchemaUtils() {}
+
+    /**
+     * Constructs a list of standard library <code>TLNamespaceImport</code> objects using the import and prefix
+     * information from the XML schema provided.
      * 
-     * @param schema
-     *            the schema from which to construct the list of namespace imports
-     * @return List<LibraryModuleImport>
+     * @param schema the schema from which to construct the list of namespace imports
+     * @return List&lt;LibraryModuleImport&gt;
      */
     public static List<LibraryModuleImport> getSchemaImports(Schema schema) {
         List<LibraryModuleImport> imports = new ArrayList<>();
@@ -57,8 +57,8 @@ public class SchemaUtils {
                     String prefix = "ns" + nsCount;
 
                     nsCount++;
-                    imports.add(new LibraryModuleImport(schemaImport.getNamespace(), prefix, Arrays
-                            .asList( schemaImport.getSchemaLocation() )));
+                    imports.add( new LibraryModuleImport( schemaImport.getNamespace(), prefix,
+                        Arrays.asList( schemaImport.getSchemaLocation() ) ) );
                 }
             }
         }
@@ -66,12 +66,10 @@ public class SchemaUtils {
     }
 
     /**
-     * Extracts a list of strings from the given schema representing the schema locations of each
-     * included schema.
+     * Extracts a list of strings from the given schema representing the schema locations of each included schema.
      * 
-     * @param schema
-     *            the schema from which to extract the list of includes
-     * @return List<String>
+     * @param schema the schema from which to extract the list of includes
+     * @return List&lt;String&gt;
      */
     public static List<String> getSchemaIncludes(Schema schema) {
         List<String> includes = new ArrayList<>();
@@ -82,7 +80,7 @@ public class SchemaUtils {
                     String schemaLocation = ((Include) element).getSchemaLocation();
 
                     if (schemaLocation != null) {
-                        includes.add(schemaLocation);
+                        includes.add( schemaLocation );
                     }
                 }
             }

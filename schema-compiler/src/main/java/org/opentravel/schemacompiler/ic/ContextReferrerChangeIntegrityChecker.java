@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.ic;
 
 import org.opentravel.schemacompiler.event.ModelEventType;
@@ -21,24 +22,22 @@ import org.opentravel.schemacompiler.model.TLContextReferrer;
 import org.opentravel.schemacompiler.model.TLModelElement;
 
 /**
- * Integrity checker component that automatically creates a <code>TLContext</code> declaration when
- * a <code>ContextReferrer</code>'s 'context' values is modified and a matching context declaration
- * does not yet exist.
+ * Integrity checker component that automatically creates a <code>TLContext</code> declaration when a
+ * <code>ContextReferrer</code>'s 'context' values is modified and a matching context declaration does not yet exist.
  * 
  * @author S. Livezey
  */
-public class ContextReferrerChangeIntegrityChecker extends
-        ContextAutoCreateIntegrityChecker<ValueChangeEvent<TLModelElement, String>, TLModelElement> {
+public class ContextReferrerChangeIntegrityChecker
+    extends ContextAutoCreateIntegrityChecker<ValueChangeEvent<TLModelElement,String>,TLModelElement> {
 
     /**
      * @see org.opentravel.schemacompiler.event.ModelEventListener#processModelEvent(org.opentravel.schemacompiler.event.ModelEvent)
      */
     @Override
-    public void processModelEvent(ValueChangeEvent<TLModelElement, String> event) {
-        if ((event.getType() == ModelEventType.CONTEXT_MODIFIED)
-                && (event.getSource() instanceof TLContextReferrer)) {
-            autoCreateContextDeclaration(
-                    ((TLContextReferrer) event.getSource()).getOwningLibrary(), event.getNewValue());
+    public void processModelEvent(ValueChangeEvent<TLModelElement,String> event) {
+        if ((event.getType() == ModelEventType.CONTEXT_MODIFIED) && (event.getSource() instanceof TLContextReferrer)) {
+            autoCreateContextDeclaration( ((TLContextReferrer) event.getSource()).getOwningLibrary(),
+                event.getNewValue() );
         }
     }
 

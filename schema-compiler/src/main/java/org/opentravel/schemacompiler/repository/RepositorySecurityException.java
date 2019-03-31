@@ -13,55 +13,51 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.repository;
 
 
 /**
- * Exception that is thrown when a web service client request fails to meet the authentication
- * and/or authorization requirements for a requested operation.
+ * Exception that is thrown when a web service client request fails to meet the authentication and/or authorization
+ * requirements for a requested operation.
  * 
  * @author S. Livezey
  */
 public class RepositorySecurityException extends RepositoryException {
 
-	private static final long serialVersionUID = 6551223793369573693L;
+    private static final long serialVersionUID = 6551223793369573693L;
 
-	/**
+    /**
      * Default constructor.
      */
-    public RepositorySecurityException() {
-    }
+    public RepositorySecurityException() {}
 
     /**
      * Constructs an exception with the specified message.
      * 
-     * @param message
-     *            the exception message
+     * @param message the exception message
      */
     public RepositorySecurityException(String message) {
-        super(message);
+        super( message );
     }
 
     /**
      * Constructs an exception with the specified underlying cause.
      * 
-     * @param cause
-     *            the underlying exception that caused this one
+     * @param cause the underlying exception that caused this one
      */
     public RepositorySecurityException(Throwable cause) {
-        super(cause);
+        super( cause );
     }
 
     /**
      * Constructs an exception with the specified message and underlying cause.
      * 
-     * @param message
-     *            the exception message
-     * @param cause
-     *            the underlying exception that caused this one
+     * @param message the exception message
+     * @param cause the underlying exception that caused this one
      */
     public RepositorySecurityException(String message, Throwable cause) {
-        super(message, cause);
+        super( message, cause );
     }
 
 }

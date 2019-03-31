@@ -13,17 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.codegen.xsd.facet;
 
-import javax.xml.namespace.QName;
+package org.opentravel.schemacompiler.codegen.xsd.facet;
 
 import org.opentravel.schemacompiler.ioc.SchemaDependency;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLFacet;
 
+import javax.xml.namespace.QName;
+
 /**
- * Code generation delegate for <code>TLFacet</code> instances with a facet type of
- * <code>DETAIL</code> and a facet owner of type <code>TLCoreObject</code>.
+ * Code generation delegate for <code>TLFacet</code> instances with a facet type of <code>DETAIL</code> and a facet
+ * owner of type <code>TLCoreObject</code>.
  * 
  * @author S. Livezey
  */
@@ -32,11 +33,10 @@ public class CoreObjectDetailFacetCodegenDelegate extends CoreObjectFacetCodegen
     /**
      * Constructor that specifies the source facet for which code artifacts are being generated.
      * 
-     * @param sourceFacet
-     *            the source facet
+     * @param sourceFacet the source facet
      */
     public CoreObjectDetailFacetCodegenDelegate(TLFacet sourceFacet) {
-        super(sourceFacet);
+        super( sourceFacet );
     }
 
     /**
@@ -48,12 +48,11 @@ public class CoreObjectDetailFacetCodegenDelegate extends CoreObjectFacetCodegen
         TLFacet baseFacet = null;
 
         if (sourceFacet.getOwningEntity() instanceof TLCoreObject) {
-            FacetCodegenDelegateFactory factory = new FacetCodegenDelegateFactory(
-                    transformerContext);
+            FacetCodegenDelegateFactory factory = new FacetCodegenDelegateFactory( transformerContext );
             TLCoreObject coreObject = (TLCoreObject) sourceFacet.getOwningEntity();
             TLFacet parentFacet = coreObject.getSummaryFacet();
 
-            if (factory.getDelegate(parentFacet).hasContent()) {
+            if (factory.getDelegate( parentFacet ).hasContent()) {
                 baseFacet = parentFacet;
             }
         }
@@ -68,7 +67,7 @@ public class CoreObjectDetailFacetCodegenDelegate extends CoreObjectFacetCodegen
         SchemaDependency extensionPoint = SchemaDependency.getExtensionPointDetailElement();
         QName extensionPointQName = extensionPoint.toQName();
 
-        addCompileTimeDependency(extensionPoint);
+        addCompileTimeDependency( extensionPoint );
         return extensionPointQName;
     }
 

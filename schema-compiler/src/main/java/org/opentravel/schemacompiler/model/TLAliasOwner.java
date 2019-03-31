@@ -13,14 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.model;
 
 import java.util.Comparator;
 import java.util.List;
 
 /**
- * Interface to be implemented by all model components that can be represented by alternate local
- * names within the same namespace.
+ * Interface to be implemented by all model components that can be represented by alternate local names within the same
+ * namespace.
  * 
  * @author S. Livezey
  */
@@ -29,15 +30,14 @@ public interface TLAliasOwner extends NamedEntity {
     /**
      * Returns the list of aliases for this entity.
      * 
-     * @return List<TLAlias>
+     * @return List&lt;TLAlias&gt;
      */
     public List<TLAlias> getAliases();
 
     /**
      * Returns the alias with the specified name or null if no such alias has been defined.
      * 
-     * @param aliasName
-     *            the name of the alias to return
+     * @param aliasName the name of the alias to return
      * @return TLAlias
      */
     public TLAlias getAlias(String aliasName);
@@ -45,63 +45,55 @@ public interface TLAliasOwner extends NamedEntity {
     /**
      * Adds an alias to the current list.
      * 
-     * @param alias
-     *            the alias to add
+     * @param alias the alias to add
      */
     public void addAlias(TLAlias alias);
 
     /**
      * Adds an alias to the current list.
      * 
-     * @param index
-     *            the index at which the given alias should be added
-     * @param alias
-     *            the alias to add
-     * @throws IndexOutOfBoundsException
-     *             thrown if the index is out of range (index < 0 || index > size())
+     * @param index the index at which the given alias should be added
+     * @param alias the alias to add
+     * @throws IndexOutOfBoundsException thrown if the index is out of range (index &lt; 0 || index &gt; size())
      */
     public void addAlias(int index, TLAlias alias);
 
     /**
      * Removes the specified alias from the current list.
      * 
-     * @param alias
-     *            the alias to remove
+     * @param alias the alias to remove
      */
     public void removeAlias(TLAlias alias);
 
     /**
-     * Moves this alias up by one position in the list. If the alias is not owned by this object or
-     * it is already at the front of the list, this method has no effect.
+     * Moves this alias up by one position in the list. If the alias is not owned by this object or it is already at the
+     * front of the list, this method has no effect.
      * 
-     * @param alias
-     *            the alias to move
+     * @param alias the alias to move
      */
     public void moveUp(TLAlias alias);
 
     /**
-     * Moves this alias down by one position in the list. If the alias is not owned by this object
-     * or it is already at the end of the list, this method has no effect.
+     * Moves this alias down by one position in the list. If the alias is not owned by this object or it is already at
+     * the end of the list, this method has no effect.
      * 
-     * @param alias
-     *            the alias to move
+     * @param alias the alias to move
      */
     public void moveDown(TLAlias alias);
 
     /**
      * Sorts the list of aliases using the comparator provided.
      * 
-     * @param comparator
-     *            the comparator to use when sorting the list
+     * @param comparator the comparator to use when sorting the list
      */
     public void sortAliases(Comparator<TLAlias> comparator);
-    
+
     /**
-     * Returns the child entity list manager that manages the list of aliases for
-     * this entity.
+     * Returns the child entity list manager that manages the list of aliases for this entity.
      * 
-     * @return ChildEntityListManager<TLAlias,?>
+     * @param <O> the type of the alias owner
+     * @return ChildEntityListManager&lt;TLAlias,?&gt;
      */
     public <O> ChildEntityListManager<TLAlias,O> getAliasListManager();
-    
+
 }

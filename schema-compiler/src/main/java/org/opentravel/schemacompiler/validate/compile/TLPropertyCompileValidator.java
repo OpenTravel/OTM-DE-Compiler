@@ -13,12 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.validate.compile;
-
-import java.util.List;
-
-import javax.xml.XMLConstants;
-import javax.xml.namespace.QName;
 
 import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
@@ -63,13 +59,18 @@ import org.opentravel.schemacompiler.version.MinorVersionHelper;
 import org.opentravel.schemacompiler.version.VersionSchemeException;
 import org.opentravel.schemacompiler.version.Versioned;
 
+import java.util.List;
+
+import javax.xml.XMLConstants;
+import javax.xml.namespace.QName;
+
 /**
  * Validator for the <code>TLProperty</code> class.
  * 
  * @author S. Livezey
  */
 public class TLPropertyCompileValidator extends TLPropertyBaseValidator {
-    
+
     public static final String ERROR_ILLEGAL_LIST_FACET_REFERENCE = "ILLEGAL_LIST_FACET_REFERENCE";
     public static final String WARNING_LIST_FACET_REPEAT_IGNORED = "LIST_FACET_REPEAT_IGNORED";
     public static final String ERROR_EMPTY_FACET_REFERENCED = "EMPTY_FACET_REFERENCED";
@@ -85,7 +86,7 @@ public class TLPropertyCompileValidator extends TLPropertyBaseValidator {
     public static final String WARNING_ILLEGAL_BUSINESS_OBJECT_ID = "ILLEGAL_BUSINESS_OBJECT_ID";
     public static final String WARNING_ILLEGAL_CORE_OBJECT_ID = "ILLEGAL_CORE_OBJECT_ID";
     public static final String WARNING_ILLEGAL_CHOICE_OBJECT_ID = "ILLEGAL_CHOICE_OBJECT_ID";
-    
+
     /**
      * @see org.opentravel.schemacompiler.validate.impl.TLValidatorBase#validateFields(org.opentravel.schemacompiler.validate.Validatable)
      */
@@ -93,78 +94,78 @@ public class TLPropertyCompileValidator extends TLPropertyBaseValidator {
     protected ValidationFindings validateFields(TLProperty target) {
         TLValidationBuilder builder = newValidationBuilder( target );
         TLPropertyType propertyType = target.getType();
-        
+
         builder.setProperty( "name", target.getName() ).setFindingType( FindingType.ERROR )
             .assertPatternMatch( NAME_XML_PATTERN );
-        
+
         builder.setEntityReferenceProperty( "type", propertyType, target.getTypeName() )
             .setFindingType( FindingType.ERROR ).assertNotNull()
             .assertValidEntityReference( TLSimple.class, TLSimpleFacet.class, TLClosedEnumeration.class,
-                    TLOpenEnumeration.class, TLRoleEnumeration.class, TLValueWithAttributes.class, TLFacet.class,
-                    TLListFacet.class, TLCoreObject.class, TLChoiceObject.class, TLBusinessObject.class, TLAlias.class,
-                    TLRoleEnumeration.class, XSDSimpleType.class, XSDComplexType.class, XSDElement.class )
+                TLOpenEnumeration.class, TLRoleEnumeration.class, TLValueWithAttributes.class, TLFacet.class,
+                TLListFacet.class, TLCoreObject.class, TLChoiceObject.class, TLBusinessObject.class, TLAlias.class,
+                TLRoleEnumeration.class, XSDSimpleType.class, XSDComplexType.class, XSDElement.class )
             .setFindingType( FindingType.WARNING ).assertNotDeprecated().assertNotObsolete();
-        
+
         validateIDFieldLocation( target, builder );
-        
+
         if ((propertyType != null) && target.isReference() && !hasID( propertyType )) {
             builder.addFinding( FindingType.ERROR, "type", ERROR_ILLEGAL_REFERENCE, target.getTypeName() );
         }
-        
+
         checkEmptyValueType( target, target.getType(), "type", builder );
-        
+
         if (CircularReferenceChecker.hasCircularReference( target )) {
             builder.addFinding( FindingType.ERROR, "type", ERROR_ILLEGAL_CIRCULAR_REFERENCE, target.getTypeName() );
         }
-        
+
         builder.setProperty( "equivalents", target.getEquivalents() ).setFindingType( FindingType.ERROR )
             .assertNotNull().assertContainsNoNullElements();
-        
+
         // Check for duplicate names of this element
         if (target.getName() != null) {
             DuplicateFieldChecker dupChecker = getDuplicateFieldChecker( target );
-            
+
             if (dupChecker.isDuplicateName( target )) {
                 builder.addFinding( FindingType.ERROR, "name", ValidationBuilder.ERROR_DUPLICATE_ELEMENT,
-                        target.getName() );
+                    target.getName() );
             }
         }
-        
+
         // Check for UPA violations
         if (target.getName() != null) {
             UPAViolationChecker upaChecker = getUPAViolationChecker( target );
-            
+
             if (upaChecker.isUPAViolation( target )) {
                 builder.addFinding( FindingType.ERROR, "name", ERROR_UPA_VIOLATION, target.getName() );
             }
         }
-        
+
         validateMinorVersionProperty( target, builder, propertyType );
-        
+
         // A warning will be issued for boolean properties (should be indicators)
         if (ValidatorUtils.isBooleanType( propertyType )) {
             builder.addFinding( FindingType.WARNING, "type", WARNING_BOOLEAN_TYPE_REFERENCE );
         }
-        
+
         validatePropertyName( target, builder, propertyType );
         validateEmptyFacetReference( propertyType, builder );
-        
+
         // Warn if a deprecated XSD date/time type is being referenced
         TLPropertyOwner elementOwner = target.getOwner();
         AbstractLibrary owningLibrary = (elementOwner == null) ? null : elementOwner.getOwningLibrary();
-        
+
         validateDeprecatedDateTimeUsage( propertyType, owningLibrary, builder );
         validateListFacetProperty( target, builder, propertyType );
-        
+
         // Issue a warning if one or more examples are provided for a complex
         // property type
         if (!(propertyType instanceof TLAttributeType) && !target.getExamples().isEmpty()) {
             builder.addFinding( FindingType.WARNING, "examples", WARNING_UNNECESSARY_EXAMPLE, target.getTypeName() );
         }
-        
+
         return builder.getFindings();
     }
-    
+
     /**
      * Issue a warning if an empty facet is referenced.
      * 
@@ -174,19 +175,19 @@ public class TLPropertyCompileValidator extends TLPropertyBaseValidator {
     private void validateEmptyFacetReference(TLPropertyType propertyType, TLValidationBuilder builder) {
         if (propertyType instanceof TLAbstractFacet) {
             TLAbstractFacet referencedFacet = (TLAbstractFacet) propertyType;
-            FacetCodegenDelegate<TLAbstractFacet> facetDelegate = new FacetCodegenDelegateFactory( null )
-                .getDelegate( referencedFacet );
-            boolean hasContent = (facetDelegate == null) ? referencedFacet.declaresContent()
-                    : facetDelegate.hasContent();
-            
+            FacetCodegenDelegate<TLAbstractFacet> facetDelegate =
+                new FacetCodegenDelegateFactory( null ).getDelegate( referencedFacet );
+            boolean hasContent =
+                (facetDelegate == null) ? referencedFacet.declaresContent() : facetDelegate.hasContent();
+
             if (!hasContent) {
                 builder.addFinding( FindingType.WARNING, "type", ERROR_EMPTY_FACET_REFERENCED,
-                        referencedFacet.getFacetType().getIdentityName(),
-                        referencedFacet.getOwningEntity().getLocalName() );
+                    referencedFacet.getFacetType().getIdentityName(),
+                    referencedFacet.getOwningEntity().getLocalName() );
             }
         }
     }
-    
+
     /**
      * List facets can only be referenced if the core object defines one or more roles.
      * 
@@ -195,19 +196,19 @@ public class TLPropertyCompileValidator extends TLPropertyBaseValidator {
      * @param propertyType the resolved type of the property being validated
      */
     private void validateListFacetProperty(TLProperty target, TLValidationBuilder builder,
-            TLPropertyType propertyType) {
+        TLPropertyType propertyType) {
         boolean isListFacet = (propertyType instanceof TLListFacet) || ((propertyType instanceof TLAlias)
-                && (((TLAlias) propertyType).getOwningEntity() instanceof TLListFacet));
-        
+            && (((TLAlias) propertyType).getOwningEntity() instanceof TLListFacet));
+
         if (isListFacet) {
             TLListFacet listFacet = (propertyType instanceof TLListFacet) ? (TLListFacet) propertyType
-                    : (TLListFacet) ((TLAlias) propertyType).getOwningEntity();
+                : (TLListFacet) ((TLAlias) propertyType).getOwningEntity();
             TLCoreObject referencedCore = (TLCoreObject) listFacet.getOwningEntity();
             int roleCount = referencedCore.getRoleEnumeration().getRoles().size();
-            
+
             if ((roleCount == 0) && !(listFacet.getItemFacet() instanceof TLSimpleFacet)) {
                 builder.addFinding( FindingType.ERROR, "type", ERROR_ILLEGAL_LIST_FACET_REFERENCE,
-                        referencedCore.getName() );
+                    referencedCore.getName() );
             }
             if ((target.getRepeat() != 0) && (target.getRepeat() != roleCount)) {
                 String repeatValue = (target.getRepeat() < 0) ? "*" : (target.getRepeat() + "");
@@ -215,7 +216,7 @@ public class TLPropertyCompileValidator extends TLPropertyBaseValidator {
             }
         }
     }
-    
+
     /**
      * Issue a warning for properties that reference complex types where the property name and the referenced type's
      * name do not match (the only exception occurs when the referenced property belongs to a built-in library since it
@@ -227,21 +228,21 @@ public class TLPropertyCompileValidator extends TLPropertyBaseValidator {
      */
     private void validatePropertyName(TLProperty target, TLValidationBuilder builder, TLPropertyType propertyType) {
         if (propertyType != null) {
-            TLPropertyType resolvedPropertyType = (target.getOwner() == null) ? propertyType
-                    : PropertyCodegenUtils.resolvePropertyType( propertyType );
-            
+            TLPropertyType resolvedPropertyType =
+                (target.getOwner() == null) ? propertyType : PropertyCodegenUtils.resolvePropertyType( propertyType );
+
             if (PropertyCodegenUtils.hasGlobalElement( resolvedPropertyType )) {
                 validateManagedPropertyName( target, builder, resolvedPropertyType );
-                
+
             } else {
                 if (target.isReference() && (target.getName() != null) && !target.getName().endsWith( "Ref" )) {
                     builder.addFinding( FindingType.WARNING, "name", WARNING_INVALID_REFERENCE_NAME,
-                            target.getName() + "Ref" );
+                        target.getName() + "Ref" );
                 }
             }
         }
     }
-    
+
     /**
      * Issue a warning for properties that reference complex types where the property name and the resolved type's name
      * do not match.
@@ -251,13 +252,13 @@ public class TLPropertyCompileValidator extends TLPropertyBaseValidator {
      * @param resolvedPropertyType the resolved type of the property being validated
      */
     private void validateManagedPropertyName(TLProperty target, TLValidationBuilder builder,
-            TLPropertyType resolvedPropertyType) {
-        QName referencedQName = PropertyCodegenUtils.getDefaultXmlElementName( resolvedPropertyType,
-                target.isReference() );
+        TLPropertyType resolvedPropertyType) {
+        QName referencedQName =
+            PropertyCodegenUtils.getDefaultXmlElementName( resolvedPropertyType, target.isReference() );
         String referencedLocalName = (referencedQName == null) ? null : referencedQName.getLocalPart();
         String propertyLocalName = target.getName();
         boolean referencedNameMatch = (propertyLocalName != null) && !propertyLocalName.equals( referencedLocalName );
-        
+
         if (referencedNameMatch) {
             if (!target.isReference()) {
                 builder.addFinding( FindingType.WARNING, "name", ERROR_ELEMENT_REF_NAME_MISMATCH, referencedLocalName );
@@ -266,7 +267,7 @@ public class TLPropertyCompileValidator extends TLPropertyBaseValidator {
             }
         }
     }
-    
+
     /**
      * Verify that properties of minor version extension are optional (with one exception - see inline comments).
      * 
@@ -275,33 +276,33 @@ public class TLPropertyCompileValidator extends TLPropertyBaseValidator {
      * @param propertyType the resolved type of the property being validated
      */
     private void validateMinorVersionProperty(TLProperty target, TLValidationBuilder builder,
-            TLPropertyType propertyType) {
+        TLPropertyType propertyType) {
         if (target.isMandatory() && isVersionExtension( getVersionedOwner( target ) )) {
             TLProperty eclipsedProperty = getEclipsedProperty( target );
             boolean isSpecialCase = false;
-            
+
             // Mandatory elements are allowed on minor version extensions if the
             // only change was to a later version of the element's type.
             if ((eclipsedProperty != null) && (eclipsedProperty.getType() instanceof Versioned)) {
                 try {
                     Versioned priorVersionType = (Versioned) eclipsedProperty.getType();
-                    List<Versioned> laterMinorVersions = new MinorVersionHelper()
-                        .getLaterMinorVersions( priorVersionType );
-                    
-                    isSpecialCase = (propertyType instanceof Versioned)
-                            && laterMinorVersions.contains( (Versioned) propertyType );
-                    
+                    List<Versioned> laterMinorVersions =
+                        new MinorVersionHelper().getLaterMinorVersions( priorVersionType );
+
+                    isSpecialCase =
+                        (propertyType instanceof Versioned) && laterMinorVersions.contains( (Versioned) propertyType );
+
                 } catch (VersionSchemeException e) {
                     // No error - assume not a special case and move on
                 }
             }
-            
+
             if (!isSpecialCase) {
                 builder.addFinding( FindingType.ERROR, "mandatory", ERROR_ILLEGAL_REQUIRED_ELEMENT );
             }
         }
     }
-    
+
     /**
      * For xsd:ID elements, make sure they are contained in the top-level facet if the owner is a core or business
      * object.
@@ -313,7 +314,7 @@ public class TLPropertyCompileValidator extends TLPropertyBaseValidator {
         if (ValidatorUtils.isXsdID( target.getType() ) && (target.getOwner() instanceof TLFacet)) {
             TLFacet facet = (TLFacet) target.getOwner();
             TLFacetOwner facetOwner = facet.getOwningEntity();
-            
+
             if (facetOwner instanceof TLBusinessObject) {
                 if ((facet.getFacetType() != TLFacetType.ID) && (facet.getFacetType() != TLFacetType.QUERY)) {
                     builder.addFinding( FindingType.WARNING, "type", WARNING_ILLEGAL_BUSINESS_OBJECT_ID );
@@ -327,7 +328,7 @@ public class TLPropertyCompileValidator extends TLPropertyBaseValidator {
             }
         }
     }
-    
+
     /**
      * Returns a <code>DuplicateFieldChecker</code> that can be used to identify duplicate field names within the
      * elements of the declaring facet.
@@ -339,14 +340,14 @@ public class TLPropertyCompileValidator extends TLPropertyBaseValidator {
         TLPropertyOwner propertyOwner = target.getOwner();
         String cacheKey = propertyOwner.getNamespace() + ":" + propertyOwner.getLocalName() + ":dupChecker";
         DuplicateFieldChecker checker = (DuplicateFieldChecker) getContextCacheEntry( cacheKey );
-        
+
         if (checker == null) {
             checker = new DuplicateFieldChecker( propertyOwner );
             setContextCacheEntry( cacheKey, checker );
         }
         return checker;
     }
-    
+
     /**
      * Returns a <code>UPAViolationChecker</code> that can be used to identify UPA violations that occur with preceding
      * elements of the declaring facet.
@@ -358,14 +359,14 @@ public class TLPropertyCompileValidator extends TLPropertyBaseValidator {
         TLPropertyOwner propertyOwner = target.getOwner();
         String cacheKey = propertyOwner.getNamespace() + ":" + propertyOwner.getLocalName() + ":upaChecker";
         UPAViolationChecker checker = (UPAViolationChecker) getContextCacheEntry( cacheKey );
-        
+
         if (checker == null) {
             checker = new UPAViolationChecker( propertyOwner );
             setContextCacheEntry( cacheKey, checker );
         }
         return checker;
     }
-    
+
     /**
      * Returns true if the given named entity publishes at least one ID value as an attribute or element.
      * 
@@ -374,42 +375,42 @@ public class TLPropertyCompileValidator extends TLPropertyBaseValidator {
      */
     protected static boolean hasID(NamedEntity entity) {
         boolean result = false;
-        
+
         if (entity instanceof TLValueWithAttributes) {
             TLValueWithAttributes vwa = (TLValueWithAttributes) entity;
-            
+
             for (TLAttribute attribute : PropertyCodegenUtils.getInheritedAttributes( vwa )) {
                 if (isIDType( attribute.getType() )) {
                     result = true;
                     break;
                 }
             }
-            
+
         } else { // non-VWA entity
             TLFacet entityFacet = null;
-            
+
             if (entity instanceof TLAlias) {
                 entity = ((TLAlias) entity).getOwningEntity();
             }
-            
+
             if (entity instanceof TLFacet) {
                 entityFacet = (TLFacet) entity;
-                
+
             } else if (entity instanceof TLChoiceObject) {
                 entityFacet = ((TLChoiceObject) entity).getSharedFacet();
-                
+
             } else if (entity instanceof TLCoreObject) {
                 entityFacet = ((TLCoreObject) entity).getSummaryFacet();
-                
+
             } else if (entity instanceof TLBusinessObject) {
                 entityFacet = ((TLBusinessObject) entity).getSummaryFacet();
             }
-            
+
             result = hasIDField( entityFacet );
         }
         return result;
     }
-    
+
     /**
      * Returns true if the given facet has an attribute or element that is an <code>xsd:ID</code>.
      * 
@@ -418,7 +419,7 @@ public class TLPropertyCompileValidator extends TLPropertyBaseValidator {
      */
     private static boolean hasIDField(TLFacet facet) {
         boolean result = false;
-        
+
         if (facet != null) {
             for (TLAttribute attribute : PropertyCodegenUtils.getInheritedAttributes( facet )) {
                 if (isIDType( attribute.getType() )) {
@@ -437,7 +438,7 @@ public class TLPropertyCompileValidator extends TLPropertyBaseValidator {
         }
         return result;
     }
-    
+
     /**
      * Returns true if the given type reference is 'xsd:ID'.
      * 
@@ -446,9 +447,9 @@ public class TLPropertyCompileValidator extends TLPropertyBaseValidator {
      */
     private static boolean isIDType(NamedEntity type) {
         return (type != null) && type.getNamespace().equals( XMLConstants.W3C_XML_SCHEMA_NS_URI )
-                && type.getLocalName().equals( "ID" );
+            && type.getLocalName().equals( "ID" );
     }
-    
+
     /**
      * Returns the <code>Versioned</code> owner of the target property.
      * 
@@ -457,17 +458,17 @@ public class TLPropertyCompileValidator extends TLPropertyBaseValidator {
      */
     private Versioned getVersionedOwner(TLProperty target) {
         Versioned owner = null;
-        
+
         if (target.getOwner() instanceof TLFacet) {
             TLFacetOwner facetOwner = ((TLFacet) target.getOwner()).getOwningEntity();
-            
+
             if (facetOwner instanceof Versioned) {
                 owner = (Versioned) facetOwner;
             }
         }
         return owner;
     }
-    
+
     /**
      * Returns the property that is eclipsed by the given target element. If the property's owner is not a version
      * extension or the target property does not eclipse an inherited element, this method will return null.
@@ -477,17 +478,18 @@ public class TLPropertyCompileValidator extends TLPropertyBaseValidator {
      */
     private TLProperty getEclipsedProperty(TLProperty target) {
         TLProperty eclipsedProperty = null;
-        
+
         if (target.getOwner() instanceof TLFacet) {
             TLFacet targetFacet = (TLFacet) target.getOwner();
-            String facetName = (targetFacet instanceof TLContextualFacet) ? ((TLContextualFacet) targetFacet).getName() : null;
+            String facetName =
+                (targetFacet instanceof TLContextualFacet) ? ((TLContextualFacet) targetFacet).getName() : null;
             TLFacetOwner targetOwner = targetFacet.getOwningEntity();
             TLFacetOwner extendedOwner = FacetCodegenUtils.getFacetOwnerExtension( targetOwner );
-            
+
             while ((eclipsedProperty == null) && (extendedOwner != null)) {
-                TLFacet priorVersionFacet = FacetCodegenUtils.getFacetOfType( extendedOwner, targetFacet.getFacetType(),
-                        facetName );
-                
+                TLFacet priorVersionFacet =
+                    FacetCodegenUtils.getFacetOfType( extendedOwner, targetFacet.getFacetType(), facetName );
+
                 if (priorVersionFacet != null) {
                     eclipsedProperty = priorVersionFacet.getElement( target.getName() );
                 }
@@ -496,5 +498,5 @@ public class TLPropertyCompileValidator extends TLPropertyBaseValidator {
         }
         return eclipsedProperty;
     }
-    
+
 }

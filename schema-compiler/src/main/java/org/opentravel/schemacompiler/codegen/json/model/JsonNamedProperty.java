@@ -13,26 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.codegen.json.model;
 
 /**
- * Interface to be implemented by model objects that can represent a
- * named property of a JSON object.
+ * Interface to be implemented by model objects that can represent a named property of a JSON object.
  */
 public interface JsonNamedProperty {
-	
-	/**
-	 * Returns the name of the JSON property.
-	 * 
-	 * @return String
-	 */
-	public String getPropertyName();
-	
-	/**
-	 * Returns the value of the JSON property.
-	 * 
-	 * @return JsonModelObject
-	 */
-	public JsonModelObject getPropertyValue();
-	
+
+    /**
+     * Returns the name of the JSON property.
+     * 
+     * @return String
+     */
+    public String getPropertyName();
+
+    /**
+     * Returns the value of the JSON property.
+     * 
+     * @return JsonModelObject
+     */
+    public JsonModelObject getPropertyValue();
+
 }

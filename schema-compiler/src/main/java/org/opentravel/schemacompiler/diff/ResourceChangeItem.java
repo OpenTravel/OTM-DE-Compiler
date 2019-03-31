@@ -24,424 +24,436 @@ import org.opentravel.schemacompiler.model.TLParameter;
 import org.opentravel.schemacompiler.model.TLResourceParentRef;
 
 /**
- * Describes a single change identified during comparison of two OTM resources or one
- * of their constituent components.
+ * Describes a single change identified during comparison of two OTM resources or one of their constituent components.
  */
 public class ResourceChangeItem extends ChangeItem<ResourceChangeType> {
-	
-	private ResourceChangeSet changeSet;
-	private TLResourceParentRef addedParentRef;
-	private TLResourceParentRef deletedParentRef;
-	private ResourceParentRefChangeSet modifiedParentRef;
-	private TLParamGroup addedParamGroup;
-	private TLParamGroup deletedParamGroup;
-	private ResourceParamGroupChangeSet modifiedParamGroup;
-	private TLParameter addedParameter;
-	private TLParameter deletedParameter;
-	private ResourceParameterChangeSet modifiedParameter;
-	private TLActionFacet addedActionFacet;
-	private TLActionFacet deletedActionFacet;
-	private EntityChangeSet modifiedActionFacet;
-	private TLAction addedAction;
-	private TLAction deletedAction;
-	private ResourceActionChangeSet modifiedAction;
-	private TLActionResponse addedActionResponse;
-	private TLActionResponse deletedActionResponse;
-	private ResourceActionResponseChangeSet modifiedActionResponse;
-	
-	/**
-	 * Constructor used when a parent reference was added or deleted from its owning resource.
-	 * 
-	 * @param changeSet  the change set to which this item belongs
-	 * @param changeType  the type of resource change
-	 * @param affectedParentRef  the parent reference that was added or removed
-	 */
-	public ResourceChangeItem(ResourceChangeSet changeSet, ResourceChangeType changeType, TLResourceParentRef affectedParentRef) {
-		this.changeSet = changeSet;
-		this.changeType = changeType;
-		
-		switch (changeType) {
-			case PARENT_REF_ADDED:
-				this.addedParentRef = affectedParentRef;
-				break;
-			case PARENT_REF_DELETED:
-				this.deletedParentRef = affectedParentRef;
-				break;
-			default:
-				throw new IllegalArgumentException("Illegal change type for parent reference addition or deletion: " + changeType);
-		}
-	}
-	
-	/**
-	 * Constructor used when a resource parent reference was modified.
-	 * 
-	 * @param changeSet  the change set to which this item belongs
-	 * @param modifiedParentRef  the change set for a modified parent reference
-	 */
-	public ResourceChangeItem(ResourceChangeSet changeSet, ResourceParentRefChangeSet modifiedParentRef) {
-		this.changeSet = changeSet;
-		this.changeType = ResourceChangeType.PARENT_REF_CHANGED;
-		this.modifiedParentRef = modifiedParentRef;
-	}
 
-	/**
-	 * Constructor used when a parent reference was added or deleted from its owning resource.
-	 * 
-	 * @param changeSet  the change set to which this item belongs
-	 * @param changeType  the type of resource change
-	 * @param affectedParentRef  the parameter group that was added or removed
-	 */
-	public ResourceChangeItem(ResourceChangeSet changeSet, ResourceChangeType changeType, TLParamGroup affectedParamGroup) {
-		this.changeSet = changeSet;
-		this.changeType = changeType;
-		
-		switch (changeType) {
-			case PARAM_GROUP_ADDED:
-				this.addedParamGroup = affectedParamGroup;
-				break;
-			case PARAM_GROUP_DELETED:
-				this.deletedParamGroup = affectedParamGroup;
-				break;
-			default:
-				throw new IllegalArgumentException("Illegal change type for parameter group addition or deletion: " + changeType);
-		}
-	}
-	
-	/**
-	 * Constructor used when a resource parameter group was modified.
-	 * 
-	 * @param modifiedParamGroup  the change set for a modified parameter group
-	 */
-	public ResourceChangeItem(ResourceChangeSet changeSet, ResourceParamGroupChangeSet modifiedParamGroup) {
-		this.changeSet = changeSet;
-		this.changeType = ResourceChangeType.PARAM_GROUP_CHANGED;
-		this.modifiedParamGroup = modifiedParamGroup;
-	}
+    private ResourceChangeSet changeSet;
+    private TLResourceParentRef addedParentRef;
+    private TLResourceParentRef deletedParentRef;
+    private ResourceParentRefChangeSet modifiedParentRef;
+    private TLParamGroup addedParamGroup;
+    private TLParamGroup deletedParamGroup;
+    private ResourceParamGroupChangeSet modifiedParamGroup;
+    private TLParameter addedParameter;
+    private TLParameter deletedParameter;
+    private ResourceParameterChangeSet modifiedParameter;
+    private TLActionFacet addedActionFacet;
+    private TLActionFacet deletedActionFacet;
+    private EntityChangeSet modifiedActionFacet;
+    private TLAction addedAction;
+    private TLAction deletedAction;
+    private ResourceActionChangeSet modifiedAction;
+    private TLActionResponse addedActionResponse;
+    private TLActionResponse deletedActionResponse;
+    private ResourceActionResponseChangeSet modifiedActionResponse;
 
-	/**
-	 * Constructor used when a parameter was added or deleted from its owning resource.
-	 * 
-	 * @param changeSet  the change set to which this item belongs
-	 * @param changeType  the type of resource change
-	 * @param affectedParameter  the parameter that was added or removed
-	 */
-	public ResourceChangeItem(ResourceChangeSet changeSet, ResourceChangeType changeType, TLParameter affectedParameter) {
-		this.changeSet = changeSet;
-		this.changeType = changeType;
-		
-		switch (changeType) {
-			case PARAMETER_ADDED:
-				this.addedParameter = affectedParameter;
-				break;
-			case PARAMETER_DELETED:
-				this.deletedParameter = affectedParameter;
-				break;
-			default:
-				throw new IllegalArgumentException("Illegal change type for parameter addition or deletion: " + changeType);
-		}
-	}
-	
-	/**
-	 * Constructor used when a resource parameter was modified.
-	 * 
-	 * @param changeSet  the change set to which this item belongs
-	 * @param modifiedParameter  the change set for a modified parameter
-	 */
-	public ResourceChangeItem(ResourceChangeSet changeSet, ResourceParameterChangeSet modifiedParameter) {
-		this.changeSet = changeSet;
-		this.changeType = ResourceChangeType.PARAMETER_CHANGED;
-		this.modifiedParameter = modifiedParameter;
-	}
+    /**
+     * Constructor used when a parent reference was added or deleted from its owning resource.
+     * 
+     * @param changeSet the change set to which this item belongs
+     * @param changeType the type of resource change
+     * @param affectedParentRef the parent reference that was added or removed
+     */
+    public ResourceChangeItem(ResourceChangeSet changeSet, ResourceChangeType changeType,
+        TLResourceParentRef affectedParentRef) {
+        this.changeSet = changeSet;
+        this.changeType = changeType;
 
-	/**
-	 * Constructor used when a action facet was added or deleted from its owning resource.
-	 * 
-	 * @param changeSet  the change set to which this item belongs
-	 * @param changeType  the type of resource change
-	 * @param affectedActionFacet  the action facet that was added or removed
-	 */
-	public ResourceChangeItem(ResourceChangeSet changeSet, ResourceChangeType changeType, TLActionFacet affectedActionFacet) {
-		this.changeSet = changeSet;
-		this.changeType = changeType;
-		
-		switch (changeType) {
-			case ACTION_FACET_ADDED:
-				this.addedActionFacet = affectedActionFacet;
-				break;
-			case ACTION_FACET_DELETED:
-				this.deletedActionFacet = affectedActionFacet;
-				break;
-			default:
-				throw new IllegalArgumentException("Illegal change type for action facet addition or deletion: " + changeType);
-		}
-	}
-	
-	/**
-	 * Constructor used when a resource action facet was modified.
-	 * 
-	 * @param changeSet  the change set to which this item belongs
-	 * @param modifiedActionFacet  the change set for a modified action facet
-	 */
-	public ResourceChangeItem(ResourceChangeSet changeSet, EntityChangeSet modifiedActionFacet) {
-		this.changeSet = changeSet;
-		this.changeType = ResourceChangeType.ACTION_FACET_CHANGED;
-		this.modifiedActionFacet = modifiedActionFacet;
-	}
+        switch (changeType) {
+            case PARENT_REF_ADDED:
+                this.addedParentRef = affectedParentRef;
+                break;
+            case PARENT_REF_DELETED:
+                this.deletedParentRef = affectedParentRef;
+                break;
+            default:
+                throw new IllegalArgumentException(
+                    "Illegal change type for parent reference addition or deletion: " + changeType );
+        }
+    }
 
-	/**
-	 * Constructor used when an action was added or deleted from its owning resource.
-	 * 
-	 * @param changeSet  the change set to which this item belongs
-	 * @param changeType  the type of resource change
-	 * @param affectedAction  the action that was added or removed
-	 */
-	public ResourceChangeItem(ResourceChangeSet changeSet, ResourceChangeType changeType, TLAction affectedAction) {
-		this.changeSet = changeSet;
-		this.changeType = changeType;
-		
-		switch (changeType) {
-			case ACTION_ADDED:
-				this.addedAction = affectedAction;
-				break;
-			case ACTION_DELETED:
-				this.deletedAction = affectedAction;
-				break;
-			default:
-				throw new IllegalArgumentException("Illegal change type for action addition or deletion: " + changeType);
-		}
-	}
-	
-	/**
-	 * Constructor used when a resource action was modified.
-	 * 
-	 * @param changeSet  the change set to which this item belongs
-	 * @param modifiedAction  the change set for a modified action
-	 */
-	public ResourceChangeItem(ResourceChangeSet changeSet, ResourceActionChangeSet modifiedAction) {
-		this.changeSet = changeSet;
-		this.changeType = ResourceChangeType.ACTION_CHANGED;
-		this.modifiedAction = modifiedAction;
-	}
+    /**
+     * Constructor used when a resource parent reference was modified.
+     * 
+     * @param changeSet the change set to which this item belongs
+     * @param modifiedParentRef the change set for a modified parent reference
+     */
+    public ResourceChangeItem(ResourceChangeSet changeSet, ResourceParentRefChangeSet modifiedParentRef) {
+        this.changeSet = changeSet;
+        this.changeType = ResourceChangeType.PARENT_REF_CHANGED;
+        this.modifiedParentRef = modifiedParentRef;
+    }
 
-	/**
-	 * Constructor used when an action response was added or deleted from its owning resource.
-	 * 
-	 * @param changeSet  the change set to which this item belongs
-	 * @param changeType  the type of resource change
-	 * @param affectedActionResponse  the action response that was added or removed
-	 */
-	public ResourceChangeItem(ResourceChangeSet changeSet, ResourceChangeType changeType, TLActionResponse affectedActionResponse) {
-		this.changeSet = changeSet;
-		this.changeType = changeType;
-		
-		switch (changeType) {
-			case RESPONSE_ADDED:
-				this.addedActionResponse = affectedActionResponse;
-				break;
-			case RESPONSE_DELETED:
-				this.deletedActionResponse = affectedActionResponse;
-				break;
-			default:
-				throw new IllegalArgumentException("Illegal change type for action response addition or deletion: " + changeType);
-		}
-	}
-	
-	/**
-	 * Constructor used when an action response was modified.
-	 * 
-	 * @param changeSet  the change set to which this item belongs
-	 * @param modifiedActionResponse  the change set for a modified action response
-	 */
-	public ResourceChangeItem(ResourceChangeSet changeSet, ResourceActionResponseChangeSet modifiedActionResponse) {
-		this.changeSet = changeSet;
-		this.changeType = ResourceChangeType.RESPONSE_CHANGED;
-		this.modifiedActionResponse = modifiedActionResponse;
-	}
+    /**
+     * Constructor used when a parent reference was added or deleted from its owning resource.
+     * 
+     * @param changeSet the change set to which this item belongs
+     * @param changeType the type of resource change
+     * @param affectedParamGroup the parameter group that was added or removed
+     */
+    public ResourceChangeItem(ResourceChangeSet changeSet, ResourceChangeType changeType,
+        TLParamGroup affectedParamGroup) {
+        this.changeSet = changeSet;
+        this.changeType = changeType;
 
-	/**
-	 * Constructor used when a resource value was changed.
-	 * 
-	 * @param changeSet  the change set to which this item belongs
-	 * @param changeType  the type of entity change
-	 * @param oldValue  the affected value from the old version
-	 * @param newValue  the affected value from the new version
-	 */
-	public ResourceChangeItem(ResourceChangeSet changeSet, ResourceChangeType changeType, String oldValue, String newValue) {
-		this.changeSet = changeSet;
-		this.changeType = changeType;
-		this.oldValue = oldValue;
-		this.newValue = newValue;
-	}
+        switch (changeType) {
+            case PARAM_GROUP_ADDED:
+                this.addedParamGroup = affectedParamGroup;
+                break;
+            case PARAM_GROUP_DELETED:
+                this.deletedParamGroup = affectedParamGroup;
+                break;
+            default:
+                throw new IllegalArgumentException(
+                    "Illegal change type for parameter group addition or deletion: " + changeType );
+        }
+    }
 
-	/**
-	 * Returns the change set to which this item belongs.
-	 *
-	 * @return ResourceChangeSet
-	 */
-	public ResourceChangeSet getChangeSet() {
-		return changeSet;
-	}
+    /**
+     * Constructor used when a resource parameter group was modified.
+     * 
+     * @param changeSet the change set to which this item belongs
+     * @param modifiedParamGroup the change set for a modified parameter group
+     */
+    public ResourceChangeItem(ResourceChangeSet changeSet, ResourceParamGroupChangeSet modifiedParamGroup) {
+        this.changeSet = changeSet;
+        this.changeType = ResourceChangeType.PARAM_GROUP_CHANGED;
+        this.modifiedParamGroup = modifiedParamGroup;
+    }
 
-	/**
-	 * Returns the parent reference that was added.
-	 *
-	 * @return TLResourceParentRef
-	 */
-	public TLResourceParentRef getAddedParentRef() {
-		return addedParentRef;
-	}
+    /**
+     * Constructor used when a parameter was added or deleted from its owning resource.
+     * 
+     * @param changeSet the change set to which this item belongs
+     * @param changeType the type of resource change
+     * @param affectedParameter the parameter that was added or removed
+     */
+    public ResourceChangeItem(ResourceChangeSet changeSet, ResourceChangeType changeType,
+        TLParameter affectedParameter) {
+        this.changeSet = changeSet;
+        this.changeType = changeType;
 
-	/**
-	 * Returns the parent reference that was deleted.
-	 *
-	 * @return TLResourceParentRef
-	 */
-	public TLResourceParentRef getDeletedParentRef() {
-		return deletedParentRef;
-	}
+        switch (changeType) {
+            case PARAMETER_ADDED:
+                this.addedParameter = affectedParameter;
+                break;
+            case PARAMETER_DELETED:
+                this.deletedParameter = affectedParameter;
+                break;
+            default:
+                throw new IllegalArgumentException(
+                    "Illegal change type for parameter addition or deletion: " + changeType );
+        }
+    }
 
-	/**
-	 * Returns the change set of the parent reference that was modified.
-	 *
-	 * @return ResourceParentRefChangeSet
-	 */
-	public ResourceParentRefChangeSet getModifiedParentRef() {
-		return modifiedParentRef;
-	}
+    /**
+     * Constructor used when a resource parameter was modified.
+     * 
+     * @param changeSet the change set to which this item belongs
+     * @param modifiedParameter the change set for a modified parameter
+     */
+    public ResourceChangeItem(ResourceChangeSet changeSet, ResourceParameterChangeSet modifiedParameter) {
+        this.changeSet = changeSet;
+        this.changeType = ResourceChangeType.PARAMETER_CHANGED;
+        this.modifiedParameter = modifiedParameter;
+    }
 
-	/**
-	 * Returns the parameter group that was added.
-	 *
-	 * @return TLParamGroup
-	 */
-	public TLParamGroup getAddedParamGroup() {
-		return addedParamGroup;
-	}
+    /**
+     * Constructor used when a action facet was added or deleted from its owning resource.
+     * 
+     * @param changeSet the change set to which this item belongs
+     * @param changeType the type of resource change
+     * @param affectedActionFacet the action facet that was added or removed
+     */
+    public ResourceChangeItem(ResourceChangeSet changeSet, ResourceChangeType changeType,
+        TLActionFacet affectedActionFacet) {
+        this.changeSet = changeSet;
+        this.changeType = changeType;
 
-	/**
-	 * Returns the parameter group that was deleted.
-	 *
-	 * @return TLParamGroup
-	 */
-	public TLParamGroup getDeletedParamGroup() {
-		return deletedParamGroup;
-	}
+        switch (changeType) {
+            case ACTION_FACET_ADDED:
+                this.addedActionFacet = affectedActionFacet;
+                break;
+            case ACTION_FACET_DELETED:
+                this.deletedActionFacet = affectedActionFacet;
+                break;
+            default:
+                throw new IllegalArgumentException(
+                    "Illegal change type for action facet addition or deletion: " + changeType );
+        }
+    }
 
-	/**
-	 * Returns the change set of the parameter group that was modified.
-	 *
-	 * @return ResourceParamGroupChangeSet
-	 */
-	public ResourceParamGroupChangeSet getModifiedParamGroup() {
-		return modifiedParamGroup;
-	}
-	
-	/**
-	 * Returns the parameter that was added.
-	 *
-	 * @return TLParameter
-	 */
-	public TLParameter getAddedParam() {
-		return addedParameter;
-	}
+    /**
+     * Constructor used when a resource action facet was modified.
+     * 
+     * @param changeSet the change set to which this item belongs
+     * @param modifiedActionFacet the change set for a modified action facet
+     */
+    public ResourceChangeItem(ResourceChangeSet changeSet, EntityChangeSet modifiedActionFacet) {
+        this.changeSet = changeSet;
+        this.changeType = ResourceChangeType.ACTION_FACET_CHANGED;
+        this.modifiedActionFacet = modifiedActionFacet;
+    }
 
-	/**
-	 * Returns the parameter that was deleted.
-	 *
-	 * @return TLParameter
-	 */
-	public TLParameter getDeletedParam() {
-		return deletedParameter;
-	}
+    /**
+     * Constructor used when an action was added or deleted from its owning resource.
+     * 
+     * @param changeSet the change set to which this item belongs
+     * @param changeType the type of resource change
+     * @param affectedAction the action that was added or removed
+     */
+    public ResourceChangeItem(ResourceChangeSet changeSet, ResourceChangeType changeType, TLAction affectedAction) {
+        this.changeSet = changeSet;
+        this.changeType = changeType;
 
-	/**
-	 * Returns the change set of the parameter that was modified.
-	 *
-	 * @return ResourceParameterChangeSet
-	 */
-	public ResourceParameterChangeSet getModifiedParam() {
-		return modifiedParameter;
-	}
+        switch (changeType) {
+            case ACTION_ADDED:
+                this.addedAction = affectedAction;
+                break;
+            case ACTION_DELETED:
+                this.deletedAction = affectedAction;
+                break;
+            default:
+                throw new IllegalArgumentException(
+                    "Illegal change type for action addition or deletion: " + changeType );
+        }
+    }
 
-	/**
-	 * Returns the action facet that was added.
-	 *
-	 * @return TLActionFacet
-	 */
-	public TLActionFacet getAddedActionFacet() {
-		return addedActionFacet;
-	}
+    /**
+     * Constructor used when a resource action was modified.
+     * 
+     * @param changeSet the change set to which this item belongs
+     * @param modifiedAction the change set for a modified action
+     */
+    public ResourceChangeItem(ResourceChangeSet changeSet, ResourceActionChangeSet modifiedAction) {
+        this.changeSet = changeSet;
+        this.changeType = ResourceChangeType.ACTION_CHANGED;
+        this.modifiedAction = modifiedAction;
+    }
 
-	/**
-	 * Returns the action facet that was deleted.
-	 *
-	 * @return TLActionFacet
-	 */
-	public TLActionFacet getDeletedActionFacet() {
-		return deletedActionFacet;
-	}
+    /**
+     * Constructor used when an action response was added or deleted from its owning resource.
+     * 
+     * @param changeSet the change set to which this item belongs
+     * @param changeType the type of resource change
+     * @param affectedActionResponse the action response that was added or removed
+     */
+    public ResourceChangeItem(ResourceChangeSet changeSet, ResourceChangeType changeType,
+        TLActionResponse affectedActionResponse) {
+        this.changeSet = changeSet;
+        this.changeType = changeType;
 
-	/**
-	 * Returns the change set of the action facet that was modified.
-	 *
-	 * @return ResourceActionFacetChangeSet
-	 */
-	public EntityChangeSet getModifiedActionFacet() {
-		return modifiedActionFacet;
-	}
+        switch (changeType) {
+            case RESPONSE_ADDED:
+                this.addedActionResponse = affectedActionResponse;
+                break;
+            case RESPONSE_DELETED:
+                this.deletedActionResponse = affectedActionResponse;
+                break;
+            default:
+                throw new IllegalArgumentException(
+                    "Illegal change type for action response addition or deletion: " + changeType );
+        }
+    }
 
-	/**
-	 * Returns the action that was added.
-	 *
-	 * @return TLAction
-	 */
-	public TLAction getAddedAction() {
-		return addedAction;
-	}
+    /**
+     * Constructor used when an action response was modified.
+     * 
+     * @param changeSet the change set to which this item belongs
+     * @param modifiedActionResponse the change set for a modified action response
+     */
+    public ResourceChangeItem(ResourceChangeSet changeSet, ResourceActionResponseChangeSet modifiedActionResponse) {
+        this.changeSet = changeSet;
+        this.changeType = ResourceChangeType.RESPONSE_CHANGED;
+        this.modifiedActionResponse = modifiedActionResponse;
+    }
 
-	/**
-	 * Returns the action that was deleted.
-	 *
-	 * @return TLAction
-	 */
-	public TLAction getDeletedAction() {
-		return deletedAction;
-	}
+    /**
+     * Constructor used when a resource value was changed.
+     * 
+     * @param changeSet the change set to which this item belongs
+     * @param changeType the type of entity change
+     * @param oldValue the affected value from the old version
+     * @param newValue the affected value from the new version
+     */
+    public ResourceChangeItem(ResourceChangeSet changeSet, ResourceChangeType changeType, String oldValue,
+        String newValue) {
+        this.changeSet = changeSet;
+        this.changeType = changeType;
+        this.oldValue = oldValue;
+        this.newValue = newValue;
+    }
 
-	/**
-	 * Returns the change set of the action that was modified.
-	 *
-	 * @return ResourceActionChangeSet
-	 */
-	public ResourceActionChangeSet getModifiedAction() {
-		return modifiedAction;
-	}
+    /**
+     * Returns the change set to which this item belongs.
+     *
+     * @return ResourceChangeSet
+     */
+    public ResourceChangeSet getChangeSet() {
+        return changeSet;
+    }
 
-	/**
-	 * Returns the action response that was added.
-	 *
-	 * @return TLActionResponse
-	 */
-	public TLActionResponse getAddedActionResponse() {
-		return addedActionResponse;
-	}
+    /**
+     * Returns the parent reference that was added.
+     *
+     * @return TLResourceParentRef
+     */
+    public TLResourceParentRef getAddedParentRef() {
+        return addedParentRef;
+    }
 
-	/**
-	 * Returns the action response that was deleted.
-	 *
-	 * @return TLActionResponse
-	 */
-	public TLActionResponse getDeletedActionResponse() {
-		return deletedActionResponse;
-	}
+    /**
+     * Returns the parent reference that was deleted.
+     *
+     * @return TLResourceParentRef
+     */
+    public TLResourceParentRef getDeletedParentRef() {
+        return deletedParentRef;
+    }
 
-	/**
-	 * Returns the change set of the action response that was modified.
-	 *
-	 * @return ResourceActionResponseChangeSet
-	 */
-	public ResourceActionResponseChangeSet getModifiedActionResponse() {
-		return modifiedActionResponse;
-	}
+    /**
+     * Returns the change set of the parent reference that was modified.
+     *
+     * @return ResourceParentRefChangeSet
+     */
+    public ResourceParentRefChangeSet getModifiedParentRef() {
+        return modifiedParentRef;
+    }
+
+    /**
+     * Returns the parameter group that was added.
+     *
+     * @return TLParamGroup
+     */
+    public TLParamGroup getAddedParamGroup() {
+        return addedParamGroup;
+    }
+
+    /**
+     * Returns the parameter group that was deleted.
+     *
+     * @return TLParamGroup
+     */
+    public TLParamGroup getDeletedParamGroup() {
+        return deletedParamGroup;
+    }
+
+    /**
+     * Returns the change set of the parameter group that was modified.
+     *
+     * @return ResourceParamGroupChangeSet
+     */
+    public ResourceParamGroupChangeSet getModifiedParamGroup() {
+        return modifiedParamGroup;
+    }
+
+    /**
+     * Returns the parameter that was added.
+     *
+     * @return TLParameter
+     */
+    public TLParameter getAddedParam() {
+        return addedParameter;
+    }
+
+    /**
+     * Returns the parameter that was deleted.
+     *
+     * @return TLParameter
+     */
+    public TLParameter getDeletedParam() {
+        return deletedParameter;
+    }
+
+    /**
+     * Returns the change set of the parameter that was modified.
+     *
+     * @return ResourceParameterChangeSet
+     */
+    public ResourceParameterChangeSet getModifiedParam() {
+        return modifiedParameter;
+    }
+
+    /**
+     * Returns the action facet that was added.
+     *
+     * @return TLActionFacet
+     */
+    public TLActionFacet getAddedActionFacet() {
+        return addedActionFacet;
+    }
+
+    /**
+     * Returns the action facet that was deleted.
+     *
+     * @return TLActionFacet
+     */
+    public TLActionFacet getDeletedActionFacet() {
+        return deletedActionFacet;
+    }
+
+    /**
+     * Returns the change set of the action facet that was modified.
+     *
+     * @return ResourceActionFacetChangeSet
+     */
+    public EntityChangeSet getModifiedActionFacet() {
+        return modifiedActionFacet;
+    }
+
+    /**
+     * Returns the action that was added.
+     *
+     * @return TLAction
+     */
+    public TLAction getAddedAction() {
+        return addedAction;
+    }
+
+    /**
+     * Returns the action that was deleted.
+     *
+     * @return TLAction
+     */
+    public TLAction getDeletedAction() {
+        return deletedAction;
+    }
+
+    /**
+     * Returns the change set of the action that was modified.
+     *
+     * @return ResourceActionChangeSet
+     */
+    public ResourceActionChangeSet getModifiedAction() {
+        return modifiedAction;
+    }
+
+    /**
+     * Returns the action response that was added.
+     *
+     * @return TLActionResponse
+     */
+    public TLActionResponse getAddedActionResponse() {
+        return addedActionResponse;
+    }
+
+    /**
+     * Returns the action response that was deleted.
+     *
+     * @return TLActionResponse
+     */
+    public TLActionResponse getDeletedActionResponse() {
+        return deletedActionResponse;
+    }
+
+    /**
+     * Returns the change set of the action response that was modified.
+     *
+     * @return ResourceActionResponseChangeSet
+     */
+    public ResourceActionResponseChangeSet getModifiedActionResponse() {
+        return modifiedActionResponse;
+    }
 
 }

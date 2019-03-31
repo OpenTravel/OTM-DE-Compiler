@@ -13,15 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.model;
 
-import java.util.Comparator;
-import java.util.List;
+package org.opentravel.schemacompiler.model;
 
 import org.opentravel.schemacompiler.event.ModelEvent;
 import org.opentravel.schemacompiler.event.ModelEventBuilder;
 import org.opentravel.schemacompiler.event.ModelEventType;
 import org.opentravel.schemacompiler.model.TLParameter.ParameterListManager;
+
+import java.util.Comparator;
+import java.util.List;
 
 
 /**
@@ -30,152 +31,152 @@ import org.opentravel.schemacompiler.model.TLParameter.ParameterListManager;
  * @author S. Livezey
  */
 public class TLParamGroup extends TLModelElement implements LibraryElement, TLDocumentationOwner {
-	
-	private TLResource owner;
-	private String name;
-	private boolean idGroup;
-	private TLFacet facetRef;
-	private String facetRefName;
+
+    private TLResource owner;
+    private String name;
+    private boolean idGroup;
+    private TLFacet facetRef;
+    private String facetRefName;
     private TLDocumentation documentation;
-    private ParameterListManager parameterManager = new ParameterListManager(this);
-    
-	/**
-	 * @see org.opentravel.schemacompiler.validate.Validatable#getValidationIdentity()
-	 */
-	@Override
-	public String getValidationIdentity() {
+    private ParameterListManager parameterManager = new ParameterListManager( this );
+
+    /**
+     * @see org.opentravel.schemacompiler.validate.Validatable#getValidationIdentity()
+     */
+    @Override
+    public String getValidationIdentity() {
         StringBuilder identity = new StringBuilder();
 
         if (owner != null) {
-            identity.append(owner.getValidationIdentity()).append("/");
+            identity.append( owner.getValidationIdentity() ).append( "/" );
         }
         if (name == null) {
-            identity.append("[Unnamed Parameter Group]");
+            identity.append( "[Unnamed Parameter Group]" );
         } else {
-            identity.append(name);
+            identity.append( name );
         }
         return identity.toString();
-	}
-	
-	/**
-	 * @see org.opentravel.schemacompiler.model.LibraryElement#getOwningLibrary()
-	 */
-	@Override
-	public AbstractLibrary getOwningLibrary() {
-		return (owner == null) ? null : owner.getOwningLibrary();
-	}
+    }
 
-	/**
-	 * @see org.opentravel.schemacompiler.model.ModelElement#getOwningModel()
-	 */
-	@Override
-	public TLModel getOwningModel() {
-		return (owner == null) ? null : owner.getOwningModel();
-	}
-	
-	/**
-	 * Returns the value of the 'owner' field.
-	 *
-	 * @return TLResource
-	 */
-	public TLResource getOwner() {
-		return owner;
-	}
-	
-	/**
-	 * Assigns the value of the 'owner' field.
-	 *
-	 * @param owner  the field value to assign
-	 */
-	public void setOwner(TLResource owner) {
-		this.owner = owner;
-	}
-	
-	/**
-	 * Returns the value of the 'name' field.
-	 *
-	 * @return String
-	 */
-	public String getName() {
-		return name;
-	}
-	
-	/**
-	 * Assigns the value of the 'name' field.
-	 *
-	 * @param name  the field value to assign
-	 */
-	public void setName(String name) {
-        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.NAME_MODIFIED, this)
-        		.setOldValue(this.name).setNewValue(name).buildEvent();
-
-		this.name = name;
-        publishEvent(event);
-	}
-	
-	/**
-	 * Returns the value of the 'idGroup' field.
-	 *
-	 * @return boolean
-	 */
-	public boolean isIdGroup() {
-		return idGroup;
-	}
-	
-	/**
-	 * Assigns the value of the 'idGroup' field.
-	 *
-	 * @param idGroup  the field value to assign
-	 */
-	public void setIdGroup(boolean idGroup) {
-        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.ID_GROUP_FLAG_MODIFIED, this)
-        		.setOldValue(this.idGroup).setNewValue(idGroup).buildEvent();
-
-		this.idGroup = idGroup;
-        publishEvent(event);
-	}
-	
     /**
-	 * Returns the value of the 'facetRef' field.
-	 *
-	 * @return TLFacet
-	 */
-	public TLFacet getFacetRef() {
-		return facetRef;
-	}
+     * @see org.opentravel.schemacompiler.model.LibraryElement#getOwningLibrary()
+     */
+    @Override
+    public AbstractLibrary getOwningLibrary() {
+        return (owner == null) ? null : owner.getOwningLibrary();
+    }
 
-	/**
-	 * Assigns the value of the 'facetRef' field.
-	 *
-	 * @param facetRef  the field value to assign
-	 */
-	public void setFacetRef(TLFacet facetRef) {
-        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.FACET_REF_MODIFIED, this)
-        		.setOldValue(this.facetRef).setNewValue(facetRef).buildEvent();
+    /**
+     * @see org.opentravel.schemacompiler.model.ModelElement#getOwningModel()
+     */
+    @Override
+    public TLModel getOwningModel() {
+        return (owner == null) ? null : owner.getOwningModel();
+    }
+
+    /**
+     * Returns the value of the 'owner' field.
+     *
+     * @return TLResource
+     */
+    public TLResource getOwner() {
+        return owner;
+    }
+
+    /**
+     * Assigns the value of the 'owner' field.
+     *
+     * @param owner the field value to assign
+     */
+    public void setOwner(TLResource owner) {
+        this.owner = owner;
+    }
+
+    /**
+     * Returns the value of the 'name' field.
+     *
+     * @return String
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * Assigns the value of the 'name' field.
+     *
+     * @param name the field value to assign
+     */
+    public void setName(String name) {
+        ModelEvent<?> event = new ModelEventBuilder( ModelEventType.NAME_MODIFIED, this ).setOldValue( this.name )
+            .setNewValue( name ).buildEvent();
+
+        this.name = name;
+        publishEvent( event );
+    }
+
+    /**
+     * Returns the value of the 'idGroup' field.
+     *
+     * @return boolean
+     */
+    public boolean isIdGroup() {
+        return idGroup;
+    }
+
+    /**
+     * Assigns the value of the 'idGroup' field.
+     *
+     * @param idGroup the field value to assign
+     */
+    public void setIdGroup(boolean idGroup) {
+        ModelEvent<?> event = new ModelEventBuilder( ModelEventType.ID_GROUP_FLAG_MODIFIED, this )
+            .setOldValue( this.idGroup ).setNewValue( idGroup ).buildEvent();
+
+        this.idGroup = idGroup;
+        publishEvent( event );
+    }
+
+    /**
+     * Returns the value of the 'facetRef' field.
+     *
+     * @return TLFacet
+     */
+    public TLFacet getFacetRef() {
+        return facetRef;
+    }
+
+    /**
+     * Assigns the value of the 'facetRef' field.
+     *
+     * @param facetRef the field value to assign
+     */
+    public void setFacetRef(TLFacet facetRef) {
+        ModelEvent<?> event = new ModelEventBuilder( ModelEventType.FACET_REF_MODIFIED, this )
+            .setOldValue( this.facetRef ).setNewValue( facetRef ).buildEvent();
 
         this.facetRef = facetRef;
-        publishEvent(event);
-	}
+        publishEvent( event );
+    }
 
-	/**
-	 * Returns the value of the 'facetRefName' field.
-	 *
-	 * @return String
-	 */
-	public String getFacetRefName() {
-		return facetRefName;
-	}
+    /**
+     * Returns the value of the 'facetRefName' field.
+     *
+     * @return String
+     */
+    public String getFacetRefName() {
+        return facetRefName;
+    }
 
-	/**
-	 * Assigns the value of the 'facetRefName' field.
-	 *
-	 * @param facetRefName  the field value to assign
-	 */
-	public void setFacetRefName(String facetRefName) {
-		this.facetRefName = facetRefName;
-	}
+    /**
+     * Assigns the value of the 'facetRefName' field.
+     *
+     * @param facetRefName the field value to assign
+     */
+    public void setFacetRefName(String facetRefName) {
+        this.facetRefName = facetRefName;
+    }
 
-	/**
+    /**
      * @see org.opentravel.schemacompiler.model.TLDocumentationOwner#getDocumentation()
      */
     public TLDocumentation getDocumentation() {
@@ -187,24 +188,24 @@ public class TLParamGroup extends TLModelElement implements LibraryElement, TLDo
      */
     public void setDocumentation(TLDocumentation documentation) {
         if (documentation != this.documentation) {
-            ModelEvent<?> event = new ModelEventBuilder(ModelEventType.DOCUMENTATION_MODIFIED, this)
-                    .setOldValue(this.documentation).setNewValue(documentation).buildEvent();
+            ModelEvent<?> event = new ModelEventBuilder( ModelEventType.DOCUMENTATION_MODIFIED, this )
+                .setOldValue( this.documentation ).setNewValue( documentation ).buildEvent();
 
             if (documentation != null) {
-                documentation.setOwner(this);
+                documentation.setOwner( this );
             }
             if (this.documentation != null) {
-                this.documentation.setOwner(null);
+                this.documentation.setOwner( null );
             }
             this.documentation = documentation;
-            publishEvent(event);
+            publishEvent( event );
         }
     }
 
     /**
      * Returns the value of the 'parameters' field.
      * 
-     * @return List<TLParameter>
+     * @return List&lt;TLParameter&gt;
      */
     public List<TLParameter> getParameters() {
         return parameterManager.getChildren();
@@ -213,68 +214,68 @@ public class TLParamGroup extends TLModelElement implements LibraryElement, TLDo
     /**
      * Returns the parameter with the specified field name.
      * 
-     * @param fieldName  the field name of the parameter to return
+     * @param fieldName the field name of the parameter to return
      * @return TLParameter
      */
     public TLParameter getParameter(String fieldName) {
-        return parameterManager.getChild(fieldName);
+        return parameterManager.getChild( fieldName );
     }
 
     /**
      * Adds a <code>TLParameter</code> element to the current list.
      * 
-     * @param parameter  the parameter to add
+     * @param parameter the parameter to add
      */
     public void addParameter(TLParameter parameter) {
-    	parameterManager.addChild(parameter);
+        parameterManager.addChild( parameter );
     }
 
     /**
      * Adds a <code>TLParameter</code> element to the current list.
      * 
-     * @param index  the index at which the given parameter should be added
-     * @param parameter  the parameter to add
+     * @param index the index at which the given parameter should be added
+     * @param parameter the parameter to add
      */
     public void addParameter(int index, TLParameter parameter) {
-    	parameterManager.addChild(index, parameter);
+        parameterManager.addChild( index, parameter );
     }
 
     /**
      * Removes the specified <code>TLParameter</code> from the current list.
      * 
-     * @param parameter  the parameter value to remove
+     * @param parameter the parameter value to remove
      */
     public void removeParameter(TLParameter parameter) {
-    	parameterManager.removeChild(parameter);
+        parameterManager.removeChild( parameter );
     }
 
     /**
-     * Moves this parameter up by one position in the list. If the parameter is not owned by this
-     * object or it is already at the front of the list, this method has no effect.
+     * Moves this parameter up by one position in the list. If the parameter is not owned by this object or it is
+     * already at the front of the list, this method has no effect.
      * 
-     * @param parameter  the parameter to move
+     * @param parameter the parameter to move
      */
     public void moveUp(TLParameter parameter) {
-    	parameterManager.moveUp(parameter);
+        parameterManager.moveUp( parameter );
     }
 
     /**
-     * Moves this parameter down by one position in the list. If the parameter is not owned by this
-     * object or it is already at the end of the list, this method has no effect.
+     * Moves this parameter down by one position in the list. If the parameter is not owned by this object or it is
+     * already at the end of the list, this method has no effect.
      * 
-     * @param parameter  the parameter to move
+     * @param parameter the parameter to move
      */
     public void moveDown(TLParameter parameter) {
-    	parameterManager.moveDown(parameter);
+        parameterManager.moveDown( parameter );
     }
 
     /**
      * Sorts the list of parameters using the comparator provided.
      * 
-     * @param comparator  the comparator to use when sorting the list
+     * @param comparator the comparator to use when sorting the list
      */
     public void sortParameters(Comparator<TLParameter> comparator) {
-    	parameterManager.sortChildren(comparator);
+        parameterManager.sortChildren( comparator );
     }
 
     /**
@@ -282,16 +283,15 @@ public class TLParamGroup extends TLModelElement implements LibraryElement, TLDo
      * 
      * @author S. Livezey
      */
-    protected static class ParamGroupListManager extends
-    		ChildEntityListManager<TLParamGroup, TLResource> {
+    protected static class ParamGroupListManager extends ChildEntityListManager<TLParamGroup,TLResource> {
 
         /**
          * Constructor that specifies the owner of the unerlying list.
          * 
-         * @param owner  the owner of the underlying list of children
+         * @param owner the owner of the underlying list of children
          */
         public ParamGroupListManager(TLResource owner) {
-            super(owner, ModelEventType.PARAMETER_ADDED, ModelEventType.PARAMETER_REMOVED);
+            super( owner, ModelEventType.PARAMETER_ADDED, ModelEventType.PARAMETER_REMOVED );
         }
 
         /**
@@ -308,7 +308,7 @@ public class TLParamGroup extends TLModelElement implements LibraryElement, TLDo
          */
         @Override
         protected void assignOwner(TLParamGroup child, TLResource owner) {
-            child.setOwner(owner);
+            child.setOwner( owner );
         }
 
         /**
@@ -320,7 +320,7 @@ public class TLParamGroup extends TLModelElement implements LibraryElement, TLDo
             TLModel owningModel = owner.getOwningModel();
 
             if (owningModel != null) {
-                owningModel.publishEvent(event);
+                owningModel.publishEvent( event );
             }
         }
 

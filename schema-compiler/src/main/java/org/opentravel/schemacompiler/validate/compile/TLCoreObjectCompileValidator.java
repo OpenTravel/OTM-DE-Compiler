@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.validate.compile;
 
 import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
@@ -35,28 +36,27 @@ public class TLCoreObjectCompileValidator extends TLCoreObjectBaseValidator {
      */
     @Override
     protected ValidationFindings validateFields(TLCoreObject target) {
-        TLValidationBuilder builder = newValidationBuilder(target);
+        TLValidationBuilder builder = newValidationBuilder( target );
 
-        builder.setProperty("name", target.getName()).setFindingType(FindingType.ERROR)
-                .assertNotNullOrBlank().assertPatternMatch(NAME_XML_PATTERN);
+        builder.setProperty( "name", target.getName() ).setFindingType( FindingType.ERROR ).assertNotNullOrBlank()
+            .assertPatternMatch( NAME_XML_PATTERN );
 
-        builder.setProperty("roles", target.getRoleEnumeration().getRoles())
-                .setFindingType(FindingType.ERROR).assertNotNull().assertContainsNoNullElements();
+        builder.setProperty( "roles", target.getRoleEnumeration().getRoles() ).setFindingType( FindingType.ERROR )
+            .assertNotNull().assertContainsNoNullElements();
 
-        builder.setProperty("equivalents", target.getEquivalents())
-                .setFindingType(FindingType.ERROR).assertNotNull().assertContainsNoNullElements();
+        builder.setProperty( "equivalents", target.getEquivalents() ).setFindingType( FindingType.ERROR )
+            .assertNotNull().assertContainsNoNullElements();
 
         if (!target.getSummaryFacet().declaresContent()) {
-            TLFacetOwner baseEntity = FacetCodegenUtils.getFacetOwnerExtension(target);
+            TLFacetOwner baseEntity = FacetCodegenUtils.getFacetOwnerExtension( target );
 
             if (baseEntity == null) {
-                builder.addFinding(FindingType.ERROR, "summaryFacet",
-                        TLValidationBuilder.ERROR_UNDER_MINIMUM_SIZE);
+                builder.addFinding( FindingType.ERROR, "summaryFacet", TLValidationBuilder.ERROR_UNDER_MINIMUM_SIZE );
             }
         }
 
-        checkSchemaNamingConflicts(target, builder);
-        validateVersioningRules(target, builder);
+        checkSchemaNamingConflicts( target, builder );
+        validateVersioningRules( target, builder );
 
         return builder.getFindings();
     }

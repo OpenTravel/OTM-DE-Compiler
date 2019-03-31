@@ -13,17 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.codegen.impl;
 
-import java.io.PrintStream;
-import java.util.HashSet;
-import java.util.Set;
+package org.opentravel.schemacompiler.codegen.impl;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerationFilter;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.BuiltInLibrary;
 import org.opentravel.schemacompiler.model.LibraryElement;
 import org.opentravel.schemacompiler.model.XSDLibrary;
+
+import java.io.PrintStream;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Default implementation of the <code>CodeGenerationFilter</code> interface.
@@ -39,36 +40,33 @@ public class DefaultCodeGenerationFilter implements CodeGenerationFilter {
     /**
      * Adds the given library to the list of libraries that will be allowed by this filter.
      * 
-     * @param library
-     *            the library to allow
+     * @param library the library to allow
      */
     public void addProcessedLibrary(AbstractLibrary library) {
-        if ((library != null) && !allowedLibraries.contains(library)) {
-            allowedLibraries.add(library);
+        if ((library != null) && !allowedLibraries.contains( library )) {
+            allowedLibraries.add( library );
         }
     }
 
     /**
      * Adds the given library to the list of schema extensions that will be allowed by this filter.
      * 
-     * @param legacySchema
-     *            the legacy schema for which an extension will be required
+     * @param legacySchema the legacy schema for which an extension will be required
      */
     public void addExtensionLibrary(XSDLibrary legacySchema) {
-        if ((legacySchema != null) && !extensionLibraries.contains(legacySchema)) {
-            extensionLibraries.add(legacySchema);
+        if ((legacySchema != null) && !extensionLibraries.contains( legacySchema )) {
+            extensionLibraries.add( legacySchema );
         }
     }
 
     /**
      * Adds the given library element to the list of entities that will be allowed by this filter.
      * 
-     * @param entity
-     *            the library element to allow
+     * @param entity the library element to allow
      */
     public void addProcessedElement(LibraryElement entity) {
-        if ((entity != null) && !allowedEntities.contains(entity)) {
-            allowedEntities.add(entity);
+        if ((entity != null) && !allowedEntities.contains( entity )) {
+            allowedEntities.add( entity );
         }
     }
 
@@ -77,7 +75,7 @@ public class DefaultCodeGenerationFilter implements CodeGenerationFilter {
      */
     @Override
     public boolean processLibrary(AbstractLibrary library) {
-        return allowedLibraries.contains(library);
+        return allowedLibraries.contains( library );
     }
 
     /**
@@ -85,7 +83,7 @@ public class DefaultCodeGenerationFilter implements CodeGenerationFilter {
      */
     @Override
     public boolean processExtendedLibrary(XSDLibrary legacySchema) {
-        return extensionLibraries.contains(legacySchema);
+        return extensionLibraries.contains( legacySchema );
     }
 
     /**
@@ -93,7 +91,7 @@ public class DefaultCodeGenerationFilter implements CodeGenerationFilter {
      */
     @Override
     public boolean processEntity(LibraryElement entity) {
-        return allowedEntities.contains(entity);
+        return allowedEntities.contains( entity );
     }
 
     /**
@@ -101,31 +99,31 @@ public class DefaultCodeGenerationFilter implements CodeGenerationFilter {
      */
     @Override
     public void addBuiltInLibrary(BuiltInLibrary library) {
-        addProcessedLibrary(library);
+        addProcessedLibrary( library );
     }
 
     /**
      * Displays the contents of this filter to standard output for debugging purposes.
      */
     @SuppressWarnings("squid:S106") // Invalid Sonar finding since this method is only used for console debugging
-	public void display() {
-		display(System.out);
-	}
-    
+    public void display() {
+        display( System.out );
+    }
+
     /**
      * Displays the contents of this filter for debugging purposes.
      * 
-     * @param out  the stream to which debugging output should be directed
+     * @param out the stream to which debugging output should be directed
      */
-	public void display(PrintStream out) {
-		out.println("CODE GENERATION FILTER:");
-		
-		for (AbstractLibrary l : allowedLibraries) {
-			out.println("  LIBRARY: " + l.getName() + " / " + l.getNamespace());
-		}
-		for (LibraryElement e : allowedEntities) {
-			out.println("  ENTITY : " + e.getValidationIdentity());
-		}
-	}
-    
+    public void display(PrintStream out) {
+        out.println( "CODE GENERATION FILTER:" );
+
+        for (AbstractLibrary l : allowedLibraries) {
+            out.println( "  LIBRARY: " + l.getName() + " / " + l.getNamespace() );
+        }
+        for (LibraryElement e : allowedEntities) {
+            out.println( "  ENTITY : " + e.getValidationIdentity() );
+        }
+    }
+
 }

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.transform.tl2jaxb16;
 
 import org.opentravel.ns.ota2.librarymodel_v01_06.Documentation;
@@ -30,8 +31,8 @@ import org.opentravel.schemacompiler.transform.symbols.SymbolResolverTransformer
  * 
  * @author S. Livezey
  */
-public class TLExtensionPointFacetTransformer extends
-        TLComplexTypeTransformer<TLExtensionPointFacet, ExtensionPointFacet> {
+public class TLExtensionPointFacetTransformer
+    extends TLComplexTypeTransformer<TLExtensionPointFacet,ExtensionPointFacet> {
 
     /**
      * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
@@ -41,22 +42,22 @@ public class TLExtensionPointFacetTransformer extends
         ExtensionPointFacet facet = new ExtensionPointFacet();
 
         if (source.getExtension() != null) {
-            ObjectTransformer<TLExtension, Extension, SymbolResolverTransformerContext> extensionTransformer = getTransformerFactory()
-                    .getTransformer(TLExtension.class, Extension.class);
+            ObjectTransformer<TLExtension,Extension,SymbolResolverTransformerContext> extensionTransformer =
+                getTransformerFactory().getTransformer( TLExtension.class, Extension.class );
 
-            facet.setExtension(extensionTransformer.transform(source.getExtension()));
+            facet.setExtension( extensionTransformer.transform( source.getExtension() ) );
         }
 
         if ((source.getDocumentation() != null) && !source.getDocumentation().isEmpty()) {
-            ObjectTransformer<TLDocumentation, Documentation, SymbolResolverTransformerContext> docTransformer = getTransformerFactory()
-                    .getTransformer(TLDocumentation.class, Documentation.class);
+            ObjectTransformer<TLDocumentation,Documentation,SymbolResolverTransformerContext> docTransformer =
+                getTransformerFactory().getTransformer( TLDocumentation.class, Documentation.class );
 
-            facet.setDocumentation(docTransformer.transform(source.getDocumentation()));
+            facet.setDocumentation( docTransformer.transform( source.getDocumentation() ) );
         }
 
-        facet.getAttribute().addAll(transformAttributes(source.getAttributes()));
-        facet.getElement().addAll(transformElements(source.getElements()));
-        facet.getIndicator().addAll(transformIndicators(source.getIndicators()));
+        facet.getAttribute().addAll( transformAttributes( source.getAttributes() ) );
+        facet.getElement().addAll( transformElements( source.getElements() ) );
+        facet.getIndicator().addAll( transformIndicators( source.getIndicators() ) );
 
         return facet;
     }

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.transform.jaxb14_2tl;
 
 import org.opentravel.ns.ota2.librarymodel_v01_04.FacetContextual;
@@ -27,32 +28,32 @@ import org.opentravel.schemacompiler.model.TLProperty;
  * 
  * @author S. Livezey
  */
-public class FacetContextualTransformer extends ComplexTypeTransformer<FacetContextual, TLContextualFacet> {
+public class FacetContextualTransformer extends ComplexTypeTransformer<FacetContextual,TLContextualFacet> {
 
     /**
      * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
      */
     @SuppressWarnings("deprecation")
-	@Override
+    @Override
     public TLContextualFacet transform(FacetContextual source) {
         final TLContextualFacet facet = new TLContextualFacet();
-        String name = trimString(source.getLabel());
-        
-        if (name == null) {
-        	name = trimString(source.getContext());
-        }
-        facet.setName(name);
-        facet.setContext(trimString(source.getContext()));
-        facet.setNotExtendable((source.isNotExtendable() != null) && source.isNotExtendable());
+        String name = trimString( source.getLabel() );
 
-        for (TLAttribute attribute : transformAttributes(source.getAttribute())) {
-            facet.addAttribute(attribute);
+        if (name == null) {
+            name = trimString( source.getContext() );
         }
-        for (TLProperty element : transformElements(source.getElement())) {
-            facet.addElement(element);
+        facet.setName( name );
+        facet.setContext( trimString( source.getContext() ) );
+        facet.setNotExtendable( (source.isNotExtendable() != null) && source.isNotExtendable() );
+
+        for (TLAttribute attribute : transformAttributes( source.getAttribute() )) {
+            facet.addAttribute( attribute );
         }
-        for (TLIndicator indicator : transformIndicators(source.getIndicator())) {
-            facet.addIndicator(indicator);
+        for (TLProperty element : transformElements( source.getElement() )) {
+            facet.addElement( element );
+        }
+        for (TLIndicator indicator : transformIndicators( source.getIndicator() )) {
+            facet.addIndicator( indicator );
         }
         return facet;
     }

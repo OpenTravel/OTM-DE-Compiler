@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.validate.base;
 
 import org.opentravel.schemacompiler.model.TLClosedEnumeration;
@@ -35,26 +36,24 @@ public class TLClosedEnumerationBaseValidator extends TLValidatorBase<TLClosedEn
      */
     @Override
     protected ValidationFindings validateChildren(TLClosedEnumeration target) {
-        Validator<TLEnumValue> enumValueValidator = getValidatorFactory().getValidatorForClass(
-                TLEnumValue.class);
+        Validator<TLEnumValue> enumValueValidator = getValidatorFactory().getValidatorForClass( TLEnumValue.class );
         ValidationFindings findings = new ValidationFindings();
 
         for (TLEnumValue enumValue : target.getValues()) {
-            findings.addAll(enumValueValidator.validate(enumValue));
+            findings.addAll( enumValueValidator.validate( enumValue ) );
         }
 
         if (target.getExtension() != null) {
-            Validator<TLExtension> extensionValidator = getValidatorFactory().getValidatorForClass(
-                    TLExtension.class);
+            Validator<TLExtension> extensionValidator = getValidatorFactory().getValidatorForClass( TLExtension.class );
 
-            findings.addAll(extensionValidator.validate(target.getExtension()));
+            findings.addAll( extensionValidator.validate( target.getExtension() ) );
         }
-        
-        if (target.getDocumentation() != null) {
-            Validator<TLDocumentation> docValidator = getValidatorFactory().getValidatorForClass(
-                    TLDocumentation.class);
 
-            findings.addAll(docValidator.validate(target.getDocumentation()));
+        if (target.getDocumentation() != null) {
+            Validator<TLDocumentation> docValidator =
+                getValidatorFactory().getValidatorForClass( TLDocumentation.class );
+
+            findings.addAll( docValidator.validate( target.getDocumentation() ) );
         }
         return findings;
     }

@@ -20,30 +20,29 @@ package org.opentravel.schemacompiler.loader;
  * Interactivly reports the progress of a project-load operation.
  */
 public interface LoaderProgressMonitor {
-	
-	/**
-	 * Called by the <code>ProjectManager</code> when a project-load operation is about to
-	 * begin.
-	 * 
-	 * @param libraryCount  the number of libraries expected to load
-	 */
-	public void beginLoad(int libraryCount);
-	
-	/**
-	 * Called when a library is about to be loaded by the <code>ProjectManager</code>.
-	 * 
-	 * @param libraryFilename  the filename of the library about to be loaded
-	 */
-	public void loadingLibrary(String libraryFilename);
-	
-	/**
-	 * Called immediately following a library load.
-	 */
-	public void libraryLoaded();
-	
-	/**
-	 * Called when the project-load operation is complete.
-	 */
-	public void done();
-	
+
+    /**
+     * Called by the <code>ProjectManager</code> when a project-load operation is about to begin.
+     * 
+     * @param libraryCount the number of libraries expected to load
+     */
+    public void beginLoad(int libraryCount);
+
+    /**
+     * Called when a library is about to be loaded by the <code>ProjectManager</code>.
+     * 
+     * @param libraryFilename the filename of the library about to be loaded
+     */
+    public void loadingLibrary(String libraryFilename);
+
+    /**
+     * Called immediately following a library load.
+     */
+    public void libraryLoaded();
+
+    /**
+     * Called when the project-load operation is complete.
+     */
+    public void done();
+
 }

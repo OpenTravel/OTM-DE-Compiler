@@ -13,18 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.codegen.json;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Writer;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+package org.opentravel.schemacompiler.codegen.json;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerationContext;
 import org.opentravel.schemacompiler.codegen.CodeGenerationException;
@@ -52,18 +42,29 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Writer;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 /**
- * <code>CodeGenerator</code> base class that handles schema output generation using the
- * <code>JsonSchema</code> model objects as a mechanism for producing the output content.
+ * <code>CodeGenerator</code> base class that handles schema output generation using the <code>JsonSchema</code> model
+ * objects as a mechanism for producing the output content.
  * 
- * @param <S>  the source type for which output content will be generated
+ * @param <S> the source type for which output content will be generated
  */
 public abstract class AbstractJsonSchemaCodeGenerator<S extends TLModelElement> extends AbstractCodeGenerator<S> {
-	
-    private static final String LINE_SEPARATOR = System.getProperty("line.separator");
-    
+
+    private static final String LINE_SEPARATOR = System.getProperty( "line.separator" );
+
     private static Gson gson = new GsonBuilder().setPrettyPrinting().create();
-    
+
     private List<SchemaDeclaration> compileTimeDependencies = new ArrayList<>();
     private TransformerFactory<CodeGenerationTransformerContext> transformerFactory;
 
@@ -71,144 +72,146 @@ public abstract class AbstractJsonSchemaCodeGenerator<S extends TLModelElement> 
      * Default constructor.
      */
     public AbstractJsonSchemaCodeGenerator() {
-        transformerFactory = TransformerFactory.getInstance(
-                SchemaCompilerApplicationContext.JSON_SCHEMA_CODEGEN_TRANSFORMER_FACTORY,
-                new CodeGenerationTransformerContext(this));
+        transformerFactory =
+            TransformerFactory.getInstance( SchemaCompilerApplicationContext.JSON_SCHEMA_CODEGEN_TRANSFORMER_FACTORY,
+                new CodeGenerationTransformerContext( this ) );
     }
 
     /**
-     * @see org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator#doGenerateOutput(java.lang.Object,org.opentravel.schemacompiler.codegen.CodeGenerationContext)
+     * @see org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator#doGenerateOutput(org.opentravel.schemacompiler.model.ModelElement,
+     *      org.opentravel.schemacompiler.codegen.CodeGenerationContext)
      */
     @Override
-    public void doGenerateOutput(S source, CodeGenerationContext context)
-            throws CodeGenerationException {
-        File outputFile = getOutputFile(source, context);
-        
-        try (Writer out = new FileWriter(outputFile)) {
-            JsonSchema jsonSchema = transformSourceObjectToJsonSchema(source, context);
+    public void doGenerateOutput(S source, CodeGenerationContext context) throws CodeGenerationException {
+        File outputFile = getOutputFile( source, context );
+
+        try (Writer out = new FileWriter( outputFile )) {
+            JsonSchema jsonSchema = transformSourceObjectToJsonSchema( source, context );
             JsonObject jsonDocument = jsonSchema.toJson();
-            
+
             if (context.getBooleanValue( CodeGenerationContext.CK_SUPRESS_OTM_EXTENSIONS )) {
-            	JsonSchemaCodegenUtils.stripOtmExtensions( jsonDocument );
+                JsonSchemaCodegenUtils.stripOtmExtensions( jsonDocument );
             }
             gson.toJson( jsonDocument, out );
 
             // Finish up by copying any dependencies that were identified during code generation
-            if (context.getBooleanValue(CodeGenerationContext.CK_COPY_COMPILE_TIME_DEPENDENCIES)) {
-                copyCompileTimeDependencies(context);
+            if (context.getBooleanValue( CodeGenerationContext.CK_COPY_COMPILE_TIME_DEPENDENCIES )) {
+                copyCompileTimeDependencies( context );
             }
-            addGeneratedFile(outputFile);
+            addGeneratedFile( outputFile );
 
         } catch (Exception e) {
-            throw new CodeGenerationException(e);
+            throw new CodeGenerationException( e );
         }
     }
-    
+
     /**
-     * Copies any schema documents that were identified at compile-time to the output folder if they
-     * do not already exist.
+     * Copies any schema documents that were identified at compile-time to the output folder if they do not already
+     * exist.
      * 
-     * @param context  the code generation context
-     * @throws CodeGenerationException  thrown if one or more of the files cannot be copied
+     * @param context the code generation context
+     * @throws CodeGenerationException thrown if one or more of the files cannot be copied
      */
-	protected void copyCompileTimeDependencies(CodeGenerationContext context) throws CodeGenerationException {
-		try {
-			for (SchemaDeclaration schemaDeclaration : getCompileTimeDependencies()) {
-				String sdFilename = schemaDeclaration.getFilename(CodeGeneratorFactory.JSON_SCHEMA_TARGET_FORMAT);
-				
-				if ((schemaDeclaration == SchemaDeclarations.SCHEMA_FOR_SCHEMAS) || (sdFilename == null)
-						|| !sdFilename.endsWith(".schema.json")) {
-					continue;
-				}
-				File outputFolder = getOutputFolder(context, null);
-				String builtInFolder = getBuiltInSchemaOutputLocation(context);
-				
-				if (builtInFolder != null) {
-					outputFolder = new File(outputFolder, builtInFolder);
-					if (!outputFolder.exists())
-						outputFolder.mkdirs();
-				}
-				
-				// Copy the contents of the file to the built-in folder location
-				File outputFile = new File(outputFolder, sdFilename);
-				
-				if (!outputFile.exists()) {
-					BufferedReader reader = new BufferedReader(new InputStreamReader(
-							schemaDeclaration.getContent(CodeGeneratorFactory.JSON_SCHEMA_TARGET_FORMAT)));
-					
-					try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile))) {
-						String line = null;
-						
-						while ((line = reader.readLine()) != null) {
-							writer.write(line);
-							writer.write(LINE_SEPARATOR);
-						}
-					}
-					reader.close();
-				}
-				addGeneratedFile(outputFile); // count dependency as generated - even if it already existed
-			}
-		} catch (IOException e) {
-			throw new CodeGenerationException(e);
-		}
-	}
-    
+    protected void copyCompileTimeDependencies(CodeGenerationContext context) throws CodeGenerationException {
+        try {
+            for (SchemaDeclaration schemaDeclaration : getCompileTimeDependencies()) {
+                String sdFilename = schemaDeclaration.getFilename( CodeGeneratorFactory.JSON_SCHEMA_TARGET_FORMAT );
+
+                if ((schemaDeclaration == SchemaDeclarations.SCHEMA_FOR_SCHEMAS) || (sdFilename == null)
+                    || !sdFilename.endsWith( ".schema.json" )) {
+                    continue;
+                }
+                File outputFolder = getOutputFolder( context, null );
+                String builtInFolder = getBuiltInSchemaOutputLocation( context );
+
+                if (builtInFolder != null) {
+                    outputFolder = new File( outputFolder, builtInFolder );
+
+                    if (!outputFolder.exists()) {
+                        outputFolder.mkdirs();
+                    }
+                }
+
+                // Copy the contents of the file to the built-in folder location
+                File outputFile = new File( outputFolder, sdFilename );
+
+                if (!outputFile.exists()) {
+                    BufferedReader reader = new BufferedReader( new InputStreamReader(
+                        schemaDeclaration.getContent( CodeGeneratorFactory.JSON_SCHEMA_TARGET_FORMAT ) ) );
+
+                    try (BufferedWriter writer = new BufferedWriter( new FileWriter( outputFile ) )) {
+                        String line = null;
+
+                        while ((line = reader.readLine()) != null) {
+                            writer.write( line );
+                            writer.write( LINE_SEPARATOR );
+                        }
+                    }
+                    reader.close();
+                }
+                addGeneratedFile( outputFile ); // count dependency as generated - even if it already existed
+            }
+        } catch (IOException e) {
+            throw new CodeGenerationException( e );
+        }
+    }
+
     /**
-     * Performs the translation from meta-model element to a JSON schema object that will be used to
-     * generate the output content.
+     * Performs the translation from meta-model element to a JSON schema object that will be used to generate the output
+     * content.
      * 
-     * @param source  the meta-model element to translate
-     * @param context  the code generation context
+     * @param source the meta-model element to translate
+     * @param context the code generation context
      * @return JsonSchema
-     * @throws CodeGenerationException  thrown if an error occurs during object translation
+     * @throws CodeGenerationException thrown if an error occurs during object translation
      */
     protected JsonSchema transformSourceObjectToJsonSchema(S source, CodeGenerationContext context)
-            throws CodeGenerationException {
-        ObjectTransformer<S, JsonSchema, CodeGenerationTransformerContext> transformer = getTransformerFactory(
-                context).getTransformer(source, JsonSchema.class);
+        throws CodeGenerationException {
+        ObjectTransformer<S,JsonSchema,CodeGenerationTransformerContext> transformer =
+            getTransformerFactory( context ).getTransformer( source, JsonSchema.class );
 
         if (transformer != null) {
-            return transformer.transform(source);
+            return transformer.transform( source );
 
         } else {
             String sourceType = (source == null) ? "UNKNOWN" : source.getClass().getSimpleName();
             throw new CodeGenerationException(
-                    "No object transformer available for model element of type " + sourceType);
+                "No object transformer available for model element of type " + sourceType );
         }
     }
 
     /**
-     * Returns the <code>TransformerFactory</code> to be used for JAXB translations by the code
-     * generator.
+     * Returns the <code>TransformerFactory</code> to be used for JAXB translations by the code generator.
      * 
-     * @param codegenContext  the current context for the code generator
-     * @return TransformerFactory<CodeGenerationTransformerContext>
+     * @param codegenContext the current context for the code generator
+     * @return TransformerFactory&lt;CodeGenerationTransformerContext&gt;
      */
     protected TransformerFactory<CodeGenerationTransformerContext> getTransformerFactory(
-            CodeGenerationContext codegenContext) {
-        transformerFactory.getContext().setCodegenContext(codegenContext);
+        CodeGenerationContext codegenContext) {
+        transformerFactory.getContext().setCodegenContext( codegenContext );
         return transformerFactory;
     }
 
     /**
-     * @see org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator#generateOutput(org.opentravel.schemacompiler.model.TLModelElement,org.opentravel.schemacompiler.codegen.CodeGenerationContext)
+     * @see org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator#generateOutput(org.opentravel.schemacompiler.model.ModelElement,
+     *      org.opentravel.schemacompiler.codegen.CodeGenerationContext)
      */
     @Override
     public Collection<File> generateOutput(final S source, CodeGenerationContext context)
-            throws ValidationException, CodeGenerationException {
+        throws ValidationException, CodeGenerationException {
         // If a filter has not already been defined, create one that will allow processing of all members and
-    	// only those libraries that are directly required by the members of the current source library.
+        // only those libraries that are directly required by the members of the current source library.
         if (getFilter() == null) {
-            final AbstractLibrary sourceLibrary = getLibrary(source);
+            final AbstractLibrary sourceLibrary = getLibrary( source );
             final CodeGenerationFilter libraryFilter;
 
             if (source instanceof LibraryMember) {
-                libraryFilter = new DependencyFilterBuilder((LibraryMember) source).buildFilter();
+                libraryFilter = new DependencyFilterBuilder( (LibraryMember) source ).buildFilter();
             } else {
-                libraryFilter = new DependencyFilterBuilder(sourceLibrary).buildFilter();
+                libraryFilter = new DependencyFilterBuilder( sourceLibrary ).buildFilter();
             }
 
-            setFilter(new CodeGenerationFilter() {
+            setFilter( new CodeGenerationFilter() {
 
                 @Override
                 public boolean processEntity(LibraryElement entity) {
@@ -222,7 +225,7 @@ public abstract class AbstractJsonSchemaCodeGenerator<S extends TLModelElement> 
 
                 @Override
                 public boolean processLibrary(AbstractLibrary library) {
-                    return (library == sourceLibrary) || libraryFilter.processLibrary(library);
+                    return (library == sourceLibrary) || libraryFilter.processLibrary( library );
                 }
 
                 /**
@@ -230,38 +233,37 @@ public abstract class AbstractJsonSchemaCodeGenerator<S extends TLModelElement> 
                  */
                 @Override
                 public void addBuiltInLibrary(BuiltInLibrary library) {
-                    libraryFilter.addBuiltInLibrary(library);
+                    libraryFilter.addBuiltInLibrary( library );
                 }
 
-            });
+            } );
         }
-        return super.generateOutput(source, context);
+        return super.generateOutput( source, context );
     }
 
     /**
-     * Adds the given schema declaration to the list of compile-time schema dependencies. At the end
-     * of the code generation process, these dependencies will be copied to the output folder.
+     * Adds the given schema declaration to the list of compile-time schema dependencies. At the end of the code
+     * generation process, these dependencies will be copied to the output folder.
      * 
-     * @param compileTimeDependency  the compile-time dependency to add
+     * @param compileTimeDependency the compile-time dependency to add
      */
     public void addCompileTimeDependency(SchemaDeclaration compileTimeDependency) {
-        if (!compileTimeDependencies.contains(compileTimeDependency)) {
-            compileTimeDependencies.add(compileTimeDependency);
+        if (!compileTimeDependencies.contains( compileTimeDependency )) {
+            compileTimeDependencies.add( compileTimeDependency );
         }
     }
 
     /**
-     * Returns the list of compile-time schema dependencies that have been reported during code
-     * generation.
+     * Returns the list of compile-time schema dependencies that have been reported during code generation.
      * 
-     * @return Collection<SchemaDeclaration>
+     * @return Collection&lt;SchemaDeclaration&gt;
      */
     public Collection<SchemaDeclaration> getCompileTimeDependencies() {
         ApplicationContext appContext = SchemaCompilerApplicationContext.getContext();
-        Collection<SchemaDeclaration> dependencies = new ArrayList<>(compileTimeDependencies);
+        Collection<SchemaDeclaration> dependencies = new ArrayList<>( compileTimeDependencies );
 
         for (SchemaDeclaration dependency : compileTimeDependencies) {
-            resolveIndirectDependencies(dependency.getDependencies(), appContext, dependencies);
+            resolveIndirectDependencies( dependency.getDependencies(), appContext, dependencies );
         }
         return dependencies;
     }
@@ -269,30 +271,26 @@ public abstract class AbstractJsonSchemaCodeGenerator<S extends TLModelElement> 
     /**
      * Resolves all of the indirect dependencies provided in the given list of bean ID's.
      * 
-     * @param dependencyBeanIds
-     *            the application context bean ID's of any indirectly-dependent item(s)
-     * @param appContext
-     *            the spring application context for the compiler
-     * @param dependencyList
-     *            the list of schema dependencies being constructed
+     * @param dependencyBeanIds the application context bean ID's of any indirectly-dependent item(s)
+     * @param appContext the spring application context for the compiler
+     * @param dependencyList the list of schema dependencies being constructed
      */
-    private void resolveIndirectDependencies(List<String> dependencyBeanIds,
-            ApplicationContext appContext, Collection<SchemaDeclaration> dependencyList) {
+    private void resolveIndirectDependencies(List<String> dependencyBeanIds, ApplicationContext appContext,
+        Collection<SchemaDeclaration> dependencyList) {
         for (String beanId : dependencyBeanIds) {
-            if (appContext.containsBean(beanId)) {
-                SchemaDeclaration dependency = (SchemaDeclaration) appContext.getBean(beanId);
+            if (appContext.containsBean( beanId )) {
+                SchemaDeclaration dependency = (SchemaDeclaration) appContext.getBean( beanId );
 
-                if (!dependencyList.contains(dependency)) {
-                    dependencyList.add(dependency);
-                    resolveIndirectDependencies(dependency.getDependencies(), appContext,
-                            dependencyList);
+                if (!dependencyList.contains( dependency )) {
+                    dependencyList.add( dependency );
+                    resolveIndirectDependencies( dependency.getDependencies(), appContext, dependencyList );
                 }
             }
         }
     }
-    
+
     /**
-     * @see org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator#isSupportedSourceObject(java.lang.Object)
+     * @see org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator#isSupportedSourceObject(org.opentravel.schemacompiler.model.ModelElement)
      */
     @Override
     protected boolean isSupportedSourceObject(S source) {
@@ -300,28 +298,30 @@ public abstract class AbstractJsonSchemaCodeGenerator<S extends TLModelElement> 
     }
 
     /**
-     * @see org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator#canGenerateOutput(org.opentravel.schemacompiler.model.TLModelElement,org.opentravel.schemacompiler.codegen.CodeGenerationContext)
+     * @see org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator#canGenerateOutput(org.opentravel.schemacompiler.model.ModelElement,
+     *      org.opentravel.schemacompiler.codegen.CodeGenerationContext)
      */
     @Override
     protected boolean canGenerateOutput(S source, CodeGenerationContext context) {
         CodeGenerationFilter filter = getFilter();
 
-        return super.canGenerateOutput(source, context)
-                && ((filter == null) || filter.processLibrary(getLibrary(source)));
+        return super.canGenerateOutput( source, context )
+            && ((filter == null) || filter.processLibrary( getLibrary( source ) ));
     }
 
     /**
-     * @see org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator#getOutputFile(org.opentravel.schemacompiler.model.TLModelElement,org.opentravel.schemacompiler.codegen.CodeGenerationContext)
+     * @see org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator#getOutputFile(org.opentravel.schemacompiler.model.ModelElement,
+     *      org.opentravel.schemacompiler.codegen.CodeGenerationContext)
      */
     @Override
     protected File getOutputFile(S source, CodeGenerationContext context) {
-        File outputFolder = getOutputFolder(context, getLibrary(source).getLibraryUrl());
-        String filename = context.getValue(CodeGenerationContext.CK_SCHEMA_FILENAME);
+        File outputFolder = getOutputFolder( context, getLibrary( source ).getLibraryUrl() );
+        String filename = context.getValue( CodeGenerationContext.CK_SCHEMA_FILENAME );
 
-        if ((filename == null) || filename.trim().equals("")) {
-            filename = getFilenameBuilder().buildFilename(source, JsonSchemaCodegenUtils.JSON_SCHEMA_FILENAME_EXT );
+        if ((filename == null) || filename.trim().equals( "" )) {
+            filename = getFilenameBuilder().buildFilename( source, JsonSchemaCodegenUtils.JSON_SCHEMA_FILENAME_EXT );
         }
-        return new File(outputFolder, filename);
+        return new File( outputFolder, filename );
     }
 
 }

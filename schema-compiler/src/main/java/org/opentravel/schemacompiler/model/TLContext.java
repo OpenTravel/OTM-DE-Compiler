@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.model;
 
 import org.opentravel.schemacompiler.event.ModelEvent;
@@ -40,12 +41,12 @@ public class TLContext extends TLModelElement implements TLDocumentationOwner {
         StringBuilder identity = new StringBuilder();
 
         if (owningLib != null) {
-            identity.append(owningLib.getValidationIdentity()).append(" : ");
+            identity.append( owningLib.getValidationIdentity() ).append( " : " );
         }
         if (contextId == null) {
-            identity.append("[Unnamed Context Declaration]");
+            identity.append( "[Unnamed Context Declaration]" );
         } else {
-            identity.append(contextId);
+            identity.append( contextId );
         }
         return identity.toString();
     }
@@ -70,32 +71,29 @@ public class TLContext extends TLModelElement implements TLDocumentationOwner {
     /**
      * Assigns the library instance that owns this model element.
      * 
-     * @param owningLibrary
-     *            the owning library instance to assign
+     * @param owningLibrary the owning library instance to assign
      */
     public void setOwningLibrary(TLLibrary owningLibrary) {
         this.owningLibrary = owningLibrary;
     }
 
     /**
-     * Moves this attribute up by one position in the list of attributes maintained by its owner. If
-     * the owner is null, or this attribute is already at the front of the list, this method has no
-     * effect.
+     * Moves this attribute up by one position in the list of attributes maintained by its owner. If the owner is null,
+     * or this attribute is already at the front of the list, this method has no effect.
      */
     public void moveUp() {
         if (owningLibrary != null) {
-            owningLibrary.moveUp(this);
+            owningLibrary.moveUp( this );
         }
     }
 
     /**
-     * Moves this attribute down by one position in the list of attributes maintained by its owner.
-     * If the owner is null, or this attribute is already at the end of the list, this method has no
-     * effect.
+     * Moves this attribute down by one position in the list of attributes maintained by its owner. If the owner is
+     * null, or this attribute is already at the end of the list, this method has no effect.
      */
     public void moveDown() {
         if (owningLibrary != null) {
-            owningLibrary.moveDown(this);
+            owningLibrary.moveDown( this );
         }
     }
 
@@ -111,15 +109,14 @@ public class TLContext extends TLModelElement implements TLDocumentationOwner {
     /**
      * Assigns the value of the 'contextId' field.
      * 
-     * @param contextId
-     *            the field value to assign
+     * @param contextId the field value to assign
      */
     public void setContextId(String contextId) {
-        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.CONTEXT_MODIFIED, this)
-                .setOldValue(this.contextId).setNewValue(contextId).buildEvent();
+        ModelEvent<?> event = new ModelEventBuilder( ModelEventType.CONTEXT_MODIFIED, this )
+            .setOldValue( this.contextId ).setNewValue( contextId ).buildEvent();
 
         this.contextId = contextId;
-        publishEvent(event);
+        publishEvent( event );
     }
 
     /**
@@ -134,16 +131,14 @@ public class TLContext extends TLModelElement implements TLDocumentationOwner {
     /**
      * Assigns the value of the 'applicationContext' field.
      * 
-     * @param applicationContext
-     *            the field value to assign
+     * @param applicationContext the field value to assign
      */
     public void setApplicationContext(String applicationContext) {
-        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.APPLICATION_CONTEXT_MODIFIED,
-                this).setOldValue(this.applicationContext).setNewValue(applicationContext)
-                .buildEvent();
+        ModelEvent<?> event = new ModelEventBuilder( ModelEventType.APPLICATION_CONTEXT_MODIFIED, this )
+            .setOldValue( this.applicationContext ).setNewValue( applicationContext ).buildEvent();
 
         this.applicationContext = applicationContext;
-        publishEvent(event);
+        publishEvent( event );
     }
 
     /**
@@ -158,17 +153,17 @@ public class TLContext extends TLModelElement implements TLDocumentationOwner {
      */
     public void setDocumentation(TLDocumentation documentation) {
         if (documentation != this.documentation) {
-            ModelEvent<?> event = new ModelEventBuilder(ModelEventType.DOCUMENTATION_MODIFIED, this)
-                    .setOldValue(this.documentation).setNewValue(documentation).buildEvent();
+            ModelEvent<?> event = new ModelEventBuilder( ModelEventType.DOCUMENTATION_MODIFIED, this )
+                .setOldValue( this.documentation ).setNewValue( documentation ).buildEvent();
 
             if (documentation != null) {
-                documentation.setOwner(this);
+                documentation.setOwner( this );
             }
             if (this.documentation != null) {
-                this.documentation.setOwner(null);
+                this.documentation.setOwner( null );
             }
             this.documentation = documentation;
-            publishEvent(event);
+            publishEvent( event );
         }
     }
 
@@ -177,16 +172,15 @@ public class TLContext extends TLModelElement implements TLDocumentationOwner {
      * 
      * @author S. Livezey
      */
-    protected static class ContextListManager extends ChildEntityListManager<TLContext, TLLibrary> {
+    protected static class ContextListManager extends ChildEntityListManager<TLContext,TLLibrary> {
 
         /**
          * Constructor that specifies the owner of the unerlying list.
          * 
-         * @param owner
-         *            the owner of the underlying list of children
+         * @param owner the owner of the underlying list of children
          */
         public ContextListManager(TLLibrary owner) {
-            super(owner, ModelEventType.CONTEXT_ADDED, ModelEventType.CONTEXT_REMOVED);
+            super( owner, ModelEventType.CONTEXT_ADDED, ModelEventType.CONTEXT_REMOVED );
         }
 
         /**
@@ -203,7 +197,7 @@ public class TLContext extends TLModelElement implements TLDocumentationOwner {
          */
         @Override
         protected void assignOwner(TLContext child, TLLibrary owner) {
-            child.setOwningLibrary(owner);
+            child.setOwningLibrary( owner );
         }
 
         /**
@@ -215,7 +209,7 @@ public class TLContext extends TLModelElement implements TLDocumentationOwner {
             TLModel owningModel = owner.getOwningModel();
 
             if (owningModel != null) {
-                owningModel.publishEvent(event);
+                owningModel.publishEvent( event );
             }
         }
 

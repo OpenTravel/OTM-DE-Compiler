@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.version.handlers;
 
 import org.opentravel.schemacompiler.model.TLAbstractEnumeration;
@@ -21,41 +22,44 @@ import org.opentravel.schemacompiler.util.ModelElementCloner;
 import org.opentravel.schemacompiler.version.VersionSchemeException;
 
 /**
- * <code>VersionHandler</code> implementation for <code>TLAbstractEnumeration</code>
- * model entities.
+ * <code>VersionHandler</code> implementation for <code>TLAbstractEnumeration</code> model entities.
  *
  * @author S. Livezey
  */
-public abstract class TLAbstractEnumerationVersionHandler<V extends TLAbstractEnumeration> extends TLExtensionOwnerVersionHandler<V> {
-	
-	/**
-	 * @see org.opentravel.schemacompiler.version.handlers.VersionHandler#rollupMinorVersion(org.opentravel.schemacompiler.version.Versioned, org.opentravel.schemacompiler.model.TLLibrary, org.opentravel.schemacompiler.version.handlers.RollupReferenceHandler)
-	 */
-	@Override
-	public V rollupMinorVersion(V minorVersion, TLLibrary majorVersionLibrary,
-			RollupReferenceHandler referenceHandler) throws VersionSchemeException {
-		V majorVersion = retrieveExistingVersion( minorVersion, majorVersionLibrary );
-		
+public abstract class TLAbstractEnumerationVersionHandler<V extends TLAbstractEnumeration>
+    extends TLExtensionOwnerVersionHandler<V> {
+
+    /**
+     * @see org.opentravel.schemacompiler.version.handlers.VersionHandler#rollupMinorVersion(org.opentravel.schemacompiler.version.Versioned,
+     *      org.opentravel.schemacompiler.model.TLLibrary,
+     *      org.opentravel.schemacompiler.version.handlers.RollupReferenceHandler)
+     */
+    @Override
+    public V rollupMinorVersion(V minorVersion, TLLibrary majorVersionLibrary, RollupReferenceHandler referenceHandler)
+        throws VersionSchemeException {
+        V majorVersion = retrieveExistingVersion( minorVersion, majorVersionLibrary );
+
         if (majorVersion == null) {
-        	majorVersion = getCloner( minorVersion ).clone( minorVersion );
+            majorVersion = getCloner( minorVersion ).clone( minorVersion );
             assignBaseExtension( majorVersion, minorVersion );
             ModelElementCloner.addToLibrary( majorVersion, majorVersionLibrary );
             referenceHandler.captureRollupReferences( majorVersion );
-        	
+
         } else if (majorVersion instanceof TLAbstractEnumeration) {
             rollupMinorVersion( minorVersion, majorVersion, referenceHandler );
         }
         return majorVersion;
-	}
-	
-	/**
-	 * @see org.opentravel.schemacompiler.version.handlers.VersionHandler#rollupMinorVersion(org.opentravel.schemacompiler.version.Versioned, org.opentravel.schemacompiler.version.Versioned, org.opentravel.schemacompiler.version.handlers.RollupReferenceHandler)
-	 */
-	@Override
-	public void rollupMinorVersion(V minorVersion, V majorVersionTarget,
-			RollupReferenceHandler referenceHandler) {
-        new VersionHandlerMergeUtils( getFactory() )
-        		.mergeEnumeratedValues( majorVersionTarget, minorVersion.getValues() );
-	}
-	
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.version.handlers.VersionHandler#rollupMinorVersion(org.opentravel.schemacompiler.version.Versioned,
+     *      org.opentravel.schemacompiler.version.Versioned,
+     *      org.opentravel.schemacompiler.version.handlers.RollupReferenceHandler)
+     */
+    @Override
+    public void rollupMinorVersion(V minorVersion, V majorVersionTarget, RollupReferenceHandler referenceHandler) {
+        new VersionHandlerMergeUtils( getFactory() ).mergeEnumeratedValues( majorVersionTarget,
+            minorVersion.getValues() );
+    }
+
 }

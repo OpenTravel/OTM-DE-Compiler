@@ -29,34 +29,33 @@ import org.opentravel.schemacompiler.validate.impl.TLValidationBuilder;
  * @author S. Livezey
  */
 public class TLContextualFacetSaveValidator extends TLContextualFacetBaseValidator {
-	
-	/**
-	 * @see org.opentravel.schemacompiler.validate.impl.TLValidatorBase#validateFields(org.opentravel.schemacompiler.validate.Validatable)
-	 */
-	@Override
-	protected ValidationFindings validateFields(TLContextualFacet target) {
-        TLValidationBuilder builder = newValidationBuilder(target);
+
+    /**
+     * @see org.opentravel.schemacompiler.validate.impl.TLValidatorBase#validateFields(org.opentravel.schemacompiler.validate.Validatable)
+     */
+    @Override
+    protected ValidationFindings validateFields(TLContextualFacet target) {
+        TLValidationBuilder builder = newValidationBuilder( target );
         TLFacetType facetType = target.getFacetType();
 
-        builder.setProperty("facetName", target.getName()).setFindingType(FindingType.ERROR)
-				.assertNotNullOrBlank().assertPatternMatch(NAME_XML_PATTERN);
-        
-        builder.setProperty("facetType", facetType).setFindingType(FindingType.ERROR)
-				.assertNotNull();
-        
-        builder.setProperty("aliases", target.getAliases()).setFindingType(FindingType.WARNING)
-        		.assertNotNull().assertContainsNoNullElements();
+        builder.setProperty( "facetName", target.getName() ).setFindingType( FindingType.ERROR ).assertNotNullOrBlank()
+            .assertPatternMatch( NAME_XML_PATTERN );
 
-        builder.setProperty("attributes", target.getAttributes())
-                .setFindingType(FindingType.WARNING).assertNotNull().assertContainsNoNullElements();
+        builder.setProperty( "facetType", facetType ).setFindingType( FindingType.ERROR ).assertNotNull();
 
-        builder.setProperty("elements", target.getElements()).setFindingType(FindingType.WARNING)
-                .assertNotNull().assertContainsNoNullElements();
+        builder.setProperty( "aliases", target.getAliases() ).setFindingType( FindingType.WARNING ).assertNotNull()
+            .assertContainsNoNullElements();
 
-        builder.setProperty("indicators", target.getIndicators())
-                .setFindingType(FindingType.WARNING).assertNotNull().assertContainsNoNullElements();
-        
+        builder.setProperty( "attributes", target.getAttributes() ).setFindingType( FindingType.WARNING )
+            .assertNotNull().assertContainsNoNullElements();
+
+        builder.setProperty( "elements", target.getElements() ).setFindingType( FindingType.WARNING ).assertNotNull()
+            .assertContainsNoNullElements();
+
+        builder.setProperty( "indicators", target.getIndicators() ).setFindingType( FindingType.WARNING )
+            .assertNotNull().assertContainsNoNullElements();
+
         return builder.getFindings();
-	}
-	
+    }
+
 }

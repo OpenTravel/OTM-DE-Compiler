@@ -13,17 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.codegen.html.writers;
 
-import java.io.IOException;
 import org.opentravel.schemacompiler.codegen.html.Content;
 
-
+import java.io.IOException;
 
 /**
  * The interface for writing library summary output.
  */
-
 public interface LibrarySummaryWriter {
 
     /**
@@ -36,7 +35,6 @@ public interface LibrarySummaryWriter {
     /**
      * Get the header for the summary.
      *
-     * @param heading Package name.
      * @return the header to be added to the content tree
      */
     public Content getHeader();
@@ -58,28 +56,22 @@ public interface LibrarySummaryWriter {
     /**
      * Adds the table of classes to the documentation tree.
      *
-     * @param classes the array of classes to document.
-     * @param label the label for this table.
-     * @param tableSummary the summary string for the table
-     * @param tableHeader array of table headers
      * @param summaryContentTree the content tree to which the summaries will be added
      */
     public void addObjectsSummary(Content summaryContentTree);
 
     /**
-     * Adds the package DESCRIPTION from the "packages.html" file to the documentation
-     * tree.
+     * Adds the package description from the "packages.html" file to the documentation tree.
      *
-     * @param packageContentTree the content tree to which the package DESCRIPTION
-     *                           will be added
+     * @param packageContentTree the content tree to which the package description will be added
      */
     public void addNamespaceDescription(Content packageContentTree);
 
 
     /**
-     * Adds the FOOTER to the documentation tree.
+     * Adds the footer to the documentation tree.
      *
-     * @param contentTree the tree to which the FOOTER will be added
+     * @param contentTree the tree to which the footer will be added
      */
     public void addFooter(Content contentTree);
 
@@ -92,6 +84,8 @@ public interface LibrarySummaryWriter {
 
     /**
      * Close the writer.
+     * 
+     * @throws IOException thrown if an error occurs while closing the writer's output stream
      */
     public void close() throws IOException;
 

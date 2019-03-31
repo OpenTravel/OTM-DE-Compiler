@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.loader.impl;
 
-import java.io.File;
-
 import org.opentravel.schemacompiler.validate.Validatable;
+
+import java.io.File;
 
 /**
  * Source object wrapper for URL objects used for compatability with the validation framework.
@@ -31,8 +32,7 @@ public class FileValidationSource implements Validatable {
     /**
      * Constructor that specifies the file reference instance to be wrapped.
      * 
-     * @param file
-     *            the file instance
+     * @param file the file instance
      */
     public FileValidationSource(File file) {
         this.file = file;

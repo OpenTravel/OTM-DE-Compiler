@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.validate.save;
 
 import org.opentravel.schemacompiler.model.TLParameter;
@@ -25,16 +26,16 @@ import org.opentravel.schemacompiler.validate.impl.TLValidationBuilder;
  * 
  * @author S. Livezey
  */
-public class TLParameterSaveValidator extends TLParameterBaseValidator{
+public class TLParameterSaveValidator extends TLParameterBaseValidator {
 
-	/**
-	 * @see org.opentravel.schemacompiler.validate.impl.TLValidatorBase#validateFields(org.opentravel.schemacompiler.validate.Validatable)
-	 */
-	@Override
-	protected ValidationFindings validateFields(TLParameter target) {
-        TLValidationBuilder builder = newValidationBuilder(target);
-        
+    /**
+     * @see org.opentravel.schemacompiler.validate.impl.TLValidatorBase#validateFields(org.opentravel.schemacompiler.validate.Validatable)
+     */
+    @Override
+    protected ValidationFindings validateFields(TLParameter target) {
+        TLValidationBuilder builder = newValidationBuilder( target );
+
         return builder.getFindings();
-	}
+    }
 
 }

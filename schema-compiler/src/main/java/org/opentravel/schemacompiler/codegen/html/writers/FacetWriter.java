@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.codegen.html.writers;
 
-import java.io.IOException;
+package org.opentravel.schemacompiler.codegen.html.writers;
 
 import org.opentravel.schemacompiler.codegen.html.Content;
 import org.opentravel.schemacompiler.codegen.html.builders.DocumentationBuilder;
@@ -27,95 +26,73 @@ import org.opentravel.schemacompiler.codegen.html.writers.info.FacetIndicatorInf
 import org.opentravel.schemacompiler.codegen.html.writers.info.InfoWriter;
 import org.opentravel.schemacompiler.codegen.html.writers.info.PropertyInfoWriter;
 
+import java.io.IOException;
+
 /**
  * @author Eric.Bronson
  *
  */
 @SuppressWarnings("squid:MaximumInheritanceDepth")
-public class FacetWriter extends
-		NamedEntityWriter<FacetDocumentationBuilder> implements
-		FieldOwnerWriter, AliasOwnerWriter {
+public class FacetWriter extends NamedEntityWriter<FacetDocumentationBuilder>
+    implements FieldOwnerWriter, AliasOwnerWriter {
 
-	/**
-	 * @param configuration
-	 * @param filename
-	 * @throws IOException
-	 */
-	public FacetWriter(FacetDocumentationBuilder classDoc,
-			DocumentationBuilder prev,
-			DocumentationBuilder next) throws IOException {
-		super(classDoc, prev, next);
-	}
+    /**
+     * @param classDoc the documentation builder for which to construct a writer
+     * @param prev the previous documentation writer
+     * @param next the next documentation writer
+     * @throws IOException thrown if the writer's output cannot be published
+     */
+    public FacetWriter(FacetDocumentationBuilder classDoc, DocumentationBuilder prev, DocumentationBuilder next)
+        throws IOException {
+        super( classDoc, prev, next );
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.opentravel.schemacompiler.codegen.html.writers.AliasOwnerWriter
-	 * #addAliasInfo(org.opentravel.schemacompiler.codegen.html.Content)
-	 */
-	@Override
-	public void addAliasInfo(Content aliasTree) {
-		if (!member.getAliases().isEmpty()) {
-			new AliasInfoWriter(this, member).addInfo(aliasTree);
-		}
-	}
+    /**
+     * @see org.opentravel.schemacompiler.codegen.html.writers.AliasOwnerWriter#addAliasInfo(org.opentravel.schemacompiler.codegen.html.Content)
+     */
+    @Override
+    public void addAliasInfo(Content aliasTree) {
+        if (!member.getAliases().isEmpty()) {
+            new AliasInfoWriter( this, member ).addInfo( aliasTree );
+        }
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.opentravel.schemacompiler.codegen.html.writers.FieldOwnerWriter
-	 * #addPropertyInfo(org.opentravel.schemacompiler.codegen.html.Content)
-	 */
-	@Override
-	public void addPropertyInfo(Content memberTree) {
-		if (!member.getProperties().isEmpty()) {
-			new PropertyInfoWriter(this, member).addInfo(memberTree);
-		}
-	}
+    /**
+     * @see org.opentravel.schemacompiler.codegen.html.writers.FieldOwnerWriter#addPropertyInfo(org.opentravel.schemacompiler.codegen.html.Content)
+     */
+    @Override
+    public void addPropertyInfo(Content memberTree) {
+        if (!member.getProperties().isEmpty()) {
+            new PropertyInfoWriter( this, member ).addInfo( memberTree );
+        }
+    }
 
-	
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.opentravel.schemacompiler.codegen.html.writers.FieldOwnerWriter
-	 * #getAttributeTree
-	 * (org.opentravel.schemacompiler.codegen.html.Content)
-	 */
-	@Override
-	public void addAttributeInfo(Content memberTree) {
-		if (!member.getAttributes().isEmpty()) {
-			new FacetAttributeInfoWriter(this, member).addInfo(memberTree);
-		}
-	}
+    /**
+     * @see org.opentravel.schemacompiler.codegen.html.writers.FieldOwnerWriter#addAttributeInfo(org.opentravel.schemacompiler.codegen.html.Content)
+     */
+    @Override
+    public void addAttributeInfo(Content memberTree) {
+        if (!member.getAttributes().isEmpty()) {
+            new FacetAttributeInfoWriter( this, member ).addInfo( memberTree );
+        }
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.opentravel.schemacompiler.codegen.html.writers.FieldOwnerWriter
-	 * #getIndicatorTree
-	 * (org.opentravel.schemacompiler.codegen.html.Content)
-	 */
-	@Override
-	public void addIndicatorInfo(Content memberTree) {
-		if (!member.getIndicators().isEmpty()) {
-			new FacetIndicatorInfoWriter(this, member).addInfo(memberTree);
-		}
-	}
+    /**
+     * @see org.opentravel.schemacompiler.codegen.html.writers.FieldOwnerWriter#addIndicatorInfo(org.opentravel.schemacompiler.codegen.html.Content)
+     */
+    @Override
+    public void addIndicatorInfo(Content memberTree) {
+        if (!member.getIndicators().isEmpty()) {
+            new FacetIndicatorInfoWriter( this, member ).addInfo( memberTree );
+        }
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.opentravel.schemacompiler.codegen.html.writers.FieldOwnerWriter
-	 * #getExampleTree(org.opentravel.schemacompiler.codegen.html.Content)
-	 */
-	@Override
-	public void addExampleInfo(Content memberTree) {
-		InfoWriter exampleWriter = new ExampleInfoWriter(this, member);
-		exampleWriter.addInfo(memberTree);
-	}
+    /**
+     * @see org.opentravel.schemacompiler.codegen.html.writers.FieldOwnerWriter#addExampleInfo(org.opentravel.schemacompiler.codegen.html.Content)
+     */
+    @Override
+    public void addExampleInfo(Content memberTree) {
+        InfoWriter exampleWriter = new ExampleInfoWriter( this, member );
+        exampleWriter.addInfo( memberTree );
+    }
 }

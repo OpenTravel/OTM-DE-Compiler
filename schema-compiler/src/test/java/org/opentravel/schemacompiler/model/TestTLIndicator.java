@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.model;
 
 import static org.junit.Assert.assertEquals;
@@ -23,29 +24,29 @@ import org.junit.Test;
  * Verifies the functions of the <code>TLIndicator</code> class.
  */
 public class TestTLIndicator extends AbstractModelTest {
-	
-	@Test
-	public void testIdentityFunctions() throws Exception {
-		TLCoreObject core = addCore( "TestObject", library1 );
-		TLIndicator indicator = addIndicator( "TestIndicator", core.getSummaryFacet() );
-		
-		assertEquals( "TestLibrary1.otm : TestObject/Summary/TestIndicator", indicator.getValidationIdentity() );
-	}
-	
-	@Test
-	public void testDocumentationFunctions() throws Exception {
-		TLCoreObject core = addCore( "TestObject", library1 );
-		TLIndicator indicator = addIndicator( "TestIndicator", core.getSummaryFacet() );
-		
-		testDocumentationFunctions( indicator );
-	}
-	
-	@Test
-	public void testEquivalentFunctions() throws Exception {
-		TLCoreObject core = addCore( "TestObject", library1 );
-		TLIndicator indicator = addIndicator( "TestIndicator", core.getSummaryFacet() );
-		
-		testEquivalentFunctions( indicator );
-	}
-	
+
+    @Test
+    public void testIdentityFunctions() throws Exception {
+        TLCoreObject core = addCore( "TestObject", library1 );
+        TLIndicator indicator = addIndicator( "TestIndicator", core.getSummaryFacet() );
+
+        assertEquals( "TestLibrary1.otm : TestObject/Summary/TestIndicator", indicator.getValidationIdentity() );
+    }
+
+    @Test
+    public void testDocumentationFunctions() throws Exception {
+        TLCoreObject core = addCore( "TestObject", library1 );
+        TLIndicator indicator = addIndicator( "TestIndicator", core.getSummaryFacet() );
+
+        testDocumentationFunctions( indicator );
+    }
+
+    @Test
+    public void testEquivalentFunctions() throws Exception {
+        TLCoreObject core = addCore( "TestObject", library1 );
+        TLIndicator indicator = addIndicator( "TestIndicator", core.getSummaryFacet() );
+
+        testEquivalentFunctions( indicator );
+    }
+
 }

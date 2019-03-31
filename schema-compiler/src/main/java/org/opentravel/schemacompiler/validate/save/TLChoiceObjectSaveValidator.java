@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.validate.save;
 
 import org.opentravel.schemacompiler.model.TLChoiceObject;
@@ -33,11 +34,10 @@ public class TLChoiceObjectSaveValidator extends TLChoiceObjectBaseValidator {
      */
     @Override
     protected ValidationFindings validateFields(TLChoiceObject target) {
-        TLValidationBuilder builder = newValidationBuilder(target).addFindings(
-                super.validateFields(target));
+        TLValidationBuilder builder = newValidationBuilder( target ).addFindings( super.validateFields( target ) );
 
-        builder.setProperty("name", target.getName()).setFindingType(FindingType.WARNING)
-                .assertPatternMatch(NAME_XML_PATTERN);
+        builder.setProperty( "name", target.getName() ).setFindingType( FindingType.WARNING )
+            .assertPatternMatch( NAME_XML_PATTERN );
 
         return builder.getFindings();
     }

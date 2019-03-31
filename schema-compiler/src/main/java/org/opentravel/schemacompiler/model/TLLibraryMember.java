@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.model;
 
 /**
  * Default implementation of the <code>LibraryMember</code> interface.
  */
 public abstract class TLLibraryMember extends TLModelElement implements LibraryMember {
-	
+
     private AbstractLibrary owningLibrary;
 
     /**

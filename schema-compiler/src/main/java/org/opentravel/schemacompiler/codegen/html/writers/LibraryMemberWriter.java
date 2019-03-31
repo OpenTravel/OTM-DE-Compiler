@@ -13,13 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.codegen.html.writers;
 
-import org.opentravel.schemacompiler.codegen.html.builders.DocumentationBuilder;
 import org.opentravel.schemacompiler.codegen.html.Content;
+import org.opentravel.schemacompiler.codegen.html.builders.DocumentationBuilder;
 
 /**
  * The interface for writing library member output.
+ * 
  * @author eric.bronson
  */
 
@@ -28,7 +30,6 @@ public interface LibraryMemberWriter {
     /**
      * Get the header of the page.
      *
-     * @param header the header string to write
      * @return header content that needs to be added to the documentation
      */
     public Content getHeader();

@@ -13,26 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.repository;
 
 /**
- * Represents a <code>RepositoryItem</code> component whose content is an OTM release
- * file.
+ * Represents a <code>RepositoryItem</code> component whose content is an OTM release file.
  */
 public interface ReleaseItem extends RepositoryItem {
-	
-	/**
-	 * Returns the release manager that owns this item.
-	 * 
-	 * @return ReleaseManager
-	 */
-	public ReleaseManager getReleaseManager();
-	
-	/**
-	 * Returns the content of the OTM release associated with this item.
-	 * 
-	 * @return Release
-	 */
-	public Release getContent();
-	
+
+    /**
+     * Returns the release manager that owns this item.
+     * 
+     * @return ReleaseManager
+     */
+    public ReleaseManager getReleaseManager();
+
+    /**
+     * Returns the content of the OTM release associated with this item.
+     * 
+     * @return Release
+     */
+    public Release getContent();
+
 }

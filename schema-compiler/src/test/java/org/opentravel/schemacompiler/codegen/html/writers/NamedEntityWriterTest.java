@@ -13,13 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.codegen.html.writers;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-
-import java.util.Collection;
-import java.util.Collections;
 
 import org.junit.After;
 import org.junit.Before;
@@ -37,143 +35,143 @@ import org.opentravel.schemacompiler.model.TLDocumentationOwner;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLModel;
 
+import java.util.Collection;
+import java.util.Collections;
+
 /**
  * @author Eric.Bronson
  *
  */
 public class NamedEntityWriterTest extends AbstractWriterTest {
 
-	NamedEntityWriter<NamedEntityDocumentationBuilder<?>> writer;
+    NamedEntityWriter<NamedEntityDocumentationBuilder<?>> writer;
 
-	TestEntity entity;
+    TestEntity entity;
 
-	/**
-	 * @throws java.lang.Exception
-	 */
-	@Before
-	public void setUp() throws Exception {
-		final TLLibrary lib = new TLLibrary();
-		lib.setName("TestLibrary");
-		entity = new TestEntity();
-		entity.setOwningLibrary(lib);
-		writer = new NamedEntityWriter<NamedEntityDocumentationBuilder<?>>(
-				new NamedEntityDocumentationBuilder<TestEntity>(entity) {
+    /**
+     * @throws java.lang.Exception
+     */
+    @Before
+    public void setUp() throws Exception {
+        final TLLibrary lib = new TLLibrary();
+        lib.setName( "TestLibrary" );
+        entity = new TestEntity();
+        entity.setOwningLibrary( lib );
+        writer = new NamedEntityWriter<NamedEntityDocumentationBuilder<?>>(
+            new NamedEntityDocumentationBuilder<TestEntity>( entity ) {
 
-					@Override
-					public void build() throws CodeGenerationException {
+                @Override
+                public void build() throws CodeGenerationException {
 
-					}
+            }
 
-					@Override
-					public DocumentationBuilderType getDocType() {
-						return DocumentationBuilderType.FACET;
-					}
+                @Override
+                public DocumentationBuilderType getDocType() {
+                    return DocumentationBuilderType.FACET;
+                }
 
-				}, null, null) {
+            }, null, null ) {
 
-		};
-	}
+        };
+    }
 
-	/**
-	 * @throws java.lang.Exception
-	 */
-	@After
-	public void tearDown() throws Exception {
-		writer.close();
-	}
+    /**
+     * @throws java.lang.Exception
+     */
+    @After
+    public void tearDown() throws Exception {
+        writer.close();
+    }
 
-	@Test
-	public void testItShouldAddTheNameToTheHeader() {
-		Content contentTree = writer.getHeader();
-		assertNotNull(contentTree);
-		String content = contentTree.toString();
-		assertTrue("Improper title.", content.contains(entity.getLocalName()));
-		assertTrue("Improper title.", content.contains(DocumentationBuilderType.FACET.toString()));
-		assertTrue("Improper namespace.", content.contains(entity.getNamespace()));
-	}
+    @Test
+    public void testItShouldAddTheNameToTheHeader() {
+        Content contentTree = writer.getHeader();
+        assertNotNull( contentTree );
+        String content = contentTree.toString();
+        assertTrue( "Improper title.", content.contains( entity.getLocalName() ) );
+        assertTrue( "Improper title.", content.contains( DocumentationBuilderType.FACET.toString() ) );
+        assertTrue( "Improper namespace.", content.contains( entity.getNamespace() ) );
+    }
 
-	@Test
-	public void testItShouldAddTheNameToTheContent() {
-		Content classContentTree = writer.getContentHeader();
-		assertNotNull(classContentTree);
-		String content = classContentTree.toString();
-		assertTrue("Improper content.", content.contains("CONTENT_CONTAINER"));
-	}
-	
-	private class TestEntity implements NamedEntity, TLDocumentationOwner{
+    @Test
+    public void testItShouldAddTheNameToTheContent() {
+        Content classContentTree = writer.getContentHeader();
+        assertNotNull( classContentTree );
+        String content = classContentTree.toString();
+        assertTrue( "Improper content.", content.contains( "CONTENT_CONTAINER" ) );
+    }
 
-		private AbstractLibrary library;
-		
-		@Override
-		public AbstractLibrary getOwningLibrary() {
-			return library;
-		}
+    private class TestEntity implements NamedEntity, TLDocumentationOwner {
 
-		public void setOwningLibrary(AbstractLibrary library) {
-			this.library = library;
-		}
-		
-		@Override
-		public LibraryElement cloneElement() {
-			return null;
-		}
+        private AbstractLibrary library;
 
-		@Override
-		public LibraryElement cloneElement(AbstractLibrary namingContext) {
-			return null;
-		}
+        @Override
+        public AbstractLibrary getOwningLibrary() {
+            return library;
+        }
 
-		@Override
-		public TLModel getOwningModel() {
-			return null;
-		}
+        public void setOwningLibrary(AbstractLibrary library) {
+            this.library = library;
+        }
 
-		@Override
-		public String getValidationIdentity() {
-			return null;
-		}
+        @Override
+        public LibraryElement cloneElement() {
+            return null;
+        }
 
-		@Override
-		public TLDocumentation getDocumentation() {
-			return null;
-		}
+        @Override
+        public LibraryElement cloneElement(AbstractLibrary namingContext) {
+            return null;
+        }
 
-		@Override
-		public void setDocumentation(TLDocumentation documentation) {
-		}
+        @Override
+        public TLModel getOwningModel() {
+            return null;
+        }
 
-		@Override
-		public String getNamespace() {
-			return "http://www.test.com/v0";
-		}
+        @Override
+        public String getValidationIdentity() {
+            return null;
+        }
 
-		@Override
-		public String getLocalName() {
-			return "TestLocalName";
-		}
+        @Override
+        public TLDocumentation getDocumentation() {
+            return null;
+        }
 
-		/**
-		 * @see org.opentravel.schemacompiler.model.ModelElement#addListener(org.opentravel.schemacompiler.event.ModelElementListener)
-		 */
-		@Override
-		public void addListener(ModelElementListener listener) {
-		}
+        @Override
+        public void setDocumentation(TLDocumentation documentation) {}
 
-		/**
-		 * @see org.opentravel.schemacompiler.model.ModelElement#removeListener(org.opentravel.schemacompiler.event.ModelElementListener)
-		 */
-		@Override
-		public void removeListener(ModelElementListener listener) {
-		}
+        @Override
+        public String getNamespace() {
+            return "http://www.test.com/v0";
+        }
 
-		/**
-		 * @see org.opentravel.schemacompiler.model.ModelElement#getListeners()
-		 */
-		@Override
-		public Collection<ModelElementListener> getListeners() {
-			return Collections.emptyList();
-		}
-		
-	}
+        @Override
+        public String getLocalName() {
+            return "TestLocalName";
+        }
+
+        /**
+         * @see org.opentravel.schemacompiler.model.ModelElement#addListener(org.opentravel.schemacompiler.event.ModelElementListener)
+         */
+        @Override
+        public void addListener(ModelElementListener listener) {}
+
+        /**
+         * @see org.opentravel.schemacompiler.model.ModelElement#removeListener(org.opentravel.schemacompiler.event.ModelElementListener)
+         */
+        @Override
+        public void removeListener(ModelElementListener listener) {}
+
+        /**
+         * @see org.opentravel.schemacompiler.model.ModelElement#getListeners()
+         */
+        @Override
+        public Collection<ModelElementListener> getListeners() {
+            return Collections.emptyList();
+        }
+
+    }
 
 }

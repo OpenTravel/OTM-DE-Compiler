@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.codegen.json.facet;
 
 import org.opentravel.schemacompiler.codegen.json.TLDocumentationJsonCodegenTransformer;
@@ -22,43 +23,42 @@ import org.opentravel.schemacompiler.model.TLDocumentationOwner;
 import org.opentravel.schemacompiler.model.TLFacet;
 
 /**
- * Code generation delegate for <code>TLFacet</code> instances with a facet type of
- * <code>SUMMARY</code> and a facet owner of type <code>TLCoreObject</code>.
+ * Code generation delegate for <code>TLFacet</code> instances with a facet type of <code>SUMMARY</code> and a facet
+ * owner of type <code>TLCoreObject</code>.
  */
 public class CoreObjectSummaryFacetJsonSchemaDelegate extends CoreObjectFacetJsonSchemaDelegate {
-	
+
     /**
      * Constructor that specifies the source facet for which code artifacts are being generated.
      * 
-     * @param sourceFacet  the source facet
+     * @param sourceFacet the source facet
      */
     public CoreObjectSummaryFacetJsonSchemaDelegate(TLFacet sourceFacet) {
-        super(sourceFacet);
+        super( sourceFacet );
     }
 
-	/**
-	 * @see org.opentravel.schemacompiler.codegen.json.facet.TLFacetJsonSchemaDelegate#createJsonDocumentation(org.opentravel.schemacompiler.model.TLDocumentationOwner)
-	 */
-	@Override
-	protected JsonDocumentation createJsonDocumentation(TLDocumentationOwner docOwner) {
-		JsonDocumentation jsonDoc = null;
+    /**
+     * @see org.opentravel.schemacompiler.codegen.json.facet.TLFacetJsonSchemaDelegate#createJsonDocumentation(org.opentravel.schemacompiler.model.TLDocumentationOwner)
+     */
+    @Override
+    protected JsonDocumentation createJsonDocumentation(TLDocumentationOwner docOwner) {
+        JsonDocumentation jsonDoc = null;
 
         if (docOwner instanceof TLFacet) {
             TLFacet sourceFacet = (TLFacet) docOwner;
 
             if (XsdCodegenUtils.isSimpleCoreObject( sourceFacet.getOwningEntity() )) {
-            	JsonDocumentation ownerDoc =
-            			super.createJsonDocumentation( (TLDocumentationOwner) sourceFacet.getOwningEntity() );
-            	JsonDocumentation facetDoc =
-            			super.createJsonDocumentation( sourceFacet );
+                JsonDocumentation ownerDoc =
+                    super.createJsonDocumentation( (TLDocumentationOwner) sourceFacet.getOwningEntity() );
+                JsonDocumentation facetDoc = super.createJsonDocumentation( sourceFacet );
 
                 jsonDoc = TLDocumentationJsonCodegenTransformer.mergeDocumentation( ownerDoc, facetDoc );
             }
         }
         if (jsonDoc == null) {
-        	jsonDoc = super.createJsonDocumentation( docOwner );
+            jsonDoc = super.createJsonDocumentation( docOwner );
         }
         return jsonDoc;
-	}
-    
+    }
+
 }

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.validate.base;
 
 import org.opentravel.schemacompiler.model.TLAction;
@@ -38,34 +39,37 @@ public class TLResourceBaseValidator extends TLValidatorBase<TLResource> {
      */
     @Override
     protected ValidationFindings validateChildren(TLResource target) {
-        Validator<TLResourceParentRef> parentRefValidator = getValidatorFactory().getValidatorForClass(TLResourceParentRef.class);
-        Validator<TLParamGroup> paramGroupValidator = getValidatorFactory().getValidatorForClass(TLParamGroup.class);
-        Validator<TLActionFacet> actionFacetValidator = getValidatorFactory().getValidatorForClass(TLActionFacet.class);
-        Validator<TLAction> actionValidator = getValidatorFactory().getValidatorForClass(TLAction.class);
+        Validator<TLResourceParentRef> parentRefValidator =
+            getValidatorFactory().getValidatorForClass( TLResourceParentRef.class );
+        Validator<TLParamGroup> paramGroupValidator = getValidatorFactory().getValidatorForClass( TLParamGroup.class );
+        Validator<TLActionFacet> actionFacetValidator =
+            getValidatorFactory().getValidatorForClass( TLActionFacet.class );
+        Validator<TLAction> actionValidator = getValidatorFactory().getValidatorForClass( TLAction.class );
         ValidationFindings findings = new ValidationFindings();
-        
-        if (target.getExtension() != null) {
-            Validator<TLExtension> extensionValidator = getValidatorFactory().getValidatorForClass(TLExtension.class);
 
-            findings.addAll(extensionValidator.validate(target.getExtension()));
+        if (target.getExtension() != null) {
+            Validator<TLExtension> extensionValidator = getValidatorFactory().getValidatorForClass( TLExtension.class );
+
+            findings.addAll( extensionValidator.validate( target.getExtension() ) );
         }
         if (target.getDocumentation() != null) {
-            Validator<TLDocumentation> docValidator = getValidatorFactory().getValidatorForClass(TLDocumentation.class);
+            Validator<TLDocumentation> docValidator =
+                getValidatorFactory().getValidatorForClass( TLDocumentation.class );
 
-            findings.addAll(docValidator.validate(target.getDocumentation()));
+            findings.addAll( docValidator.validate( target.getDocumentation() ) );
         }
-        
+
         for (TLResourceParentRef parentRef : target.getParentRefs()) {
-            findings.addAll(parentRefValidator.validate(parentRef));
+            findings.addAll( parentRefValidator.validate( parentRef ) );
         }
         for (TLParamGroup paramGroup : target.getParamGroups()) {
-            findings.addAll(paramGroupValidator.validate(paramGroup));
+            findings.addAll( paramGroupValidator.validate( paramGroup ) );
         }
         for (TLActionFacet actionFacet : target.getActionFacets()) {
-            findings.addAll(actionFacetValidator.validate(actionFacet));
+            findings.addAll( actionFacetValidator.validate( actionFacet ) );
         }
         for (TLAction action : target.getActions()) {
-            findings.addAll(actionValidator.validate(action));
+            findings.addAll( actionValidator.validate( action ) );
         }
         return findings;
     }

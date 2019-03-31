@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.model;
 
 import static org.junit.Assert.assertEquals;
@@ -23,37 +24,37 @@ import org.junit.Test;
  * Verifies the functions of the <code>TLAttribute</code> class.
  */
 public class TestTLAttribute extends AbstractModelTest {
-	
-	@Test
-	public void testIdentityFunctions() throws Exception {
-		TLCoreObject core = addCore( "TestObject", library1 );
-		TLAttribute attr = addAttribute( "testAttr", core.getSummaryFacet() );
-		
-		assertEquals( "TestLibrary1.otm : TestObject/Summary/testAttr", attr.getValidationIdentity() );
-	}
-	
-	@Test
-	public void testDocumentationFunctions() throws Exception {
-		TLCoreObject core = addCore( "TestObject", library1 );
-		TLAttribute attr = addAttribute( "testAttr", core.getSummaryFacet() );
-		
-		testDocumentationFunctions( attr );
-	}
-	
-	@Test
-	public void testEquivalentFunctions() throws Exception {
-		TLCoreObject core = addCore( "TestObject", library1 );
-		TLAttribute attr = addAttribute( "testAttr", core.getSummaryFacet() );
-		
-		testEquivalentFunctions( attr );
-	}
-	
-	@Test
-	public void testExampleFunctions() throws Exception {
-		TLCoreObject core = addCore( "TestObject", library1 );
-		TLAttribute attr = addAttribute( "testAttr", core.getSummaryFacet() );
-		
-		testExampleFunctions( attr );
-	}
-	
+
+    @Test
+    public void testIdentityFunctions() throws Exception {
+        TLCoreObject core = addCore( "TestObject", library1 );
+        TLAttribute attr = addAttribute( "testAttr", core.getSummaryFacet() );
+
+        assertEquals( "TestLibrary1.otm : TestObject/Summary/testAttr", attr.getValidationIdentity() );
+    }
+
+    @Test
+    public void testDocumentationFunctions() throws Exception {
+        TLCoreObject core = addCore( "TestObject", library1 );
+        TLAttribute attr = addAttribute( "testAttr", core.getSummaryFacet() );
+
+        testDocumentationFunctions( attr );
+    }
+
+    @Test
+    public void testEquivalentFunctions() throws Exception {
+        TLCoreObject core = addCore( "TestObject", library1 );
+        TLAttribute attr = addAttribute( "testAttr", core.getSummaryFacet() );
+
+        testEquivalentFunctions( attr );
+    }
+
+    @Test
+    public void testExampleFunctions() throws Exception {
+        TLCoreObject core = addCore( "TestObject", library1 );
+        TLAttribute attr = addAttribute( "testAttr", core.getSummaryFacet() );
+
+        testExampleFunctions( attr );
+    }
+
 }

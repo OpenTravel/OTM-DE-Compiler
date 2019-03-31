@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.codegen.json;
 
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchema;
@@ -22,32 +23,33 @@ import org.opentravel.schemacompiler.codegen.json.model.JsonType;
 import org.opentravel.schemacompiler.model.TLIndicator;
 
 /**
- * Performs the translation from <code>TLIndicator</code> objects to the JSON schema elements
- * used to produce the output.
+ * Performs the translation from <code>TLIndicator</code> objects to the JSON schema elements used to produce the
+ * output.
  */
-public class TLIndicatorJsonCodegenTransformer extends AbstractJsonSchemaTransformer<TLIndicator, JsonSchemaNamedReference> {
+public class TLIndicatorJsonCodegenTransformer
+    extends AbstractJsonSchemaTransformer<TLIndicator,JsonSchemaNamedReference> {
 
-	/**
-	 * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
-	 */
-	@Override
-	public JsonSchemaNamedReference transform(TLIndicator source) {
-		JsonSchemaNamedReference jsonIndicator = new JsonSchemaNamedReference();
-		JsonSchema indicatorSchema = new JsonSchema();
+    /**
+     * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
+     */
+    @Override
+    public JsonSchemaNamedReference transform(TLIndicator source) {
+        JsonSchemaNamedReference jsonIndicator = new JsonSchemaNamedReference();
+        JsonSchema indicatorSchema = new JsonSchema();
         String indicatorName = source.getName();
-        
-        if (!indicatorName.endsWith("Ind")) {
+
+        if (!indicatorName.endsWith( "Ind" )) {
             indicatorName += "Ind";
         }
-        
+
         indicatorSchema.setType( JsonType.JSON_BOOLEAN );
         jsonIndicator.setName( indicatorName );
         jsonIndicator.setSchema( new JsonSchemaReference( indicatorSchema ) );
-        
+
         transformDocumentation( source, indicatorSchema );
         indicatorSchema.getEquivalentItems().addAll( jsonUtils.getEquivalentInfo( source ) );
-        
-		return jsonIndicator;
-	}
-	
+
+        return jsonIndicator;
+    }
+
 }

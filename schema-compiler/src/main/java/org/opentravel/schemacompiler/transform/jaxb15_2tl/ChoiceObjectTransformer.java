@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.transform.jaxb15_2tl;
 
 import org.opentravel.ns.ota2.librarymodel_v01_05.ChoiceObject;
@@ -32,66 +33,65 @@ import org.opentravel.schemacompiler.transform.ObjectTransformer;
 import org.opentravel.schemacompiler.transform.symbols.DefaultTransformerContext;
 
 /**
- * Handles the transformation of objects from the <code>ChoiceObject</code> type to the
- * <code>TLChoiceObject</code> type.
+ * Handles the transformation of objects from the <code>ChoiceObject</code> type to the <code>TLChoiceObject</code>
+ * type.
  *
  * @author S. Livezey
  */
-public class ChoiceObjectTransformer extends
-		ComplexTypeTransformer<ChoiceObject, TLChoiceObject> {
-	
-	/**
-	 * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
-	 */
-	@Override
-	public TLChoiceObject transform(ChoiceObject source) {
-        ObjectTransformer<Facet, TLFacet, DefaultTransformerContext> facetTransformer = getTransformerFactory()
-                .getTransformer(Facet.class, TLFacet.class);
-        ObjectTransformer<FacetContextual, TLContextualFacet, DefaultTransformerContext> facetContextualTransformer =
-        		getTransformerFactory().getTransformer(FacetContextual.class, TLContextualFacet.class);
-        ObjectTransformer<Equivalent, TLEquivalent, DefaultTransformerContext> equivTransformer = getTransformerFactory()
-                .getTransformer(Equivalent.class, TLEquivalent.class);
+public class ChoiceObjectTransformer extends ComplexTypeTransformer<ChoiceObject,TLChoiceObject> {
+
+    /**
+     * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
+     */
+    @Override
+    public TLChoiceObject transform(ChoiceObject source) {
+        ObjectTransformer<Facet,TLFacet,DefaultTransformerContext> facetTransformer =
+            getTransformerFactory().getTransformer( Facet.class, TLFacet.class );
+        ObjectTransformer<FacetContextual,TLContextualFacet,DefaultTransformerContext> facetContextualTransformer =
+            getTransformerFactory().getTransformer( FacetContextual.class, TLContextualFacet.class );
+        ObjectTransformer<Equivalent,TLEquivalent,DefaultTransformerContext> equivTransformer =
+            getTransformerFactory().getTransformer( Equivalent.class, TLEquivalent.class );
         TLChoiceObject choiceObject = new TLChoiceObject();
 
-        choiceObject.setName(trimString(source.getName()));
-        choiceObject.setNotExtendable((source.isNotExtendable() != null) && source.isNotExtendable());
+        choiceObject.setName( trimString( source.getName() ) );
+        choiceObject.setNotExtendable( (source.isNotExtendable() != null) && source.isNotExtendable() );
 
         if (source.getDocumentation() != null) {
-            ObjectTransformer<Documentation, TLDocumentation, DefaultTransformerContext> docTransformer = getTransformerFactory()
-                    .getTransformer(Documentation.class, TLDocumentation.class);
+            ObjectTransformer<Documentation,TLDocumentation,DefaultTransformerContext> docTransformer =
+                getTransformerFactory().getTransformer( Documentation.class, TLDocumentation.class );
 
-            choiceObject.setDocumentation(docTransformer.transform(source.getDocumentation()));
+            choiceObject.setDocumentation( docTransformer.transform( source.getDocumentation() ) );
         }
 
         if (source.getExtension() != null) {
-            ObjectTransformer<Extension, TLExtension, DefaultTransformerContext> extensionTransformer = getTransformerFactory()
-                    .getTransformer(Extension.class, TLExtension.class);
+            ObjectTransformer<Extension,TLExtension,DefaultTransformerContext> extensionTransformer =
+                getTransformerFactory().getTransformer( Extension.class, TLExtension.class );
 
-            choiceObject.setExtension(extensionTransformer.transform(source.getExtension()));
+            choiceObject.setExtension( extensionTransformer.transform( source.getExtension() ) );
         }
 
         for (Equivalent sourceEquiv : source.getEquivalent()) {
-        	choiceObject.addEquivalent(equivTransformer.transform(sourceEquiv));
+            choiceObject.addEquivalent( equivTransformer.transform( sourceEquiv ) );
         }
 
-        for (String aliasName : trimStrings(source.getAliases())) {
+        for (String aliasName : trimStrings( source.getAliases() )) {
             TLAlias alias = new TLAlias();
 
-            alias.setName(aliasName);
-            choiceObject.addAlias(alias);
+            alias.setName( aliasName );
+            choiceObject.addAlias( alias );
         }
 
         if (source.getShared() != null) {
-        	choiceObject.setSharedFacet(facetTransformer.transform(source.getShared()));
+            choiceObject.setSharedFacet( facetTransformer.transform( source.getShared() ) );
         }
 
         if (source.getChoice() != null) {
             for (FacetContextual sourceFacet : source.getChoice()) {
-            	choiceObject.addChoiceFacet(facetContextualTransformer.transform(sourceFacet));
+                choiceObject.addChoiceFacet( facetContextualTransformer.transform( sourceFacet ) );
             }
         }
 
         return choiceObject;
-	}
-	
+    }
+
 }

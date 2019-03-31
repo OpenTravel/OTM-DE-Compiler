@@ -13,10 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.codegen.xsd;
 
-import javax.xml.XMLConstants;
-import javax.xml.namespace.QName;
+package org.opentravel.schemacompiler.codegen.xsd;
 
 import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerContext;
 import org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts;
@@ -39,50 +37,49 @@ import org.w3._2001.xmlschema.SimpleExtensionType;
 import org.w3._2001.xmlschema.TopLevelComplexType;
 import org.w3._2001.xmlschema.TopLevelSimpleType;
 
+import javax.xml.XMLConstants;
+import javax.xml.namespace.QName;
+
 /**
- * Performs the translation from <code>TLCoreObject</code> objects to the JAXB nodes used to produce
- * the schema output.
+ * Performs the translation from <code>TLCoreObject</code> objects to the JAXB nodes used to produce the schema output.
  * 
  * @author S. Livezey
  */
-public class TLCoreObjectCodegenTransformer extends
-        AbstractXsdTransformer<TLCoreObject, CodegenArtifacts> {
+public class TLCoreObjectCodegenTransformer extends AbstractXsdTransformer<TLCoreObject,CodegenArtifacts> {
 
-	private static final String OPEN = "_Open";
+    private static final String OPEN = "_Open";
 
-	/**
+    /**
      * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
      */
     @Override
     public CodegenArtifacts transform(TLCoreObject source) {
-        FacetCodegenDelegateFactory delegateFactory = new FacetCodegenDelegateFactory(context);
+        FacetCodegenDelegateFactory delegateFactory = new FacetCodegenDelegateFactory( context );
         FacetCodegenElements elementArtifacts = new FacetCodegenElements();
         CodegenArtifacts otherArtifacts = new CodegenArtifacts();
 
-        otherArtifacts.addAllArtifacts(delegateFactory.getDelegate(source.getSimpleListFacet())
-                .generateElements().getFacetElements(source.getSimpleListFacet()));
-        otherArtifacts.addAllArtifacts(delegateFactory.getDelegate(source.getSimpleFacet())
-                .generateArtifacts());
-        otherArtifacts.addAllArtifacts(delegateFactory.getDelegate(source.getSimpleListFacet())
-                .generateArtifacts());
-        generateFacetArtifacts(delegateFactory.getDelegate(source.getSummaryFacet()),
-                elementArtifacts, otherArtifacts, false);
-        generateFacetArtifacts(delegateFactory.getDelegate(source.getDetailFacet()),
-                elementArtifacts, otherArtifacts, false);
+        otherArtifacts.addAllArtifacts( delegateFactory.getDelegate( source.getSimpleListFacet() ).generateElements()
+            .getFacetElements( source.getSimpleListFacet() ) );
+        otherArtifacts.addAllArtifacts( delegateFactory.getDelegate( source.getSimpleFacet() ).generateArtifacts() );
+        otherArtifacts
+            .addAllArtifacts( delegateFactory.getDelegate( source.getSimpleListFacet() ).generateArtifacts() );
+        generateFacetArtifacts( delegateFactory.getDelegate( source.getSummaryFacet() ), elementArtifacts,
+            otherArtifacts, false );
+        generateFacetArtifacts( delegateFactory.getDelegate( source.getDetailFacet() ), elementArtifacts,
+            otherArtifacts, false );
 
         if (!source.getRoleEnumeration().getRoles().isEmpty()) {
-            otherArtifacts.addArtifact(createRoleEnumerationComplexType(source));
-            otherArtifacts.addArtifact(createRoleEnumerationSimpleType(source, false));
-            otherArtifacts.addArtifact(createRoleEnumerationSimpleType(source, true));
+            otherArtifacts.addArtifact( createRoleEnumerationComplexType( source ) );
+            otherArtifacts.addArtifact( createRoleEnumerationSimpleType( source, false ) );
+            otherArtifacts.addArtifact( createRoleEnumerationSimpleType( source, true ) );
         }
-        return buildCorrelatedArtifacts(source, elementArtifacts, otherArtifacts);
+        return buildCorrelatedArtifacts( source, elementArtifacts, otherArtifacts );
     }
 
     /**
      * Creates the XML schema simple enumeration for the roles of the core object.
      * 
-     * @param source
-     *            the core object being transformed
+     * @param source the core object being transformed
      * @return SimpleType
      */
     private TopLevelComplexType createRoleEnumerationComplexType(TLCoreObject source) {
@@ -92,65 +89,60 @@ public class TLCoreObjectCodegenTransformer extends
         SimpleExtensionType extension = new SimpleExtensionType();
         Attribute attribute = new Attribute();
 
-        complexType.setName(source.getRoleEnumeration().getLocalName());
-        complexType.setSimpleContent(simpleContent);
-        XsdCodegenUtils.addAppInfo(source, complexType);
-        simpleContent.setExtension(extension);
-        extension.setBase(new QName(source.getNamespace(), source.getRoleEnumeration()
-                .getLocalName() + OPEN));
-        extension.getAttributeOrAttributeGroup().add(attribute);
-        attribute.setName("extension");
-        attribute.setType(enumExtension.toQName());
-        addCompileTimeDependency(enumExtension);
+        complexType.setName( source.getRoleEnumeration().getLocalName() );
+        complexType.setSimpleContent( simpleContent );
+        XsdCodegenUtils.addAppInfo( source, complexType );
+        simpleContent.setExtension( extension );
+        extension.setBase( new QName( source.getNamespace(), source.getRoleEnumeration().getLocalName() + OPEN ) );
+        extension.getAttributeOrAttributeGroup().add( attribute );
+        attribute.setName( "extension" );
+        attribute.setType( enumExtension.toQName() );
+        addCompileTimeDependency( enumExtension );
         return complexType;
     }
 
     /**
      * Creates the XML schema simple enumeration for the roles of the core object.
      * 
-     * @param source
-     *            the core object being transformed
-     * @param openEnumeration
-     *            indicates whether to generate the open or closed enumeration variant of the simple
-     *            type
+     * @param source the core object being transformed
+     * @param openEnumeration indicates whether to generate the open or closed enumeration variant of the simple type
      * @return TopLevelSimpleType
      */
-    private TopLevelSimpleType createRoleEnumerationSimpleType(TLCoreObject source,
-            boolean openEnumeration) {
+    private TopLevelSimpleType createRoleEnumerationSimpleType(TLCoreObject source, boolean openEnumeration) {
         TopLevelSimpleType rolesEnum = new TopLevelSimpleType();
         Restriction restriction = new Restriction();
 
         if (openEnumeration) {
-            rolesEnum.setName(source.getRoleEnumeration().getLocalName() + OPEN);
-            rolesEnum.setRestriction(restriction);
-            restriction.setBase(new QName(XMLConstants.W3C_XML_SCHEMA_NS_URI, "string"));
+            rolesEnum.setName( source.getRoleEnumeration().getLocalName() + OPEN );
+            rolesEnum.setRestriction( restriction );
+            restriction.setBase( new QName( XMLConstants.W3C_XML_SCHEMA_NS_URI, "string" ) );
 
         } else { // closed enumeration
-            rolesEnum.setName(source.getRoleEnumeration().getLocalName() + "_Base");
-            rolesEnum.setRestriction(restriction);
-            restriction.setBase(new QName(source.getNamespace(), source.getRoleEnumeration()
-                    .getLocalName() + OPEN));
+            rolesEnum.setName( source.getRoleEnumeration().getLocalName() + "_Base" );
+            rolesEnum.setRestriction( restriction );
+            restriction
+                .setBase( new QName( source.getNamespace(), source.getRoleEnumeration().getLocalName() + OPEN ) );
         }
 
-        for (TLRole role : PropertyCodegenUtils.getInheritedRoles(source)) {
-        	TLDocumentation doc = DocumentationFinder.getDocumentation(role);
+        for (TLRole role : PropertyCodegenUtils.getInheritedRoles( source )) {
+            TLDocumentation doc = DocumentationFinder.getDocumentation( role );
             NoFixedFacet roleEnumValue = new NoFixedFacet();
 
-            roleEnumValue.setValue(role.getName());
-            restriction.getFacets().add(jaxbObjectFactory.createEnumeration(roleEnumValue));
+            roleEnumValue.setValue( role.getName() );
+            restriction.getFacets().add( jaxbObjectFactory.createEnumeration( roleEnumValue ) );
 
             if (doc != null) {
-                ObjectTransformer<TLDocumentation, Annotation, CodeGenerationTransformerContext> docTransformer =
-                		getTransformerFactory().getTransformer(doc, Annotation.class);
+                ObjectTransformer<TLDocumentation,Annotation,CodeGenerationTransformerContext> docTransformer =
+                    getTransformerFactory().getTransformer( doc, Annotation.class );
 
-                roleEnumValue.setAnnotation(docTransformer.transform(doc));
+                roleEnumValue.setAnnotation( docTransformer.transform( doc ) );
             }
         }
         if (openEnumeration) {
             NoFixedFacet otherEnumValue = new NoFixedFacet();
 
-            otherEnumValue.setValue(TLBaseEnumerationCodegenTransformer.OPEN_ENUM_VALUE);
-            restriction.getFacets().add(jaxbObjectFactory.createEnumeration(otherEnumValue));
+            otherEnumValue.setValue( TLBaseEnumerationCodegenTransformer.OPEN_ENUM_VALUE );
+            restriction.getFacets().add( jaxbObjectFactory.createEnumeration( otherEnumValue ) );
         }
         return rolesEnum;
     }

@@ -23,96 +23,98 @@ import org.opentravel.schemacompiler.model.TLMemberFieldOwner;
  * Describes a single change identified during comparison of two OTM entities.
  */
 public class EntityChangeItem extends ChangeItem<EntityChangeType> {
-	
-	private EntityChangeSet changeSet;
-	private TLMemberField<TLMemberFieldOwner> addedField;
-	private TLMemberField<TLMemberFieldOwner> deletedField;
-	private FieldChangeSet modifiedField;
-	
-	/**
-	 * Constructor used when a field was added or deleted from its owning entity.
-	 * 
-	 * @param changeSet  the change set to which this item belongs
-	 * @param changeType  the type of entity change
-	 * @param affectedField  the field that was added or removed
-	 */
-	public EntityChangeItem(EntityChangeSet changeSet, EntityChangeType changeType, TLMemberField<TLMemberFieldOwner> affectedField) {
-		this.changeSet = changeSet;
-		this.changeType = changeType;
-		
-		switch (changeType) {
-			case MEMBER_FIELD_ADDED:
-				this.addedField = affectedField;
-				break;
-			case MEMBER_FIELD_DELETED:
-				this.deletedField = affectedField;
-				break;
-			default:
-				throw new IllegalArgumentException("Illegal change type for field addition or deletion: " + changeType);
-		}
-	}
-	
-	/**
-	 * Constructor used when an entity field was modified.
-	 * 
-	 * @param changeSet  the change set to which this item belongs
-	 * @param modifiedField  the change set for a modified field
-	 */
-	public EntityChangeItem(EntityChangeSet changeSet, FieldChangeSet modifiedField) {
-		this.changeSet = changeSet;
-		this.changeType = EntityChangeType.MEMBER_FIELD_CHANGED;
-		this.modifiedField = modifiedField;
-	}
-	
-	/**
-	 * Constructor used when an entity value was changed.
-	 * 
-	 * @param changeSet  the change set to which this item belongs
-	 * @param changeType  the type of entity change
-	 * @param oldValue  the affected value from the old version
-	 * @param newValue  the affected value from the new version
-	 */
-	public EntityChangeItem(EntityChangeSet changeSet, EntityChangeType changeType, String oldValue, String newValue) {
-		this.changeSet = changeSet;
-		this.changeType = changeType;
-		this.oldValue = oldValue;
-		this.newValue = newValue;
-	}
 
-	/**
-	 * Returns the change set to which this item belongs.
-	 *
-	 * @return EntityChangeSet
-	 */
-	public EntityChangeSet getChangeSet() {
-		return changeSet;
-	}
+    private EntityChangeSet changeSet;
+    private TLMemberField<TLMemberFieldOwner> addedField;
+    private TLMemberField<TLMemberFieldOwner> deletedField;
+    private FieldChangeSet modifiedField;
 
-	/**
-	 * Returns the field that was added.
-	 *
-	 * @return TLMemberField<TLMemberFieldOwner>
-	 */
-	public TLMemberField<TLMemberFieldOwner> getAddedField() {
-		return addedField;
-	}
+    /**
+     * Constructor used when a field was added or deleted from its owning entity.
+     * 
+     * @param changeSet the change set to which this item belongs
+     * @param changeType the type of entity change
+     * @param affectedField the field that was added or removed
+     */
+    public EntityChangeItem(EntityChangeSet changeSet, EntityChangeType changeType,
+        TLMemberField<TLMemberFieldOwner> affectedField) {
+        this.changeSet = changeSet;
+        this.changeType = changeType;
 
-	/**
-	 * Returns the field that was deleted.
-	 *
-	 * @return TLMemberField<TLMemberFieldOwner>
-	 */
-	public TLMemberField<TLMemberFieldOwner> getDeletedField() {
-		return deletedField;
-	}
+        switch (changeType) {
+            case MEMBER_FIELD_ADDED:
+                this.addedField = affectedField;
+                break;
+            case MEMBER_FIELD_DELETED:
+                this.deletedField = affectedField;
+                break;
+            default:
+                throw new IllegalArgumentException(
+                    "Illegal change type for field addition or deletion: " + changeType );
+        }
+    }
 
-	/**
-	 * Returns the change set for a modified field.
-	 *
-	 * @return FieldChangeSet
-	 */
-	public FieldChangeSet getModifiedField() {
-		return modifiedField;
-	}
+    /**
+     * Constructor used when an entity field was modified.
+     * 
+     * @param changeSet the change set to which this item belongs
+     * @param modifiedField the change set for a modified field
+     */
+    public EntityChangeItem(EntityChangeSet changeSet, FieldChangeSet modifiedField) {
+        this.changeSet = changeSet;
+        this.changeType = EntityChangeType.MEMBER_FIELD_CHANGED;
+        this.modifiedField = modifiedField;
+    }
+
+    /**
+     * Constructor used when an entity value was changed.
+     * 
+     * @param changeSet the change set to which this item belongs
+     * @param changeType the type of entity change
+     * @param oldValue the affected value from the old version
+     * @param newValue the affected value from the new version
+     */
+    public EntityChangeItem(EntityChangeSet changeSet, EntityChangeType changeType, String oldValue, String newValue) {
+        this.changeSet = changeSet;
+        this.changeType = changeType;
+        this.oldValue = oldValue;
+        this.newValue = newValue;
+    }
+
+    /**
+     * Returns the change set to which this item belongs.
+     *
+     * @return EntityChangeSet
+     */
+    public EntityChangeSet getChangeSet() {
+        return changeSet;
+    }
+
+    /**
+     * Returns the field that was added.
+     *
+     * @return TLMemberField&lt;TLMemberFieldOwner&gt;
+     */
+    public TLMemberField<TLMemberFieldOwner> getAddedField() {
+        return addedField;
+    }
+
+    /**
+     * Returns the field that was deleted.
+     *
+     * @return TLMemberField&lt;TLMemberFieldOwner&gt;
+     */
+    public TLMemberField<TLMemberFieldOwner> getDeletedField() {
+        return deletedField;
+    }
+
+    /**
+     * Returns the change set for a modified field.
+     *
+     * @return FieldChangeSet
+     */
+    public FieldChangeSet getModifiedField() {
+        return modifiedField;
+    }
 
 }

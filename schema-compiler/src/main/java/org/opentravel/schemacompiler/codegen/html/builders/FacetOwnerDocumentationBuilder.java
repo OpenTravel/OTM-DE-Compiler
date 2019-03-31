@@ -13,74 +13,75 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.codegen.html.builders;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ListIterator;
+package org.opentravel.schemacompiler.codegen.html.builders;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerationException;
 import org.opentravel.schemacompiler.model.TLDocumentationOwner;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLFacetOwner;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ListIterator;
+
 /**
  * @author Eric.Bronson
  *
  */
 public abstract class FacetOwnerDocumentationBuilder<T extends TLFacetOwner & TLDocumentationOwner>
-		extends NamedEntityDocumentationBuilder<T> {
+    extends NamedEntityDocumentationBuilder<T> {
 
-	List<FacetDocumentationBuilder> facets = new ArrayList<>();
+    List<FacetDocumentationBuilder> facets = new ArrayList<>();
 
-	/**
-	 * @param manager
-	 */
-	public FacetOwnerDocumentationBuilder(T t) {
-		super(t);
-		initializeFacets(t);
-	}
+    /**
+     * @param t the facet owner for which to create a builder
+     */
+    public FacetOwnerDocumentationBuilder(T t) {
+        super( t );
+        initializeFacets( t );
+    }
 
-	protected abstract void initializeFacets(T t);
-	
-	protected boolean shouldAddFacet(TLFacet facet) {
-		return facet != null && facet.declaresContent();
-	}
+    protected abstract void initializeFacets(T t);
 
-	public List<FacetDocumentationBuilder> getFacets() {
-		return facets;
-	}
-	
-	@Override
-	public void build() throws CodeGenerationException {
-		ListIterator<FacetDocumentationBuilder> facetIter = facets.listIterator();
-		FacetDocumentationBuilder prev;
-		FacetDocumentationBuilder next;
-		
-		while(facetIter.hasNext()){
-			prev = facetIter.hasPrevious() ? facets.get(facetIter.previousIndex()) : null;
-			FacetDocumentationBuilder builder = facetIter.next();
-			next = facetIter.hasNext() ? facets.get(facetIter.nextIndex()) : null;
-			builder.setPrevious(prev);
-			builder.setNext(next);
-			builder.build();
-		}
-	}
+    protected boolean shouldAddFacet(TLFacet facet) {
+        return facet != null && facet.declaresContent();
+    }
 
-	/**
-	 * @see org.opentravel.schemacompiler.codegen.html.builders.AbstractDocumentationBuilder#hashCode()
-	 */
-	@Override
-	public int hashCode() {
-		return super.hashCode();
-	}
+    public List<FacetDocumentationBuilder> getFacets() {
+        return facets;
+    }
 
-	/**
-	 * @see org.opentravel.schemacompiler.codegen.html.builders.AbstractDocumentationBuilder#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		return super.equals(obj);
-	}
+    @Override
+    public void build() throws CodeGenerationException {
+        ListIterator<FacetDocumentationBuilder> facetIter = facets.listIterator();
+        FacetDocumentationBuilder prev;
+        FacetDocumentationBuilder next;
+
+        while (facetIter.hasNext()) {
+            prev = facetIter.hasPrevious() ? facets.get( facetIter.previousIndex() ) : null;
+            FacetDocumentationBuilder builder = facetIter.next();
+            next = facetIter.hasNext() ? facets.get( facetIter.nextIndex() ) : null;
+            builder.setPrevious( prev );
+            builder.setNext( next );
+            builder.build();
+        }
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.codegen.html.builders.AbstractDocumentationBuilder#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.codegen.html.builders.AbstractDocumentationBuilder#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+        return super.equals( obj );
+    }
 
 }

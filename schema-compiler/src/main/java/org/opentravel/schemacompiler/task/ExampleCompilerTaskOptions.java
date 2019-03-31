@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.task;
 
 /**
@@ -30,8 +31,8 @@ public interface ExampleCompilerTaskOptions {
     public boolean isGenerateExamples();
 
     /**
-     * Returns true if the maximum amount of detail is to be included in generated EXAMPLE data. If
-     * false, minimum detail will be generated.
+     * Returns true if the maximum amount of detail is to be included in generated EXAMPLE data. If false, minimum
+     * detail will be generated.
      * 
      * @return boolean
      */
@@ -45,27 +46,24 @@ public interface ExampleCompilerTaskOptions {
     public String getExampleContext();
 
     /**
-     * Returns the maximum number of times that repeating elements should be displayed in generated
-     * EXAMPLE output.
+     * Returns the maximum number of times that repeating elements should be displayed in generated EXAMPLE output.
      * 
      * @return Integer
      */
     public Integer getExampleMaxRepeat();
 
     /**
-     * Returns the maximum depth that should be included for nested elements in generated EXAMPLE
-     * output.
+     * Returns the maximum depth that should be included for nested elements in generated EXAMPLE output.
      * 
      * @return Integer
      */
     public Integer getExampleMaxDepth();
-    
+
     /**
-     * Returns the flag indicating whether optional fields should be suppressed
-	 * during EXAMPLE generation.
-	 * 
+     * Returns the flag indicating whether optional fields should be suppressed during EXAMPLE generation.
+     * 
      * @return boolean
      */
     public boolean isSuppressOptionalFields();
-    
+
 }

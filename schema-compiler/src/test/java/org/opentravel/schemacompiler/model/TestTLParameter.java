@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.model;
 
 import static org.junit.Assert.assertEquals;
@@ -23,31 +24,32 @@ import org.junit.Test;
  * Verifies the functions of the <code>TLParameter</code> class.
  */
 public class TestTLParameter extends AbstractModelTest {
-	
-	@Test
-	public void testIdentityFunctions() throws Exception {
-		TLResource resource = addResource( "TestResource", library1 );
-		TLParamGroup paramGroup = addParamGroup( "TestParamGroup",
-				resource.getBusinessObjectRef().getIdFacet(), resource );
-		TLMemberField<?> fieldRef = resource.getBusinessObjectRef().getIdFacet().getMemberFields().get( 0 );
-		TLParameter param = addParameter( fieldRef, TLParamLocation.QUERY, paramGroup );
-		
-		assertEquals( "TestLibrary1.otm : TestResource/TestParamGroup/" + fieldRef.getName(), param.getValidationIdentity() );
-	}
-	
-	@Test
-	public void testDocumentationFunctions() throws Exception {
-		testDocumentationFunctions( new TLParameter() );
-	}
-	
-	@Test
-	public void testEquivalentFunctions() throws Exception {
-		testEquivalentFunctions( new TLParameter() );
-	}
-	
-	@Test
-	public void testExampleFunctions() throws Exception {
-		testExampleFunctions( new TLParameter() );
-	}
-	
+
+    @Test
+    public void testIdentityFunctions() throws Exception {
+        TLResource resource = addResource( "TestResource", library1 );
+        TLParamGroup paramGroup =
+            addParamGroup( "TestParamGroup", resource.getBusinessObjectRef().getIdFacet(), resource );
+        TLMemberField<?> fieldRef = resource.getBusinessObjectRef().getIdFacet().getMemberFields().get( 0 );
+        TLParameter param = addParameter( fieldRef, TLParamLocation.QUERY, paramGroup );
+
+        assertEquals( "TestLibrary1.otm : TestResource/TestParamGroup/" + fieldRef.getName(),
+            param.getValidationIdentity() );
+    }
+
+    @Test
+    public void testDocumentationFunctions() throws Exception {
+        testDocumentationFunctions( new TLParameter() );
+    }
+
+    @Test
+    public void testEquivalentFunctions() throws Exception {
+        testEquivalentFunctions( new TLParameter() );
+    }
+
+    @Test
+    public void testExampleFunctions() throws Exception {
+        testExampleFunctions( new TLParameter() );
+    }
+
 }

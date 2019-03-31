@@ -13,10 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.codegen.xsd;
 
-import javax.xml.XMLConstants;
-import javax.xml.namespace.QName;
+package org.opentravel.schemacompiler.codegen.xsd;
 
 import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerContext;
 import org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts;
@@ -38,14 +36,17 @@ import org.w3._2001.xmlschema.SimpleType;
 import org.w3._2001.xmlschema.TopLevelComplexType;
 import org.w3._2001.xmlschema.TopLevelSimpleType;
 
+import javax.xml.XMLConstants;
+import javax.xml.namespace.QName;
+
 /**
- * Performs the translation from <code>TLOpenEnumeration</code> objects to the JAXB nodes used to
- * produce the schema output.
+ * Performs the translation from <code>TLOpenEnumeration</code> objects to the JAXB nodes used to produce the schema
+ * output.
  * 
  * @author S. Livezey
  */
-public class TLOpenEnumerationCodegenTransformer extends
-        TLBaseEnumerationCodegenTransformer<TLOpenEnumeration, CodegenArtifacts> {
+public class TLOpenEnumerationCodegenTransformer
+    extends TLBaseEnumerationCodegenTransformer<TLOpenEnumeration,CodegenArtifacts> {
 
     private static final TLEnumValue OTHER_ENUM_VALUE;
 
@@ -56,16 +57,15 @@ public class TLOpenEnumerationCodegenTransformer extends
     public CodegenArtifacts transform(TLOpenEnumeration source) {
         CodegenArtifacts artifacts = new CodegenArtifacts();
 
-        artifacts.addArtifact(createEnumComplexType(source));
-        artifacts.addArtifact(createEnumSimpleType(source));
+        artifacts.addArtifact( createEnumComplexType( source ) );
+        artifacts.addArtifact( createEnumSimpleType( source ) );
         return artifacts;
     }
 
     /**
      * Constructs the complex type component of the open enumeration.
      * 
-     * @param source
-     *            the source meta-model enumeration
+     * @param source the source meta-model enumeration
      * @return ComplexType
      */
     protected ComplexType createEnumComplexType(TLOpenEnumeration source) {
@@ -77,53 +77,52 @@ public class TLOpenEnumerationCodegenTransformer extends
         Attribute attribute = new Attribute();
 
         if (sourceDoc != null) {
-            ObjectTransformer<TLDocumentation, Annotation, CodeGenerationTransformerContext> docTransformer =
-            		getTransformerFactory().getTransformer(sourceDoc, Annotation.class);
+            ObjectTransformer<TLDocumentation,Annotation,CodeGenerationTransformerContext> docTransformer =
+                getTransformerFactory().getTransformer( sourceDoc, Annotation.class );
 
-            complexEnum.setAnnotation(docTransformer.transform(sourceDoc));
+            complexEnum.setAnnotation( docTransformer.transform( sourceDoc ) );
         }
-        complexEnum.setName(source.getName());
-        complexEnum.setSimpleContent(simpleContent);
-        XsdCodegenUtils.addAppInfo(source, complexEnum);
-        simpleContent.setExtension(extension);
-        extension.setBase(new QName(source.getNamespace(), source.getLocalName() + "_Base"));
-        extension.getAttributeOrAttributeGroup().add(attribute);
-        attribute.setName("extension");
-        attribute.setType(enumExtension.toQName());
-        addCompileTimeDependency(enumExtension);
+        complexEnum.setName( source.getName() );
+        complexEnum.setSimpleContent( simpleContent );
+        XsdCodegenUtils.addAppInfo( source, complexEnum );
+        simpleContent.setExtension( extension );
+        extension.setBase( new QName( source.getNamespace(), source.getLocalName() + "_Base" ) );
+        extension.getAttributeOrAttributeGroup().add( attribute );
+        attribute.setName( "extension" );
+        attribute.setType( enumExtension.toQName() );
+        addCompileTimeDependency( enumExtension );
         return complexEnum;
     }
 
     /**
      * Constructs the simple type component of the open enumeration.
      * 
-     * @param source
-     *            the source meta-model enumeration
+     * @param source the source meta-model enumeration
      * @return SimpleType
      */
     protected SimpleType createEnumSimpleType(TLOpenEnumeration source) {
         SimpleType simpleEnum = new TopLevelSimpleType();
         Restriction restriction = new Restriction();
 
-        simpleEnum.setName(source.getName() + "_Base");
-        restriction.setBase(new QName(XMLConstants.W3C_XML_SCHEMA_NS_URI, "string"));
+        simpleEnum.setName( source.getName() + "_Base" );
+        restriction.setBase( new QName( XMLConstants.W3C_XML_SCHEMA_NS_URI, "string" ) );
 
         // Generate the documentation BLOCK (if required)
         TLDocumentation sourceDoc = DocumentationFinder.getDocumentation( source );
-        
-        if (sourceDoc != null) {
-            ObjectTransformer<TLDocumentation, Annotation, CodeGenerationTransformerContext> docTransformer =
-            		getTransformerFactory().getTransformer(sourceDoc, Annotation.class);
 
-            simpleEnum.setAnnotation(docTransformer.transform(sourceDoc));
+        if (sourceDoc != null) {
+            ObjectTransformer<TLDocumentation,Annotation,CodeGenerationTransformerContext> docTransformer =
+                getTransformerFactory().getTransformer( sourceDoc, Annotation.class );
+
+            simpleEnum.setAnnotation( docTransformer.transform( sourceDoc ) );
         }
-        XsdCodegenUtils.addAppInfo(source, simpleEnum);
+        XsdCodegenUtils.addAppInfo( source, simpleEnum );
 
         for (TLEnumValue modelEnum : EnumCodegenUtils.getInheritedValues( source )) {
-            restriction.getFacets().add(createEnumValue(modelEnum));
+            restriction.getFacets().add( createEnumValue( modelEnum ) );
         }
-        restriction.getFacets().add(createEnumValue(OTHER_ENUM_VALUE));
-        simpleEnum.setRestriction(restriction);
+        restriction.getFacets().add( createEnumValue( OTHER_ENUM_VALUE ) );
+        simpleEnum.setRestriction( restriction );
         return simpleEnum;
     }
 
@@ -134,11 +133,11 @@ public class TLOpenEnumerationCodegenTransformer extends
         try {
             TLEnumValue otherEnum = new TLEnumValue();
 
-            otherEnum.setLiteral("Other_");
+            otherEnum.setLiteral( "Other_" );
             OTHER_ENUM_VALUE = otherEnum;
 
         } catch (Exception e) {
-            throw new ExceptionInInitializerError(e);
+            throw new ExceptionInInitializerError( e );
         }
     }
 

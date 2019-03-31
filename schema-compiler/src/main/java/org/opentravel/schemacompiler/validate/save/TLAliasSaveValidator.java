@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.validate.save;
 
 import org.opentravel.schemacompiler.model.TLAlias;
@@ -33,10 +34,10 @@ public class TLAliasSaveValidator extends TLValidatorBase<TLAlias> {
      */
     @Override
     protected ValidationFindings validateFields(TLAlias target) {
-        TLValidationBuilder builder = newValidationBuilder(target);
+        TLValidationBuilder builder = newValidationBuilder( target );
 
-        builder.setProperty("name", target.getName()).setFindingType(FindingType.WARNING)
-                .assertPatternMatch(NAME_XML_PATTERN);
+        builder.setProperty( "name", target.getName() ).setFindingType( FindingType.WARNING )
+            .assertPatternMatch( NAME_XML_PATTERN );
 
         return builder.getFindings();
     }

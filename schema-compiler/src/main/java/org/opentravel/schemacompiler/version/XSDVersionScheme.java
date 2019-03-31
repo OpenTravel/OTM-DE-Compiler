@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.version;
 
 import java.util.Collections;
@@ -24,9 +25,9 @@ import java.util.List;
  */
 public class XSDVersionScheme implements VersionScheme {
 
-	private static final String XML_SCHEMA_NS = "http://www.w3.org/2001/XMLSchema";
-	private static final String V1_0 = "1.0";
-	public static final String ID = "XSD";
+    private static final String XML_SCHEMA_NS = "http://www.w3.org/2001/XMLSchema";
+    private static final String V1_0 = "1.0";
+    public static final String ID = "XSD";
 
     @Override
     public String getVersionIdentifier(String majorVersion, String minorVersion, String patchLevel) {
@@ -44,7 +45,7 @@ public class XSDVersionScheme implements VersionScheme {
     }
 
     @Override
-    public String getDefaultVersionIdentifer() {
+    public String getDefaultVersionIdentifier() {
         return V1_0;
     }
 
@@ -54,17 +55,17 @@ public class XSDVersionScheme implements VersionScheme {
     }
 
     @Override
-    public String getMajorVersion(String versionIdentifer) {
+    public String getMajorVersion(String versionIdentifier) {
         return V1_0;
     }
 
     @Override
-    public String getMinorVersion(String versionIdentifer) {
+    public String getMinorVersion(String versionIdentifier) {
         return V1_0;
     }
 
     @Override
-    public String getPatchLevel(String versionIdentifer) {
+    public String getPatchLevel(String versionIdentifier) {
         return V1_0;
     }
 
@@ -105,36 +106,36 @@ public class XSDVersionScheme implements VersionScheme {
 
     @Override
     public Comparator<Versioned> getComparator(boolean sortAscending) {
-    		return (o1, o2) -> 0;
+        return (o1, o2) -> 0;
     }
 
     @Override
-    public String incrementMajorVersion(String versionIdentifer) {
+    public String incrementMajorVersion(String versionIdentifier) {
         return V1_0;
     }
 
     @Override
-    public String decrementMajorVersion(String versionIdentifer) {
+    public String decrementMajorVersion(String versionIdentifier) {
         return V1_0;
     }
 
     @Override
-    public String incrementMinorVersion(String versionIdentifer) {
+    public String incrementMinorVersion(String versionIdentifier) {
         return V1_0;
     }
 
     @Override
-    public String decrementMinorVersion(String versionIdentifer) {
+    public String decrementMinorVersion(String versionIdentifier) {
         return V1_0;
     }
 
     @Override
-    public String incrementPatchLevel(String versionIdentifer) {
+    public String incrementPatchLevel(String versionIdentifier) {
         return V1_0;
     }
 
     @Override
-    public String decrementPatchLevel(String versionIdentifer) {
+    public String decrementPatchLevel(String versionIdentifier) {
         return V1_0;
     }
 

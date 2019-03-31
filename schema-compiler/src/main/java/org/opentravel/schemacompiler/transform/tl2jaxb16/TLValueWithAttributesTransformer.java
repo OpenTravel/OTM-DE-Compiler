@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.transform.tl2jaxb16;
 
 import org.opentravel.ns.ota2.librarymodel_v01_06.Documentation;
@@ -33,49 +34,48 @@ import org.opentravel.schemacompiler.transform.symbols.SymbolResolverTransformer
  * 
  * @author S. Livezey
  */
-public class TLValueWithAttributesTransformer extends
-        TLComplexTypeTransformer<TLValueWithAttributes, ValueWithAttributes> {
+public class TLValueWithAttributesTransformer
+    extends TLComplexTypeTransformer<TLValueWithAttributes,ValueWithAttributes> {
 
     /**
      * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
      */
     @Override
     public ValueWithAttributes transform(TLValueWithAttributes source) {
-        ObjectTransformer<TLDocumentation, Documentation, SymbolResolverTransformerContext> docTransformer = getTransformerFactory()
-                .getTransformer(TLDocumentation.class, Documentation.class);
-        ObjectTransformer<TLEquivalent, Equivalent, SymbolResolverTransformerContext> equivTransformer = getTransformerFactory()
-                .getTransformer(TLEquivalent.class, Equivalent.class);
-        ObjectTransformer<TLExample, Example, SymbolResolverTransformerContext> exTransformer = getTransformerFactory()
-                .getTransformer(TLExample.class, Example.class);
+        ObjectTransformer<TLDocumentation,Documentation,SymbolResolverTransformerContext> docTransformer =
+            getTransformerFactory().getTransformer( TLDocumentation.class, Documentation.class );
+        ObjectTransformer<TLEquivalent,Equivalent,SymbolResolverTransformerContext> equivTransformer =
+            getTransformerFactory().getTransformer( TLEquivalent.class, Equivalent.class );
+        ObjectTransformer<TLExample,Example,SymbolResolverTransformerContext> exTransformer =
+            getTransformerFactory().getTransformer( TLExample.class, Example.class );
         NamedEntity parentType = source.getParentType();
         ValueWithAttributes simpleType = new ValueWithAttributes();
 
-        simpleType.setName(trimString(source.getName(), false));
-        simpleType.getAttribute().addAll(transformAttributes(source.getAttributes()));
-        simpleType.getIndicator().addAll(transformIndicators(source.getIndicators()));
+        simpleType.setName( trimString( source.getName(), false ) );
+        simpleType.getAttribute().addAll( transformAttributes( source.getAttributes() ) );
+        simpleType.getIndicator().addAll( transformIndicators( source.getIndicators() ) );
 
         if ((source.getDocumentation() != null) && !source.getDocumentation().isEmpty()) {
-            simpleType.setDocumentation(docTransformer.transform(source.getDocumentation()));
+            simpleType.setDocumentation( docTransformer.transform( source.getDocumentation() ) );
         }
         if ((source.getValueDocumentation() != null) && !source.getValueDocumentation().isEmpty()) {
-            simpleType.setValueDocumentation(docTransformer.transform(source
-                    .getValueDocumentation()));
+            simpleType.setValueDocumentation( docTransformer.transform( source.getValueDocumentation() ) );
         }
 
         for (TLEquivalent sourceEquiv : source.getEquivalents()) {
-            simpleType.getEquivalent().add(equivTransformer.transform(sourceEquiv));
+            simpleType.getEquivalent().add( equivTransformer.transform( sourceEquiv ) );
         }
 
         for (TLExample sourceEx : source.getExamples()) {
-            simpleType.getExample().add(exTransformer.transform(sourceEx));
+            simpleType.getExample().add( exTransformer.transform( sourceEx ) );
         }
 
         if (parentType != null) {
-            simpleType.setType(context.getSymbolResolver().buildEntityName(
-                    parentType.getNamespace(), parentType.getLocalName()));
+            simpleType.setType(
+                context.getSymbolResolver().buildEntityName( parentType.getNamespace(), parentType.getLocalName() ) );
         }
         if (simpleType.getType() == null) {
-            simpleType.setType(trimString(source.getParentTypeName(), false));
+            simpleType.setType( trimString( source.getParentTypeName(), false ) );
         }
         return simpleType;
     }

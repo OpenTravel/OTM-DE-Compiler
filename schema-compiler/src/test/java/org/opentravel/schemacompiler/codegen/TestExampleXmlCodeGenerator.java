@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.codegen;
 
 import static org.junit.Assert.assertFalse;
@@ -39,36 +40,35 @@ public class TestExampleXmlCodeGenerator extends AbstractTestTransformers {
 
     @Test
     public void testExampleXmlGenerator() throws Exception {
-        TLBusinessObject sampleBusinessObject = getBusinessObject(PACKAGE_2_NAMESPACE,
-                "library_1_p2", "SampleBusinessObject");
-        TLBusinessObject compoundBusinessObject = getBusinessObject(PACKAGE_2_NAMESPACE,
-                "library_1_p2", "CompoundBusinessObject");
-        TLFacet customFacet = sampleBusinessObject.getCustomFacet("Test1");
+        TLBusinessObject sampleBusinessObject =
+            getBusinessObject( PACKAGE_2_NAMESPACE, "library_1_p2", "SampleBusinessObject" );
+        TLBusinessObject compoundBusinessObject =
+            getBusinessObject( PACKAGE_2_NAMESPACE, "library_1_p2", "CompoundBusinessObject" );
+        TLFacet customFacet = sampleBusinessObject.getCustomFacet( "Test1" );
         ExampleGeneratorOptions options = new ExampleGeneratorOptions();
 
-        options.setDetailLevel(DetailLevel.MAXIMUM);
+        options.setDetailLevel( DetailLevel.MAXIMUM );
 
-        assertNotNull(sampleBusinessObject);
-        assertNotNull(compoundBusinessObject);
-        assertNotNull(customFacet);
+        assertNotNull( sampleBusinessObject );
+        assertNotNull( compoundBusinessObject );
+        assertNotNull( customFacet );
 
         try {
-            String exampleContent = new ExampleDocumentBuilder(options).setModelElement(
-                    compoundBusinessObject).buildString();
-            assertNotNull(exampleContent); // for now, just make sure we generate some content
-                                           // without error
+            String exampleContent =
+                new ExampleDocumentBuilder( options ).setModelElement( compoundBusinessObject ).buildString();
+            assertNotNull( exampleContent ); // for now, just make sure we generate some content
+                                             // without error
 
         } catch (ValidationException e) {
-            SchemaCompilerTestUtils.printFindings(e.getFindings());
-            assertFalse(e.getFindings().hasFinding(FindingType.ERROR));
+            SchemaCompilerTestUtils.printFindings( e.getFindings() );
+            assertFalse( e.getFindings().hasFinding( FindingType.ERROR ) );
         }
     }
 
-    private TLBusinessObject getBusinessObject(String namespace, String libraryName, String typeName)
-            throws Exception {
-        TLLibrary library = getLibrary(namespace, libraryName);
+    private TLBusinessObject getBusinessObject(String namespace, String libraryName, String typeName) throws Exception {
+        TLLibrary library = getLibrary( namespace, libraryName );
 
-        return (library == null) ? null : library.getBusinessObjectType(typeName);
+        return (library == null) ? null : library.getBusinessObjectType( typeName );
     }
 
     /**

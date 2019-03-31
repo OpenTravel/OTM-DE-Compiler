@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.codegen.xsd.facet;
 
-import javax.xml.namespace.QName;
+package org.opentravel.schemacompiler.codegen.xsd.facet;
 
 import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerContext;
 import org.opentravel.schemacompiler.codegen.impl.DocumentationFinder;
@@ -30,9 +29,11 @@ import org.w3._2001.xmlschema.Restriction;
 import org.w3._2001.xmlschema.SimpleType;
 import org.w3._2001.xmlschema.TopLevelSimpleType;
 
+import javax.xml.namespace.QName;
+
 /**
- * Code generation delegate for <code>TLSimpleFacet</code> instances with a facet type of
- * <code>SIMPLE</code> and a facet owner of type <code>TLCoreObject</code>.
+ * Code generation delegate for <code>TLSimpleFacet</code> instances with a facet type of <code>SIMPLE</code> and a
+ * facet owner of type <code>TLCoreObject</code>.
  * 
  * @author S. Livezey
  */
@@ -41,11 +42,10 @@ public class TLSimpleFacetCodegenDelegate extends FacetCodegenDelegate<TLSimpleF
     /**
      * Constructor that specifies the source facet for which code artifacts are being generated.
      * 
-     * @param sourceFacet
-     *            the source facet
+     * @param sourceFacet the source facet
      */
     public TLSimpleFacetCodegenDelegate(TLSimpleFacet sourceFacet) {
-        super(sourceFacet);
+        super( sourceFacet );
     }
 
     /**
@@ -62,36 +62,35 @@ public class TLSimpleFacetCodegenDelegate extends FacetCodegenDelegate<TLSimpleF
     @Override
     protected Annotated createType() {
         TLSimpleFacet sourceFacet = getSourceFacet();
-        TLDocumentation doc = DocumentationFinder.getDocumentation(sourceFacet);
+        TLDocumentation doc = DocumentationFinder.getDocumentation( sourceFacet );
         Restriction restriction = new Restriction();
         SimpleType type = null;
         QName baseType;
 
         type = new TopLevelSimpleType();
-        type.setName(XsdCodegenUtils.getGlobalTypeName(sourceFacet));
-        type.setRestriction(restriction);
+        type.setName( XsdCodegenUtils.getGlobalTypeName( sourceFacet ) );
+        type.setRestriction( restriction );
 
         if (sourceFacet.getSimpleType() instanceof TLCoreObject) {
             // Special Case: For core objects, use the simple facet as the base type
             TLCoreObject coreObject = (TLCoreObject) sourceFacet.getSimpleType();
             TLSimpleFacet coreSimple = coreObject.getSimpleFacet();
 
-            baseType = new QName(coreSimple.getNamespace(),
-                    XsdCodegenUtils.getGlobalTypeName(coreSimple));
+            baseType = new QName( coreSimple.getNamespace(), XsdCodegenUtils.getGlobalTypeName( coreSimple ) );
 
         } else { // normal case
-            baseType = new QName(sourceFacet.getSimpleType().getNamespace(),
-                    XsdCodegenUtils.getGlobalTypeName(sourceFacet.getSimpleType()));
+            baseType = new QName( sourceFacet.getSimpleType().getNamespace(),
+                XsdCodegenUtils.getGlobalTypeName( sourceFacet.getSimpleType() ) );
         }
-        restriction.setBase(baseType);
+        restriction.setBase( baseType );
 
         if (doc != null) {
-            ObjectTransformer<TLDocumentation, Annotation, CodeGenerationTransformerContext> docTransformer =
-            		getTransformerFactory().getTransformer(doc, Annotation.class);
+            ObjectTransformer<TLDocumentation,Annotation,CodeGenerationTransformerContext> docTransformer =
+                getTransformerFactory().getTransformer( doc, Annotation.class );
 
-            type.setAnnotation(docTransformer.transform(doc));
+            type.setAnnotation( docTransformer.transform( doc ) );
         }
-        XsdCodegenUtils.addAppInfo(sourceFacet, type);
+        XsdCodegenUtils.addAppInfo( sourceFacet, type );
         return type;
     }
 

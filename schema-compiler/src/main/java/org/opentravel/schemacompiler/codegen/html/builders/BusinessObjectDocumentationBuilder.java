@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.codegen.html.builders;
 
-import java.io.IOException;
+package org.opentravel.schemacompiler.codegen.html.builders;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerationException;
 import org.opentravel.schemacompiler.codegen.html.Content;
@@ -23,69 +22,73 @@ import org.opentravel.schemacompiler.codegen.html.writers.BusinessObjectWriter;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLExtension;
 
+import java.io.IOException;
+
 /**
  * @author Eric.Bronson
- *
  */
-public class BusinessObjectDocumentationBuilder extends
-		ComplexTypeDocumentationBuilder<TLBusinessObject> {
+public class BusinessObjectDocumentationBuilder extends ComplexTypeDocumentationBuilder<TLBusinessObject> {
 
-	public BusinessObjectDocumentationBuilder(TLBusinessObject t) {
-		super(t);
-		TLExtension tle = t.getExtension();
-		if (tle != null) {
-			superType = new BusinessObjectDocumentationBuilder(
-					(TLBusinessObject) tle.getExtendsEntity());
-		}
-	}
+    /**
+     * Constructs a documentation builder for the given business object.
+     * 
+     * @param t the business object instance
+     */
+    public BusinessObjectDocumentationBuilder(TLBusinessObject t) {
+        super( t );
+        TLExtension tle = t.getExtension();
+        if (tle != null) {
+            superType = new BusinessObjectDocumentationBuilder( (TLBusinessObject) tle.getExtendsEntity() );
+        }
+    }
 
-	@Override
-	protected void initializeFacets(TLBusinessObject t) {
-		addFacet( t.getIdFacet() );
-		addFacet( t.getSummaryFacet() );
-		addFacet( t.getDetailFacet() );
-		addContextualFacets( t.getCustomFacets() );
-		addContextualFacets( t.getQueryFacets() );
-		addContextualFacets( t.getUpdateFacets() );
-	}
+    @Override
+    protected void initializeFacets(TLBusinessObject t) {
+        addFacet( t.getIdFacet() );
+        addFacet( t.getSummaryFacet() );
+        addFacet( t.getDetailFacet() );
+        addContextualFacets( t.getCustomFacets() );
+        addContextualFacets( t.getQueryFacets() );
+        addContextualFacets( t.getUpdateFacets() );
+    }
 
-	@Override
-	public DocumentationBuilderType getDocType() {
-		return DocumentationBuilderType.BUSINESS_OBJECT;
-	}
-	
-	@Override
-	public void build() throws CodeGenerationException {
-		try {
-			BusinessObjectWriter writer = new BusinessObjectWriter(this, prev, next);
-			Content contentTree = writer.getHeader();
-			writer.addMemberInheritanceTree(contentTree);
-			Content classContentTree = writer.getContentHeader();
-			Content tree = writer.getMemberTree(classContentTree);
+    @Override
+    public DocumentationBuilderType getDocType() {
+        return DocumentationBuilderType.BUSINESS_OBJECT;
+    }
 
-			Content classInfoTree = writer.getMemberInfoItemTree();
-			writer.addDocumentationInfo(classInfoTree);
-			tree.addContent(classInfoTree);
+    @Override
+    public void build() throws CodeGenerationException {
+        try {
+            BusinessObjectWriter writer = new BusinessObjectWriter( this, prev, next );
+            Content contentTree = writer.getHeader();
+            writer.addMemberInheritanceTree( contentTree );
+            Content classContentTree = writer.getContentHeader();
+            Content tree = writer.getMemberTree( classContentTree );
 
-			classInfoTree = writer.getMemberInfoItemTree();
-			writer.addFacetInfo(classInfoTree);
-			tree.addContent(classInfoTree);
+            Content classInfoTree = writer.getMemberInfoItemTree();
+            writer.addDocumentationInfo( classInfoTree );
+            tree.addContent( classInfoTree );
 
-			classInfoTree = writer.getMemberInfoItemTree();
-			writer.addAliasInfo(classInfoTree);
-			tree.addContent(classInfoTree);
+            classInfoTree = writer.getMemberInfoItemTree();
+            writer.addFacetInfo( classInfoTree );
+            tree.addContent( classInfoTree );
 
-			Content desc = writer.getMemberInfoTree(tree);
-			classContentTree.addContent(desc);
-			contentTree.addContent(classContentTree);
-			writer.addFooter(contentTree);
-			writer.printDocument(contentTree);
-			writer.close();
-			super.build();
-			
-		} catch (IOException e) {
-			throw new CodeGenerationException("Error creating doclet writer", e);
-		}
-	}
+            classInfoTree = writer.getMemberInfoItemTree();
+            writer.addAliasInfo( classInfoTree );
+            tree.addContent( classInfoTree );
+
+            Content desc = writer.getMemberInfoTree( tree );
+            classContentTree.addContent( desc );
+            contentTree.addContent( classContentTree );
+            writer.addFooter( contentTree );
+            writer.printDocument( contentTree );
+            writer.close();
+            super.build();
+
+        } catch (IOException e) {
+            throw new CodeGenerationException( "Error creating doclet writer", e );
+        }
+    }
 
 }

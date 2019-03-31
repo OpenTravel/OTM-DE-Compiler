@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.validate.compile;
 
 import org.opentravel.schemacompiler.model.TLAction;
@@ -31,79 +32,78 @@ import org.opentravel.schemacompiler.validate.impl.TLValidationBuilder;
  */
 public class TLResourceCompileValidator extends TLResourceBaseValidator {
 
-	private static final String BASE_PATH = "basePath";
-	
-	public static final String ERROR_INVALID_BASE_PATH             = "INVALID_BASE_PATH";
-    public static final String ERROR_PARAM_GROUPS_NOT_ALLOWED      = "PARAM_GROUPS_NOT_ALLOWED";
-    public static final String ERROR_MULTIPLE_COMMON_ACTIONS       = "MULTIPLE_COMMON_ACTIONS";
-    public static final String ERROR_PARENT_REFERENCES_REQUIRED    = "PARENT_REFERENCES_REQUIRED";
-    
-	private static ResourceUrlValidator urlValidator = new ResourceUrlValidator();
-	
+    private static final String BASE_PATH = "basePath";
+
+    public static final String ERROR_INVALID_BASE_PATH = "INVALID_BASE_PATH";
+    public static final String ERROR_PARAM_GROUPS_NOT_ALLOWED = "PARAM_GROUPS_NOT_ALLOWED";
+    public static final String ERROR_MULTIPLE_COMMON_ACTIONS = "MULTIPLE_COMMON_ACTIONS";
+    public static final String ERROR_PARENT_REFERENCES_REQUIRED = "PARENT_REFERENCES_REQUIRED";
+
+    private static ResourceUrlValidator urlValidator = new ResourceUrlValidator();
+
     /**
      * @see org.opentravel.schemacompiler.validate.impl.TLValidatorBase#validateFields(org.opentravel.schemacompiler.validate.Validatable)
      */
     @Override
     protected ValidationFindings validateFields(TLResource target) {
-        TLValidationBuilder builder = newValidationBuilder(target);
-        
-        builder.setProperty("name", target.getName()).setFindingType(FindingType.ERROR)
-        		.assertNotNullOrBlank().assertPatternMatch(NAME_XML_PATTERN);
-        
+        TLValidationBuilder builder = newValidationBuilder( target );
+
+        builder.setProperty( "name", target.getName() ).setFindingType( FindingType.ERROR ).assertNotNullOrBlank()
+            .assertPatternMatch( NAME_XML_PATTERN );
+
         // Different rules for abstract and non-abstract resources
         if (target.isAbstract()) {
-        	builder.setProperty(BASE_PATH, target.getBasePath()).setFindingType(FindingType.ERROR)
-            		.assertNullOrBlank();
-        	builder.setProperty("businessObjectRef", target.getBusinessObjectRef()).setFindingType(FindingType.ERROR)
-        			.assertNull();
-        	
-        	if (!target.getParamGroups().isEmpty()) {
-            	builder.addFinding( FindingType.ERROR, "paramGroups", ERROR_PARAM_GROUPS_NOT_ALLOWED );
-        	}
-        	
+            builder.setProperty( BASE_PATH, target.getBasePath() ).setFindingType( FindingType.ERROR )
+                .assertNullOrBlank();
+            builder.setProperty( "businessObjectRef", target.getBusinessObjectRef() )
+                .setFindingType( FindingType.ERROR ).assertNull();
+
+            if (!target.getParamGroups().isEmpty()) {
+                builder.addFinding( FindingType.ERROR, "paramGroups", ERROR_PARAM_GROUPS_NOT_ALLOWED );
+            }
+
         } else {
-        	TLBusinessObject businessObjectRef = target.getBusinessObjectRef();
-        	String basePath = target.getBasePath();
-        	
-        	builder.setProperty(BASE_PATH, basePath).setFindingType(FindingType.ERROR)
-        			.assertNotNullOrBlank();
-        	
-        	if ((basePath != null) &&
-        			!(urlValidator.isValid( basePath ) || urlValidator.isValidPath( basePath ))) {
-            	builder.addFinding( FindingType.ERROR, BASE_PATH, ERROR_INVALID_BASE_PATH, basePath );
-        	}
-        	if (!target.isFirstClass() && target.getParentRefs().isEmpty()) {
-            	builder.addFinding( FindingType.ERROR, "firstClass", ERROR_PARENT_REFERENCES_REQUIRED );
-        	}
-        	builder.setEntityReferenceProperty("businessObjectRef", businessObjectRef, target.getBusinessObjectRefName())
-        			.setFindingType(FindingType.ERROR).assertNotNull();
+            TLBusinessObject businessObjectRef = target.getBusinessObjectRef();
+            String basePath = target.getBasePath();
+
+            builder.setProperty( BASE_PATH, basePath ).setFindingType( FindingType.ERROR ).assertNotNullOrBlank();
+
+            if ((basePath != null) && !(urlValidator.isValid( basePath ) || urlValidator.isValidPath( basePath ))) {
+                builder.addFinding( FindingType.ERROR, BASE_PATH, ERROR_INVALID_BASE_PATH, basePath );
+            }
+            if (!target.isFirstClass() && target.getParentRefs().isEmpty()) {
+                builder.addFinding( FindingType.ERROR, "firstClass", ERROR_PARENT_REFERENCES_REQUIRED );
+            }
+            builder
+                .setEntityReferenceProperty( "businessObjectRef", businessObjectRef, target.getBusinessObjectRefName() )
+                .setFindingType( FindingType.ERROR ).assertNotNull();
         }
-        
+
         if (countCommonActions( target ) > 1) {
-        	builder.addFinding( FindingType.ERROR, "actions", ERROR_MULTIPLE_COMMON_ACTIONS );
+            builder.addFinding( FindingType.ERROR, "actions", ERROR_MULTIPLE_COMMON_ACTIONS );
         }
-        
-        checkSchemaNamingConflicts(target, builder);
-        validateVersioningRules(target, builder);
-        
+
+        checkSchemaNamingConflicts( target, builder );
+        validateVersioningRules( target, builder );
+
         return builder.getFindings();
     }
-    
+
     /**
      * Returns the number of common actions declared for the resource.
      * 
-     * @param target  the target resource being validated
+     * @param target the target resource being validated
      * @return int
      */
     private int countCommonActions(TLResource target) {
-    	int commonCount = 0;
-    	
-    	for (TLAction action : target.getActions()) {
-    		if (action.isCommonAction()) {
-    			commonCount++;
-    		}
-    	}
-    	return commonCount;
+        int commonCount = 0;
+
+        for (TLAction action : target.getActions()) {
+            if (action.isCommonAction()) {
+                commonCount++;
+            }
+        }
+        return commonCount;
     }
-    
+
 }

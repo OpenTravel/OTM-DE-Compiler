@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.ic;
 
-import java.util.Collection;
+package org.opentravel.schemacompiler.ic;
 
 import org.opentravel.schemacompiler.event.OwnershipEvent;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
@@ -41,53 +40,50 @@ import org.opentravel.schemacompiler.model.TLValueWithAttributes;
 import org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter;
 import org.opentravel.schemacompiler.visitor.ModelNavigator;
 
+import java.util.Collection;
+
 /**
- * Abstract integrity checker component that provides common functions to release references to an
- * entity or entities when they are removed from the model.
+ * Abstract integrity checker component that provides common functions to release references to an entity or entities
+ * when they are removed from the model.
  * 
- * @param <S>
- *            the source object type for the event
- * @param <I>
- *            the type of item that was added or removed from the parent entity
+ * @param <S> the source object type for the event
+ * @param <I> the type of item that was added or removed from the parent entity
  * @author S. Livezey
  */
-public abstract class EntityRemovedIntegrityChecker<S, I> extends
-        AbstractIntegrityChecker<OwnershipEvent<S, I>, S> {
+public abstract class EntityRemovedIntegrityChecker<S, I> extends AbstractIntegrityChecker<OwnershipEvent<S,I>,S> {
 
     /**
      * Purges all references to each of the specified entities from the model.
      * 
-     * @param removedEntity
-     *            the entity that was removed from the model
-     * @param model
-     *            the model from which all entity references should be purged
+     * @param removedEntity the entity that was removed from the model
+     * @param model the model from which all entity references should be purged
      */
     protected void purgeEntitiesFromModel(TLModelElement removedEntity, TLModel model) {
         // First, build a collection of all the named entities being removed from the model
         ModelElementCollector collectVisitor = new ModelElementCollector();
 
         if (removedEntity instanceof AbstractLibrary) {
-            ModelNavigator.navigate((AbstractLibrary) removedEntity, collectVisitor);
+            ModelNavigator.navigate( (AbstractLibrary) removedEntity, collectVisitor );
 
         } else if (removedEntity instanceof LibraryElement) {
-            ModelNavigator.navigate((LibraryElement) removedEntity, collectVisitor);
+            ModelNavigator.navigate( (LibraryElement) removedEntity, collectVisitor );
         }
 
         // Next, purge any references to those entities we just collected
         Collection<TLModelElement> removedEntities = collectVisitor.getLibraryEntities();
 
         if (!removedEntities.isEmpty()) {
-            PurgeEntityVisitor purgeVisitor = new PurgeEntityVisitor(removedEntities);
+            PurgeEntityVisitor purgeVisitor = new PurgeEntityVisitor( removedEntities );
 
             for (TLLibrary library : model.getUserDefinedLibraries()) {
-                ModelNavigator.navigate(library, purgeVisitor);
+                ModelNavigator.navigate( library, purgeVisitor );
             }
         }
     }
 
     /**
-     * Visitor that handles updates the entity name field for any entities who reference another
-     * entity whose local name was modified.
+     * Visitor that handles updates the entity name field for any entities who reference another entity whose local name
+     * was modified.
      * 
      * @author S. Livezey
      */
@@ -96,11 +92,10 @@ public abstract class EntityRemovedIntegrityChecker<S, I> extends
         private TLModelElement[] removedEntities;
 
         /**
-         * Constructor that assigns the list of modified entities and the symbol resolver used to
-         * construct new entity name values.
+         * Constructor that assigns the list of modified entities and the symbol resolver used to construct new entity
+         * name values.
          * 
-         * @param removedEntities
-         *            the named entities that were removed from the model
+         * @param removedEntities the named entities that were removed from the model
          */
         public PurgeEntityVisitor(Collection<TLModelElement> removedEntities) {
             if (removedEntities != null) {
@@ -121,14 +116,14 @@ public abstract class EntityRemovedIntegrityChecker<S, I> extends
          */
         @Override
         public boolean visitSimple(TLSimple simple) {
-        	TLModelElement referencedEntity = (TLModelElement) simple.getParentType();
+            TLModelElement referencedEntity = (TLModelElement) simple.getParentType();
 
-            if (isRemovedEntity(referencedEntity)) {
+            if (isRemovedEntity( referencedEntity )) {
                 TLModel model = simple.getOwningModel();
-                boolean listenersEnabled = disableListeners(model);
+                boolean listenersEnabled = disableListeners( model );
 
-                simple.setParentType(null);
-                restoreListeners(model, listenersEnabled);
+                simple.setParentType( null );
+                restoreListeners( model, listenersEnabled );
             }
             return true;
         }
@@ -138,14 +133,14 @@ public abstract class EntityRemovedIntegrityChecker<S, I> extends
          */
         @Override
         public boolean visitValueWithAttributes(TLValueWithAttributes valueWithAttributes) {
-        	TLModelElement referencedEntity = (TLModelElement) valueWithAttributes.getParentType();
+            TLModelElement referencedEntity = (TLModelElement) valueWithAttributes.getParentType();
 
-            if (isRemovedEntity(referencedEntity)) {
+            if (isRemovedEntity( referencedEntity )) {
                 TLModel model = valueWithAttributes.getOwningModel();
-                boolean listenersEnabled = disableListeners(model);
+                boolean listenersEnabled = disableListeners( model );
 
-                valueWithAttributes.setParentType(null);
-                restoreListeners(model, listenersEnabled);
+                valueWithAttributes.setParentType( null );
+                restoreListeners( model, listenersEnabled );
             }
             return true;
         }
@@ -155,14 +150,14 @@ public abstract class EntityRemovedIntegrityChecker<S, I> extends
          */
         @Override
         public boolean visitExtension(TLExtension extension) {
-        	TLModelElement referencedEntity = (TLModelElement) extension.getExtendsEntity();
+            TLModelElement referencedEntity = (TLModelElement) extension.getExtendsEntity();
 
-            if (isRemovedEntity(referencedEntity)) {
+            if (isRemovedEntity( referencedEntity )) {
                 TLModel model = extension.getOwningModel();
-                boolean listenersEnabled = disableListeners(model);
+                boolean listenersEnabled = disableListeners( model );
 
-                extension.setExtendsEntity(null);
-                restoreListeners(model, listenersEnabled);
+                extension.setExtendsEntity( null );
+                restoreListeners( model, listenersEnabled );
             }
             return true;
         }
@@ -172,48 +167,48 @@ public abstract class EntityRemovedIntegrityChecker<S, I> extends
          */
         @Override
         public boolean visitSimpleFacet(TLSimpleFacet simpleFacet) {
-        	TLModelElement referencedEntity = (TLModelElement) simpleFacet.getSimpleType();
+            TLModelElement referencedEntity = (TLModelElement) simpleFacet.getSimpleType();
 
-            if (isRemovedEntity(referencedEntity)) {
+            if (isRemovedEntity( referencedEntity )) {
                 TLModel model = simpleFacet.getOwningModel();
-                boolean listenersEnabled = disableListeners(model);
+                boolean listenersEnabled = disableListeners( model );
 
-                simpleFacet.setSimpleType(null);
-                restoreListeners(model, listenersEnabled);
+                simpleFacet.setSimpleType( null );
+                restoreListeners( model, listenersEnabled );
             }
             return true;
         }
 
         /**
-		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitor#visitContextualFacet(org.opentravel.schemacompiler.model.TLContextualFacet)
-		 */
-		@Override
-		public boolean visitContextualFacet(TLContextualFacet facet) {
-        	TLModelElement referencedEntity = (TLModelElement) facet.getOwningEntity();
+         * @see org.opentravel.schemacompiler.visitor.ModelElementVisitor#visitContextualFacet(org.opentravel.schemacompiler.model.TLContextualFacet)
+         */
+        @Override
+        public boolean visitContextualFacet(TLContextualFacet facet) {
+            TLModelElement referencedEntity = (TLModelElement) facet.getOwningEntity();
 
-            if (isRemovedEntity(referencedEntity)) {
+            if (isRemovedEntity( referencedEntity )) {
                 TLModel model = facet.getOwningModel();
-                boolean listenersEnabled = disableListeners(model);
+                boolean listenersEnabled = disableListeners( model );
 
-                facet.setOwningEntity(null);
-                restoreListeners(model, listenersEnabled);
+                facet.setOwningEntity( null );
+                restoreListeners( model, listenersEnabled );
             }
             return true;
-		}
+        }
 
-		/**
+        /**
          * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitAttribute(org.opentravel.schemacompiler.model.TLAttribute)
          */
         @Override
         public boolean visitAttribute(TLAttribute attribute) {
-        	TLModelElement referencedEntity = (TLModelElement) attribute.getType();
+            TLModelElement referencedEntity = (TLModelElement) attribute.getType();
 
-            if (isRemovedEntity(referencedEntity)) {
+            if (isRemovedEntity( referencedEntity )) {
                 TLModel model = attribute.getOwningModel();
-                boolean listenersEnabled = disableListeners(model);
+                boolean listenersEnabled = disableListeners( model );
 
-                attribute.setType(null);
-                restoreListeners(model, listenersEnabled);
+                attribute.setType( null );
+                restoreListeners( model, listenersEnabled );
             }
             return true;
         }
@@ -223,155 +218,154 @@ public abstract class EntityRemovedIntegrityChecker<S, I> extends
          */
         @Override
         public boolean visitElement(TLProperty element) {
-        	TLModelElement referencedEntity = (TLModelElement) element.getType();
+            TLModelElement referencedEntity = (TLModelElement) element.getType();
 
-            if (isRemovedEntity(referencedEntity)) {
+            if (isRemovedEntity( referencedEntity )) {
                 TLModel model = element.getOwningModel();
-                boolean listenersEnabled = disableListeners(model);
+                boolean listenersEnabled = disableListeners( model );
 
-                element.setType(null);
-                restoreListeners(model, listenersEnabled);
+                element.setType( null );
+                restoreListeners( model, listenersEnabled );
             }
             return true;
         }
 
         /**
-		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitResource(org.opentravel.schemacompiler.model.TLResource)
-		 */
-		@Override
-		public boolean visitResource(TLResource resource) {
-			TLModelElement referencedEntity = resource.getBusinessObjectRef();
+         * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitResource(org.opentravel.schemacompiler.model.TLResource)
+         */
+        @Override
+        public boolean visitResource(TLResource resource) {
+            TLModelElement referencedEntity = resource.getBusinessObjectRef();
 
-            if (isRemovedEntity(referencedEntity)) {
+            if (isRemovedEntity( referencedEntity )) {
                 TLModel model = resource.getOwningModel();
-                boolean listenersEnabled = disableListeners(model);
+                boolean listenersEnabled = disableListeners( model );
 
-                resource.setBusinessObjectRef(null);
-                restoreListeners(model, listenersEnabled);
+                resource.setBusinessObjectRef( null );
+                restoreListeners( model, listenersEnabled );
             }
             return true;
-		}
+        }
 
-		/**
-		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitResourceParentRef(org.opentravel.schemacompiler.model.TLResourceParentRef)
-		 */
-		@Override
-		public boolean visitResourceParentRef(TLResourceParentRef parentRef) {
-			TLModelElement referencedResource = parentRef.getParentResource();
+        /**
+         * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitResourceParentRef(org.opentravel.schemacompiler.model.TLResourceParentRef)
+         */
+        @Override
+        public boolean visitResourceParentRef(TLResourceParentRef parentRef) {
+            TLModelElement referencedResource = parentRef.getParentResource();
             TLParamGroup referencedParamGroup = parentRef.getParentParamGroup();
             TLModel model = parentRef.getOwningModel();
 
-            if (isRemovedEntity(referencedResource)) {
-                boolean listenersEnabled = disableListeners(model);
+            if (isRemovedEntity( referencedResource )) {
+                boolean listenersEnabled = disableListeners( model );
 
-                parentRef.setParentResource(null);
-                restoreListeners(model, listenersEnabled);
+                parentRef.setParentResource( null );
+                restoreListeners( model, listenersEnabled );
             }
-            if (isRemovedEntity(referencedParamGroup)) {
-                boolean listenersEnabled = disableListeners(model);
+            if (isRemovedEntity( referencedParamGroup )) {
+                boolean listenersEnabled = disableListeners( model );
 
-                parentRef.setParentParamGroup(null);
-                restoreListeners(model, listenersEnabled);
+                parentRef.setParentParamGroup( null );
+                restoreListeners( model, listenersEnabled );
             }
             return true;
-		}
+        }
 
-		/**
-		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitParamGroup(org.opentravel.schemacompiler.model.TLParamGroup)
-		 */
-		@Override
-		public boolean visitParamGroup(TLParamGroup paramGroup) {
-			TLModelElement referencedEntity = paramGroup.getFacetRef();
+        /**
+         * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitParamGroup(org.opentravel.schemacompiler.model.TLParamGroup)
+         */
+        @Override
+        public boolean visitParamGroup(TLParamGroup paramGroup) {
+            TLModelElement referencedEntity = paramGroup.getFacetRef();
 
-            if (isRemovedEntity(referencedEntity)) {
+            if (isRemovedEntity( referencedEntity )) {
                 TLModel model = paramGroup.getOwningModel();
-                boolean listenersEnabled = disableListeners(model);
+                boolean listenersEnabled = disableListeners( model );
 
-                paramGroup.setFacetRef(null);
-                restoreListeners(model, listenersEnabled);
+                paramGroup.setFacetRef( null );
+                restoreListeners( model, listenersEnabled );
             }
             return true;
-		}
+        }
 
-		/**
-		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitParameter(org.opentravel.schemacompiler.model.TLParameter)
-		 */
-		@Override
-		public boolean visitParameter(TLParameter parameter) {
-			TLModelElement referencedEntity = (TLModelElement) parameter.getFieldRef();
+        /**
+         * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitParameter(org.opentravel.schemacompiler.model.TLParameter)
+         */
+        @Override
+        public boolean visitParameter(TLParameter parameter) {
+            TLModelElement referencedEntity = (TLModelElement) parameter.getFieldRef();
 
-            if (isRemovedEntity(referencedEntity)) {
+            if (isRemovedEntity( referencedEntity )) {
                 TLModel model = parameter.getOwningModel();
-                boolean listenersEnabled = disableListeners(model);
-                
+                boolean listenersEnabled = disableListeners( model );
+
                 if (parameter.getFieldRef() == null) {
                     // If a field is deleted from its owner, we will delete any corresponing
                     // parameters rather than setting their reference to null
-                    parameter.getOwner().removeParameter(parameter);
-                	
+                    parameter.getOwner().removeParameter( parameter );
+
                 } else if (referencedEntity.getOwningModel() == null) {
-                	// If the field is still assigned to its owner but the owning
-                	// model is null, we will set the field reference to null since the
-                	// field's library was likely removed from the model.  We should leave
-                	// the parameter in place since it can re-resolve the field reference
-                	// if the library is reloaded.
-                	parameter.setFieldRef( null );
+                    // If the field is still assigned to its owner but the owning
+                    // model is null, we will set the field reference to null since the
+                    // field's library was likely removed from the model. We should leave
+                    // the parameter in place since it can re-resolve the field reference
+                    // if the library is reloaded.
+                    parameter.setFieldRef( null );
                 }
-                restoreListeners(model, listenersEnabled);
+                restoreListeners( model, listenersEnabled );
             }
             return true;
-		}
+        }
 
-		/**
-		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitActionRequest(org.opentravel.schemacompiler.model.TLActionRequest)
-		 */
-		@Override
-		public boolean visitActionRequest(TLActionRequest actionRequest) {
+        /**
+         * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitActionRequest(org.opentravel.schemacompiler.model.TLActionRequest)
+         */
+        @Override
+        public boolean visitActionRequest(TLActionRequest actionRequest) {
             TLParamGroup referencedParamGroup = actionRequest.getParamGroup();
             TLActionFacet referencedPayloadType = actionRequest.getPayloadType();
             TLModel model = actionRequest.getOwningModel();
-            
-            if (isRemovedEntity(referencedParamGroup)) {
-                boolean listenersEnabled = disableListeners(model);
 
-                actionRequest.setParamGroup(null);
-                restoreListeners(model, listenersEnabled);
+            if (isRemovedEntity( referencedParamGroup )) {
+                boolean listenersEnabled = disableListeners( model );
+
+                actionRequest.setParamGroup( null );
+                restoreListeners( model, listenersEnabled );
             }
-            if (isRemovedEntity(referencedPayloadType)) {
-                boolean listenersEnabled = disableListeners(model);
+            if (isRemovedEntity( referencedPayloadType )) {
+                boolean listenersEnabled = disableListeners( model );
 
-                actionRequest.setPayloadType(null);
-                restoreListeners(model, listenersEnabled);
+                actionRequest.setPayloadType( null );
+                restoreListeners( model, listenersEnabled );
             }
             return true;
-		}
+        }
 
-		/**
-		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitActionResponse(org.opentravel.schemacompiler.model.TLActionResponse)
-		 */
-		@Override
-		public boolean visitActionResponse(TLActionResponse actionResponse) {
+        /**
+         * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitActionResponse(org.opentravel.schemacompiler.model.TLActionResponse)
+         */
+        @Override
+        public boolean visitActionResponse(TLActionResponse actionResponse) {
             NamedEntity referencedPayloadType = actionResponse.getPayloadType();
-            
-            if ((referencedPayloadType instanceof TLModelElement)
-            		&& isRemovedEntity((TLModelElement) referencedPayloadType)) {
-                TLModel model = actionResponse.getOwningModel();
-                boolean listenersEnabled = disableListeners(model);
 
-                actionResponse.setPayloadType(null);
-                restoreListeners(model, listenersEnabled);
+            if ((referencedPayloadType instanceof TLModelElement)
+                && isRemovedEntity( (TLModelElement) referencedPayloadType )) {
+                TLModel model = actionResponse.getOwningModel();
+                boolean listenersEnabled = disableListeners( model );
+
+                actionResponse.setPayloadType( null );
+                restoreListeners( model, listenersEnabled );
             }
             return true;
-		}
+        }
 
-		/**
-         * Returns true if the given named entity is one of the instances flagged for removal from
-         * the model. This performs a reference check on the removed entity list instead of the
-         * 'equals()' method that is employed by the Java collection API, eliminating unexpected
-         * behavior for model entity class(es) that override the 'equals()' method.
+        /**
+         * Returns true if the given named entity is one of the instances flagged for removal from the model. This
+         * performs a reference check on the removed entity list instead of the 'equals()' method that is employed by
+         * the Java collection API, eliminating unexpected behavior for model entity class(es) that override the
+         * 'equals()' method.
          * 
-         * @param entity
-         *            the named entity to check
+         * @param entity the named entity to check
          * @return boolean
          */
         private boolean isRemovedEntity(TLModelElement entity) {
@@ -387,11 +381,10 @@ public abstract class EntityRemovedIntegrityChecker<S, I> extends
         }
 
         /**
-         * Disables listener event propagation for the given model. The return value indicates the
-         * original state of the flag before events were disabled.
+         * Disables listener event propagation for the given model. The return value indicates the original state of the
+         * flag before events were disabled.
          * 
-         * @param model
-         *            the model for which listener events should be disabled
+         * @param model the model for which listener events should be disabled
          * @return boolean
          */
         private boolean disableListeners(TLModel model) {
@@ -399,7 +392,7 @@ public abstract class EntityRemovedIntegrityChecker<S, I> extends
 
             if (model != null) {
                 listenersEnabled = model.isListenersEnabled();
-                model.setListenersEnabled(false);
+                model.setListenersEnabled( false );
 
             } else {
                 listenersEnabled = false;
@@ -410,14 +403,12 @@ public abstract class EntityRemovedIntegrityChecker<S, I> extends
         /**
          * Restores the original value for the 'listenersEnabled' flag for the given model.
          * 
-         * @param model
-         *            the model for which the listener state should be restored
-         * @param listenersEnabled
-         *            the original flag value for the 'listenersEnabled' flag
+         * @param model the model for which the listener state should be restored
+         * @param listenersEnabled the original flag value for the 'listenersEnabled' flag
          */
         private void restoreListeners(TLModel model, boolean listenersEnabled) {
             if (model != null) {
-                model.setListenersEnabled(listenersEnabled);
+                model.setListenersEnabled( listenersEnabled );
             }
         }
 

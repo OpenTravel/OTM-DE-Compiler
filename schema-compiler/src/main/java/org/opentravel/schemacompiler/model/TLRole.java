@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.model;
 
 import org.opentravel.schemacompiler.event.ModelEvent;
@@ -39,12 +40,12 @@ public class TLRole extends TLModelElement implements TLDocumentationOwner {
         StringBuilder identity = new StringBuilder();
 
         if (owningCore != null) {
-            identity.append(owningCore.getValidationIdentity()).append(" : ");
+            identity.append( owningCore.getValidationIdentity() ).append( " : " );
         }
         if (getName() == null) {
-            identity.append("[Unnamed Role]");
+            identity.append( "[Unnamed Role]" );
         } else {
-            identity.append(getName());
+            identity.append( getName() );
         }
         return identity.toString();
     }
@@ -77,30 +78,29 @@ public class TLRole extends TLModelElement implements TLDocumentationOwner {
     /**
      * Assigns the role enumeration that owns this role instance.
      * 
-     * @param owningEnum
-     *            the role enumeration owner to assign
+     * @param owningEnum the role enumeration owner to assign
      */
     public void setRoleEnumeration(TLRoleEnumeration owningEnum) {
         this.owningEnum = owningEnum;
     }
 
     /**
-     * Moves this role up by one position in the list of roles maintained by its owner. If the owner
-     * is null, or this role is already at the front of the list, this method has no effect.
+     * Moves this role up by one position in the list of roles maintained by its owner. If the owner is null, or this
+     * role is already at the front of the list, this method has no effect.
      */
     public void moveUp() {
         if (owningEnum != null) {
-            owningEnum.moveUp(this);
+            owningEnum.moveUp( this );
         }
     }
 
     /**
-     * Moves this role down by one position in the list of roles maintained by its owner. If the
-     * owner is null, or this role is already at the end of the list, this method has no effect.
+     * Moves this role down by one position in the list of roles maintained by its owner. If the owner is null, or this
+     * role is already at the end of the list, this method has no effect.
      */
     public void moveDown() {
         if (owningEnum != null) {
-            owningEnum.moveDown(this);
+            owningEnum.moveDown( this );
         }
     }
 
@@ -116,15 +116,14 @@ public class TLRole extends TLModelElement implements TLDocumentationOwner {
     /**
      * Assigns the value of the 'name' field.
      * 
-     * @param name
-     *            the field value to assign
+     * @param name the field value to assign
      */
     public void setName(String name) {
-        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.NAME_MODIFIED, this)
-                .setOldValue(this.name).setNewValue(name).buildEvent();
+        ModelEvent<?> event = new ModelEventBuilder( ModelEventType.NAME_MODIFIED, this ).setOldValue( this.name )
+            .setNewValue( name ).buildEvent();
 
         this.name = name;
-        publishEvent(event);
+        publishEvent( event );
     }
 
     /**
@@ -139,17 +138,17 @@ public class TLRole extends TLModelElement implements TLDocumentationOwner {
      */
     public void setDocumentation(TLDocumentation documentation) {
         if (documentation != this.documentation) {
-            ModelEvent<?> event = new ModelEventBuilder(ModelEventType.DOCUMENTATION_MODIFIED, this)
-                    .setOldValue(this.documentation).setNewValue(documentation).buildEvent();
+            ModelEvent<?> event = new ModelEventBuilder( ModelEventType.DOCUMENTATION_MODIFIED, this )
+                .setOldValue( this.documentation ).setNewValue( documentation ).buildEvent();
 
             if (documentation != null) {
-                documentation.setOwner(this);
+                documentation.setOwner( this );
             }
             if (this.documentation != null) {
-                this.documentation.setOwner(null);
+                this.documentation.setOwner( null );
             }
             this.documentation = documentation;
-            publishEvent(event);
+            publishEvent( event );
         }
     }
 
@@ -158,17 +157,15 @@ public class TLRole extends TLModelElement implements TLDocumentationOwner {
      * 
      * @author S. Livezey
      */
-    protected static class RoleListManager extends
-            ChildEntityListManager<TLRole, TLRoleEnumeration> {
+    protected static class RoleListManager extends ChildEntityListManager<TLRole,TLRoleEnumeration> {
 
         /**
          * Constructor that specifies the owner of the unerlying list.
          * 
-         * @param owner
-         *            the owner of the underlying list of children
+         * @param owner the owner of the underlying list of children
          */
         public RoleListManager(TLRoleEnumeration owner) {
-            super(owner, ModelEventType.ROLE_ADDED, ModelEventType.ROLE_REMOVED);
+            super( owner, ModelEventType.ROLE_ADDED, ModelEventType.ROLE_REMOVED );
         }
 
         /**
@@ -185,7 +182,7 @@ public class TLRole extends TLModelElement implements TLDocumentationOwner {
          */
         @Override
         protected void assignOwner(TLRole child, TLRoleEnumeration owner) {
-            child.setRoleEnumeration(owner);
+            child.setRoleEnumeration( owner );
         }
 
         /**
@@ -197,7 +194,7 @@ public class TLRole extends TLModelElement implements TLDocumentationOwner {
             TLModel owningModel = owner.getOwningModel();
 
             if (owningModel != null) {
-                owningModel.publishEvent(event);
+                owningModel.publishEvent( event );
             }
         }
 

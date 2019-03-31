@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.task;
 
 import java.net.URL;
@@ -22,13 +23,12 @@ import java.net.URL;
  * 
  * @author S. Livezey
  */
-public interface ServiceCompilerTaskOptions extends CommonCompilerTaskOptions,
-        ExampleCompilerTaskOptions {
+public interface ServiceCompilerTaskOptions extends CommonCompilerTaskOptions, ExampleCompilerTaskOptions {
 
     /**
-     * Returns the URL of the OTM library that contains the single service to be generated. If
-     * present, only that service's WSDL will be generated. If not present, WSDL's will be generated
-     * for all services that exist in the OTM model being processed.
+     * Returns the URL of the OTM library that contains the single service to be generated. If present, only that
+     * service's WSDL will be generated. If not present, WSDL's will be generated for all services that exist in the OTM
+     * model being processed.
      * 
      * @return URL
      */

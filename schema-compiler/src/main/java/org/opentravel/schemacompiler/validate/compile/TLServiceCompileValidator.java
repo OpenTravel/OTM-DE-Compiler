@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.validate.compile;
 
 import org.opentravel.schemacompiler.model.TLLibrary;
@@ -40,42 +41,41 @@ public class TLServiceCompileValidator extends TLServiceBaseValidator {
      */
     @Override
     protected ValidationFindings validateFields(TLService target) {
-        TLValidationBuilder builder = newValidationBuilder(target);
+        TLValidationBuilder builder = newValidationBuilder( target );
 
-        builder.setProperty("name", target.getName()).setFindingType(FindingType.ERROR)
-                .assertNotNullOrBlank().assertPatternMatch(NAME_XML_PATTERN);
+        builder.setProperty( "name", target.getName() ).setFindingType( FindingType.ERROR ).assertNotNullOrBlank()
+            .assertPatternMatch( NAME_XML_PATTERN );
 
-        builder.setProperty("equivalents", target.getEquivalents())
-                .setFindingType(FindingType.ERROR).assertNotNull().assertContainsNoNullElements();
+        builder.setProperty( "equivalents", target.getEquivalents() ).setFindingType( FindingType.ERROR )
+            .assertNotNull().assertContainsNoNullElements();
 
-        builder.setProperty("operations", target.getOperations()).setFindingType(FindingType.ERROR)
-                .assertMinimumSize(1);
+        builder.setProperty( "operations", target.getOperations() ).setFindingType( FindingType.ERROR )
+            .assertMinimumSize( 1 );
 
         // Validate versioning rules
         try {
             if ((target.getOwningLibrary() instanceof TLLibrary) && (target.getName() != null)) {
                 TLLibrary owningLibrary = (TLLibrary) target.getOwningLibrary();
                 MinorVersionHelper helper = new MinorVersionHelper();
-                VersionScheme vScheme = helper.getVersionScheme(owningLibrary);
+                VersionScheme vScheme = helper.getVersionScheme( owningLibrary );
 
-                if ((vScheme != null) && vScheme.isPatchVersion(owningLibrary.getNamespace())) {
-                    builder.addFinding(FindingType.ERROR, "name", ERROR_ILLEGAL_PATCH);
+                if ((vScheme != null) && vScheme.isPatchVersion( owningLibrary.getNamespace() )) {
+                    builder.addFinding( FindingType.ERROR, "name", ERROR_ILLEGAL_PATCH );
 
                 } else {
-                    TLLibrary previousLibraryVersion = helper.getPriorMinorVersion(owningLibrary);
+                    TLLibrary previousLibraryVersion = helper.getPriorMinorVersion( owningLibrary );
                     boolean hasError = false;
 
                     while (!hasError && (previousLibraryVersion != null)) {
                         TLService previousServiceVersion = previousLibraryVersion.getService();
 
                         hasError = (previousServiceVersion != null)
-                                && !target.getName().equals(previousServiceVersion.getName());
-                        previousLibraryVersion = helper
-                                .getPriorMinorVersion(previousLibraryVersion);
+                            && !target.getName().equals( previousServiceVersion.getName() );
+                        previousLibraryVersion = helper.getPriorMinorVersion( previousLibraryVersion );
                     }
                     if (hasError) {
-                        builder.addFinding(FindingType.ERROR, "name",
-                                ERROR_ILLEGAL_SERVICE_VERSION, target.getName());
+                        builder.addFinding( FindingType.ERROR, "name", ERROR_ILLEGAL_SERVICE_VERSION,
+                            target.getName() );
                     }
                 }
             }

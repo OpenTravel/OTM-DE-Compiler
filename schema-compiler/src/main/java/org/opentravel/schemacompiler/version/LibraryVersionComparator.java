@@ -13,11 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.version;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
+package org.opentravel.schemacompiler.version;
 
 import org.opentravel.schemacompiler.event.ModelElementListener;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
@@ -25,13 +22,15 @@ import org.opentravel.schemacompiler.model.LibraryElement;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLModel;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+
 /**
- * Comparator that can be used to sort <code>TLLibrary</code> instances according to their version
- * identifiers.
+ * Comparator that can be used to sort <code>TLLibrary</code> instances according to their version identifiers.
  * 
  * <p>
- * NOTE: At this time, sorting lists of libraries assigned to multiple version schemes is not
- * supported.
+ * NOTE: At this time, sorting lists of libraries assigned to multiple version schemes is not supported.
  * 
  * @author S. Livezey
  */
@@ -40,24 +39,20 @@ public class LibraryVersionComparator implements Comparator<TLLibrary> {
     private Comparator<Versioned> versionComparator;
 
     /**
-     * Constructor that provides the version scheme under which the librarys' versions will be
-     * compared.
+     * Constructor that provides the version scheme under which the librarys' versions will be compared.
      * 
-     * @param sortAscending
-     *            indicates the direction of the sort produced by the comparator (true = ascending,
-     *            false = descending)
-     * @param versionScheme
-     *            the version scheme from which a version comparator should be obtained
+     * @param sortAscending indicates the direction of the sort produced by the comparator (true = ascending, false =
+     *        descending)
+     * @param versionScheme the version scheme from which a version comparator should be obtained
      */
     public LibraryVersionComparator(VersionScheme versionScheme, boolean sortAscending) {
-        this(versionScheme.getComparator(sortAscending));
+        this( versionScheme.getComparator( sortAscending ) );
     }
 
     /**
      * Constructor that provides the comparator for the librarys' version identifiers.
      * 
-     * @param versionComparator
-     *            the version comparator to use when comparing version identifier strings
+     * @param versionComparator the version comparator to use when comparing version identifier strings
      */
     public LibraryVersionComparator(Comparator<Versioned> versionComparator) {
         this.versionComparator = versionComparator;
@@ -67,23 +62,23 @@ public class LibraryVersionComparator implements Comparator<TLLibrary> {
      * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
      */
     @Override
-	public int compare(TLLibrary library1, TLLibrary library2) {
-		int result;
-		
-		if ((library1 == null) || (library2 == null)) {
-			if (library1 == null) {
-				result = (library2 == null) ? 0 : 1;
-			} else {
-				result = -1;
-			}
-			
-		} else {
-			result = versionComparator.compare(new LibraryVersionedDecorator(library1),
-					new LibraryVersionedDecorator(library2));
-		}
-		return result;
-	}
-	
+    public int compare(TLLibrary library1, TLLibrary library2) {
+        int result;
+
+        if ((library1 == null) || (library2 == null)) {
+            if (library1 == null) {
+                result = (library2 == null) ? 0 : 1;
+            } else {
+                result = -1;
+            }
+
+        } else {
+            result = versionComparator.compare( new LibraryVersionedDecorator( library1 ),
+                new LibraryVersionedDecorator( library2 ) );
+        }
+        return result;
+    }
+
     /**
      * Wrapper class used to apply the <code>Versioned</code> interface to a <code>TLLibrary</code>.
      */
@@ -94,8 +89,7 @@ public class LibraryVersionComparator implements Comparator<TLLibrary> {
         /**
          * Constructor that provides the <code>TLLibrary</code> instance to be decorated.
          * 
-         * @param library
-         *            the user-defined library instance
+         * @param library the user-defined library instance
          */
         private LibraryVersionedDecorator(TLLibrary library) {
             this.library = library;
@@ -138,8 +132,8 @@ public class LibraryVersionComparator implements Comparator<TLLibrary> {
          */
         @Override
         public boolean isLaterVersion(Versioned otherVersionedItem) {
-            return (library != null) && (otherVersionedItem != null) &&
-            		library.isLaterVersion(otherVersionedItem.getOwningLibrary());
+            return (library != null) && (otherVersionedItem != null)
+                && library.isLaterVersion( otherVersionedItem.getOwningLibrary() );
         }
 
         /**
@@ -190,29 +184,29 @@ public class LibraryVersionComparator implements Comparator<TLLibrary> {
             return null;
         }
 
-		/**
-		 * @see org.opentravel.schemacompiler.model.ModelElement#addListener(org.opentravel.schemacompiler.event.ModelElementListener)
-		 */
-		@Override
-		public void addListener(ModelElementListener listener) {
-			// No action - listeners not supported by the decorator
-		}
+        /**
+         * @see org.opentravel.schemacompiler.model.ModelElement#addListener(org.opentravel.schemacompiler.event.ModelElementListener)
+         */
+        @Override
+        public void addListener(ModelElementListener listener) {
+            // No action - listeners not supported by the decorator
+        }
 
-		/**
-		 * @see org.opentravel.schemacompiler.model.ModelElement#removeListener(org.opentravel.schemacompiler.event.ModelElementListener)
-		 */
-		@Override
-		public void removeListener(ModelElementListener listener) {
-			// No action - listeners not supported by the decorator
-		}
+        /**
+         * @see org.opentravel.schemacompiler.model.ModelElement#removeListener(org.opentravel.schemacompiler.event.ModelElementListener)
+         */
+        @Override
+        public void removeListener(ModelElementListener listener) {
+            // No action - listeners not supported by the decorator
+        }
 
-		/**
-		 * @see org.opentravel.schemacompiler.model.ModelElement#getListeners()
-		 */
-		@Override
-		public Collection<ModelElementListener> getListeners() {
-			return Collections.emptyList();
-		}
+        /**
+         * @see org.opentravel.schemacompiler.model.ModelElement#getListeners()
+         */
+        @Override
+        public Collection<ModelElementListener> getListeners() {
+            return Collections.emptyList();
+        }
 
     }
 

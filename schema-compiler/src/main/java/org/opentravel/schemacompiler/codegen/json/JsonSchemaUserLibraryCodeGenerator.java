@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.codegen.json;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerationFilenameBuilder;
@@ -26,26 +27,27 @@ import org.opentravel.schemacompiler.model.TLLibrary;
  * <p>
  * The following context variable(s) are required when invoking this code generation module:
  * <ul>
- *   <li><code>schemacompiler.OutputFolder</code> - the folder where generated JSON schema files should be stored</li>
- *   <li><code>schemacompiler.SchemaFilename</code> - the name of the JSON schema file to be generated (uses library name/version if not specified)</li>
+ * <li><code>schemacompiler.OutputFolder</code> - the folder where generated JSON schema files should be stored</li>
+ * <li><code>schemacompiler.SchemaFilename</code> - the name of the JSON schema file to be generated (uses library
+ * name/version if not specified)</li>
  * </ul>
  */
 public class JsonSchemaUserLibraryCodeGenerator extends AbstractJsonSchemaCodeGenerator<TLLibrary> {
 
-	/**
-	 * @see org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator#getDefaultFilenameBuilder()
-	 */
-	@Override
-	protected CodeGenerationFilenameBuilder<TLLibrary> getDefaultFilenameBuilder() {
+    /**
+     * @see org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator#getDefaultFilenameBuilder()
+     */
+    @Override
+    protected CodeGenerationFilenameBuilder<TLLibrary> getDefaultFilenameBuilder() {
         return new LibraryFilenameBuilder<>();
-	}
+    }
 
-	/**
-	 * @see org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator#getLibrary(org.opentravel.schemacompiler.model.ModelElement)
-	 */
-	@Override
-	protected AbstractLibrary getLibrary(TLLibrary source) {
-		return source;
-	}
-	
+    /**
+     * @see org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator#getLibrary(org.opentravel.schemacompiler.model.ModelElement)
+     */
+    @Override
+    protected AbstractLibrary getLibrary(TLLibrary source) {
+        return source;
+    }
+
 }

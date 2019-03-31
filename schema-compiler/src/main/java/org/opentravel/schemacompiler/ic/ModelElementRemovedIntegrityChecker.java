@@ -13,42 +13,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.ic;
 
-import java.util.Arrays;
-import java.util.List;
+package org.opentravel.schemacompiler.ic;
 
 import org.opentravel.schemacompiler.event.ModelEventType;
 import org.opentravel.schemacompiler.event.OwnershipEvent;
 import org.opentravel.schemacompiler.model.TLModelElement;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
- * Integrity checker component that purges all references to an entity when it is removed from the
- * model.
+ * Integrity checker component that purges all references to an entity when it is removed from the model.
  * 
- * @param <S>
- *            the source object type for the event
+ * @param <S> the source object type for the event
  * @author S. Livezey
  */
-public class ModelElementRemovedIntegrityChecker<S extends TLModelElement> extends
-        EntityRemovedIntegrityChecker<S, TLModelElement> {
+public class ModelElementRemovedIntegrityChecker<S extends TLModelElement>
+    extends EntityRemovedIntegrityChecker<S,TLModelElement> {
 
-    private static final ModelEventType[] ELIGIBLE_EVENT_TYPES = { ModelEventType.MEMBER_REMOVED,
-            ModelEventType.ROLE_REMOVED, ModelEventType.ALIAS_REMOVED,
-            ModelEventType.OPERATION_REMOVED, ModelEventType.CUSTOM_FACET_REMOVED,
-            ModelEventType.QUERY_FACET_REMOVED, ModelEventType.ACTION_FACET_REMOVED,
-            ModelEventType.CHOICE_FACET_REMOVED, ModelEventType.PARAMETER_REMOVED,
-            ModelEventType.PARAM_GROUP_REMOVED, ModelEventType.ACTION_REMOVED,
-            ModelEventType.ACTION_RESPONSE_REMOVED };
+    private static final ModelEventType[] ELIGIBLE_EVENT_TYPES =
+        {ModelEventType.MEMBER_REMOVED, ModelEventType.ROLE_REMOVED, ModelEventType.ALIAS_REMOVED,
+            ModelEventType.OPERATION_REMOVED, ModelEventType.CUSTOM_FACET_REMOVED, ModelEventType.QUERY_FACET_REMOVED,
+            ModelEventType.ACTION_FACET_REMOVED, ModelEventType.CHOICE_FACET_REMOVED, ModelEventType.PARAMETER_REMOVED,
+            ModelEventType.PARAM_GROUP_REMOVED, ModelEventType.ACTION_REMOVED, ModelEventType.ACTION_RESPONSE_REMOVED};
 
-    private List<ModelEventType> eligibleEvents = Arrays.asList(ELIGIBLE_EVENT_TYPES);
+    private List<ModelEventType> eligibleEvents = Arrays.asList( ELIGIBLE_EVENT_TYPES );
     private Class<S> eventSourceType;
 
     /**
      * Constructor that specifies the source type of the event.
      * 
-     * @param eventSourceType
-     *            the source type of the event to which this listener will respond
+     * @param eventSourceType the source type of the event to which this listener will respond
      */
     public ModelElementRemovedIntegrityChecker(Class<S> eventSourceType) {
         this.eventSourceType = eventSourceType;
@@ -58,13 +54,12 @@ public class ModelElementRemovedIntegrityChecker<S extends TLModelElement> exten
      * @see org.opentravel.schemacompiler.event.ModelEventListener#processModelEvent(org.opentravel.schemacompiler.event.ModelEvent)
      */
     @Override
-    public void processModelEvent(OwnershipEvent<S, TLModelElement> event) {
-        if (eligibleEvents.contains(event.getType())) {
-        	TLModelElement removedEntity = event.getAffectedItem();
+    public void processModelEvent(OwnershipEvent<S,TLModelElement> event) {
+        if (eligibleEvents.contains( event.getType() )) {
+            TLModelElement removedEntity = event.getAffectedItem();
 
             if (removedEntity instanceof TLModelElement) {
-                purgeEntitiesFromModel((TLModelElement) event.getAffectedItem(), event.getSource()
-                        .getOwningModel());
+                purgeEntitiesFromModel( (TLModelElement) event.getAffectedItem(), event.getSource().getOwningModel() );
             }
         }
     }

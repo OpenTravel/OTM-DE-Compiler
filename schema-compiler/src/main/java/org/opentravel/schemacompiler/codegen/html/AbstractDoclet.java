@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.codegen.html;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerationException;
@@ -27,8 +28,8 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractDoclet {
 
-    private static final Logger log = LoggerFactory.getLogger(AbstractDoclet.class);
-    
+    private static final Logger log = LoggerFactory.getLogger( AbstractDoclet.class );
+
     /**
      * The global configuration information for this run.
      */
@@ -40,54 +41,52 @@ public abstract class AbstractDoclet {
     private static final String OTM_DOCLET_NAME = HtmlDoclet.class.getName();
 
     /**
-     * Verify that the only doclet that is using this toolkit is
-     * {@value #OTM_DOCLET_NAME}.
+     * Verify that the only doclet that is using this toolkit is {@value #OTM_DOCLET_NAME}.
      */
     private boolean isValidDoclet(AbstractDoclet doclet) {
-        if (! doclet.getClass().getName().equals(OTM_DOCLET_NAME)) {
-            configuration.message.error("doclet.Toolkit_Usage_Violation",
-                OTM_DOCLET_NAME);
+        if (!doclet.getClass().getName().equals( OTM_DOCLET_NAME )) {
+            configuration.message.error( "doclet.Toolkit_Usage_Violation", OTM_DOCLET_NAME );
             return false;
         }
         return true;
     }
 
     /**
-	 * Returns the global configuration information for this run.
-	 *
-	 * @return Configuration
-	 */
-	public Configuration getConfiguration() {
-		return configuration;
-	}
+     * Returns the global configuration information for this run.
+     *
+     * @return Configuration
+     */
+    public Configuration getConfiguration() {
+        return configuration;
+    }
 
-	/**
-	 * Assigns the global configuration information for this run.
-	 *
-	 * @param configuration  the configuration settings to assign
-	 */
-	public void setConfiguration(Configuration configuration) {
-		this.configuration = configuration;
-	}
+    /**
+     * Assigns the global configuration information for this run.
+     *
+     * @param configuration the configuration settings to assign
+     */
+    public void setConfiguration(Configuration configuration) {
+        this.configuration = configuration;
+    }
 
-	/**
+    /**
      * The method that starts the execution of the doclet.
      *
      * @param doclet the doclet to start the execution for.
-     * @param root   the {@link RootDoc} that points to the source to document.
-     * @return true if the doclet executed without error.  False otherwise.
+     * @param model the model for which documentation is being generated
+     * @return true if the doclet executed without error. False otherwise.
      */
     public boolean start(AbstractDoclet doclet, TLModel model) {
         configuration = newConfiguration();
-        configuration.setModel(model);
-        if (! isValidDoclet(doclet)) {
+        configuration.setModel( model );
+        if (!isValidDoclet( doclet )) {
             return false;
         }
         try {
-            doclet.startGeneration(model);
-            
+            doclet.startGeneration( model );
+
         } catch (Exception exc) {
-        	log.error("Error starting doclet generation.", exc);
+            log.error( "Error starting doclet generation.", exc );
             return false;
         }
         return true;
@@ -96,42 +95,45 @@ public abstract class AbstractDoclet {
 
     /**
      * Create the configuration instance and returns it.
+     * 
      * @return the configuration of the doclet.
      */
     public abstract Configuration newConfiguration();
 
     /**
-     * Start the generation of files. Call generate methods in the individual
-     * writers, which will in turn genrate the documentation files. Call the
-     * TreeWriter generation first to ensure the Class Hierarchy is built
-     * first and then can be used in the later generation.
+     * Start the generation of files. Call generate methods in the individual writers, which will in turn genrate the
+     * documentation files. Call the TreeWriter generation first to ensure the Class Hierarchy is built first and then
+     * can be used in the later generation.
      *
      * @see org.opentravel.schemacompiler.codegen.html.RootDoc
      */
     private void startGeneration(TLModel model) throws CodeGenerationException {
         if (model.getUserDefinedLibraries().isEmpty()) {
-            configuration.message.notice("doclet.No_Libraries_To_Document");
+            configuration.message.notice( "doclet.No_Libraries_To_Document" );
             return;
         }
-        configuration.getDocletSpecificMsg().notice("doclet.build_version",
-            configuration.getDocletSpecificBuildDate());
+        configuration.getDocletSpecificMsg().notice( "doclet.build_version",
+            configuration.getDocletSpecificBuildDate() );
 
-        LibraryListWriter.generate(configuration);
-        generateLibraryFiles(model);
+        LibraryListWriter.generate( configuration );
+        generateLibraryFiles( model );
 
-        generateOtherFiles(model);
+        generateOtherFiles( model );
     }
 
     /**
+     * Generates supporting files for the given model's documentation.
      * 
-     * @param manager
-     * @throws CodeGenerationException 
+     * @param model the model for which to generate files
+     * @throws CodeGenerationException thrown if an error occurs during file generation
      */
     protected abstract void generateOtherFiles(TLModel model) throws CodeGenerationException;
-  
+
     /**
      * Generate the library documentation.
      *
+     * @param model the model for which to generate library-related files
+     * @throws CodeGenerationException thrown if an error occurs during file generation
      */
     protected abstract void generateLibraryFiles(TLModel model) throws CodeGenerationException;
 

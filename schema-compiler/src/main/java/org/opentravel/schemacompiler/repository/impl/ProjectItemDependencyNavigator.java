@@ -13,12 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.repository.impl;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+package org.opentravel.schemacompiler.repository.impl;
 
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.NamedEntity;
@@ -27,6 +23,11 @@ import org.opentravel.schemacompiler.version.VersionScheme;
 import org.opentravel.schemacompiler.version.VersionSchemeException;
 import org.opentravel.schemacompiler.version.VersionSchemeFactory;
 import org.opentravel.schemacompiler.visitor.DependencyNavigator;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Dependency navigator used to identify dependent project items within a project manager's model.
@@ -46,28 +47,28 @@ public class ProjectItemDependencyNavigator extends DependencyNavigator {
         AbstractLibrary library = (target == null) ? null : target.getOwningLibrary();
         String libraryUrl = (library == null) ? null : library.getLibraryUrl().toExternalForm();
 
-        if ((libraryUrl != null) && !visitedLibraries.contains(libraryUrl)) {
-            List<AbstractLibrary> previousLibraryVersions = getPreviousLibraryVersions(library);
+        if ((libraryUrl != null) && !visitedLibraries.contains( libraryUrl )) {
+            List<AbstractLibrary> previousLibraryVersions = getPreviousLibraryVersions( library );
 
-            visitedLibraries.add(libraryUrl);
-            navigateLibraryMembers(library, target);
+            visitedLibraries.add( libraryUrl );
+            navigateLibraryMembers( library, target );
 
             // Also navigate all prior versions of this library since it is required that they
             // are part of the model
             for (AbstractLibrary previousLibraryVersion : previousLibraryVersions) {
-            	String previousLibraryUrl = previousLibraryVersion.getLibraryUrl().toExternalForm();
-            	
-                if (!visitedLibraries.contains(previousLibraryUrl)) {
+                String previousLibraryUrl = previousLibraryVersion.getLibraryUrl().toExternalForm();
+
+                if (!visitedLibraries.contains( previousLibraryUrl )) {
                     if (previousLibraryVersion instanceof TLLibrary) {
-                        visitor.visitUserDefinedLibrary((TLLibrary) previousLibraryVersion);
+                        visitor.visitUserDefinedLibrary( (TLLibrary) previousLibraryVersion );
                     }
-                    visitedLibraries.add(previousLibraryUrl);
-                    navigateLibraryMembers(previousLibraryVersion, target);
+                    visitedLibraries.add( previousLibraryUrl );
+                    navigateLibraryMembers( previousLibraryVersion, target );
                 }
             }
         }
-        if ((target != null) && !visitedEntities.contains(target)) {
-            super.navigateDependency(target);
+        if ((target != null) && !visitedEntities.contains( target )) {
+            super.navigateDependency( target );
         }
     }
 
@@ -76,46 +77,42 @@ public class ProjectItemDependencyNavigator extends DependencyNavigator {
      */
     @Override
     public void navigateLibrary(AbstractLibrary library) {
-        List<AbstractLibrary> previousLibraryVersions = getPreviousLibraryVersions(library);
+        List<AbstractLibrary> previousLibraryVersions = getPreviousLibraryVersions( library );
 
         // We need to make sure we capture each prior version of the library that
         // exists in the model, but we do not need to recursively navigate them. That
         // is already being handled by the navigateDependency() method above
         for (AbstractLibrary previousLibraryVersion : previousLibraryVersions) {
-        	String previousLibraryUrl = previousLibraryVersion.getLibraryUrl().toExternalForm();
-        	
-            if ((!visitedLibraries.contains(previousLibraryUrl))
-                    && (previousLibraryVersion instanceof TLLibrary)) {
-            	super.navigateLibrary((TLLibrary) previousLibraryVersion);
+            String previousLibraryUrl = previousLibraryVersion.getLibraryUrl().toExternalForm();
+
+            if ((!visitedLibraries.contains( previousLibraryUrl )) && (previousLibraryVersion instanceof TLLibrary)) {
+                super.navigateLibrary( (TLLibrary) previousLibraryVersion );
             }
         }
-        super.navigateLibrary(library);
+        super.navigateLibrary( library );
     }
 
     /**
      * Navigates all members of the given library.
      * 
-     * @param library
-     *            the library whose members are to be navigated
-     * @param originalTarget
-     *            the original named entity that initiated this navigation
+     * @param library the library whose members are to be navigated
+     * @param originalTarget the original named entity that initiated this navigation
      */
     private void navigateLibraryMembers(AbstractLibrary library, NamedEntity originalTarget) {
         for (NamedEntity libraryMember : library.getNamedMembers()) {
-            if ((libraryMember != originalTarget) && !visitedEntities.contains(libraryMember)) {
-                visitedEntities.add(libraryMember);
-                super.navigateDependency(libraryMember);
+            if ((libraryMember != originalTarget) && !visitedEntities.contains( libraryMember )) {
+                visitedEntities.add( libraryMember );
+                super.navigateDependency( libraryMember );
             }
         }
     }
 
     /**
-     * Searches the model for all previous versions of the given library. If no prior version exists
-     * in the model, this method will return an empty list.
+     * Searches the model for all previous versions of the given library. If no prior version exists in the model, this
+     * method will return an empty list.
      * 
-     * @param library
-     *            the library whose prior versions are to be returned
-     * @return List<AbstractLibrary>
+     * @param library the library whose prior versions are to be returned
+     * @return List&lt;AbstractLibrary&gt;
      */
     private List<AbstractLibrary> getPreviousLibraryVersions(AbstractLibrary library) {
         List<AbstractLibrary> previousVersions = new ArrayList<>();
@@ -123,12 +120,12 @@ public class ProjectItemDependencyNavigator extends DependencyNavigator {
         if ((library instanceof TLLibrary) && (library.getOwningModel() != null)) {
             try {
                 TLLibrary currentVersion = (TLLibrary) library;
-                VersionScheme vScheme = VersionSchemeFactory.getInstance().getVersionScheme(
-                        currentVersion.getVersionScheme());
-                List<String> versionChain = vScheme.getMajorVersionChain(currentVersion.getNamespace());
+                VersionScheme vScheme =
+                    VersionSchemeFactory.getInstance().getVersionScheme( currentVersion.getVersionScheme() );
+                List<String> versionChain = vScheme.getMajorVersionChain( currentVersion.getNamespace() );
 
-                getPreviousVersions(currentVersion, previousVersions, versionChain, vScheme);
-                
+                getPreviousVersions( currentVersion, previousVersions, versionChain, vScheme );
+
             } catch (VersionSchemeException e) {
                 // Ignore error and return null
             }
@@ -136,30 +133,29 @@ public class ProjectItemDependencyNavigator extends DependencyNavigator {
         return previousVersions;
     }
 
-	/**
-	 * Searches the model and returns all previous versions of the current-version library.
-	 * 
-	 * @param currentVersion  the current version of the library
-	 * @param previousVersions  the list of previous versions being constructed
-	 * @param versionChain  the major version chain of version identifiers
-	 * @param vScheme  the library version scheme
-	 */
-	private void getPreviousVersions(TLLibrary currentVersion, List<AbstractLibrary> previousVersions,
-			List<String> versionChain, VersionScheme vScheme) {
-		for (int i = 1; i < versionChain.size(); i++) { // skip the first element since it
-		                                                // represents the current library's
-		                                                // version
-		    String previousVersionId = vScheme.getVersionIdentifier(versionChain.get(i));
+    /**
+     * Searches the model and returns all previous versions of the current-version library.
+     * 
+     * @param currentVersion the current version of the library
+     * @param previousVersions the list of previous versions being constructed
+     * @param versionChain the major version chain of version identifiers
+     * @param vScheme the library version scheme
+     */
+    private void getPreviousVersions(TLLibrary currentVersion, List<AbstractLibrary> previousVersions,
+        List<String> versionChain, VersionScheme vScheme) {
+        for (int i = 1; i < versionChain.size(); i++) {
+            // Skip the first element since it represents the current library's version
+            String previousVersionId = vScheme.getVersionIdentifier( versionChain.get( i ) );
 
-		    for (TLLibrary lib : currentVersion.getOwningModel().getUserDefinedLibraries()) {
-				if ((lib != currentVersion) && lib.getName().equals(currentVersion.getName())
-						&& lib.getVersion().equals(previousVersionId)
-						&& lib.getBaseNamespace().equals(currentVersion.getBaseNamespace())) {
-					previousVersions.add(lib);
-					break; // stop searching after the first match
-				}
-		    }
-		}
-	}
+            for (TLLibrary lib : currentVersion.getOwningModel().getUserDefinedLibraries()) {
+                if ((lib != currentVersion) && lib.getName().equals( currentVersion.getName() )
+                    && lib.getVersion().equals( previousVersionId )
+                    && lib.getBaseNamespace().equals( currentVersion.getBaseNamespace() )) {
+                    previousVersions.add( lib );
+                    break; // stop searching after the first match
+                }
+            }
+        }
+    }
 
 }

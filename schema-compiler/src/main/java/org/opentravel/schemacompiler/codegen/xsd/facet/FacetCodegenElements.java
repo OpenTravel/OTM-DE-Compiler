@@ -13,17 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.codegen.xsd.facet;
+
+import org.opentravel.schemacompiler.model.NamedEntity;
+import org.opentravel.schemacompiler.model.TLAlias;
+import org.w3._2001.xmlschema.Element;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
-import org.opentravel.schemacompiler.model.NamedEntity;
-import org.opentravel.schemacompiler.model.TLAlias;
-import org.w3._2001.xmlschema.Element;
 
 /**
  * Container that correlates XSD elements with the model elements from which they were constructed.
@@ -38,18 +39,17 @@ public class FacetCodegenElements {
     /**
      * Adds/merges the contents of the given <code>FacetCodegenElements</code> with this instance.
      * 
-     * @param facetElements
-     *            the collection of facet elements to merge with this instance
+     * @param otherFacetElements the collection of facet elements to merge with this instance
      */
     public void addAll(FacetCodegenElements otherFacetElements) {
         if (facetElements != null) {
-            this.subgroupElements.putAll(otherFacetElements.subgroupElements);
+            this.subgroupElements.putAll( otherFacetElements.subgroupElements );
 
             for (NamedEntity otherFacetOwner : otherFacetElements.facetElements.keySet()) {
-                List<Element> otherElements = otherFacetElements.getFacetElements(otherFacetOwner);
+                List<Element> otherElements = otherFacetElements.getFacetElements( otherFacetOwner );
 
                 for (Element otherElement : otherElements) {
-                    this.addFacetElement(otherFacetOwner, otherElement);
+                    this.addFacetElement( otherFacetOwner, otherElement );
                 }
             }
         }
@@ -58,35 +58,30 @@ public class FacetCodegenElements {
     /**
      * Adds the top-level element for the owner's substitution group.
      * 
-     * @param elementOwner
-     *            the element owner that was used to construct the given element
-     * @param element
-     *            the XSD element to add
+     * @param elementOwner the element owner that was used to construct the given element
+     * @param element the XSD element to add
      */
     public void addSubstitutionGroupElement(NamedEntity elementOwner, Element element) {
         if (element != null) {
-            subgroupElements.put(elementOwner, element);
+            subgroupElements.put( elementOwner, element );
         }
     }
 
     /**
      * Returns the top-level element for the owner's substitution group, if one was created.
      * 
-     * @param elementOwner
-     *            the owner for which to return the substitution group element
+     * @param elementOwner the owner for which to return the substitution group element
      * @return Element
      */
     public Element getSubstitutionGroupElement(NamedEntity elementOwner) {
-        return subgroupElements.get(elementOwner);
+        return subgroupElements.get( elementOwner );
     }
 
     /**
      * Adds an element that will be associated with the given facet owner.
      * 
-     * @param elementOwner
-     *            the element owner whose facet was used to construct the given element
-     * @param element
-     *            the XSD element to add
+     * @param elementOwner the element owner whose facet was used to construct the given element
+     * @param element the XSD element to add
      */
     public void addFacetElement(NamedEntity elementOwner, Element element) {
         if (element != null) {
@@ -98,38 +93,37 @@ public class FacetCodegenElements {
     /**
      * Returns the list of facet elements that are associated with the given facet owner.
      * 
-     * @param elementOwner
-     *            the owner for which to return the facet element
-     * @return List<Element>
+     * @param elementOwner the owner for which to return the facet element
+     * @return List&lt;Element&gt;
      */
     public List<Element> getFacetElements(NamedEntity elementOwner) {
-        List<Element> elementList = facetElements.get(elementOwner);
+        List<Element> elementList = facetElements.get( elementOwner );
 
         if (elementList == null) {
             elementList = new ArrayList<>();
         }
         return elementList;
     }
-    
+
     /**
      * Returns the list of all elements for all entities in this collection.
      * 
-     * @return List<Element>
+     * @return List&lt;Element&gt;
      */
-	public List<Element> getAllFacetElements() {
-		List<Element> elementList = new ArrayList<>();
-		
-		for (Entry<NamedEntity,List<Element>> entry : facetElements.entrySet()) {
-			if (!(entry.getKey() instanceof TLAlias)) {
-				elementList.addAll( entry.getValue() );
-			}
-		}
-		for (Entry<NamedEntity,List<Element>> entry : facetElements.entrySet()) {
-			if (entry.getKey() instanceof TLAlias) {
-				elementList.addAll( entry.getValue() );
-			}
-		}
-		return elementList;
-	}
-    
+    public List<Element> getAllFacetElements() {
+        List<Element> elementList = new ArrayList<>();
+
+        for (Entry<NamedEntity,List<Element>> entry : facetElements.entrySet()) {
+            if (!(entry.getKey() instanceof TLAlias)) {
+                elementList.addAll( entry.getValue() );
+            }
+        }
+        for (Entry<NamedEntity,List<Element>> entry : facetElements.entrySet()) {
+            if (entry.getKey() instanceof TLAlias) {
+                elementList.addAll( entry.getValue() );
+            }
+        }
+        return elementList;
+    }
+
 }

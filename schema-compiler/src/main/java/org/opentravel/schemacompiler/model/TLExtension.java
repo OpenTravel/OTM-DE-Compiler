@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.model;
 
 import org.opentravel.schemacompiler.event.ModelEvent;
@@ -20,8 +21,7 @@ import org.opentravel.schemacompiler.event.ModelEventBuilder;
 import org.opentravel.schemacompiler.event.ModelEventType;
 
 /**
- * Model element that indicates an "extends" between the extension owner and the entity to which the
- * extension refers.
+ * Model element that indicates an "extends" between the extension owner and the entity to which the extension refers.
  * 
  * @author S. Livezey
  */
@@ -40,11 +40,11 @@ public class TLExtension extends TLModelElement implements TLDocumentationOwner 
         StringBuilder identity = new StringBuilder();
 
         if (owner != null) {
-            identity.append(owner.getValidationIdentity()).append(" : ");
+            identity.append( owner.getValidationIdentity() ).append( " : " );
         } else if (extendsEntity == null) {
-            identity.append("[Unspecified Extension]");
+            identity.append( "[Unspecified Extension]" );
         } else {
-            identity.append("Extension:").append(extendsEntity.getLocalName());
+            identity.append( "Extension:" ).append( extendsEntity.getLocalName() );
         }
         return identity.toString();
     }
@@ -77,8 +77,7 @@ public class TLExtension extends TLModelElement implements TLDocumentationOwner 
     /**
      * Assigns the value of the 'owner' field.
      * 
-     * @param owner
-     *            the field value to assign
+     * @param owner the field value to assign
      */
     public void setOwner(TLExtensionOwner owner) {
         this.owner = owner;
@@ -96,15 +95,14 @@ public class TLExtension extends TLModelElement implements TLDocumentationOwner 
     /**
      * Assigns the value of the 'extendsEntity' field.
      * 
-     * @param extendsEntity
-     *            the field value to assign
+     * @param extendsEntity the field value to assign
      */
     public void setExtendsEntity(NamedEntity extendsEntity) {
-        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.EXTENDS_ENTITY_MODIFIED, this)
-                .setOldValue(this.extendsEntity).setNewValue(extendsEntity).buildEvent();
+        ModelEvent<?> event = new ModelEventBuilder( ModelEventType.EXTENDS_ENTITY_MODIFIED, this )
+            .setOldValue( this.extendsEntity ).setNewValue( extendsEntity ).buildEvent();
 
         this.extendsEntity = extendsEntity;
-        publishEvent(event);
+        publishEvent( event );
     }
 
     /**
@@ -119,8 +117,7 @@ public class TLExtension extends TLModelElement implements TLDocumentationOwner 
     /**
      * Assigns the value of the 'extendsEntityName' field.
      * 
-     * @param extendsEntityName
-     *            the field value to assign
+     * @param extendsEntityName the field value to assign
      */
     public void setExtendsEntityName(String extendsEntityName) {
         this.extendsEntityName = extendsEntityName;
@@ -140,17 +137,17 @@ public class TLExtension extends TLModelElement implements TLDocumentationOwner 
     @Override
     public void setDocumentation(TLDocumentation documentation) {
         if (documentation != this.documentation) {
-            ModelEvent<?> event = new ModelEventBuilder(ModelEventType.DOCUMENTATION_MODIFIED, this)
-                    .setOldValue(this.documentation).setNewValue(documentation).buildEvent();
+            ModelEvent<?> event = new ModelEventBuilder( ModelEventType.DOCUMENTATION_MODIFIED, this )
+                .setOldValue( this.documentation ).setNewValue( documentation ).buildEvent();
 
             if (documentation != null) {
-                documentation.setOwner(this);
+                documentation.setOwner( this );
             }
             if (this.documentation != null) {
-                this.documentation.setOwner(null);
+                this.documentation.setOwner( null );
             }
             this.documentation = documentation;
-            publishEvent(event);
+            publishEvent( event );
         }
     }
 

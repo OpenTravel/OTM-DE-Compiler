@@ -13,15 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.model;
 
-import java.util.Comparator;
-import java.util.List;
+package org.opentravel.schemacompiler.model;
 
 import org.opentravel.schemacompiler.event.ModelEvent;
 import org.opentravel.schemacompiler.event.ModelEventBuilder;
 import org.opentravel.schemacompiler.event.ModelEventType;
 import org.opentravel.schemacompiler.model.TLEquivalent.EquivalentListManager;
+
+import java.util.Comparator;
+import java.util.List;
 
 /**
  * Values defined in an owning <code>EnumerationWithDoc</code> type.
@@ -34,7 +35,7 @@ public class TLEnumValue extends TLModelElement implements TLDocumentationOwner,
     private String literal;
     private String label;
     private TLDocumentation documentation;
-    private EquivalentListManager equivalentManager = new EquivalentListManager(this);
+    private EquivalentListManager equivalentManager = new EquivalentListManager( this );
 
     /**
      * @see org.opentravel.schemacompiler.model.LibraryElement#getOwningLibrary()
@@ -56,31 +57,10 @@ public class TLEnumValue extends TLModelElement implements TLDocumentationOwner,
     /**
      * Assigns the value of the 'owningEnum' field.
      * 
-     * @param owningEnum
-     *            the field value to assign
+     * @param owningEnum the field value to assign
      */
     public void setOwningEnum(TLAbstractEnumeration owningEnum) {
         this.owningEnum = owningEnum;
-    }
-
-    /**
-     * Moves this value up by one position in the list of values maintained by its owner. If the
-     * owner is null, or this value is already at the front of the list, this method has no effect.
-     */
-    public void moveUp() {
-        if (owningEnum != null) {
-            owningEnum.moveUp(this);
-        }
-    }
-
-    /**
-     * Moves this value down by one position in the list of values maintained by its owner. If the
-     * owner is null, or this value is already at the end of the list, this method has no effect.
-     */
-    public void moveDown() {
-        if (owningEnum != null) {
-            owningEnum.moveDown(this);
-        }
     }
 
     /**
@@ -91,12 +71,12 @@ public class TLEnumValue extends TLModelElement implements TLDocumentationOwner,
         StringBuilder identity = new StringBuilder();
 
         if (owningEnum != null) {
-            identity.append(owningEnum.getValidationIdentity()).append("/");
+            identity.append( owningEnum.getValidationIdentity() ).append( "/" );
         }
         if (literal == null) {
-            identity.append("[Unnamed Enum Literal]");
+            identity.append( "[Unnamed Enum Literal]" );
         } else {
-            identity.append(literal);
+            identity.append( literal );
         }
         return identity.toString();
     }
@@ -121,15 +101,14 @@ public class TLEnumValue extends TLModelElement implements TLDocumentationOwner,
     /**
      * Assigns the value of the 'literal' field.
      * 
-     * @param literal
-     *            the field value to assign
+     * @param literal the field value to assign
      */
     public void setLiteral(String literal) {
-        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.ENUM_LITERAL_MODIFIED, this)
-                .setOldValue(this.literal).setNewValue(literal).buildEvent();
+        ModelEvent<?> event = new ModelEventBuilder( ModelEventType.ENUM_LITERAL_MODIFIED, this )
+            .setOldValue( this.literal ).setNewValue( literal ).buildEvent();
 
         this.literal = literal;
-        publishEvent(event);
+        publishEvent( event );
     }
 
     /**
@@ -144,15 +123,14 @@ public class TLEnumValue extends TLModelElement implements TLDocumentationOwner,
     /**
      * Assigns the value of the 'label' field.
      * 
-     * @param label
-     *            the field value to assign
+     * @param label the field value to assign
      */
     public void setLabel(String label) {
-        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.ENUM_LABEL_MODIFIED, this)
-                .setOldValue(this.label).setNewValue(label).buildEvent();
+        ModelEvent<?> event = new ModelEventBuilder( ModelEventType.ENUM_LABEL_MODIFIED, this )
+            .setOldValue( this.label ).setNewValue( label ).buildEvent();
 
         this.label = label;
-        publishEvent(event);
+        publishEvent( event );
     }
 
     /**
@@ -167,17 +145,17 @@ public class TLEnumValue extends TLModelElement implements TLDocumentationOwner,
      */
     public void setDocumentation(TLDocumentation documentation) {
         if (documentation != this.documentation) {
-            ModelEvent<?> event = new ModelEventBuilder(ModelEventType.DOCUMENTATION_MODIFIED, this)
-                    .setOldValue(this.documentation).setNewValue(documentation).buildEvent();
+            ModelEvent<?> event = new ModelEventBuilder( ModelEventType.DOCUMENTATION_MODIFIED, this )
+                .setOldValue( this.documentation ).setNewValue( documentation ).buildEvent();
 
             if (documentation != null) {
-                documentation.setOwner(this);
+                documentation.setOwner( this );
             }
             if (this.documentation != null) {
-                this.documentation.setOwner(null);
+                this.documentation.setOwner( null );
             }
             this.documentation = documentation;
-            publishEvent(event);
+            publishEvent( event );
         }
     }
 
@@ -194,7 +172,7 @@ public class TLEnumValue extends TLModelElement implements TLDocumentationOwner,
      */
     @Override
     public TLEquivalent getEquivalent(String context) {
-        return equivalentManager.getChild(context);
+        return equivalentManager.getChild( context );
     }
 
     /**
@@ -202,7 +180,7 @@ public class TLEnumValue extends TLModelElement implements TLDocumentationOwner,
      */
     @Override
     public void addEquivalent(TLEquivalent equivalent) {
-        equivalentManager.addChild(equivalent);
+        equivalentManager.addChild( equivalent );
     }
 
     /**
@@ -211,7 +189,7 @@ public class TLEnumValue extends TLModelElement implements TLDocumentationOwner,
      */
     @Override
     public void addEquivalent(int index, TLEquivalent equivalent) {
-        equivalentManager.addChild(index, equivalent);
+        equivalentManager.addChild( index, equivalent );
     }
 
     /**
@@ -219,23 +197,7 @@ public class TLEnumValue extends TLModelElement implements TLDocumentationOwner,
      */
     @Override
     public void removeEquivalent(TLEquivalent equivalent) {
-        equivalentManager.removeChild(equivalent);
-    }
-
-    /**
-     * @see org.opentravel.schemacompiler.model.TLEquivalentOwner#moveUp(org.opentravel.schemacompiler.model.TLEquivalent)
-     */
-    @Override
-    public void moveUp(TLEquivalent equivalent) {
-        equivalentManager.moveUp(equivalent);
-    }
-
-    /**
-     * @see org.opentravel.schemacompiler.model.TLEquivalentOwner#moveDown(org.opentravel.schemacompiler.model.TLEquivalent)
-     */
-    @Override
-    public void moveDown(TLEquivalent equivalent) {
-        equivalentManager.moveDown(equivalent);
+        equivalentManager.removeChild( equivalent );
     }
 
     /**
@@ -243,7 +205,43 @@ public class TLEnumValue extends TLModelElement implements TLDocumentationOwner,
      */
     @Override
     public void sortEquivalents(Comparator<TLEquivalent> comparator) {
-        equivalentManager.sortChildren(comparator);
+        equivalentManager.sortChildren( comparator );
+    }
+
+    /**
+     * Moves this value up by one position in the list of values maintained by its owner. If the owner is null, or this
+     * value is already at the front of the list, this method has no effect.
+     */
+    public void moveUp() {
+        if (owningEnum != null) {
+            owningEnum.moveUp( this );
+        }
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.model.TLEquivalentOwner#moveUp(org.opentravel.schemacompiler.model.TLEquivalent)
+     */
+    @Override
+    public void moveUp(TLEquivalent equivalent) {
+        equivalentManager.moveUp( equivalent );
+    }
+
+    /**
+     * Moves this value down by one position in the list of values maintained by its owner. If the owner is null, or
+     * this value is already at the end of the list, this method has no effect.
+     */
+    public void moveDown() {
+        if (owningEnum != null) {
+            owningEnum.moveDown( this );
+        }
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.model.TLEquivalentOwner#moveDown(org.opentravel.schemacompiler.model.TLEquivalent)
+     */
+    @Override
+    public void moveDown(TLEquivalent equivalent) {
+        equivalentManager.moveDown( equivalent );
     }
 
     /**
@@ -251,17 +249,15 @@ public class TLEnumValue extends TLModelElement implements TLDocumentationOwner,
      * 
      * @author S. Livezey
      */
-    protected static class EnumValueListManager extends
-            ChildEntityListManager<TLEnumValue, TLAbstractEnumeration> {
+    protected static class EnumValueListManager extends ChildEntityListManager<TLEnumValue,TLAbstractEnumeration> {
 
         /**
          * Constructor that specifies the owner of the unerlying list.
          * 
-         * @param owner
-         *            the owner of the underlying list of children
+         * @param owner the owner of the underlying list of children
          */
         public EnumValueListManager(TLAbstractEnumeration owner) {
-            super(owner, ModelEventType.ENUM_VALUE_ADDED, ModelEventType.ENUM_VALUE_REMOVED);
+            super( owner, ModelEventType.ENUM_VALUE_ADDED, ModelEventType.ENUM_VALUE_REMOVED );
         }
 
         /**
@@ -278,7 +274,7 @@ public class TLEnumValue extends TLModelElement implements TLDocumentationOwner,
          */
         @Override
         protected void assignOwner(TLEnumValue child, TLAbstractEnumeration owner) {
-            child.setOwningEnum(owner);
+            child.setOwningEnum( owner );
         }
 
         /**
@@ -290,7 +286,7 @@ public class TLEnumValue extends TLModelElement implements TLDocumentationOwner,
             TLModel owningModel = owner.getOwningModel();
 
             if (owningModel != null) {
-                owningModel.publishEvent(event);
+                owningModel.publishEvent( event );
             }
         }
 

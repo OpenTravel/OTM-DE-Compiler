@@ -13,14 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.loader.impl;
-
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.xml.XMLConstants;
-import javax.xml.namespace.QName;
 
 import org.opentravel.ns.ota2.librarymodel_v01_04.EnumXsdSimpleType;
 import org.opentravel.schemacompiler.loader.BuiltInLibraryLoader;
@@ -28,6 +22,13 @@ import org.opentravel.schemacompiler.loader.LibraryLoaderException;
 import org.opentravel.schemacompiler.model.BuiltInLibrary;
 import org.opentravel.schemacompiler.model.LibraryMember;
 import org.opentravel.schemacompiler.model.XSDSimpleType;
+
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.xml.XMLConstants;
+import javax.xml.namespace.QName;
 
 /**
  * Handles the construction of a built-in library for the W3C built-in library.
@@ -54,8 +55,7 @@ public class XMLSchemaBuiltInLibraryLoader implements BuiltInLibraryLoader {
     /**
      * Assigns the default prefix for the built-in library produced by this loader.
      * 
-     * @param defaultPrefix
-     *            the default prefix to assign
+     * @param defaultPrefix the default prefix to assign
      */
     public void setDefaultPrefix(String defaultPrefix) {
         this.defaultPrefix = defaultPrefix;
@@ -66,8 +66,9 @@ public class XMLSchemaBuiltInLibraryLoader implements BuiltInLibraryLoader {
      */
     @Override
     public BuiltInLibrary loadBuiltInLibrary() throws LibraryLoaderException {
-        return new BuiltInLibrary( new QName( XMLConstants.W3C_XML_SCHEMA_NS_URI, XML_SCHEMA_LIBRARY_NAME,
-                defaultPrefix ), XML_SCHEMA_LIBRARY_URL, XML_SCHEMA_LIBRARY_MEMBERS);
+        return new BuiltInLibrary(
+            new QName( XMLConstants.W3C_XML_SCHEMA_NS_URI, XML_SCHEMA_LIBRARY_NAME, defaultPrefix ),
+            XML_SCHEMA_LIBRARY_URL, XML_SCHEMA_LIBRARY_MEMBERS );
     }
 
     /**
@@ -78,13 +79,13 @@ public class XMLSchemaBuiltInLibraryLoader implements BuiltInLibraryLoader {
             List<LibraryMember> members = new ArrayList<>();
 
             for (EnumXsdSimpleType xsdSimpleType : EnumXsdSimpleType.values()) {
-                members.add(new XSDSimpleType(xsdSimpleType.value(), null));
+                members.add( new XSDSimpleType( xsdSimpleType.value(), null ) );
             }
             XML_SCHEMA_LIBRARY_MEMBERS = members;
-            XML_SCHEMA_LIBRARY_URL = new URL(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+            XML_SCHEMA_LIBRARY_URL = new URL( XMLConstants.W3C_XML_SCHEMA_NS_URI );
 
         } catch (Exception e) {
-            throw new ExceptionInInitializerError(e);
+            throw new ExceptionInInitializerError( e );
         }
     }
 

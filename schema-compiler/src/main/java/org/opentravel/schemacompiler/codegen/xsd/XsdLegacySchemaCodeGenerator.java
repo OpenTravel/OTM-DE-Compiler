@@ -13,16 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.codegen.xsd;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URL;
+package org.opentravel.schemacompiler.codegen.xsd;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerationContext;
 import org.opentravel.schemacompiler.codegen.CodeGenerationException;
@@ -34,19 +26,27 @@ import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.XSDLibrary;
 import org.opentravel.schemacompiler.util.URLUtils;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
+
 /**
- * Code generator for legacy XML schemas referenced in a library meta-model. The behavior of this
- * code generator is to simply copy the content of the file from its source URL to the proper output
- * location.
+ * Code generator for legacy XML schemas referenced in a library meta-model. The behavior of this code generator is to
+ * simply copy the content of the file from its source URL to the proper output location.
  * 
  * @author S. Livezey
  */
 public class XsdLegacySchemaCodeGenerator extends AbstractCodeGenerator<XSDLibrary> {
 
-    private static final String LINE_SEPARATOR = System.getProperty("line.separator");
+    private static final String LINE_SEPARATOR = System.getProperty( "line.separator" );
 
     /**
-     * @see org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator#getLibrary(java.lang.Object)
+     * @see org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator#getLibrary(org.opentravel.schemacompiler.model.ModelElement)
      */
     @Override
     protected AbstractLibrary getLibrary(XSDLibrary source) {
@@ -54,60 +54,59 @@ public class XsdLegacySchemaCodeGenerator extends AbstractCodeGenerator<XSDLibra
     }
 
     /**
-     * @see org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator#doGenerateOutput(java.lang.Object,
+     * @see org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator#doGenerateOutput(org.opentravel.schemacompiler.model.ModelElement,
      *      org.opentravel.schemacompiler.codegen.CodeGenerationContext)
      */
     @Override
-    public void doGenerateOutput(XSDLibrary source, CodeGenerationContext context)
-            throws CodeGenerationException {
+    public void doGenerateOutput(XSDLibrary source, CodeGenerationContext context) throws CodeGenerationException {
         try (BufferedReader reader = getContentReader( source.getLibraryUrl() )) {
-            File outputFile = getOutputFile(source, context);
+            File outputFile = getOutputFile( source, context );
             String line = null;
 
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile))) {
+            try (BufferedWriter writer = new BufferedWriter( new FileWriter( outputFile ) )) {
                 while ((line = reader.readLine()) != null) {
-                    writer.write(line);
-                    writer.write(LINE_SEPARATOR);
+                    writer.write( line );
+                    writer.write( LINE_SEPARATOR );
                 }
-                addGeneratedFile(outputFile);
+                addGeneratedFile( outputFile );
             }
 
         } catch (IOException e) {
-            throw new CodeGenerationException(e);
+            throw new CodeGenerationException( e );
         }
-    }
-    
-    /**
-     * Returns a buffered reader to read content from the given URL.
-     * 
-     * @param contentUrl  the URL for which to return a reader
-     * @return BufferedReader
-     * @throws IOException  thrown if an error occurs while creating the reader
-     */
-    private BufferedReader getContentReader(URL contentUrl) throws IOException {
-    	BufferedReader reader;
-    	
-        if (URLUtils.isFileURL(contentUrl)) {
-            reader = new BufferedReader(new FileReader(URLUtils.toFile(contentUrl)));
-        } else {
-            reader = new BufferedReader(new InputStreamReader(contentUrl.openStream()));
-        }
-    	return reader;
     }
 
     /**
-     * @see org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator#getOutputFile(org.opentravel.schemacompiler.model.TLModelElement,
+     * Returns a buffered reader to read content from the given URL.
+     * 
+     * @param contentUrl the URL for which to return a reader
+     * @return BufferedReader
+     * @throws IOException thrown if an error occurs while creating the reader
+     */
+    private BufferedReader getContentReader(URL contentUrl) throws IOException {
+        BufferedReader reader;
+
+        if (URLUtils.isFileURL( contentUrl )) {
+            reader = new BufferedReader( new FileReader( URLUtils.toFile( contentUrl ) ) );
+        } else {
+            reader = new BufferedReader( new InputStreamReader( contentUrl.openStream() ) );
+        }
+        return reader;
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator#getOutputFile(org.opentravel.schemacompiler.model.ModelElement,
      *      org.opentravel.schemacompiler.codegen.CodeGenerationContext)
      */
     @Override
     protected File getOutputFile(XSDLibrary source, CodeGenerationContext context) {
-        File outputFolder = getOutputFolder(context, source.getLibraryUrl());
-        String filename = context.getValue(CodeGenerationContext.CK_SCHEMA_FILENAME);
+        File outputFolder = getOutputFolder( context, source.getLibraryUrl() );
+        String filename = context.getValue( CodeGenerationContext.CK_SCHEMA_FILENAME );
 
-        if ((filename == null) || filename.trim().equals("")) {
-            filename = getFilenameBuilder().buildFilename(source, "xsd");
+        if ((filename == null) || filename.trim().equals( "" )) {
+            filename = getFilenameBuilder().buildFilename( source, "xsd" );
         }
-        return new File(outputFolder, filename);
+        return new File( outputFolder, filename );
     }
 
     /**
@@ -116,19 +115,21 @@ public class XsdLegacySchemaCodeGenerator extends AbstractCodeGenerator<XSDLibra
      */
     @Override
     protected File getOutputFolder(CodeGenerationContext context, URL libraryUrl) {
-        File outputFolder = super.getOutputFolder(context, libraryUrl);
-        String legacySchemaFolder = getLegacySchemaOutputLocation(context);
+        File outputFolder = super.getOutputFolder( context, libraryUrl );
+        String legacySchemaFolder = getLegacySchemaOutputLocation( context );
 
         if (legacySchemaFolder != null) {
-            outputFolder = new File(outputFolder, legacySchemaFolder);
-            if (!outputFolder.exists())
+            outputFolder = new File( outputFolder, legacySchemaFolder );
+
+            if (!outputFolder.exists()) {
                 outputFolder.mkdirs();
+            }
         }
         return outputFolder;
     }
 
     /**
-     * @see org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator#isSupportedSourceObject(java.lang.Object)
+     * @see org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator#isSupportedSourceObject(org.opentravel.schemacompiler.model.ModelElement)
      */
     @Override
     protected boolean isSupportedSourceObject(XSDLibrary source) {
@@ -136,17 +137,15 @@ public class XsdLegacySchemaCodeGenerator extends AbstractCodeGenerator<XSDLibra
     }
 
     /**
-     * @see org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator#canGenerateOutput(java.lang.Object,
-     *      org.opentravel.schemacompiler.codegen.CodeGenerationContext,
-     *      org.opentravel.schemacompiler.validate.ValidationFindings)
+     * @see org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator#canGenerateOutput(org.opentravel.schemacompiler.model.ModelElement,
+     *      org.opentravel.schemacompiler.codegen.CodeGenerationContext)
      */
     @Override
     protected boolean canGenerateOutput(XSDLibrary source, CodeGenerationContext context) {
         CodeGenerationFilter filter = getFilter();
 
-        return super.canGenerateOutput(source, context)
-                && ((filter == null) || filter.processLibrary(source) || filter
-                        .processExtendedLibrary(source));
+        return super.canGenerateOutput( source, context )
+            && ((filter == null) || filter.processLibrary( source ) || filter.processExtendedLibrary( source ));
     }
 
     /**

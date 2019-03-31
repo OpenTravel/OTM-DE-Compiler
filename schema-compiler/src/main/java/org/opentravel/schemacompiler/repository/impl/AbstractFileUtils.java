@@ -13,7 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.repository.impl;
+
+import org.opentravel.schemacompiler.util.FileUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -22,23 +25,19 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import org.opentravel.schemacompiler.util.FileUtils;
-
 /**
- * Base class for utility file managers that provide methods for creating,
- * restoring, and deleting backup files during save operations.
+ * Base class for utility file managers that provide methods for creating, restoring, and deleting backup files during
+ * save operations.
  */
 public interface AbstractFileUtils {
-	
+
     /**
-     * Creates a backup of the specified original file on the local file system. The location of the
-     * newly-created backup file is returned by this method.
+     * Creates a backup of the specified original file on the local file system. The location of the newly-created
+     * backup file is returned by this method.
      * 
-     * @param originalFile
-     *            the original file to backup
+     * @param originalFile the original file to backup
      * @return File
-     * @throws IOException
-     *             thrown if the backup file cannot be created
+     * @throws IOException thrown if the backup file cannot be created
      */
     public default File createBackupFile(File originalFile) throws IOException {
         File backupFile;
@@ -50,11 +49,11 @@ public interface AbstractFileUtils {
             byte[] buffer = new byte[1024];
             int bytesRead;
 
-            backupFile = new File(originalFile.getParentFile(), getBackupFilename(originalFile));
-            try (InputStream in = new FileInputStream(originalFile)) {
-                try (OutputStream out = new FileOutputStream(backupFile)) {
-                    while ((bytesRead = in.read(buffer)) >= 0) {
-                        out.write(buffer, 0, bytesRead);
+            backupFile = new File( originalFile.getParentFile(), getBackupFilename( originalFile ) );
+            try (InputStream in = new FileInputStream( originalFile )) {
+                try (OutputStream out = new FileOutputStream( backupFile )) {
+                    while ((bytesRead = in.read( buffer )) >= 0) {
+                        out.write( buffer, 0, bytesRead );
                     }
                 }
             }
@@ -65,31 +64,26 @@ public interface AbstractFileUtils {
     /**
      * Creates a backup of the specified original file on the local file system.
      * 
-     * @param backupFile
-     *            the backup file to restore
-     * @param originalFilename
-     *            the original name of the file to be restored (without the filepath)
-     * @throws IOException
-     *             thrown if the backup file cannot be restored
+     * @param backupFile the backup file to restore
+     * @param originalFilename the original name of the file to be restored (without the filepath)
+     * @throws IOException thrown if the backup file cannot be restored
      */
-    public default void restoreBackupFile(File backupFile, String originalFilename)
-            throws IOException {
+    public default void restoreBackupFile(File backupFile, String originalFilename) throws IOException {
         if ((backupFile != null) && backupFile.exists()) {
             String filename = backupFile.getName();
 
-            if (!filename.endsWith(".bak")) {
-                throw new IllegalArgumentException("The specified file is not a valid backup.");
+            if (!filename.endsWith( ".bak" )) {
+                throw new IllegalArgumentException( "The specified file is not a valid backup." );
             }
             if (!backupFile.exists()) {
-                throw new IllegalStateException("The specified backup file no longer exists: "
-                        + backupFile.getAbsolutePath());
+                throw new IllegalStateException(
+                    "The specified backup file no longer exists: " + backupFile.getAbsolutePath() );
             }
-            File originalFile = new File(backupFile.getParentFile(), originalFilename);
+            File originalFile = new File( backupFile.getParentFile(), originalFilename );
 
-            if (originalFile.exists() && !FileUtils.confirmDelete(originalFile)) {
+            if (originalFile.exists() && !FileUtils.confirmDelete( originalFile )) {
                 throw new IOException(
-                        "Unable to delete original file during restoration of backup: "
-                                + backupFile.getAbsolutePath());
+                    "Unable to delete original file during restoration of backup: " + backupFile.getAbsolutePath() );
             }
             FileUtils.renameTo( backupFile, originalFile );
         }
@@ -98,18 +92,16 @@ public interface AbstractFileUtils {
     /**
      * Deletes the inidicated backup file from the local file system.
      * 
-     * @param backupFile
-     *            the backup file to remove
+     * @param backupFile the backup file to remove
      */
     public default void removeBackupFile(File backupFile) {
-    		FileUtils.delete( backupFile );
+        FileUtils.delete( backupFile );
     }
 
     /**
      * Returns the name of the backup file for the specified original.
      * 
-     * @param originalFile
-     *            the original file for which a backup is being created
+     * @param originalFile the original file for which a backup is being created
      * @return String
      */
     public default String getBackupFilename(File originalFile) {
@@ -117,36 +109,32 @@ public interface AbstractFileUtils {
 
         if (originalFile != null) {
             String originalFilename = originalFile.getName();
-            int dotIdx = originalFilename.lastIndexOf('.');
+            int dotIdx = originalFilename.lastIndexOf( '.' );
 
-            filename = ((dotIdx < 0) ? originalFilename : originalFilename.substring(0, dotIdx))
-                    + ".bak";
+            filename = ((dotIdx < 0) ? originalFilename : originalFilename.substring( 0, dotIdx )) + ".bak";
         }
         return filename;
     }
 
     /**
-     * Copies the specified source file's content to the destination file's location. If the
-     * destination file already exists, it will be overwritten.
+     * Copies the specified source file's content to the destination file's location. If the destination file already
+     * exists, it will be overwritten.
      * 
-     * @param sourceFile
-     *            the source file's location
-     * @param destinationFile
-     *            the destination file's location
-     * @throws IOException
-     *             thrown if the file cannot be copied
+     * @param sourceFile the source file's location
+     * @param destinationFile the destination file's location
+     * @throws IOException thrown if the file cannot be copied
      */
     public default void copyFile(File sourceFile, File destinationFile) throws IOException {
         if (!destinationFile.getParentFile().exists()) {
             destinationFile.getParentFile().mkdirs();
         }
-        try (InputStream in = new FileInputStream(sourceFile)) {
-            try (OutputStream out = new FileOutputStream(destinationFile)) {
+        try (InputStream in = new FileInputStream( sourceFile )) {
+            try (OutputStream out = new FileOutputStream( destinationFile )) {
                 byte[] buffer = new byte[1024];
                 int bytesRead;
 
-                while ((bytesRead = in.read(buffer)) >= 0) {
-                    out.write(buffer, 0, bytesRead);
+                while ((bytesRead = in.read( buffer )) >= 0) {
+                    out.write( buffer, 0, bytesRead );
                 }
             }
         }

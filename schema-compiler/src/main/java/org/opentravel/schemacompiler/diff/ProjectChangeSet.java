@@ -19,28 +19,27 @@ package org.opentravel.schemacompiler.diff;
 import org.opentravel.schemacompiler.repository.Project;
 
 /**
- * Container for all change items identified during the comparison of two projects, as
- * well as the library change sets for the libraries that existed in both versions of the
- * project.
+ * Container for all change items identified during the comparison of two projects, as well as the library change sets
+ * for the libraries that existed in both versions of the project.
  */
 public class ProjectChangeSet extends ChangeSet<Project,ProjectChangeItem> {
-	
-	/**
-	 * Constructor that assigns the old and new version of a project that was modified.
-	 * 
-	 * @param oldProject  the old version of the project
-	 * @param newProject  the new version of the project
-	 */
-	public ProjectChangeSet(Project oldProject, Project newProject) {
-		super( oldProject, newProject );
-	}
 
-	/**
-	 * @see org.opentravel.schemacompiler.diff.ChangeSet#getBookmarkId()
-	 */
-	public String getBookmarkId() {
-		Project project = (getNewVersion() != null) ? getNewVersion() : getOldVersion();
-		return (project == null) ? "UNKNOWN_PROJECT" : ("prj$" + project.getName());
-	}
+    /**
+     * Constructor that assigns the old and new version of a project that was modified.
+     * 
+     * @param oldProject the old version of the project
+     * @param newProject the new version of the project
+     */
+    public ProjectChangeSet(Project oldProject, Project newProject) {
+        super( oldProject, newProject );
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.diff.ChangeSet#getBookmarkId()
+     */
+    public String getBookmarkId() {
+        Project project = (getNewVersion() != null) ? getNewVersion() : getOldVersion();
+        return (project == null) ? "UNKNOWN_PROJECT" : ("prj$" + project.getName());
+    }
 
 }

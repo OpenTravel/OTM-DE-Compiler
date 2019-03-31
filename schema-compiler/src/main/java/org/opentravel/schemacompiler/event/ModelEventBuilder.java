@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.event;
 
 /**
@@ -21,127 +22,127 @@ package org.opentravel.schemacompiler.event;
  * @author S. Livezey
  */
 public class ModelEventBuilder {
-	
-	private ModelEventType eventType;
-	private Object sourceObject;
-	private Object affectedItem;
-	private Object oldValue;
-	private Object newValue;
-	
-	/**
-	 * Default constructor.
-	 */
-	public ModelEventBuilder() {
-	}
-	
-	/**
-	 * Convenience constructor that assigns
-	 * 
-	 * @param eventType
-	 * @param sourceObject
-	 */
-	public ModelEventBuilder(ModelEventType eventType, Object sourceObject) {
-		this.eventType = eventType;
-		this.sourceObject = sourceObject;
-	}
-	
-	/**
-	 * Constructs a new <code>ModelEvent</code> using the information provided
-	 * to this builder.
-	 * 
-	 * @return ModelEvent<S>
-	 */
-	@SuppressWarnings("unchecked")
-	public <S> ModelEvent<S> buildEvent() {
-		ModelEvent<S> modelEvent = null;
-		
-		if (eventType.getEventClass().equals(OwnershipEvent.class) && (affectedItem != null)) {
-			OwnershipEvent<Object, Object> event = new OwnershipEvent<>(eventType, sourceObject);
-			
-			event.setAffectedItem(affectedItem);
-			modelEvent = (ModelEvent<S>) event;
-			
-		} else if (eventType.getEventClass().equals(ValueChangeEvent.class)) {
-			ValueChangeEvent<Object, Object> event = new ValueChangeEvent<>(eventType, sourceObject);
-			
-			event.setOldValue(oldValue);
-			event.setNewValue(newValue);
-			modelEvent = (ModelEvent<S>) event;
-			
-		} else {
-			throw new IllegalArgumentException(
-					"Unknown model event class: " + eventType.getEventClass().getSimpleName());
-		}
-		return modelEvent;
-	}
-	
-	/**
-	 * Constructs a new <code>ModelEvent</code> using the information provided
-	 * to this builder.
-	 * 
-	 * @return ModelEvent<S>
-	 */
-	@SuppressWarnings("unchecked")
-	public <S,E> OwnershipEvent<S,E> buildOwnershipEvent() {
-		OwnershipEvent<Object, Object> event = new OwnershipEvent<>(eventType, sourceObject);
-		
-		event.setAffectedItem(affectedItem);
-		return (OwnershipEvent<S, E>) event;
-	}
-	
-	/**
-	 * Assigns the type of event to be created.
-	 * 
-	 * @param eventType the event type value to assign
-	 * @return ModelEventBuilder
-	 */
-	public ModelEventBuilder setEventType(ModelEventType eventType) {
-		this.eventType = eventType;
-		return this;
-	}
-	
-	/**
-	 * Assigns the source object for the event.
-	 * 
-	 * @param sourceObject the source object instance to assign
-	 * @return ModelEventBuilder
-	 */
-	public ModelEventBuilder setSourceObject(Object sourceObject) {
-		this.sourceObject = sourceObject;
-		return this;
-	}
-	
-	/**
-	 * Assigns the affected item for ownership events.
-	 * 
-	 * @param affectedItem the affected item to assign
-	 * @return ModelEventBuilder
-	 */
-	public ModelEventBuilder setAffectedItem(Object affectedItem) {
-		this.affectedItem = affectedItem;
-		return this;
-	}
-	
-	/**
-	 * Assigns the old field value for value change events.
-	 * 
-	 * @param oldValue the old field value to assign
-	 * @return ModelEventBuilder
-	 */
-	public ModelEventBuilder setOldValue(Object oldValue) {
-		this.oldValue = oldValue;
-		return this;
-	}
-	
-	/**
-	 * Assigns the new field value for value change events.
-	 * 
-	 * @param newValue the new field value to assign
-	 * @return ModelEventBuilder
-	 */
-	public ModelEventBuilder setNewValue(Object newValue) {
-		this.newValue = newValue;
-		return this;
-	}
-	
+
+    private ModelEventType eventType;
+    private Object sourceObject;
+    private Object affectedItem;
+    private Object oldValue;
+    private Object newValue;
+
+    /**
+     * Default constructor.
+     */
+    public ModelEventBuilder() {}
+
+    /**
+     * Convenience constructor that assigns
+     * 
+     * @param eventType the type of event to be created
+     * @param sourceObject the source object for the event
+     */
+    public ModelEventBuilder(ModelEventType eventType, Object sourceObject) {
+        this.eventType = eventType;
+        this.sourceObject = sourceObject;
+    }
+
+    /**
+     * Constructs a new <code>ModelEvent</code> using the information provided to this builder.
+     * 
+     * @param <S> the type of the source object for the event
+     * @return ModelEvent&lt;S&gt;
+     */
+    @SuppressWarnings("unchecked")
+    public <S> ModelEvent<S> buildEvent() {
+        ModelEvent<S> modelEvent = null;
+
+        if (eventType.getEventClass().equals( OwnershipEvent.class ) && (affectedItem != null)) {
+            OwnershipEvent<Object,Object> event = new OwnershipEvent<>( eventType, sourceObject );
+
+            event.setAffectedItem( affectedItem );
+            modelEvent = (ModelEvent<S>) event;
+
+        } else if (eventType.getEventClass().equals( ValueChangeEvent.class )) {
+            ValueChangeEvent<Object,Object> event = new ValueChangeEvent<>( eventType, sourceObject );
+
+            event.setOldValue( oldValue );
+            event.setNewValue( newValue );
+            modelEvent = (ModelEvent<S>) event;
+
+        } else {
+            throw new IllegalArgumentException(
+                "Unknown model event class: " + eventType.getEventClass().getSimpleName() );
+        }
+        return modelEvent;
+    }
+
+    /**
+     * Constructs a new <code>ModelEvent</code> using the information provided to this builder.
+     * 
+     * @param <E> the type of the event
+     * @param <S> the type of the source object for the event
+     * @return ModelEvent&lt;S&gt;
+     */
+    @SuppressWarnings("unchecked")
+    public <S, E> OwnershipEvent<S,E> buildOwnershipEvent() {
+        OwnershipEvent<Object,Object> event = new OwnershipEvent<>( eventType, sourceObject );
+
+        event.setAffectedItem( affectedItem );
+        return (OwnershipEvent<S,E>) event;
+    }
+
+    /**
+     * Assigns the type of event to be created.
+     * 
+     * @param eventType the event type value to assign
+     * @return ModelEventBuilder
+     */
+    public ModelEventBuilder setEventType(ModelEventType eventType) {
+        this.eventType = eventType;
+        return this;
+    }
+
+    /**
+     * Assigns the source object for the event.
+     * 
+     * @param sourceObject the source object instance to assign
+     * @return ModelEventBuilder
+     */
+    public ModelEventBuilder setSourceObject(Object sourceObject) {
+        this.sourceObject = sourceObject;
+        return this;
+    }
+
+    /**
+     * Assigns the affected item for ownership events.
+     * 
+     * @param affectedItem the affected item to assign
+     * @return ModelEventBuilder
+     */
+    public ModelEventBuilder setAffectedItem(Object affectedItem) {
+        this.affectedItem = affectedItem;
+        return this;
+    }
+
+    /**
+     * Assigns the old field value for value change events.
+     * 
+     * @param oldValue the old field value to assign
+     * @return ModelEventBuilder
+     */
+    public ModelEventBuilder setOldValue(Object oldValue) {
+        this.oldValue = oldValue;
+        return this;
+    }
+
+    /**
+     * Assigns the new field value for value change events.
+     * 
+     * @param newValue the new field value to assign
+     * @return ModelEventBuilder
+     */
+    public ModelEventBuilder setNewValue(Object newValue) {
+        this.newValue = newValue;
+        return this;
+    }
+
 }

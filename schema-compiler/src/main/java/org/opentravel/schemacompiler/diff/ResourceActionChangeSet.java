@@ -20,30 +20,30 @@ import org.opentravel.schemacompiler.model.TLAction;
 import org.opentravel.schemacompiler.model.TLResource;
 
 /**
- * Container for all change items identified during the comparison of two resource  actions.
+ * Container for all change items identified during the comparison of two resource actions.
  */
 public class ResourceActionChangeSet extends ChangeSet<TLAction,ResourceChangeItem> {
-	
-	/**
-	 * Constructor that assigns the old and new version of a resource action that was modified.
-	 * 
-	 * @param oldAction  the old version of the resource action
-	 * @param newAction  the new version of the resource action
-	 */
-	public ResourceActionChangeSet(TLAction oldAction, TLAction newAction) {
-		super( oldAction, newAction );
-	}
-	
-	/**
-	 * @see org.opentravel.schemacompiler.diff.ChangeSet#getBookmarkId()
-	 */
-	@Override
-	public String getBookmarkId() {
-		TLAction action = (getNewVersion() != null) ? getNewVersion() : getOldVersion();
-		TLResource owner = (action == null) ? null : action.getOwner();
-		String actionId = (action == null) ? null : action.getActionId();
-		
-		return getBookmarkId( owner ) + "$action$" + ((actionId == null) ? "UNKNOWN_ACTION" : actionId);
-	}
-	
+
+    /**
+     * Constructor that assigns the old and new version of a resource action that was modified.
+     * 
+     * @param oldAction the old version of the resource action
+     * @param newAction the new version of the resource action
+     */
+    public ResourceActionChangeSet(TLAction oldAction, TLAction newAction) {
+        super( oldAction, newAction );
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.diff.ChangeSet#getBookmarkId()
+     */
+    @Override
+    public String getBookmarkId() {
+        TLAction action = (getNewVersion() != null) ? getNewVersion() : getOldVersion();
+        TLResource owner = (action == null) ? null : action.getOwner();
+        String actionId = (action == null) ? null : action.getActionId();
+
+        return getBookmarkId( owner ) + "$action$" + ((actionId == null) ? "UNKNOWN_ACTION" : actionId);
+    }
+
 }

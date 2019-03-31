@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.codegen.swagger;
 
-import java.util.List;
+package org.opentravel.schemacompiler.codegen.swagger;
 
 import org.opentravel.schemacompiler.codegen.impl.QualifiedParameter;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchema;
@@ -36,144 +35,145 @@ import org.opentravel.schemacompiler.model.TLParameter;
 import org.opentravel.schemacompiler.model.TLProperty;
 import org.opentravel.schemacompiler.util.SimpleTypeInfo;
 
-/**
- * Performs the translation from <code>QualifiedParameter</code> objects to the Swagger model
- * objects used to produce the output.
- */
-public class TLParameterSwaggerTransformer extends AbstractSwaggerCodegenTransformer<QualifiedParameter,SwaggerParameter> {
-	
-	/**
-	 * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
-	 */
-	@Override
-	public SwaggerParameter transform(QualifiedParameter source) {
-		TLMemberField<?> fieldRef = source.getParameter().getFieldRef();
-		SwaggerParameter swaggerParam = new SwaggerParameter();
-		
-		swaggerParam.setName( source.getParameterName() );
-		swaggerParam.setIn( getParamType( source.getParameter() ) );
-		swaggerParam.setRequired( isRequired( fieldRef ) );
-		swaggerParam.setType( getFieldSchema( fieldRef ) );
-		
-		if (fieldRef instanceof TLDocumentationOwner) {
-			transformDocumentation( (TLDocumentationOwner) fieldRef, swaggerParam );
-		}
-		if (fieldRef instanceof TLEquivalentOwner) {
-			swaggerParam.getEquivalentItems().addAll(
-					jsonUtils.getEquivalentInfo( (TLEquivalentOwner) fieldRef ) );
-		}
-		if (fieldRef instanceof TLExampleOwner) {
-			swaggerParam.getExampleItems().addAll(
-					jsonUtils.getExampleInfo( (TLExampleOwner) fieldRef ) );
-		}
-		return swaggerParam;
-	}
-	
-	/**
-	 * Returns the JSON schema for the given source field.
-	 * 
-	 * @param sourceField  the source field for which to return the JSON schema
-	 * @return JsonSchema
-	 */
-	private JsonSchema getFieldSchema(TLMemberField<?> sourceField) {
-		JsonSchema schema = null;
-		
-		if (sourceField instanceof TLIndicator) {
-			schema = new JsonSchema();
-			schema.setType(JsonType.JSON_BOOLEAN);
-			
-		} else {
-			NamedEntity fieldType = null;
-			
-			if (sourceField instanceof TLAttribute) {
-				fieldType = ((TLAttribute) sourceField).getType();
-			} else {
-				fieldType = ((TLProperty) sourceField).getType();
-			}
-			
-			if (fieldType != null) {
-				schema = buildFieldSchema(fieldType);
-			}
-		}
-		
-		// Last resort if we could not identify a type - use a string
-		if ((schema != null) && (schema.getType() == null)) {
-			schema.setType(JsonType.JSON_STRING);
-		}
-		return schema;
-	}
+import java.util.List;
 
-	/**
-	 * Builds a JSON schema for the given field type.
-	 * 
-	 * @param fieldType  the OTM entity type for which to create a schema
-	 * @return JsonSchema
-	 */
-	private JsonSchema buildFieldSchema(NamedEntity fieldType) {
-		SimpleTypeInfo simpleInfo = SimpleTypeInfo.newInstance(fieldType);
-		JsonType jsonType = (simpleInfo == null) ? null : JsonType.valueOf(simpleInfo.getBaseSimpleType());
-		JsonSchema schema;
-		
-		if (jsonType != null) {
-			schema = jsonUtils.buildSimpleTypeSchema(simpleInfo, jsonType);
-			
-		} else {
-			schema = new JsonSchema(); // default to an empty schema
-			
-			if (fieldType instanceof TLClosedEnumeration) {
-				TLClosedEnumeration closedEnum = (TLClosedEnumeration) fieldType;
-				List<String> enumValues = schema.getEnumValues();
-				
-				for (TLEnumValue modelEnum : EnumCodegenUtils.getInheritedValues(closedEnum)) {
-					enumValues.add(modelEnum.getLiteral());
-				}
-				schema.setType(JsonType.JSON_STRING);
-			}
-		}
-		return schema;
-	}
-	
-	/**
-	 * Returns the Swagger parameter type for the source parameter.
-	 * 
-	 * @param source  the source parameter
-	 * @return SwaggerParamType
-	 */
-	private SwaggerParamType getParamType(TLParameter source) {
-		SwaggerParamType paramType = null;
-		
-		switch (source.getLocation()) {
-			case PATH:
-				paramType = SwaggerParamType.PATH;
-				break;
-			case QUERY:
-				paramType = SwaggerParamType.QUERY;
-				break;
-			case HEADER:
-				paramType = SwaggerParamType.HEADER;
-				break;
-			default:
-				break;
-		}
-		return paramType;
-	}
-	
-	/**
-	 * Returns true if the given source field is required.
-	 * 
-	 * @param sourceField  the source field to check
-	 * @return boolean
-	 */
-	private boolean isRequired(TLMemberField<?> sourceField) {
-		boolean required = false;
-		
-		if (sourceField instanceof TLAttribute) {
-			required = ((TLAttribute) sourceField).isMandatory();
-			
-		} else if (sourceField instanceof TLProperty) {
-			required = ((TLProperty) sourceField).isMandatory();
-		}
-		return required;
-	}
-	
+/**
+ * Performs the translation from <code>QualifiedParameter</code> objects to the Swagger model objects used to produce
+ * the output.
+ */
+public class TLParameterSwaggerTransformer
+    extends AbstractSwaggerCodegenTransformer<QualifiedParameter,SwaggerParameter> {
+
+    /**
+     * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
+     */
+    @Override
+    public SwaggerParameter transform(QualifiedParameter source) {
+        TLMemberField<?> fieldRef = source.getParameter().getFieldRef();
+        SwaggerParameter swaggerParam = new SwaggerParameter();
+
+        swaggerParam.setName( source.getParameterName() );
+        swaggerParam.setIn( getParamType( source.getParameter() ) );
+        swaggerParam.setRequired( isRequired( fieldRef ) );
+        swaggerParam.setType( getFieldSchema( fieldRef ) );
+
+        if (fieldRef instanceof TLDocumentationOwner) {
+            transformDocumentation( (TLDocumentationOwner) fieldRef, swaggerParam );
+        }
+        if (fieldRef instanceof TLEquivalentOwner) {
+            swaggerParam.getEquivalentItems().addAll( jsonUtils.getEquivalentInfo( (TLEquivalentOwner) fieldRef ) );
+        }
+        if (fieldRef instanceof TLExampleOwner) {
+            swaggerParam.getExampleItems().addAll( jsonUtils.getExampleInfo( (TLExampleOwner) fieldRef ) );
+        }
+        return swaggerParam;
+    }
+
+    /**
+     * Returns the JSON schema for the given source field.
+     * 
+     * @param sourceField the source field for which to return the JSON schema
+     * @return JsonSchema
+     */
+    private JsonSchema getFieldSchema(TLMemberField<?> sourceField) {
+        JsonSchema schema = null;
+
+        if (sourceField instanceof TLIndicator) {
+            schema = new JsonSchema();
+            schema.setType( JsonType.JSON_BOOLEAN );
+
+        } else {
+            NamedEntity fieldType = null;
+
+            if (sourceField instanceof TLAttribute) {
+                fieldType = ((TLAttribute) sourceField).getType();
+            } else {
+                fieldType = ((TLProperty) sourceField).getType();
+            }
+
+            if (fieldType != null) {
+                schema = buildFieldSchema( fieldType );
+            }
+        }
+
+        // Last resort if we could not identify a type - use a string
+        if ((schema != null) && (schema.getType() == null)) {
+            schema.setType( JsonType.JSON_STRING );
+        }
+        return schema;
+    }
+
+    /**
+     * Builds a JSON schema for the given field type.
+     * 
+     * @param fieldType the OTM entity type for which to create a schema
+     * @return JsonSchema
+     */
+    private JsonSchema buildFieldSchema(NamedEntity fieldType) {
+        SimpleTypeInfo simpleInfo = SimpleTypeInfo.newInstance( fieldType );
+        JsonType jsonType = (simpleInfo == null) ? null : JsonType.valueOf( simpleInfo.getBaseSimpleType() );
+        JsonSchema schema;
+
+        if (jsonType != null) {
+            schema = jsonUtils.buildSimpleTypeSchema( simpleInfo, jsonType );
+
+        } else {
+            schema = new JsonSchema(); // default to an empty schema
+
+            if (fieldType instanceof TLClosedEnumeration) {
+                TLClosedEnumeration closedEnum = (TLClosedEnumeration) fieldType;
+                List<String> enumValues = schema.getEnumValues();
+
+                for (TLEnumValue modelEnum : EnumCodegenUtils.getInheritedValues( closedEnum )) {
+                    enumValues.add( modelEnum.getLiteral() );
+                }
+                schema.setType( JsonType.JSON_STRING );
+            }
+        }
+        return schema;
+    }
+
+    /**
+     * Returns the Swagger parameter type for the source parameter.
+     * 
+     * @param source the source parameter
+     * @return SwaggerParamType
+     */
+    private SwaggerParamType getParamType(TLParameter source) {
+        SwaggerParamType paramType = null;
+
+        switch (source.getLocation()) {
+            case PATH:
+                paramType = SwaggerParamType.PATH;
+                break;
+            case QUERY:
+                paramType = SwaggerParamType.QUERY;
+                break;
+            case HEADER:
+                paramType = SwaggerParamType.HEADER;
+                break;
+            default:
+                break;
+        }
+        return paramType;
+    }
+
+    /**
+     * Returns true if the given source field is required.
+     * 
+     * @param sourceField the source field to check
+     * @return boolean
+     */
+    private boolean isRequired(TLMemberField<?> sourceField) {
+        boolean required = false;
+
+        if (sourceField instanceof TLAttribute) {
+            required = ((TLAttribute) sourceField).isMandatory();
+
+        } else if (sourceField instanceof TLProperty) {
+            required = ((TLProperty) sourceField).isMandatory();
+        }
+        return required;
+    }
+
 }

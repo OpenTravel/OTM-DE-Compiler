@@ -32,38 +32,38 @@ import org.opentravel.schemacompiler.validate.impl.TLValidatorBase;
  */
 public abstract class TLContextualFacetBaseValidator extends TLValidatorBase<TLContextualFacet> {
 
-	/**
-	 * @see org.opentravel.schemacompiler.validate.impl.TLValidatorBase#validateChildren(org.opentravel.schemacompiler.validate.Validatable)
-	 */
-	@Override
-	protected ValidationFindings validateChildren(TLContextualFacet target) {
-		Validator<TLAttribute> attributeValidator = getValidatorFactory().getValidatorForClass(TLAttribute.class);
-        Validator<TLProperty> elementValidator = getValidatorFactory().getValidatorForClass(TLProperty.class);
-        Validator<TLIndicator> indicatorValidator = getValidatorFactory().getValidatorForClass(TLIndicator.class);
-        Validator<TLDocumentation> docValidator = getValidatorFactory().getValidatorForClass(TLDocumentation.class);
+    /**
+     * @see org.opentravel.schemacompiler.validate.impl.TLValidatorBase#validateChildren(org.opentravel.schemacompiler.validate.Validatable)
+     */
+    @Override
+    protected ValidationFindings validateChildren(TLContextualFacet target) {
+        Validator<TLAttribute> attributeValidator = getValidatorFactory().getValidatorForClass( TLAttribute.class );
+        Validator<TLProperty> elementValidator = getValidatorFactory().getValidatorForClass( TLProperty.class );
+        Validator<TLIndicator> indicatorValidator = getValidatorFactory().getValidatorForClass( TLIndicator.class );
+        Validator<TLDocumentation> docValidator = getValidatorFactory().getValidatorForClass( TLDocumentation.class );
         ValidationFindings findings = new ValidationFindings();
-        
+
         if (target.getDocumentation() != null) {
-            findings.addAll(docValidator.validate(target.getDocumentation()));
+            findings.addAll( docValidator.validate( target.getDocumentation() ) );
         }
-        
+
         if (target.getAttributes() != null) {
             for (TLAttribute attribute : target.getAttributes()) {
-                findings.addAll(attributeValidator.validate(attribute));
+                findings.addAll( attributeValidator.validate( attribute ) );
             }
         }
         if (target.getElements() != null) {
             for (TLProperty element : target.getElements()) {
-                findings.addAll(elementValidator.validate(element));
+                findings.addAll( elementValidator.validate( element ) );
             }
         }
         if (target.getIndicators() != null) {
             for (TLIndicator indicator : target.getIndicators()) {
-                findings.addAll(indicatorValidator.validate(indicator));
+                findings.addAll( indicatorValidator.validate( indicator ) );
             }
         }
-        
+
         return findings;
-	}
+    }
 
 }

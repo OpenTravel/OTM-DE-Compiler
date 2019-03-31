@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.validate.compile;
 
 import org.opentravel.schemacompiler.model.TLDocumentationPatch;
@@ -32,8 +33,8 @@ public class TLDocumentationPatchCompileValidator extends TLDocumentationPatchBa
      */
     @Override
     protected ValidationFindings validateFields(TLDocumentationPatch target) {
-        TLValidationBuilder builder = newValidationBuilder(target);
-        
+        TLValidationBuilder builder = newValidationBuilder( target );
+
         return builder.getFindings();
     }
 

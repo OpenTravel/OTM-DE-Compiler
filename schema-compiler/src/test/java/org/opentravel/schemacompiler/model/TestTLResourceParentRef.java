@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.model;
 
 import static org.junit.Assert.assertEquals;
@@ -23,21 +24,22 @@ import org.junit.Test;
  * Verifies the functions of the <code>TLResourceParentRef</code> class.
  */
 public class TestTLResourceParentRef extends AbstractModelTest {
-	
-	@Test
-	public void testIdentityFunctions() throws Exception {
-		TLResource parentResource = addResource( "ParentResource", library1 );
-		TLParamGroup paramGroup = addParamGroup( "TestParamGroup",
-				parentResource.getBusinessObjectRef().getIdFacet(), parentResource );
-		TLResource resource = addResource( "TestResource", library1 );
-		TLResourceParentRef parentRef = addParentRef( parentResource, paramGroup, resource );
-		
-		assertEquals( "TestLibrary1.otm : TestResource/Parent-Ref/ParentResource-TestParamGroup", parentRef.getValidationIdentity() );
-	}
-	
-	@Test
-	public void testDocumentationFunctions() throws Exception {
-		testDocumentationFunctions( new TLResourceParentRef() );
-	}
-	
+
+    @Test
+    public void testIdentityFunctions() throws Exception {
+        TLResource parentResource = addResource( "ParentResource", library1 );
+        TLParamGroup paramGroup =
+            addParamGroup( "TestParamGroup", parentResource.getBusinessObjectRef().getIdFacet(), parentResource );
+        TLResource resource = addResource( "TestResource", library1 );
+        TLResourceParentRef parentRef = addParentRef( parentResource, paramGroup, resource );
+
+        assertEquals( "TestLibrary1.otm : TestResource/Parent-Ref/ParentResource-TestParamGroup",
+            parentRef.getValidationIdentity() );
+    }
+
+    @Test
+    public void testDocumentationFunctions() throws Exception {
+        testDocumentationFunctions( new TLResourceParentRef() );
+    }
+
 }

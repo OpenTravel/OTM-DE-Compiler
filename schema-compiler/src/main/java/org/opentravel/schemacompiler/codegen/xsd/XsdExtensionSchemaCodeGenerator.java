@@ -13,15 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.codegen.xsd;
-
-import java.io.File;
-import java.net.URL;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.namespace.QName;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerationContext;
 import org.opentravel.schemacompiler.codegen.CodeGenerationException;
@@ -40,17 +33,23 @@ import org.w3._2001.xmlschema.Include;
 import org.w3._2001.xmlschema.Schema;
 import org.w3._2001.xmlschema.TopLevelElement;
 
+import java.io.File;
+import java.net.URL;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.namespace.QName;
+
 /**
- * Code generator implementation used to generate supplemental XSD companion documents for legacy
- * schemas.
+ * Code generator implementation used to generate supplemental XSD companion documents for legacy schemas.
  * 
  * <p>
  * The following context variable(s) are required when invoking this code generation module:
  * <ul>
- * <li><code>schemacompiler.OutputFolder</code> - the folder where generated XSD files should be
- * stored</li>
- * <li><code>schemacompiler.SchemaFilename</code> - the name of the XSD schema file to be generated
- * (uses library name/version if not specified)</li>
+ * <li><code>schemacompiler.OutputFolder</code> - the folder where generated XSD files should be stored</li>
+ * <li><code>schemacompiler.SchemaFilename</code> - the name of the XSD schema file to be generated (uses library
+ * name/version if not specified)</li>
  * </ul>
  * 
  * @author S. Livezey
@@ -64,7 +63,7 @@ public class XsdExtensionSchemaCodeGenerator extends AbstractXsdCodeGenerator<XS
     private CodeGenerationFilenameBuilder<XSDLibrary> legacySchemaFilenameBuilder = new LibraryFilenameBuilder<>();
 
     /**
-     * @see org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator#getLibrary(org.opentravel.schemacompiler.model.TLModelElement)
+     * @see org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator#getLibrary(org.opentravel.schemacompiler.model.ModelElement)
      */
     @Override
     protected AbstractLibrary getLibrary(XSDLibrary source) {
@@ -72,24 +71,23 @@ public class XsdExtensionSchemaCodeGenerator extends AbstractXsdCodeGenerator<XS
     }
 
     /**
-     * @see org.opentravel.schemacompiler.codegen.xsd.AbstractXsdCodeGenerator#canGenerateOutput(org.opentravel.schemacompiler.model.TLModelElement,
+     * @see org.opentravel.schemacompiler.codegen.xsd.AbstractXsdCodeGenerator#canGenerateOutput(org.opentravel.schemacompiler.model.ModelElement,
      *      org.opentravel.schemacompiler.codegen.CodeGenerationContext)
      */
     @Override
     protected boolean canGenerateOutput(XSDLibrary source, CodeGenerationContext context) {
-        return (getFilter() == null) || getFilter().processExtendedLibrary(source);
+        return (getFilter() == null) || getFilter().processExtendedLibrary( source );
     }
 
     /**
-     * @see org.opentravel.schemacompiler.codegen.impl.AbstractJaxbCodeGenerator#getMarshaller(org.opentravel.schemacompiler.model.TLModelElement,
+     * @see org.opentravel.schemacompiler.codegen.impl.AbstractJaxbCodeGenerator#getMarshaller(org.opentravel.schemacompiler.model.ModelElement,
      *      org.w3._2001.xmlschema.Schema)
      */
     @Override
-    protected Marshaller getMarshaller(XSDLibrary source, org.w3._2001.xmlschema.Schema schema)
-            throws JAXBException {
+    protected Marshaller getMarshaller(XSDLibrary source, org.w3._2001.xmlschema.Schema schema) throws JAXBException {
         Marshaller m = jaxbContext.createMarshaller();
 
-        m.setSchema(validationSchema);
+        m.setSchema( validationSchema );
         return m;
     }
 
@@ -98,7 +96,7 @@ public class XsdExtensionSchemaCodeGenerator extends AbstractXsdCodeGenerator<XS
      */
     @Override
     protected CodeGenerationFilenameBuilder<XSDLibrary> getDefaultFilenameBuilder() {
-        return new LegacySchemaExtensionFilenameBuilder<>(legacySchemaFilenameBuilder);
+        return new LegacySchemaExtensionFilenameBuilder<>( legacySchemaFilenameBuilder );
     }
 
     /**
@@ -107,57 +105,57 @@ public class XsdExtensionSchemaCodeGenerator extends AbstractXsdCodeGenerator<XS
      */
     @Override
     protected File getOutputFolder(CodeGenerationContext context, URL libraryUrl) {
-        File outputFolder = super.getOutputFolder(context, libraryUrl);
-        String legacySchemaFolder = getLegacySchemaOutputLocation(context);
+        File outputFolder = super.getOutputFolder( context, libraryUrl );
+        String legacySchemaFolder = getLegacySchemaOutputLocation( context );
 
         if (legacySchemaFolder != null) {
-            outputFolder = new File(outputFolder, legacySchemaFolder);
-            if (!outputFolder.exists())
+            outputFolder = new File( outputFolder, legacySchemaFolder );
+
+            if (!outputFolder.exists()) {
                 outputFolder.mkdirs();
+            }
         }
         return outputFolder;
     }
 
     /**
-     * Overrides the base class method to perform the transformation locally instead of delegating
-     * to an <code>ObjectTransformer</code> component.
+     * Overrides the base class method to perform the transformation locally instead of delegating to an
+     * <code>ObjectTransformer</code> component.
      * 
-     * @see org.opentravel.schemacompiler.codegen.xsd.AbstractXsdCodeGenerator#transformSourceObjectToJaxb(org.opentravel.schemacompiler.model.TLModelElement,
+     * @see org.opentravel.schemacompiler.codegen.xsd.AbstractXsdCodeGenerator#transformSourceObjectToJaxb(org.opentravel.schemacompiler.model.ModelElement,
      *      org.opentravel.schemacompiler.codegen.CodeGenerationContext)
      */
     @Override
     protected Object transformSourceObjectToJaxb(XSDLibrary source, CodeGenerationContext context)
-            throws CodeGenerationException {
+        throws CodeGenerationException {
         CodeGenerationFilter filter = getFilter();
         Schema schema = new Schema();
         Include incl = new Include();
 
         // Create the root schema element
-        schema.setAttributeFormDefault(FormChoice.UNQUALIFIED);
-        schema.setElementFormDefault(FormChoice.QUALIFIED);
+        schema.setAttributeFormDefault( FormChoice.UNQUALIFIED );
+        schema.setElementFormDefault( FormChoice.QUALIFIED );
 
-        if (!AnonymousEntityFilter.ANONYMOUS_PSEUDO_NAMESPACE.equals(source.getNamespace())) {
-            schema.setTargetNamespace(source.getNamespace());
+        if (!AnonymousEntityFilter.ANONYMOUS_PSEUDO_NAMESPACE.equals( source.getNamespace() )) {
+            schema.setTargetNamespace( source.getNamespace() );
         }
 
         // Declare an import for the original legacy schema that is being extended
-        incl.setSchemaLocation(legacySchemaFilenameBuilder.buildFilename(source, "xsd"));
-        schema.getIncludeOrImportOrRedefine().add(incl);
+        incl.setSchemaLocation( legacySchemaFilenameBuilder.buildFilename( source, "xsd" ) );
+        schema.getIncludeOrImportOrRedefine().add( incl );
 
         // For each complex type that does not declare an identity element, create it for this
         // schema
         for (LibraryMember member : source.getNamedMembers()) {
-            if ((member instanceof XSDComplexType)
-                    && ((filter == null) || filter.processEntity(member))) {
+            if ((member instanceof XSDComplexType) && ((filter == null) || filter.processEntity( member ))) {
                 XSDComplexType complexType = (XSDComplexType) member;
 
                 if (complexType.getIdentityAlias() == null) {
                     Element element = new TopLevelElement();
 
-                    element.setName(complexType.getLocalName());
-                    element.setType(new QName(schema.getTargetNamespace(), complexType
-                            .getLocalName()));
-                    schema.getSimpleTypeOrComplexTypeOrGroup().add(element);
+                    element.setName( complexType.getLocalName() );
+                    element.setType( new QName( schema.getTargetNamespace(), complexType.getLocalName() ) );
+                    schema.getSimpleTypeOrComplexTypeOrGroup().add( element );
                 }
             }
         }
@@ -169,10 +167,10 @@ public class XsdExtensionSchemaCodeGenerator extends AbstractXsdCodeGenerator<XS
      */
     static {
         try {
-            jaxbContext = JAXBContext.newInstance(SCHEMA_CONTEXT);
+            jaxbContext = JAXBContext.newInstance( SCHEMA_CONTEXT );
 
         } catch (Exception e) {
-            throw new ExceptionInInitializerError(e);
+            throw new ExceptionInInitializerError( e );
         }
     }
 

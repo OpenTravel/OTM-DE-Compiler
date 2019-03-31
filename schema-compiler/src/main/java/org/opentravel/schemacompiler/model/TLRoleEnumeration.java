@@ -13,29 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.model;
+
+import org.opentravel.schemacompiler.model.TLRole.RoleListManager;
 
 import java.util.Comparator;
 import java.util.List;
 
-import org.opentravel.schemacompiler.model.TLRole.RoleListManager;
-
 /**
- * The role enumeration is a specialized open enumeration composed of the roles defined for a core
- * object.
+ * The role enumeration is a specialized open enumeration composed of the roles defined for a core object.
  * 
  * @author S. Livezey
  */
 public class TLRoleEnumeration extends TLModelElement implements TLAttributeType {
 
     private TLCoreObject owningEntity;
-    private RoleListManager roleManager = new RoleListManager(this);
+    private RoleListManager roleManager = new RoleListManager( this );
 
     /**
      * Constructor that specifies the owning core object for the enumeration instance.
      * 
-     * @param owningEntity
-     *            the owning core object for the enumeration
+     * @param owningEntity the owning core object for the enumeration
      */
     public TLRoleEnumeration(TLCoreObject owningEntity) {
         this.owningEntity = owningEntity;
@@ -49,9 +48,9 @@ public class TLRoleEnumeration extends TLModelElement implements TLAttributeType
         StringBuilder identity = new StringBuilder();
 
         if (owningEntity != null) {
-            identity.append(owningEntity.getValidationIdentity()).append(" : ");
+            identity.append( owningEntity.getValidationIdentity() ).append( " : " );
         }
-        identity.append("Role Enumeration");
+        identity.append( "Role Enumeration" );
         return identity.toString();
     }
 
@@ -76,8 +75,7 @@ public class TLRoleEnumeration extends TLModelElement implements TLAttributeType
      */
     @Override
     public String getLocalName() {
-        return "Enum_" + ((owningEntity == null) ? "UnknownCore" : owningEntity.getLocalName())
-                + "Role";
+        return "Enum_" + ((owningEntity == null) ? "UnknownCore" : owningEntity.getLocalName()) + "Role";
     }
 
     /**
@@ -108,7 +106,7 @@ public class TLRoleEnumeration extends TLModelElement implements TLAttributeType
     /**
      * Returns the value of the 'roles' field.
      * 
-     * @return List<TLRole>
+     * @return List&lt;TLRole&gt;
      */
     public List<TLRole> getRoles() {
         return roleManager.getChildren();
@@ -117,67 +115,59 @@ public class TLRoleEnumeration extends TLModelElement implements TLAttributeType
     /**
      * Adds a role string value to the current list.
      * 
-     * @param role
-     *            the role string value to add
+     * @param role the role string value to add
      */
     public void addRole(TLRole role) {
-        roleManager.addChild(role);
+        roleManager.addChild( role );
     }
 
     /**
      * Adds a <code>TLRole</code> element to the current list.
      * 
-     * @param index
-     *            the index at which the given role should be added
-     * @param role
-     *            the role value to add
-     * @throws IndexOutOfBoundsException
-     *             thrown if the index is out of range (index < 0 || index > size())
+     * @param index the index at which the given role should be added
+     * @param role the role value to add
+     * @throws IndexOutOfBoundsException thrown if the index is out of range (index &lt; 0 || index &gt; size())
      */
     public void addRole(int index, TLRole role) {
-        roleManager.addChild(index, role);
+        roleManager.addChild( index, role );
     }
 
     /**
      * Removes the specified role string value from the current list.
      * 
-     * @param role
-     *            the role string value to remove
+     * @param role the role string value to remove
      */
     public void removeRole(TLRole role) {
-        roleManager.removeChild(role);
+        roleManager.removeChild( role );
     }
 
     /**
-     * Moves this role up by one position in the list. If the role is not owned by this object or it
-     * is already at the front of the list, this method has no effect.
+     * Moves this role up by one position in the list. If the role is not owned by this object or it is already at the
+     * front of the list, this method has no effect.
      * 
-     * @param role
-     *            the role to move
+     * @param role the role to move
      */
     public void moveUp(TLRole role) {
-        roleManager.moveUp(role);
+        roleManager.moveUp( role );
     }
 
     /**
-     * Moves this role down by one position in the list. If the role is not owned by this object or
-     * it is already at the end of the list, this method has no effect.
+     * Moves this role down by one position in the list. If the role is not owned by this object or it is already at the
+     * end of the list, this method has no effect.
      * 
-     * @param role
-     *            the role to move
+     * @param role the role to move
      */
     public void moveDown(TLRole role) {
-        roleManager.moveDown(role);
+        roleManager.moveDown( role );
     }
 
     /**
      * Sorts the list of roles using the comparator provided.
      * 
-     * @param comparator
-     *            the comparator to use when sorting the list
+     * @param comparator the comparator to use when sorting the list
      */
     public void sortRoles(Comparator<TLRole> comparator) {
-        roleManager.sortChildren(comparator);
+        roleManager.sortChildren( comparator );
     }
 
 }

@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.codegen.xsd;
 
-import javax.xml.bind.JAXBElement;
+package org.opentravel.schemacompiler.codegen.xsd;
 
 import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerContext;
 import org.opentravel.schemacompiler.codegen.impl.DocumentationFinder;
@@ -25,40 +24,38 @@ import org.opentravel.schemacompiler.transform.ObjectTransformer;
 import org.w3._2001.xmlschema.Annotation;
 import org.w3._2001.xmlschema.NoFixedFacet;
 
+import javax.xml.bind.JAXBElement;
+
 /**
  * Base class for enumeration transformers that provides common methods and functions.
  * 
- * @param <S>
- *            the source type of the object transformation
- * @param <T>
- *            the target type of the object transformation
+ * @param <S> the source type of the object transformation
+ * @param <T> the target type of the object transformation
  * @author S. Livezey
  */
-public abstract class TLBaseEnumerationCodegenTransformer<S, T> extends
-        AbstractXsdTransformer<S, T> {
+public abstract class TLBaseEnumerationCodegenTransformer<S, T> extends AbstractXsdTransformer<S,T> {
 
     public static final String OPEN_ENUM_VALUE = "Other_";
 
     /**
      * Constructs an XML schema representation of the given meta-model enumeration value.
      * 
-     * @param modelEnum
-     *            the enumeration value from the compiler meta-model
-     * @return JAXBElement<NoFixedFacet>
+     * @param modelEnum the enumeration value from the compiler meta-model
+     * @return JAXBElement&lt;NoFixedFacet&gt;
      */
     protected JAXBElement<NoFixedFacet> createEnumValue(TLEnumValue modelEnum) {
-        TLDocumentation doc = DocumentationFinder.getDocumentation(modelEnum);
+        TLDocumentation doc = DocumentationFinder.getDocumentation( modelEnum );
         NoFixedFacet facet = new NoFixedFacet();
 
-        facet.setValue(modelEnum.getLiteral());
+        facet.setValue( modelEnum.getLiteral() );
 
         if (doc != null) {
-            ObjectTransformer<TLDocumentation, Annotation, CodeGenerationTransformerContext> docTransformer =
-            		getTransformerFactory().getTransformer(doc, Annotation.class);
+            ObjectTransformer<TLDocumentation,Annotation,CodeGenerationTransformerContext> docTransformer =
+                getTransformerFactory().getTransformer( doc, Annotation.class );
 
-            facet.setAnnotation(docTransformer.transform(doc));
+            facet.setAnnotation( docTransformer.transform( doc ) );
         }
-        return jaxbObjectFactory.createEnumeration(facet);
+        return jaxbObjectFactory.createEnumeration( facet );
     }
 
 }

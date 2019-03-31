@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.validate.compile;
 
 import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
@@ -37,23 +38,22 @@ public class TLOperationCompileValidator extends TLOperationBaseValidator {
      */
     @Override
     protected ValidationFindings validateFields(TLOperation target) {
-        TLValidationBuilder builder = newValidationBuilder(target);
+        TLValidationBuilder builder = newValidationBuilder( target );
 
-        builder.setProperty("name", target.getName()).setFindingType(FindingType.ERROR)
-                .assertNotNullOrBlank().assertPatternMatch(NAME_XML_PATTERN);
+        builder.setProperty( "name", target.getName() ).setFindingType( FindingType.ERROR ).assertNotNullOrBlank()
+            .assertPatternMatch( NAME_XML_PATTERN );
 
-        builder.setProperty("equivalents", target.getEquivalents())
-                .setFindingType(FindingType.ERROR).assertNotNull().assertContainsNoNullElements();
+        builder.setProperty( "equivalents", target.getEquivalents() ).setFindingType( FindingType.ERROR )
+            .assertNotNull().assertContainsNoNullElements();
 
-        builder.setProperty("name", target.getOwningService().getOperations())
-                .setFindingType(FindingType.ERROR)
-                .assertNoDuplicates( e -> (e == null) ? null : ((TLOperation) e).getName() );
+        builder.setProperty( "name", target.getOwningService().getOperations() ).setFindingType( FindingType.ERROR )
+            .assertNoDuplicates( e -> (e == null) ? null : ((TLOperation) e).getName() );
 
-        if (FacetCodegenUtils.getOperationType(target) == OperationType.INVALID) {
-            builder.addFinding(FindingType.ERROR, "operationType", ERROR_INVALID_OPERATION);
+        if (FacetCodegenUtils.getOperationType( target ) == OperationType.INVALID) {
+            builder.addFinding( FindingType.ERROR, "operationType", ERROR_INVALID_OPERATION );
         }
 
-        validateVersioningRules(target, builder);
+        validateVersioningRules( target, builder );
 
         return builder.getFindings();
     }

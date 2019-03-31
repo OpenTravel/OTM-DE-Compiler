@@ -13,103 +13,102 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.codegen.json.model;
 
 /**
  * Class used to represent a named reference to a JSON schema.
  */
 public class JsonSchemaNamedReference implements JsonNamedProperty {
-	
-	private String name;
-	private JsonSchemaReference schema;
-	private boolean required = false;
-	
-	/**
-	 * Default constructor.
-	 */
-	public JsonSchemaNamedReference() {}
-	
-	/**
-	 * Full constructor.
-	 * 
-	 * @param name  the name of the schema reference
-	 * @param schema  the schema reference
-	 */
-	public JsonSchemaNamedReference(String name, JsonSchemaReference schema) {
-		this.name = name;
-		this.schema = schema;
-	}
-	
-	/**
-	 * Returns the name of the JSON type.
-	 *
-	 * @return String
-	 */
-	public String getName() {
-		return name;
-	}
-	
-	/**
-	 * Assigns the name of the JSON type.
-	 *
-	 * @param name  the field value to assign
-	 */
-	public void setName(String name) {
-		this.name = name;
-	}
 
-	/**
-	 * Returns the schema reference.
-	 *
-	 * @return JsonSchemaReference
-	 */
-	public JsonSchemaReference getSchema() {
-		return schema;
-	}
+    private String name;
+    private JsonSchemaReference schema;
+    private boolean required = false;
 
-	/**
-	 * Assigns the schema reference.
-	 *
-	 * @param schema  the schema reference to assign
-	 */
-	public void setSchema(JsonSchemaReference schema) {
-		this.schema = schema;
-	}
+    /**
+     * Default constructor.
+     */
+    public JsonSchemaNamedReference() {}
 
-	/**
-	 * Returns the flag indicating whether the named reference is required when used
-	 * as a schema property.
-	 *
-	 * @return boolean
-	 */
-	public boolean isRequired() {
-		return required;
-	}
+    /**
+     * Full constructor.
+     * 
+     * @param name the name of the schema reference
+     * @param schema the schema reference
+     */
+    public JsonSchemaNamedReference(String name, JsonSchemaReference schema) {
+        this.name = name;
+        this.schema = schema;
+    }
 
-	/**
-	 * Assigns the flag indicating whether the named reference is required when used
-	 * as a schema property.
-	 *
-	 * @param required  the flag value to assign
-	 */
-	public void setRequired(boolean required) {
-		this.required = required;
-	}
+    /**
+     * Returns the name of the JSON type.
+     *
+     * @return String
+     */
+    public String getName() {
+        return name;
+    }
 
-	/**
-	 * @see org.opentravel.schemacompiler.codegen.json.model.JsonNamedProperty#getPropertyName()
-	 */
-	@Override
-	public String getPropertyName() {
-		return getName();
-	}
+    /**
+     * Assigns the name of the JSON type.
+     *
+     * @param name the field value to assign
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	/**
-	 * @see org.opentravel.schemacompiler.codegen.json.model.JsonNamedProperty#getPropertyValue()
-	 */
-	@Override
-	public JsonModelObject getPropertyValue() {
-		return getSchema();
-	}
-	
+    /**
+     * Returns the schema reference.
+     *
+     * @return JsonSchemaReference
+     */
+    public JsonSchemaReference getSchema() {
+        return schema;
+    }
+
+    /**
+     * Assigns the schema reference.
+     *
+     * @param schema the schema reference to assign
+     */
+    public void setSchema(JsonSchemaReference schema) {
+        this.schema = schema;
+    }
+
+    /**
+     * Returns the flag indicating whether the named reference is required when used as a schema property.
+     *
+     * @return boolean
+     */
+    public boolean isRequired() {
+        return required;
+    }
+
+    /**
+     * Assigns the flag indicating whether the named reference is required when used as a schema property.
+     *
+     * @param required the flag value to assign
+     */
+    public void setRequired(boolean required) {
+        this.required = required;
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.codegen.json.model.JsonNamedProperty#getPropertyName()
+     */
+    @Override
+    public String getPropertyName() {
+        return getName();
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.codegen.json.model.JsonNamedProperty#getPropertyValue()
+     */
+    @Override
+    public JsonModelObject getPropertyValue() {
+        return getSchema();
+    }
+
 }

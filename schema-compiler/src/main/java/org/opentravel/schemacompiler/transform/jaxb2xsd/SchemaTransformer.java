@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.transform.jaxb2xsd;
 
-import java.util.Set;
+package org.opentravel.schemacompiler.transform.jaxb2xsd;
 
 import org.opentravel.schemacompiler.loader.LibraryModuleImport;
 import org.opentravel.schemacompiler.model.LibraryMember;
@@ -29,14 +28,14 @@ import org.opentravel.schemacompiler.version.XSDVersionScheme;
 import org.w3._2001.xmlschema.OpenAttrs;
 import org.w3._2001.xmlschema.Schema;
 
+import java.util.Set;
+
 /**
- * Handles the transformation of objects from the <code>Schema</code> type to the
- * <code>XSDLibrary</code> type.
+ * Handles the transformation of objects from the <code>Schema</code> type to the <code>XSDLibrary</code> type.
  * 
  * @author S. Livezey
  */
-public class SchemaTransformer extends
-        BaseTransformer<Schema, XSDLibrary, DefaultTransformerContext> {
+public class SchemaTransformer extends BaseTransformer<Schema,XSDLibrary,DefaultTransformerContext> {
 
     /**
      * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
@@ -46,39 +45,38 @@ public class SchemaTransformer extends
     public XSDLibrary transform(Schema source) {
         XSDLibrary target = new XSDLibrary();
 
-        target.setVersionScheme(XSDVersionScheme.ID);
-        target.setNamespace(source.getTargetNamespace());
-        target.setPrefix(source.getId()); // prefix is stored in the ID field by the
-                                          // LibrarySchema1_3_ModuleLoader
+        target.setVersionScheme( XSDVersionScheme.ID );
+        target.setNamespace( source.getTargetNamespace() );
+        // Prefix is stored in the ID field by the LibrarySchema1_3_ModuleLoader
+        target.setPrefix( source.getId() );
 
-        for (String _include : SchemaUtils.getSchemaIncludes(source)) {
+        for (String includePath : SchemaUtils.getSchemaIncludes( source )) {
             TLInclude include = new TLInclude();
 
-            include.setPath(_include);
-            target.addInclude(include);
+            include.setPath( includePath );
+            target.addInclude( include );
         }
-        for (LibraryModuleImport nsImport : SchemaUtils.getSchemaImports(source)) {
+        for (LibraryModuleImport nsImport : SchemaUtils.getSchemaImports( source )) {
             String[] fileHints = null;
 
             if (nsImport.getFileHints() != null) {
-                fileHints = nsImport.getFileHints().toArray(
-                        new String[nsImport.getFileHints().size()]);
+                fileHints = nsImport.getFileHints().toArray( new String[nsImport.getFileHints().size()] );
             }
-            target.addNamespaceImport(trimString(nsImport.getPrefix()),
-                    trimString(nsImport.getNamespace()), fileHints);
+            target.addNamespaceImport( trimString( nsImport.getPrefix() ), trimString( nsImport.getNamespace() ),
+                fileHints );
         }
 
         for (OpenAttrs sourceMember : source.getSimpleTypeOrComplexTypeOrGroup()) {
-            Set<Class<?>> targetTypes = getTransformerFactory().findTargetTypes(sourceMember);
-            Class<LibraryMember> targetType = (Class<LibraryMember>)
-            		(targetTypes.isEmpty() ? null : targetTypes.iterator().next());
+            Set<Class<?>> targetTypes = getTransformerFactory().findTargetTypes( sourceMember );
+            Class<LibraryMember> targetType =
+                (Class<LibraryMember>) (targetTypes.isEmpty() ? null : targetTypes.iterator().next());
 
             if (targetType != null) {
-                ObjectTransformer<OpenAttrs, LibraryMember, DefaultTransformerContext> memberTransformer = getTransformerFactory()
-                        .getTransformer(sourceMember, targetType);
+                ObjectTransformer<OpenAttrs,LibraryMember,DefaultTransformerContext> memberTransformer =
+                    getTransformerFactory().getTransformer( sourceMember, targetType );
 
                 if (memberTransformer != null) {
-                    target.addNamedMember(memberTransformer.transform(sourceMember));
+                    target.addNamedMember( memberTransformer.transform( sourceMember ) );
                 }
             }
         }

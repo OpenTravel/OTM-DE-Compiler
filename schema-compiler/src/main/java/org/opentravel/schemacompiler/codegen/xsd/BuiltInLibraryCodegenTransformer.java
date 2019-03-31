@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.codegen.xsd;
 
-import java.io.File;
+package org.opentravel.schemacompiler.codegen.xsd;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerationContext;
 import org.opentravel.schemacompiler.codegen.CodeGenerationFilenameBuilder;
@@ -32,14 +31,15 @@ import org.w3._2001.xmlschema.Annotation;
 import org.w3._2001.xmlschema.OpenAttrs;
 import org.w3._2001.xmlschema.Schema;
 
+import java.io.File;
+
 /**
- * Performs the translation from <code>BuiltInLibrary</code> objects to the JAXB nodes used to
- * produce the schema output.
+ * Performs the translation from <code>BuiltInLibrary</code> objects to the JAXB nodes used to produce the schema
+ * output.
  * 
  * @author S. Livezey
  */
-public class BuiltInLibraryCodegenTransformer extends
-        AbstractXsdTransformer<BuiltInLibrary, Schema> {
+public class BuiltInLibraryCodegenTransformer extends AbstractXsdTransformer<BuiltInLibrary,Schema> {
 
     /**
      * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
@@ -48,26 +48,26 @@ public class BuiltInLibraryCodegenTransformer extends
     @Override
     public Schema transform(BuiltInLibrary source) {
         CodeGenerationFilter filter = context.getCodeGenerator().getFilter();
-        Schema schema = createSchema(source.getNamespace(), null);
+        Schema schema = createSchema( source.getNamespace(), null );
 
         // Add the application info for this library
         Annotation schemaAnnotation = new Annotation();
 
-        schemaAnnotation.getAppinfoOrDocumentation().add(
-                XsdCodegenUtils.getAppInfo(source, context.getCodegenContext()));
-        schema.getIncludeOrImportOrRedefine().add(schemaAnnotation);
+        schemaAnnotation.getAppinfoOrDocumentation()
+            .add( XsdCodegenUtils.getAppInfo( source, context.getCodegenContext() ) );
+        schema.getIncludeOrImportOrRedefine().add( schemaAnnotation );
 
         // Add entries for each non-service term declaration
         for (NamedEntity member : source.getNamedMembers()) {
-            ObjectTransformer<NamedEntity, CodegenArtifacts, CodeGenerationTransformerContext> transformer =
-            		getTransformerFactory().getTransformer(member, CodegenArtifacts.class);
+            ObjectTransformer<NamedEntity,CodegenArtifacts,CodeGenerationTransformerContext> transformer =
+                getTransformerFactory().getTransformer( member, CodegenArtifacts.class );
 
-            if ((transformer != null) && ((filter == null) || filter.processEntity(member))) {
-                CodegenArtifacts artifacts = transformer.transform(member);
+            if ((transformer != null) && ((filter == null) || filter.processEntity( member ))) {
+                CodegenArtifacts artifacts = transformer.transform( member );
 
                 if (artifacts != null) {
-                    for (OpenAttrs artifact : artifacts.getArtifactsOfType(OpenAttrs.class)) {
-                        schema.getSimpleTypeOrComplexTypeOrGroup().add(artifact);
+                    for (OpenAttrs artifact : artifacts.getArtifactsOfType( OpenAttrs.class )) {
+                        schema.getSimpleTypeOrComplexTypeOrGroup().add( artifact );
                     }
                 }
             }
@@ -75,11 +75,11 @@ public class BuiltInLibraryCodegenTransformer extends
 
         // Add entries for all imports and includes
         CodeGenerationFilenameBuilder<?> filenameBuilder = context.getCodeGenerator().getFilenameBuilder();
-        CodeGenerationFilter libraryFilter = new LibraryFilterBuilder(source).setGlobalFilter(
-                context.getCodeGenerator().getFilter()).buildFilter();
+        CodeGenerationFilter libraryFilter =
+            new LibraryFilterBuilder( source ).setGlobalFilter( context.getCodeGenerator().getFilter() ).buildFilter();
 
-        addImports(schema, source, (CodeGenerationFilenameBuilder<AbstractLibrary>) filenameBuilder, libraryFilter);
-        addIncludes(schema, source, (CodeGenerationFilenameBuilder<AbstractLibrary>) filenameBuilder, libraryFilter);
+        addImports( schema, source, (CodeGenerationFilenameBuilder<AbstractLibrary>) filenameBuilder, libraryFilter );
+        addIncludes( schema, source, (CodeGenerationFilenameBuilder<AbstractLibrary>) filenameBuilder, libraryFilter );
 
         return schema;
     }
@@ -101,8 +101,8 @@ public class BuiltInLibraryCodegenTransformer extends
     @Override
     protected File getBaseOutputFolder() {
         CodeGenerationContext cgContext = context.getCodegenContext();
-        return new File(XsdCodegenUtils.getBaseOutputFolder(cgContext),
-                XsdCodegenUtils.getBuiltInSchemaOutputLocation(cgContext));
+        return new File( XsdCodegenUtils.getBaseOutputFolder( cgContext ),
+            XsdCodegenUtils.getBuiltInSchemaOutputLocation( cgContext ) );
     }
 
 }

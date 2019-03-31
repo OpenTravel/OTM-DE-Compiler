@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.codegen.html.builders;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerationException;
@@ -23,55 +24,55 @@ import org.opentravel.schemacompiler.codegen.CodeGenerationException;
  */
 public interface DocumentationBuilder {
 
-	public String getName();
+    public String getName();
 
-	public String getNamespace();
+    public String getNamespace();
 
-	public String getQualifiedName();
-	
-	public DocumentationBuilderType getDocType();
-	
-	public void setNext(DocumentationBuilder next);
-	
-	public void setPrevious(DocumentationBuilder prev);
-	
-	public void build() throws CodeGenerationException;
-	
-	public String getDescription();
-	
-	public String getOwningLibrary();
-	
-	public enum DocumentationBuilderType {
-		BUSINESS_OBJECT("BusinessObject"), 
-		CORE_OBJECT("CoreObject"), 
-		CHOICE_OBJECT("ChoiceObject"),
-		VWA("ValueWithAttributes"), 
-		SERVICE("Service"), 
-		SIMPLE("SimpleType"), 
-		CLOSED_ENUM("Closed Enumeration"),
-		OPEN_ENUM("Open Enumeration"),
-		FACET("Facet"),
-		OPERATION("Operation"), 
-		INDICATOR("Indicator"), 
-		ATTRIBUTE("Attribute"), 
-		PROPERTY("Property"), 
-		LIBRARY("Library");
-		
-		private String type;
-		
-		private DocumentationBuilderType(String type){
-			this.type = type;
-		}
+    public String getQualifiedName();
 
-		/**
-		 * @return the type
-		 */
-		@Override
-		public String toString() {
-			return type;
-		}
-		
-	}
+    public DocumentationBuilderType getDocType();
 
-	
+    public void setNext(DocumentationBuilder next);
+
+    public void setPrevious(DocumentationBuilder prev);
+
+    public void build() throws CodeGenerationException;
+
+    public String getDescription();
+
+    public String getOwningLibrary();
+
+    public enum DocumentationBuilderType {
+        BUSINESS_OBJECT("BusinessObject"),
+        CORE_OBJECT("CoreObject"),
+        CHOICE_OBJECT("ChoiceObject"),
+        VWA("ValueWithAttributes"),
+        SERVICE("Service"),
+        SIMPLE("SimpleType"),
+        CLOSED_ENUM("Closed Enumeration"),
+        OPEN_ENUM("Open Enumeration"),
+        FACET("Facet"),
+        OPERATION("Operation"),
+        INDICATOR("Indicator"),
+        ATTRIBUTE("Attribute"),
+        PROPERTY("Property"),
+        LIBRARY("Library");
+
+        private String type;
+
+        private DocumentationBuilderType(String type) {
+            this.type = type;
+        }
+
+        /**
+         * @return the type
+         */
+        @Override
+        public String toString() {
+            return type;
+        }
+
+    }
+
+
 }

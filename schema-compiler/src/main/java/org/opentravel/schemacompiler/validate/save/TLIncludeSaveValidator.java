@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.validate.save;
 
 import org.opentravel.schemacompiler.model.TLInclude;
@@ -33,10 +34,10 @@ public class TLIncludeSaveValidator extends TLValidatorBase<TLInclude> {
      */
     @Override
     protected ValidationFindings validateFields(TLInclude target) {
-        TLValidationBuilder builder = newValidationBuilder(target);
+        TLValidationBuilder builder = newValidationBuilder( target );
 
-        builder.setProperty("path", target.getPath()).setFindingType(FindingType.WARNING)
-                .assertNotNullOrBlank().assertContainsNoWhitespace();
+        builder.setProperty( "path", target.getPath() ).setFindingType( FindingType.WARNING ).assertNotNullOrBlank()
+            .assertContainsNoWhitespace();
 
         return builder.getFindings();
     }

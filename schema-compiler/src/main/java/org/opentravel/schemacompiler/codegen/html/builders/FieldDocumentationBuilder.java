@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.codegen.html.builders;
 
 import org.opentravel.schemacompiler.model.NamedEntity;
@@ -23,101 +24,102 @@ import org.opentravel.schemacompiler.model.TLDocumentationOwner;
  *
  */
 public abstract class FieldDocumentationBuilder<T extends TLDocumentationOwner>
-		extends AbstractDocumentationBuilder<T> {
+    extends AbstractDocumentationBuilder<T> {
 
-	protected DocumentationBuilder type;
-	
-	protected NamedEntityDocumentationBuilder<?> owner;
+    protected DocumentationBuilder type;
 
-	protected String typeName;
-	
-	protected String sinceVersion;
-	
-	protected boolean isRequired;
-	
-	protected int maxOcurrences;
+    protected NamedEntityDocumentationBuilder<?> owner;
 
-	protected String pattern;
+    protected String typeName;
 
-	protected String exampleValue;
-	
-	/**
-	 * @param 
-	 */
-	public FieldDocumentationBuilder(T t) {
-		super(t);
-	}
+    protected String sinceVersion;
 
-	/**
-	 * @return the isRequired
-	 */
-	public boolean isRequired() {
-		return isRequired;
-	}
+    protected boolean isRequired;
 
-	/**
-	 * @return the maxOcurrences
-	 */
-	public int getMaxOcurrences() {
-		return maxOcurrences;
-	}
+    protected int maxOcurrences;
 
-	/**
-	 * @return the pattern
-	 */
-	public String getPattern() {
-		return pattern;
-	}
+    protected String pattern;
 
-	/**
-	 * @return the exampleValue
-	 */
-	public String getExampleValue() {
-		return exampleValue;
-	}
-	
-	
-	public DocumentationBuilder getType() {
-		return type;
-	}
+    protected String exampleValue;
 
-	public String getTypeName() {
-		return typeName;
-	}
+    /**
+     * @param t the member field for which to return a builder
+     */
+    public FieldDocumentationBuilder(T t) {
+        super( t );
+    }
 
-	public String getSinceVersion() {
-		return sinceVersion;
-	}
+    /**
+     * @return the isRequired
+     */
+    public boolean isRequired() {
+        return isRequired;
+    }
 
-	/**
-	 * @return the owner
-	 */
-	@SuppressWarnings("unchecked")
-	public <B extends NamedEntity & TLDocumentationOwner> NamedEntityDocumentationBuilder<B> getOwner() {
-		return (NamedEntityDocumentationBuilder<B>) owner;
-	}
+    /**
+     * @return the maxOcurrences
+     */
+    public int getMaxOcurrences() {
+        return maxOcurrences;
+    }
 
-	/**
-	 * @param owner the owner to set
-	 */
-	public void setOwner(NamedEntityDocumentationBuilder<?> owner) {
-		this.owner = owner;
-	}
-	
-	/**
-	 * @see org.opentravel.schemacompiler.codegen.html.builders.AbstractDocumentationBuilder#hashCode()
-	 */
-	@Override
-	public int hashCode() {
-		return super.hashCode();
-	}
+    /**
+     * @return the pattern
+     */
+    public String getPattern() {
+        return pattern;
+    }
 
-	/**
-	 * @see org.opentravel.schemacompiler.codegen.html.builders.AbstractDocumentationBuilder#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		return super.equals(obj);
-	}
+    /**
+     * @return the exampleValue
+     */
+    public String getExampleValue() {
+        return exampleValue;
+    }
+
+
+    public DocumentationBuilder getType() {
+        return type;
+    }
+
+    public String getTypeName() {
+        return typeName;
+    }
+
+    public String getSinceVersion() {
+        return sinceVersion;
+    }
+
+    /**
+     * @param <B> the type of the owning builder to be returned
+     * @return the owner
+     */
+    @SuppressWarnings("unchecked")
+    public <B extends NamedEntity & TLDocumentationOwner> NamedEntityDocumentationBuilder<B> getOwner() {
+        return (NamedEntityDocumentationBuilder<B>) owner;
+    }
+
+    /**
+     * @param owner the owner to set
+     */
+    public void setOwner(NamedEntityDocumentationBuilder<?> owner) {
+        this.owner = owner;
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.codegen.html.builders.AbstractDocumentationBuilder#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.codegen.html.builders.AbstractDocumentationBuilder#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+        return super.equals( obj );
+    }
 
 }

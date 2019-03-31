@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.validate;
 
-import java.util.Locale;
+package org.opentravel.schemacompiler.validate;
 
 import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
 import org.springframework.context.NoSuchMessageException;
+
+import java.util.Locale;
 
 /**
  * Describes the overall format used to display error messages.
@@ -27,9 +28,9 @@ import org.springframework.context.NoSuchMessageException;
  */
 public enum FindingMessageFormat {
 
-    IDENTIFIED_FORMAT("ValidationFindings.IdentityMessageFormat", "{0} [{1}]: {2}"), BARE_FORMAT(
-            "ValidationFindings.BareMessageFormat", "{1}: {2}"), MESSAGE_ONLY_FORMAT(
-            "ValidationFindings.MessageOnlyFormat", "{2}");
+    IDENTIFIED_FORMAT("ValidationFindings.IdentityMessageFormat", "{0} [{1}]: {2}"),
+    BARE_FORMAT("ValidationFindings.BareMessageFormat", "{1}: {2}"),
+    MESSAGE_ONLY_FORMAT("ValidationFindings.MessageOnlyFormat", "{2}");
 
     /** The default message format value. */
     public static final FindingMessageFormat DEFAULT = FindingMessageFormat.IDENTIFIED_FORMAT;
@@ -38,13 +39,11 @@ public enum FindingMessageFormat {
     private String defaultFormat;
 
     /**
-     * Constructor that specifies the resource bundle key used to identify the formatter string, and
-     * the default format string to use if the bundle does not explicitly specify a format.
+     * Constructor that specifies the resource bundle key used to identify the formatter string, and the default format
+     * string to use if the bundle does not explicitly specify a format.
      * 
-     * @param formatKey
-     *            the resource bundle key
-     * @param defaultFormat
-     *            the default format string to use if one is not explicitly defined
+     * @param formatKey the resource bundle key
+     * @param defaultFormat the default format string to use if one is not explicitly defined
      */
     private FindingMessageFormat(String formatKey, String defaultFormat) {
         this.formatKey = formatKey;
@@ -70,19 +69,17 @@ public enum FindingMessageFormat {
     }
 
     /**
-     * Returns the string to use for message formatting. If the bundle does not define a string for
-     * the 'formatKey' value, the 'defaultFormat' will be returned.
+     * Returns the string to use for message formatting. If the bundle does not define a string for the 'formatKey'
+     * value, the 'defaultFormat' will be returned.
      * 
-     * @param bundle
-     *            the resource bundle from which to retrieve the format string
      * @return String
      */
     public String getFormat() {
         String formatString;
 
         try {
-            formatString = SchemaCompilerApplicationContext.getContext().getMessage(formatKey,
-                    null, Locale.getDefault());
+            formatString =
+                SchemaCompilerApplicationContext.getContext().getMessage( formatKey, null, Locale.getDefault() );
 
         } catch (NoSuchMessageException e) {
             formatString = defaultFormat;

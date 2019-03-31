@@ -13,11 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.model;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+package org.opentravel.schemacompiler.model;
 
 import org.opentravel.schemacompiler.event.ModelEventType;
 import org.opentravel.schemacompiler.model.TLAlias.AliasListManager;
@@ -25,25 +22,29 @@ import org.opentravel.schemacompiler.model.TLContextualFacet.ContextualFacetList
 import org.opentravel.schemacompiler.util.OTM16Upgrade;
 import org.opentravel.schemacompiler.version.Versioned;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+
 /**
  * Choice object definition for a type library.
  * 
  * @author S. Livezey
  */
 public class TLChoiceObject extends TLComplexTypeBase implements TLFacetOwner, TLAliasOwner {
-	
-    protected AliasListManager aliasManager = new AliasListManager(this);
-    private ContextualFacetListManager choiceFacetManager = new ContextualFacetListManager(this, TLFacetType.CHOICE,
-            ModelEventType.CHOICE_FACET_ADDED, ModelEventType.CHOICE_FACET_REMOVED);
+
+    protected AliasListManager aliasManager = new AliasListManager( this );
+    private ContextualFacetListManager choiceFacetManager = new ContextualFacetListManager( this, TLFacetType.CHOICE,
+        ModelEventType.CHOICE_FACET_ADDED, ModelEventType.CHOICE_FACET_REMOVED );
     private TLFacet sharedFacet;
-    
-	/**
-	 * Default constructor.
-	 */
-	public TLChoiceObject() {
-		setSharedFacet( new TLFacet() );
-	}
-	
+
+    /**
+     * Default constructor.
+     */
+    public TLChoiceObject() {
+        setSharedFacet( new TLFacet() );
+    }
+
     /**
      * @see org.opentravel.schemacompiler.validate.Validatable#getValidationIdentity()
      */
@@ -53,12 +54,12 @@ public class TLChoiceObject extends TLComplexTypeBase implements TLFacetOwner, T
         StringBuilder identity = new StringBuilder();
 
         if (owningLibrary != null) {
-            identity.append(owningLibrary.getValidationIdentity()).append(" : ");
+            identity.append( owningLibrary.getValidationIdentity() ).append( " : " );
         }
         if (getName() == null) {
-            identity.append("[Unnamed Business Object Type]");
+            identity.append( "[Unnamed Business Object Type]" );
         } else {
-            identity.append(getName());
+            identity.append( getName() );
         }
         return identity.toString();
     }
@@ -114,31 +115,30 @@ public class TLChoiceObject extends TLComplexTypeBase implements TLFacetOwner, T
     public boolean isLaterVersion(Versioned otherVersionedItem) {
         boolean result = false;
 
-        if ((otherVersionedItem != null) && otherVersionedItem.getClass().equals(this.getClass())
-                && (this.getOwningLibrary() != null)
-                && (otherVersionedItem.getOwningLibrary() != null) && (this.getLocalName() != null)
-                && this.getLocalName().equals(otherVersionedItem.getLocalName())) {
-            result = this.getOwningLibrary().isLaterVersion(otherVersionedItem.getOwningLibrary());
+        if ((otherVersionedItem != null) && otherVersionedItem.getClass().equals( this.getClass() )
+            && (this.getOwningLibrary() != null) && (otherVersionedItem.getOwningLibrary() != null)
+            && (this.getLocalName() != null) && this.getLocalName().equals( otherVersionedItem.getLocalName() )) {
+            result = this.getOwningLibrary().isLaterVersion( otherVersionedItem.getOwningLibrary() );
         }
         return result;
     }
 
     /**
-	 * @see org.opentravel.schemacompiler.model.TLLibraryMember#setOwningLibrary(org.opentravel.schemacompiler.model.AbstractLibrary)
-	 */
-	@Override
-	public void setOwningLibrary(AbstractLibrary owningLibrary) {
-    	if (!OTM16Upgrade.otm16Enabled) {
-    		for (TLContextualFacet facet : getChoiceFacets()) {
-    			if (owningLibrary != null) {
-        			owningLibrary.addNamedMember( facet );
-    			} else {
-    				this.getOwningLibrary().removeNamedMember( facet );
-    			}
-    		}
-    	}
-		super.setOwningLibrary(owningLibrary);
-	}
+     * @see org.opentravel.schemacompiler.model.TLLibraryMember#setOwningLibrary(org.opentravel.schemacompiler.model.AbstractLibrary)
+     */
+    @Override
+    public void setOwningLibrary(AbstractLibrary owningLibrary) {
+        if (!OTM16Upgrade.otm16Enabled) {
+            for (TLContextualFacet facet : getChoiceFacets()) {
+                if (owningLibrary != null) {
+                    owningLibrary.addNamedMember( facet );
+                } else {
+                    this.getOwningLibrary().removeNamedMember( facet );
+                }
+            }
+        }
+        super.setOwningLibrary( owningLibrary );
+    }
 
     /**
      * @see org.opentravel.schemacompiler.model.TLAliasOwner#getAliases()
@@ -151,30 +151,29 @@ public class TLChoiceObject extends TLComplexTypeBase implements TLFacetOwner, T
      * @see org.opentravel.schemacompiler.model.TLAliasOwner#getAlias(java.lang.String)
      */
     public TLAlias getAlias(String aliasName) {
-        return aliasManager.getChild(aliasName);
+        return aliasManager.getChild( aliasName );
     }
 
     /**
      * @see org.opentravel.schemacompiler.model.TLAliasOwner#addAlias(org.opentravel.schemacompiler.model.TLAlias)
      */
     public void addAlias(TLAlias alias) {
-        aliasManager.addChild(alias);
+        aliasManager.addChild( alias );
     }
 
     /**
-     * @see org.opentravel.schemacompiler.model.TLAliasOwner#addAlias(int,
-     *      org.opentravel.schemacompiler.model.TLAlias)
+     * @see org.opentravel.schemacompiler.model.TLAliasOwner#addAlias(int, org.opentravel.schemacompiler.model.TLAlias)
      */
     @Override
     public void addAlias(int index, TLAlias alias) {
-        aliasManager.addChild(index, alias);
+        aliasManager.addChild( index, alias );
     }
 
     /**
      * @see org.opentravel.schemacompiler.model.TLAliasOwner#removeAlias(org.opentravel.schemacompiler.model.TLAlias)
      */
     public void removeAlias(TLAlias alias) {
-        aliasManager.removeChild(alias);
+        aliasManager.removeChild( alias );
     }
 
     /**
@@ -182,7 +181,7 @@ public class TLChoiceObject extends TLComplexTypeBase implements TLFacetOwner, T
      */
     @Override
     public void moveUp(TLAlias alias) {
-        aliasManager.moveUp(alias);
+        aliasManager.moveUp( alias );
     }
 
     /**
@@ -190,7 +189,7 @@ public class TLChoiceObject extends TLComplexTypeBase implements TLFacetOwner, T
      */
     @Override
     public void moveDown(TLAlias alias) {
-        aliasManager.moveDown(alias);
+        aliasManager.moveDown( alias );
     }
 
     /**
@@ -198,32 +197,32 @@ public class TLChoiceObject extends TLComplexTypeBase implements TLFacetOwner, T
      */
     @Override
     public void sortAliases(Comparator<TLAlias> comparator) {
-        aliasManager.sortChildren(comparator);
+        aliasManager.sortChildren( comparator );
     }
 
     /**
-	 * @see org.opentravel.schemacompiler.model.TLAliasOwner#getAliasListManager()
-	 */
-	@SuppressWarnings("unchecked")
-	@Override
-	public ChildEntityListManager<TLAlias,TLAliasOwner> getAliasListManager() {
-		return aliasManager;
-	}
+     * @see org.opentravel.schemacompiler.model.TLAliasOwner#getAliasListManager()
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public ChildEntityListManager<TLAlias,TLAliasOwner> getAliasListManager() {
+        return aliasManager;
+    }
 
     /**
-	 * @see org.opentravel.schemacompiler.model.TLFacetOwner#getAllFacets()
-	 */
-	@Override
-	public List<TLFacet> getAllFacets() {
-		List<TLFacet> facetList = new ArrayList<>();
-		
-		facetList.add( getSharedFacet() );
-		
-		for (TLFacet facet : getChoiceFacets()) {
-			facetList.add( facet );
-		}
-		return facetList;
-	}
+     * @see org.opentravel.schemacompiler.model.TLFacetOwner#getAllFacets()
+     */
+    @Override
+    public List<TLFacet> getAllFacets() {
+        List<TLFacet> facetList = new ArrayList<>();
+
+        facetList.add( getSharedFacet() );
+
+        for (TLFacet facet : getChoiceFacets()) {
+            facetList.add( facet );
+        }
+        return facetList;
+    }
 
     /**
      * Returns the value of the 'sharedFacet' field.
@@ -237,21 +236,21 @@ public class TLChoiceObject extends TLComplexTypeBase implements TLFacetOwner, T
     /**
      * Assigns the value of the 'sharedFacet' field.
      * 
-     * @param sharedFacet  the field value to assign
+     * @param sharedFacet the field value to assign
      */
     public void setSharedFacet(TLFacet sharedFacet) {
         if (sharedFacet != this.sharedFacet) {
             if (getOwningModel() != null) {
                 throw new IllegalStateException(
-                        "Facets cannot be modified once their owner has been assigned to a model.");
+                    "Facets cannot be modified once their owner has been assigned to a model." );
             }
             if (sharedFacet != null) {
-            	sharedFacet.setFacetType(TLFacetType.SHARED);
-            	sharedFacet.setOwningEntity(this);
+                sharedFacet.setFacetType( TLFacetType.SHARED );
+                sharedFacet.setOwningEntity( this );
             }
             if (this.sharedFacet != null) {
-                this.sharedFacet.setFacetType(null);
-                this.sharedFacet.setOwningEntity(null);
+                this.sharedFacet.setFacetType( null );
+                this.sharedFacet.setOwningEntity( null );
             }
             this.sharedFacet = sharedFacet;
         }
@@ -260,7 +259,7 @@ public class TLChoiceObject extends TLComplexTypeBase implements TLFacetOwner, T
     /**
      * Returns the list of choice facets for this choice object.
      * 
-     * @return List<TLContextualFacet>
+     * @return List&lt;TLContextualFacet&gt;
      */
     public List<TLContextualFacet> getChoiceFacets() {
         return choiceFacetManager.getChildren();
@@ -269,110 +268,109 @@ public class TLChoiceObject extends TLComplexTypeBase implements TLFacetOwner, T
     /**
      * Returns the choice facet with the specified name.
      * 
-     * @param name  the context of the choice facet to return
+     * @param name the context of the choice facet to return
      * @return TLContextualFacet
      */
     public TLContextualFacet getChoiceFacet(String name) {
-        return choiceFacetManager.getChild(name);
+        return choiceFacetManager.getChild( name );
     }
 
     /**
      * Returns the choice facet with the specified name.
      * 
-     * @param context  the context of the choice facet to return
-     * @param label  the label of the choice facet to return
+     * @param context the context of the choice facet to return
+     * @param label the label of the choice facet to return
      * @return TLContextualFacet
-     * @deprecated  Use the {@link #getChoiceFacet(String)} method instead
+     * @deprecated Use the {@link #getChoiceFacet(String)} method instead
      */
     @Deprecated
     public TLContextualFacet getChoiceFacet(String context, String label) {
-		return getChoiceFacet( label );
+        return getChoiceFacet( label );
     }
 
     /**
-     * Adds a choice <code>TLContextualFacet</code> element to the current list.
+     * In cases where multiple choice facets of the same name are defined for a choice object, this method provides a
+     * means of retrieving based on the name and owning library of the facet.
      * 
-     * @param choiceFacet  the choice facet value to add
-     */
-    public void addChoiceFacet(TLContextualFacet choiceFacet) {
-    	contextualFacetAdded(choiceFacet);
-    	choiceFacetManager.addChild(choiceFacet);
-    }
-
-    /**
-     * In cases where multiple choice facets of the same name are defined for
-     * a choice object, this method provides a means of retrieving based on the
-     * name and owning library of the facet.
+     * <p>
+     * NOTE: Under normal circumstances, this situation only arises after a new library version has been created which
+     * contains non-local contextual facets.
      * 
-     * <p>NOTE: Under normal circumstances, this situation only arises after a new
-     * library version has been created which contains non-local contextual facets.
-     * 
-     * @param facetName  the name of the facet to retrieve
-     * @param facetLibrary  the owning library of the facet
+     * @param facetName the name of the facet to retrieve
+     * @param facetLibrary the owning library of the facet
      * @return TLContextualFacet
      */
-	public TLContextualFacet getChoiceFacet(String facetName, AbstractLibrary facetLibrary) {
-		TLContextualFacet childFacet = null;
-		
-		for (TLContextualFacet facet : getChoiceFacets()) {
-			if (facetName.equals( facet.getName() ) && (facet.getOwningLibrary() == facetLibrary)) {
-				childFacet = facet;
-				break;
-			}
-		}
-		return childFacet;
-	}
-	
+    public TLContextualFacet getChoiceFacet(String facetName, AbstractLibrary facetLibrary) {
+        TLContextualFacet childFacet = null;
+
+        for (TLContextualFacet facet : getChoiceFacets()) {
+            if (facetName.equals( facet.getName() ) && (facet.getOwningLibrary() == facetLibrary)) {
+                childFacet = facet;
+                break;
+            }
+        }
+        return childFacet;
+    }
+
     /**
      * Adds a choice <code>TLContextualFacet</code> element to the current list.
      * 
-     * @param index  the index at which the given choice facet should be added
-     * @param choiceFacet  the choice facet value to add
-     * @throws IndexOutOfBoundsException
-     *             thrown if the index is out of range (index < 0 || index > size())
+     * @param choiceFacet the choice facet value to add
+     */
+    public void addChoiceFacet(TLContextualFacet choiceFacet) {
+        contextualFacetAdded( choiceFacet );
+        choiceFacetManager.addChild( choiceFacet );
+    }
+
+    /**
+     * Adds a choice <code>TLContextualFacet</code> element to the current list.
+     * 
+     * @param index the index at which the given choice facet should be added
+     * @param choiceFacet the choice facet value to add
+     * @throws IndexOutOfBoundsException thrown if the index is out of range (index &lt; 0 || index &gt; size())
      */
     public void addChoiceFacet(int index, TLContextualFacet choiceFacet) {
-    	contextualFacetAdded(choiceFacet);
-    	choiceFacetManager.addChild(index, choiceFacet);
+        contextualFacetAdded( choiceFacet );
+        choiceFacetManager.addChild( index, choiceFacet );
     }
 
     /**
      * Removes the specified choice <code>TLContextualFacet</code> from the current list.
      * 
-     * @param choiceFacet  the choice facet value to remove
+     * @param choiceFacet the choice facet value to remove
      */
     public void removeChoiceFacet(TLContextualFacet choiceFacet) {
-    	contextualFacetRemoved(choiceFacet);
-    	choiceFacetManager.removeChild(choiceFacet);
+        contextualFacetRemoved( choiceFacet );
+        choiceFacetManager.removeChild( choiceFacet );
     }
 
     /**
-     * Moves this choice facet up by one position in the list. If the choice facet is not owned by
-     * this object or it is already at the front of the list, this method has no effect.
+     * Moves this choice facet up by one position in the list. If the choice facet is not owned by this object or it is
+     * already at the front of the list, this method has no effect.
      * 
-     * @param choiceFacet  the choice facet to move
+     * @param choiceFacet the choice facet to move
      */
     public void moveChoiceFacetUp(TLContextualFacet choiceFacet) {
-    	choiceFacetManager.moveUp(choiceFacet);
+        choiceFacetManager.moveUp( choiceFacet );
     }
 
     /**
-     * Moves this choice facet down by one position in the list. If the choice facet is not owned by
-     * this object or it is already at the end of the list, this method has no effect.
+     * Moves this choice facet down by one position in the list. If the choice facet is not owned by this object or it
+     * is already at the end of the list, this method has no effect.
      * 
-     * @param choiceFacet  the choice facet to move
+     * @param choiceFacet the choice facet to move
      */
     public void moveChoiceFacetDown(TLContextualFacet choiceFacet) {
-    	choiceFacetManager.moveDown(choiceFacet);
+        choiceFacetManager.moveDown( choiceFacet );
     }
 
     /**
      * Sorts the list of choice facets using the comparator provided.
      * 
-     * @param comparator  the comparator to use when sorting the list
+     * @param comparator the comparator to use when sorting the list
      */
     public void sortChoiceFacets(Comparator<TLContextualFacet> comparator) {
-    	choiceFacetManager.sortChildren(comparator);
+        choiceFacetManager.sortChildren( comparator );
     }
 
 }

@@ -13,26 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.codegen.example;
+
+import org.opentravel.schemacompiler.model.TLFacet;
+import org.opentravel.schemacompiler.model.TLFacetOwner;
+import org.opentravel.schemacompiler.model.TLOperation;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.xml.namespace.QName;
 
-import org.opentravel.schemacompiler.model.TLFacet;
-import org.opentravel.schemacompiler.model.TLFacetOwner;
-import org.opentravel.schemacompiler.model.TLOperation;
-
 /**
- * Specifies the options to use when generating examples using the <code>ExampleNavigator</code>
- * component.
+ * Specifies the options to use when generating examples using the <code>ExampleNavigator</code> component.
  * 
  * @author S. Livezey
  */
 public class ExampleGeneratorOptions {
 
-    public enum DetailLevel { MINIMUM, MAXIMUM }
+    public enum DetailLevel {
+        MINIMUM, MAXIMUM
+    }
 
     private DetailLevel detailLevel = DetailLevel.MAXIMUM;
     private Map<QName,TLFacet> preferredFacetMap = new HashMap<>();
@@ -53,40 +55,36 @@ public class ExampleGeneratorOptions {
     /**
      * Assigns the amount of detail to include in the generated EXAMPLE.
      * 
-     * @param detailLevel
-     *            the detail level to assign
+     * @param detailLevel the detail level to assign
      */
     public void setDetailLevel(DetailLevel detailLevel) {
         this.detailLevel = detailLevel;
     }
-    
+
     /**
-     * Returns the preferred facet to generate for substitution groups with the
-     * given entity.  If no preferred facet has been assigned, this method will
-     * return null.
+     * Returns the preferred facet to generate for substitution groups with the given entity. If no preferred facet has
+     * been assigned, this method will return null.
      * 
-     * @param entity  the entity for which to return a preferred facet
+     * @param entity the entity for which to return a preferred facet
      * @return TLFacet
      */
     public TLFacet getPreferredFacet(TLFacetOwner entity) {
-    	return preferredFacetMap.get( new QName( entity.getNamespace(), entity.getLocalName() ) );
+        return preferredFacetMap.get( new QName( entity.getNamespace(), entity.getLocalName() ) );
     }
-    
+
     /**
-     * Returns the preferred facet to generate for substitution groups with the
-     * given entity.
+     * Returns the preferred facet to generate for substitution groups with the given entity.
      * 
-     * @param entity  the entity for which to assign the preferred facet
-     * @param preferredFacet  the preferred facet to use when generating substitution
-     *						  groups for the entity
+     * @param entity the entity for which to assign the preferred facet
+     * @param preferredFacet the preferred facet to use when generating substitution groups for the entity
      */
     public void setPreferredFacet(TLFacetOwner entity, TLFacet preferredFacet) {
-    	QName entityName = new QName( entity.getNamespace(), entity.getLocalName() );
-    	
-    	if (entity instanceof TLOperation) {
-    		throw new IllegalArgumentException("Operation facets are not part of substitution groups.");
-    	}
-    	preferredFacetMap.put( entityName, preferredFacet );
+        QName entityName = new QName( entity.getNamespace(), entity.getLocalName() );
+
+        if (entity instanceof TLOperation) {
+            throw new IllegalArgumentException( "Operation facets are not part of substitution groups." );
+        }
+        preferredFacetMap.put( entityName, preferredFacet );
     }
 
     /**
@@ -99,10 +97,9 @@ public class ExampleGeneratorOptions {
     }
 
     /**
-     * Assigns the exampleContext to use identify examples for simple data types.
+     * Assigns the example context to use identify examples for simple data types.
      * 
-     * @param exampleContext
-     *            the exampleContext value to assign
+     * @param context the example context value to assign
      */
     public void setExampleContext(String context) {
         this.exampleContext = context;
@@ -120,16 +117,15 @@ public class ExampleGeneratorOptions {
     /**
      * Assigns the maximum number of time a repeating element should repeat.
      * 
-     * @param maxRepeat
-     *            the maximum repeat value to assign
+     * @param maxRepeat the maximum repeat value to assign
      */
     public void setMaxRepeat(int maxRepeat) {
         this.maxRepeat = maxRepeat;
     }
 
     /**
-     * Returns the maximum number of times that an element should be recursively visited within a
-     * nested object structure.
+     * Returns the maximum number of times that an element should be recursively visited within a nested object
+     * structure.
      * 
      * @return int
      */
@@ -138,34 +134,31 @@ public class ExampleGeneratorOptions {
     }
 
     /**
-     * Assigns the maximum number of times that an element should be recursively visited within a
-     * nested object structure.
+     * Assigns the maximum number of times that an element should be recursively visited within a nested object
+     * structure.
      * 
-     * @param maxRecursionDepth
-     *            the maximum recursion depth to allow during EXAMPLE navigation
+     * @param maxRecursionDepth the maximum recursion depth to allow during EXAMPLE navigation
      */
     public void setMaxRecursionDepth(int maxRecursionDepth) {
         this.maxRecursionDepth = maxRecursionDepth;
     }
 
-	/**
-	 * Returns the flag indicating whether optional fields should be suppressed
-	 * during EXAMPLE generation.
-	 *
-	 * @return boolean
-	 */
-	public boolean isSuppressOptionalFields() {
-		return suppressOptionalFields;
-	}
+    /**
+     * Returns the flag indicating whether optional fields should be suppressed during EXAMPLE generation.
+     *
+     * @return boolean
+     */
+    public boolean isSuppressOptionalFields() {
+        return suppressOptionalFields;
+    }
 
-	/**
-	 * Assigns the flag indicating whether optional fields should be suppressed
-	 * during EXAMPLE generation.
-	 *
-	 * @param suppressOptionalFields  the field value to assign
-	 */
-	public void setSuppressOptionalFields(boolean suppressOptionalFields) {
-		this.suppressOptionalFields = suppressOptionalFields;
-	}
+    /**
+     * Assigns the flag indicating whether optional fields should be suppressed during EXAMPLE generation.
+     *
+     * @param suppressOptionalFields the field value to assign
+     */
+    public void setSuppressOptionalFields(boolean suppressOptionalFields) {
+        this.suppressOptionalFields = suppressOptionalFields;
+    }
 
 }

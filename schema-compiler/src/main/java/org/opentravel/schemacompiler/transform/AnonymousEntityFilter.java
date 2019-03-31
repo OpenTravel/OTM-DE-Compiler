@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.transform;
 
 /**
- * Used in conjunction with a symbol resolver to identify valid symbol references to "Anonymous"
- * entities that can belong to multiple namespaces. The behavior generally follows the chameleon
- * pattern employed during entity resolution for XML schemas.
+ * Used in conjunction with a symbol resolver to identify valid symbol references to "Anonymous" entities that can
+ * belong to multiple namespaces. The behavior generally follows the chameleon pattern employed during entity resolution
+ * for XML schemas.
  * 
  * @author S. Livezey
  */
@@ -29,10 +30,8 @@ public abstract class AnonymousEntityFilter {
     /**
      * Resolves an anonymous (aka. chameleon) entity from the symbol table provided.
      * 
-     * @param localName
-     *            the local name of the entity to resolve
-     * @param symbols
-     *            the symbol table from which the resulting entity should be resolved
+     * @param localName the local name of the entity to resolve
+     * @param symbols the symbol table from which the resulting entity should be resolved
      * @return Object
      */
     public abstract Object getAnonymousEntity(String localName, SymbolTable symbols);

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.transform.jaxb2xsd;
 
 import org.opentravel.schemacompiler.model.XSDComplexType;
@@ -26,15 +27,15 @@ import org.w3._2001.xmlschema.TopLevelComplexType;
  * 
  * @author S. Livezey
  */
-public class TopLevelComplexTypeTransformer extends
-        BaseTransformer<TopLevelComplexType, XSDComplexType, DefaultTransformerContext> {
+public class TopLevelComplexTypeTransformer
+    extends BaseTransformer<TopLevelComplexType,XSDComplexType,DefaultTransformerContext> {
 
     /**
      * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
      */
     @Override
     public XSDComplexType transform(TopLevelComplexType source) {
-        return new XSDComplexType(source.getName(), source);
+        return new XSDComplexType( source.getName(), source );
     }
 
 }

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.validate.base;
 
 import org.opentravel.schemacompiler.model.TLDocumentation;
@@ -36,10 +37,10 @@ public class TLRoleBaseValidator extends TLValidatorBase<TLRole> {
         ValidationFindings findings = new ValidationFindings();
 
         if (target.getDocumentation() != null) {
-            Validator<TLDocumentation> docValidator = getValidatorFactory().getValidatorForClass(
-                    TLDocumentation.class);
+            Validator<TLDocumentation> docValidator =
+                getValidatorFactory().getValidatorForClass( TLDocumentation.class );
 
-            findings.addAll(docValidator.validate(target.getDocumentation()));
+            findings.addAll( docValidator.validate( target.getDocumentation() ) );
         }
         return findings;
     }

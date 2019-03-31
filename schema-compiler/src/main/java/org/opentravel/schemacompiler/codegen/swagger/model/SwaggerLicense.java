@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.codegen.swagger.model;
 
 import org.opentravel.schemacompiler.codegen.json.model.JsonModelObject;
@@ -23,55 +24,55 @@ import com.google.gson.JsonObject;
  * Class that defines the meta-model for a Swagger License object.
  */
 public class SwaggerLicense implements JsonModelObject {
-	
-	private String name;
-	private String url;
-	
-	/**
-	 * Returns the value of the 'name' field.
-	 *
-	 * @return String
-	 */
-	public String getName() {
-		return name;
-	}
-	
-	/**
-	 * Assigns the value of the 'name' field.
-	 *
-	 * @param name  the field value to assign
-	 */
-	public void setName(String name) {
-		this.name = name;
-	}
-	
-	/**
-	 * Returns the value of the 'url' field.
-	 *
-	 * @return String
-	 */
-	public String getUrl() {
-		return url;
-	}
-	
-	/**
-	 * Assigns the value of the 'url' field.
-	 *
-	 * @param url  the field value to assign
-	 */
-	public void setUrl(String url) {
-		this.url = url;
-	}
-	
-	/**
-	 * @see org.opentravel.schemacompiler.codegen.json.model.JsonModelObject#toJson()
-	 */
-	public JsonObject toJson() {
-		JsonObject json = new JsonObject();
-		
-		addProperty( json, "name", name );
-		addProperty( json, "url", url );
-		return json;
-	}
+
+    private String name;
+    private String url;
+
+    /**
+     * Returns the value of the 'name' field.
+     *
+     * @return String
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * Assigns the value of the 'name' field.
+     *
+     * @param name the field value to assign
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    /**
+     * Returns the value of the 'url' field.
+     *
+     * @return String
+     */
+    public String getUrl() {
+        return url;
+    }
+
+    /**
+     * Assigns the value of the 'url' field.
+     *
+     * @param url the field value to assign
+     */
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.codegen.json.model.JsonModelObject#toJson()
+     */
+    public JsonObject toJson() {
+        JsonObject json = new JsonObject();
+
+        addProperty( json, "name", name );
+        addProperty( json, "url", url );
+        return json;
+    }
 
 }

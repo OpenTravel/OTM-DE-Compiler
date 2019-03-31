@@ -13,11 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.repository.impl;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
+package org.opentravel.schemacompiler.repository.impl;
 
 import org.opentravel.schemacompiler.event.ModelElementListener;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
@@ -28,6 +25,10 @@ import org.opentravel.schemacompiler.version.VersionScheme;
 import org.opentravel.schemacompiler.version.VersionSchemeException;
 import org.opentravel.schemacompiler.version.VersionSchemeFactory;
 import org.opentravel.schemacompiler.version.Versioned;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 
 /**
  * Wrapper used to sort repository items in versioned order.
@@ -42,8 +43,7 @@ public class RepositoryItemVersionedWrapper implements Versioned {
     /**
      * Constructor that provides the repository item to be wrapped.
      * 
-     * @param item
-     *            the repository item to be wrapped by this instance
+     * @param item the repository item to be wrapped by this instance
      */
     public RepositoryItemVersionedWrapper(RepositoryItem item) {
         this.item = item;
@@ -81,21 +81,19 @@ public class RepositoryItemVersionedWrapper implements Versioned {
     public boolean isLaterVersion(Versioned otherVersionedItem) {
         boolean result = false;
 
-        if ((versionScheme != null)
-                && (otherVersionedItem instanceof RepositoryItemVersionedWrapper)) {
+        if ((versionScheme != null) && (otherVersionedItem instanceof RepositoryItemVersionedWrapper)) {
             RepositoryItemVersionedWrapper otherRepositoryItem = (RepositoryItemVersionedWrapper) otherVersionedItem;
 
-            if (versionScheme.equals(otherRepositoryItem.getVersionScheme())) {
+            if (versionScheme.equals( otherRepositoryItem.getVersionScheme() )) {
                 try {
-                    VersionScheme vScheme = VersionSchemeFactory.getInstance().getVersionScheme(
-                            versionScheme);
+                    VersionScheme vScheme = VersionSchemeFactory.getInstance().getVersionScheme( versionScheme );
                     String thisBaseNamespace = getBaseNamespace();
 
                     if ((vScheme != null) && (thisBaseNamespace != null)
-                            && thisBaseNamespace.equals(otherRepositoryItem.getBaseNamespace())) {
-                        Comparator<Versioned> comparator = vScheme.getComparator(false);
+                        && thisBaseNamespace.equals( otherRepositoryItem.getBaseNamespace() )) {
+                        Comparator<Versioned> comparator = vScheme.getComparator( false );
 
-                        result = (comparator.compare(otherRepositoryItem, this) > 0);
+                        result = (comparator.compare( otherRepositoryItem, this ) > 0);
                     }
                 } catch (VersionSchemeException e) {
                     // No error - ignore and return false
@@ -169,28 +167,28 @@ public class RepositoryItemVersionedWrapper implements Versioned {
         return null;
     }
 
-	/**
-	 * @see org.opentravel.schemacompiler.model.ModelElement#addListener(org.opentravel.schemacompiler.event.ModelElementListener)
-	 */
-	@Override
-	public void addListener(ModelElementListener listener) {
-		// No action required - listeners not supported
-	}
+    /**
+     * @see org.opentravel.schemacompiler.model.ModelElement#addListener(org.opentravel.schemacompiler.event.ModelElementListener)
+     */
+    @Override
+    public void addListener(ModelElementListener listener) {
+        // No action required - listeners not supported
+    }
 
-	/**
-	 * @see org.opentravel.schemacompiler.model.ModelElement#removeListener(org.opentravel.schemacompiler.event.ModelElementListener)
-	 */
-	@Override
-	public void removeListener(ModelElementListener listener) {
-		// No action required - listeners not supported
-	}
+    /**
+     * @see org.opentravel.schemacompiler.model.ModelElement#removeListener(org.opentravel.schemacompiler.event.ModelElementListener)
+     */
+    @Override
+    public void removeListener(ModelElementListener listener) {
+        // No action required - listeners not supported
+    }
 
-	/**
-	 * @see org.opentravel.schemacompiler.model.ModelElement#getListeners()
-	 */
-	@Override
-	public Collection<ModelElementListener> getListeners() {
-		return Collections.emptyList();
-	}
-    
+    /**
+     * @see org.opentravel.schemacompiler.model.ModelElement#getListeners()
+     */
+    @Override
+    public Collection<ModelElementListener> getListeners() {
+        return Collections.emptyList();
+    }
+
 }

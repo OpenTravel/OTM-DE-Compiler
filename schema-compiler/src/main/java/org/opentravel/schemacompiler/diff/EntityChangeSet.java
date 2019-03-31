@@ -19,27 +19,26 @@ package org.opentravel.schemacompiler.diff;
 import org.opentravel.schemacompiler.model.NamedEntity;
 
 /**
- * Container for all change items identified during the comparison of two entities, as
- * well as the field change sets for the fields that existed in both versions of the
- * entity.
+ * Container for all change items identified during the comparison of two entities, as well as the field change sets for
+ * the fields that existed in both versions of the entity.
  */
 public class EntityChangeSet extends ChangeSet<NamedEntity,EntityChangeItem> {
-	
-	/**
-	 * Constructor that assigns the old and new version of an entity that was modified.
-	 * 
-	 * @param oldEntity  the old version of the entity
-	 * @param newEntity  the new version of the entity
-	 */
-	public EntityChangeSet(NamedEntity oldEntity, NamedEntity newEntity) {
-		super( oldEntity, newEntity );
-	}
-	
-	/**
-	 * @see org.opentravel.schemacompiler.diff.ChangeSet#getBookmarkId()
-	 */
-	public String getBookmarkId() {
-		return getBookmarkId( (getNewVersion() != null) ? getNewVersion() : getOldVersion() );
-	}
+
+    /**
+     * Constructor that assigns the old and new version of an entity that was modified.
+     * 
+     * @param oldEntity the old version of the entity
+     * @param newEntity the new version of the entity
+     */
+    public EntityChangeSet(NamedEntity oldEntity, NamedEntity newEntity) {
+        super( oldEntity, newEntity );
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.diff.ChangeSet#getBookmarkId()
+     */
+    public String getBookmarkId() {
+        return getBookmarkId( (getNewVersion() != null) ? getNewVersion() : getOldVersion() );
+    }
 
 }

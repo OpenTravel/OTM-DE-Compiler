@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.codegen.html.writers;
 
-import java.io.IOException;
+package org.opentravel.schemacompiler.codegen.html.writers;
 
 import org.opentravel.schemacompiler.codegen.html.builders.BusinessObjectDocumentationBuilder;
 import org.opentravel.schemacompiler.codegen.html.builders.DocumentationBuilder;
+
+import java.io.IOException;
 
 /**
  * Generate the BusinessObject Information Page.
@@ -26,20 +27,15 @@ import org.opentravel.schemacompiler.codegen.html.builders.DocumentationBuilder;
 @SuppressWarnings("squid:MaximumInheritanceDepth")
 public class BusinessObjectWriter extends ComplexObjectWriter<BusinessObjectDocumentationBuilder> {
 
-	/**
-	 * @param businessObject
-	 *            the class being documented.
-	 * @param prev
-	 *            the previous class that was documented.
-	 * @param next
-	 *            the next class being documented.
-	 * @param classTree
-	 *            the class tree for the given class.
-	 */
-	public BusinessObjectWriter(BusinessObjectDocumentationBuilder businessObject,
-			DocumentationBuilder prev, DocumentationBuilder next)
-			throws IOException {
-		super(businessObject, prev, next);
-	}
+    /**
+     * @param businessObject the class being documented.
+     * @param prev the previous class that was documented.
+     * @param next the next class being documented.
+     * @throws IOException thrown if an error occurs during writer initialization
+     */
+    public BusinessObjectWriter(BusinessObjectDocumentationBuilder businessObject, DocumentationBuilder prev,
+        DocumentationBuilder next) throws IOException {
+        super( businessObject, prev, next );
+    }
 
 }

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.validate.base;
 
 import org.opentravel.schemacompiler.model.TLAction;
@@ -30,29 +31,32 @@ import org.opentravel.schemacompiler.validate.impl.TLValidatorBase;
  */
 public class TLActionBaseValidator extends TLValidatorBase<TLAction> {
 
-	/**
-	 * @see org.opentravel.schemacompiler.validate.impl.TLValidatorBase#validateChildren(org.opentravel.schemacompiler.validate.Validatable)
-	 */
-	@Override
-	protected ValidationFindings validateChildren(TLAction target) {
-        Validator<TLActionResponse> responseValidator = getValidatorFactory().getValidatorForClass(TLActionResponse.class);
+    /**
+     * @see org.opentravel.schemacompiler.validate.impl.TLValidatorBase#validateChildren(org.opentravel.schemacompiler.validate.Validatable)
+     */
+    @Override
+    protected ValidationFindings validateChildren(TLAction target) {
+        Validator<TLActionResponse> responseValidator =
+            getValidatorFactory().getValidatorForClass( TLActionResponse.class );
         ValidationFindings findings = new ValidationFindings();
-        
+
         if (target.getDocumentation() != null) {
-            Validator<TLDocumentation> docValidator = getValidatorFactory().getValidatorForClass(TLDocumentation.class);
+            Validator<TLDocumentation> docValidator =
+                getValidatorFactory().getValidatorForClass( TLDocumentation.class );
 
-            findings.addAll(docValidator.validate(target.getDocumentation()));
+            findings.addAll( docValidator.validate( target.getDocumentation() ) );
         }
-        
-        if (target.getRequest() != null) {
-            Validator<TLActionRequest> requestValidator = getValidatorFactory().getValidatorForClass(TLActionRequest.class);
 
-            findings.addAll(requestValidator.validate(target.getRequest()));
+        if (target.getRequest() != null) {
+            Validator<TLActionRequest> requestValidator =
+                getValidatorFactory().getValidatorForClass( TLActionRequest.class );
+
+            findings.addAll( requestValidator.validate( target.getRequest() ) );
         }
         for (TLActionResponse response : target.getResponses()) {
-            findings.addAll(responseValidator.validate(response));
+            findings.addAll( responseValidator.validate( response ) );
         }
         return findings;
-	}
+    }
 
 }

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.model;
 
 import org.opentravel.schemacompiler.event.ModelEvent;
@@ -38,12 +39,12 @@ public class TLDocumentationItem extends TLModelElement implements LibraryElemen
         StringBuilder identity = new StringBuilder();
 
         if (owningDocumentation != null) {
-            identity.append(owningDocumentation.getValidationIdentity()).append("/");
+            identity.append( owningDocumentation.getValidationIdentity() ).append( "/" );
         }
         if (type == null) {
-            identity.append("[Unknown Documentation Element]");
+            identity.append( "[Unknown Documentation Element]" );
         } else {
-            identity.append(type.getDisplayIdentity());
+            identity.append( type.getDisplayIdentity() );
         }
         return identity.toString();
     }
@@ -76,8 +77,7 @@ public class TLDocumentationItem extends TLModelElement implements LibraryElemen
     /**
      * Assigns the value of the 'owningDocumentation' field.
      * 
-     * @param owningDocumentation
-     *            the field value to assign
+     * @param owningDocumentation the field value to assign
      */
     public void setOwningDocumentation(TLDocumentation owningDocumentation) {
         this.owningDocumentation = owningDocumentation;
@@ -95,8 +95,7 @@ public class TLDocumentationItem extends TLModelElement implements LibraryElemen
     /**
      * Assigns the value of the 'type' field.
      * 
-     * @param type
-     *            the field value to assign
+     * @param type the field value to assign
      */
     public void setType(TLDocumentationType type) {
         this.type = type;
@@ -114,16 +113,15 @@ public class TLDocumentationItem extends TLModelElement implements LibraryElemen
     /**
      * Assigns the value of the 'text' field.
      * 
-     * @param text
-     *            the field value to assign
+     * @param text the field value to assign
      */
-    public void setText(String description) {
-        String desc = TLDocumentation.adjustStringEncoding(description);
-        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.DOC_TEXT_MODIFIED, this)
-                .setOldValue(this.text).setNewValue(desc).buildEvent();
+    public void setText(String text) {
+        String desc = TLDocumentation.adjustStringEncoding( text );
+        ModelEvent<?> event = new ModelEventBuilder( ModelEventType.DOC_TEXT_MODIFIED, this ).setOldValue( this.text )
+            .setNewValue( desc ).buildEvent();
 
         this.text = desc;
-        publishEvent(event);
+        publishEvent( event );
     }
 
     /**
@@ -131,22 +129,19 @@ public class TLDocumentationItem extends TLModelElement implements LibraryElemen
      * 
      * @author S. Livezey
      */
-    protected static class DocumentationItemListManager extends
-            ChildEntityListManager<TLDocumentationItem, TLDocumentation> {
+    protected static class DocumentationItemListManager
+        extends ChildEntityListManager<TLDocumentationItem,TLDocumentation> {
 
         /**
          * Constructor that specifies the owner of the unerlying list.
          * 
-         * @param owner
-         *            the owner of the underlying list of children
-         * @param addEventType
-         *            the type of event to publish when a child entity is added
-         * @param removeEventType
-         *            the type of event to publish when a child entity is removed
+         * @param owner the owner of the underlying list of children
+         * @param addEventType the type of event to publish when a child entity is added
+         * @param removeEventType the type of event to publish when a child entity is removed
          */
         public DocumentationItemListManager(TLDocumentation owner, ModelEventType addEventType,
-                ModelEventType removeEventType) {
-            super(owner, addEventType, removeEventType);
+            ModelEventType removeEventType) {
+            super( owner, addEventType, removeEventType );
         }
 
         /**
@@ -163,7 +158,7 @@ public class TLDocumentationItem extends TLModelElement implements LibraryElemen
          */
         @Override
         protected void assignOwner(TLDocumentationItem child, TLDocumentation owner) {
-            child.setOwningDocumentation(owner);
+            child.setOwningDocumentation( owner );
         }
 
         /**
@@ -173,7 +168,7 @@ public class TLDocumentationItem extends TLModelElement implements LibraryElemen
         @Override
         protected void publishEvent(TLDocumentation owner, ModelEvent<?> event) {
             if (owner != null) {
-                owner.publishEvent(event);
+                owner.publishEvent( event );
             }
         }
 

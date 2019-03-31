@@ -13,13 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.transform.tl2jaxb;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+package org.opentravel.schemacompiler.transform.tl2jaxb;
 
 import org.opentravel.ns.ota2.librarymodel_v01_05.BusinessObject;
 import org.opentravel.ns.ota2.librarymodel_v01_05.ChoiceObject;
@@ -55,44 +50,48 @@ import org.opentravel.schemacompiler.transform.ObjectTransformer;
 import org.opentravel.schemacompiler.transform.symbols.SymbolResolverTransformerContext;
 import org.opentravel.schemacompiler.transform.util.BaseTransformer;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 /**
- * Handles the transformation of objects from the <code>TLLibrary</code> type to the
- * <code>Library</code> type.
+ * Handles the transformation of objects from the <code>TLLibrary</code> type to the <code>Library</code> type.
  * 
  * @author S. Livezey
  */
-public class TLLibraryTransformer extends
-        BaseTransformer<TLLibrary, Library, SymbolResolverTransformerContext> {
+public class TLLibraryTransformer extends BaseTransformer<TLLibrary,Library,SymbolResolverTransformerContext> {
 
-    private static final Map<Class<?>, Class<?>> model2JaxbClassMappings;
+    private static final Map<Class<?>,Class<?>> model2JaxbClassMappings;
 
     /**
      * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
      */
     @Override
     public Library transform(TLLibrary source) {
-        ObjectTransformer<TLContext, ContextDeclaration, SymbolResolverTransformerContext> contextTransformer = getTransformerFactory()
-                .getTransformer(TLContext.class, ContextDeclaration.class);
+        ObjectTransformer<TLContext,ContextDeclaration,SymbolResolverTransformerContext> contextTransformer =
+            getTransformerFactory().getTransformer( TLContext.class, ContextDeclaration.class );
         Library target = new Library();
 
-        target.setName(trimString(source.getName(), false));
-        target.setVersionScheme(trimString(source.getVersionScheme(), false));
-        target.setPreviousVersionLocation(trimString(source.getPreviousVersionUri()));
-        target.setStatus(transformStatus(source.getStatus()));
-        target.setNamespace(trimString(source.getNamespace(), false));
-        target.setPrefix(trimString(source.getPrefix()));
-        target.setComments(trimString(source.getComments()));
+        target.setName( trimString( source.getName(), false ) );
+        target.setVersionScheme( trimString( source.getVersionScheme(), false ) );
+        target.setPreviousVersionLocation( trimString( source.getPreviousVersionUri() ) );
+        target.setStatus( transformStatus( source.getStatus() ) );
+        target.setNamespace( trimString( source.getNamespace(), false ) );
+        target.setPrefix( trimString( source.getPrefix() ) );
+        target.setComments( trimString( source.getComments() ) );
 
         if (source.getAlternateCredentialsUrl() != null) {
-            target.setAlternateCredentials(source.getAlternateCredentialsUrl().toExternalForm());
+            target.setAlternateCredentials( source.getAlternateCredentialsUrl().toExternalForm() );
         }
 
         for (TLContext context : source.getContexts()) {
-            target.getContext().add(contextTransformer.transform(context));
+            target.getContext().add( contextTransformer.transform( context ) );
         }
 
         if (source.getIncludes() != null) {
-            target.getIncludes().addAll(getIncludePaths(source.getIncludes()));
+            target.getIncludes().addAll( getIncludePaths( source.getIncludes() ) );
         }
 
         for (TLNamespaceImport modelImport : source.getNamespaceImports()) {
@@ -101,64 +100,64 @@ public class TLLibraryTransformer extends
 
         // Perform transforms for all library members
         for (NamedEntity libraryMember : source.getNamedMembers()) {
-            Class<?> targetType = model2JaxbClassMappings.get(libraryMember.getClass());
+            Class<?> targetType = model2JaxbClassMappings.get( libraryMember.getClass() );
 
             if (targetType != null) {
-                ObjectTransformer<NamedEntity, ?, SymbolResolverTransformerContext> transformer = getTransformerFactory()
-                        .getTransformer(libraryMember, targetType);
-                Object jaxbTerm = transformer.transform(libraryMember);
+                ObjectTransformer<NamedEntity,?,SymbolResolverTransformerContext> transformer =
+                    getTransformerFactory().getTransformer( libraryMember, targetType );
+                Object jaxbTerm = transformer.transform( libraryMember );
 
                 if (jaxbTerm instanceof Service) {
-                    target.setService((Service) jaxbTerm);
+                    target.setService( (Service) jaxbTerm );
 
                 } else {
-                    target.getTerms().add(jaxbTerm);
+                    target.getTerms().add( jaxbTerm );
                 }
             }
         }
         return target;
     }
 
-	/**
-	 * Transforms the given namespace import.
-	 * 
-	 * @param source  the source library being transformed
-	 * @param target  the target JAXB library instance
-	 */
-	private void transformImport(TLNamespaceImport modelImport, Library target) {
-		NamespaceImport jaxbImport = new NamespaceImport();
+    /**
+     * Transforms the given namespace import.
+     * 
+     * @param source the source library being transformed
+     * @param target the target JAXB library instance
+     */
+    private void transformImport(TLNamespaceImport modelImport, Library target) {
+        NamespaceImport jaxbImport = new NamespaceImport();
 
-		if ((modelImport.getFileHints() != null) && !modelImport.getFileHints().isEmpty()) {
-		    StringBuilder fileHints = new StringBuilder();
+        if ((modelImport.getFileHints() != null) && !modelImport.getFileHints().isEmpty()) {
+            StringBuilder fileHints = new StringBuilder();
 
-		    for (String fileHint : modelImport.getFileHints()) {
-		        if (fileHint != null) {
-		            if (fileHints.length() > 0)
-		                fileHints.append(' ');
-		            fileHints.append(fileHint);
-		        }
-		    }
-		    jaxbImport.setFileHints(fileHints.toString());
-		}
-		jaxbImport.setPrefix(trimString(modelImport.getPrefix()));
-		jaxbImport.setNamespace(trimString(modelImport.getNamespace()));
-		target.getImport().add(jaxbImport);
-	}
+            for (String fileHint : modelImport.getFileHints()) {
+                if (fileHint != null) {
+                    if (fileHints.length() > 0) {
+                        fileHints.append( ' ' );
+                    }
+                    fileHints.append( fileHint );
+                }
+            }
+            jaxbImport.setFileHints( fileHints.toString() );
+        }
+        jaxbImport.setPrefix( trimString( modelImport.getPrefix() ) );
+        jaxbImport.setNamespace( trimString( modelImport.getNamespace() ) );
+        target.getImport().add( jaxbImport );
+    }
 
     /**
-     * Extracts the list of include paths from the given list of <code>TLInclude</code> entities and
-     * returns them as a simple list of strings.
+     * Extracts the list of include paths from the given list of <code>TLInclude</code> entities and returns them as a
+     * simple list of strings.
      * 
-     * @param includes
-     *            the list of include entities to process
-     * @return List<String>
+     * @param includes the list of include entities to process
+     * @return List&lt;String&gt;
      */
     private List<String> getIncludePaths(List<TLInclude> includes) {
         List<String> roleNames = new ArrayList<>();
 
         for (TLInclude include : includes) {
             if (include.getPath() != null) {
-                roleNames.add(trimString(include.getPath()));
+                roleNames.add( trimString( include.getPath() ) );
             }
         }
         return roleNames;
@@ -167,8 +166,7 @@ public class TLLibraryTransformer extends
     /**
      * Converts the JAXB status enumeration value into its equivalent value for the TL model.
      * 
-     * @param jaxbStatus
-     *            the JAXB status enumeration value
+     * @param jaxbStatus the JAXB status enumeration value
      * @return TLLibraryStatus
      */
     private LibraryStatus transformStatus(TLLibraryStatus tlStatus) {
@@ -193,27 +191,27 @@ public class TLLibraryTransformer extends
     }
 
     /**
-     * Initializes the JAXB-to-TLModel class mappings required to obtain an
-     * <code>ObjectTransformer</code> for arbitrary JAXB objects.
+     * Initializes the JAXB-to-TLModel class mappings required to obtain an <code>ObjectTransformer</code> for arbitrary
+     * JAXB objects.
      */
     static {
         try {
             Map<Class<?>,Class<?>> classMappings = new HashMap<>();
 
-            classMappings.put(TLService.class, Service.class);
-            classMappings.put(TLBusinessObject.class, BusinessObject.class);
-            classMappings.put(TLChoiceObject.class, ChoiceObject.class);
-            classMappings.put(TLCoreObject.class, CoreObject.class);
-            classMappings.put(TLClosedEnumeration.class, EnumerationClosed.class);
-            classMappings.put(TLOpenEnumeration.class, EnumerationOpen.class);
-            classMappings.put(TLResource.class, Resource.class);
-            classMappings.put(TLSimple.class, Simple.class);
-            classMappings.put(TLValueWithAttributes.class, ValueWithAttributes.class);
-            classMappings.put(TLExtensionPointFacet.class, ExtensionPointFacet.class);
-            model2JaxbClassMappings = Collections.unmodifiableMap(classMappings);
+            classMappings.put( TLService.class, Service.class );
+            classMappings.put( TLBusinessObject.class, BusinessObject.class );
+            classMappings.put( TLChoiceObject.class, ChoiceObject.class );
+            classMappings.put( TLCoreObject.class, CoreObject.class );
+            classMappings.put( TLClosedEnumeration.class, EnumerationClosed.class );
+            classMappings.put( TLOpenEnumeration.class, EnumerationOpen.class );
+            classMappings.put( TLResource.class, Resource.class );
+            classMappings.put( TLSimple.class, Simple.class );
+            classMappings.put( TLValueWithAttributes.class, ValueWithAttributes.class );
+            classMappings.put( TLExtensionPointFacet.class, ExtensionPointFacet.class );
+            model2JaxbClassMappings = Collections.unmodifiableMap( classMappings );
 
         } catch (Exception e) {
-            throw new ExceptionInInitializerError(e);
+            throw new ExceptionInInitializerError( e );
         }
     }
 

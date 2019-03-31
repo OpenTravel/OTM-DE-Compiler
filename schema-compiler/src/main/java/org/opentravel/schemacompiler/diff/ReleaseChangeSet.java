@@ -19,28 +19,27 @@ package org.opentravel.schemacompiler.diff;
 import org.opentravel.schemacompiler.repository.Release;
 
 /**
- * Container for all change items identified during the comparison of two releases, as
- * well as the library change sets for the libraries that existed in both versions of the
- * release.
+ * Container for all change items identified during the comparison of two releases, as well as the library change sets
+ * for the libraries that existed in both versions of the release.
  */
 public class ReleaseChangeSet extends ChangeSet<Release,ReleaseChangeItem> {
-	
-	/**
-	 * Constructor that assigns the old and new version of a project that was modified.
-	 * 
-	 * @param oldProject  the old version of the project
-	 * @param newProject  the new version of the project
-	 */
-	public ReleaseChangeSet(Release oldRelease, Release newRelease) {
-		super( oldRelease, newRelease );
-	}
 
-	/**
-	 * @see org.opentravel.schemacompiler.diff.ChangeSet#getBookmarkId()
-	 */
-	public String getBookmarkId() {
-		Release release = (getNewVersion() != null) ? getNewVersion() : getOldVersion();
-		return (release == null) ? "UNKNOWN_PROJECT" : ("rel$" + release.getName());
-	}
+    /**
+     * Constructor that assigns the old and new version of a release that was modified.
+     * 
+     * @param oldRelease the old version of the release
+     * @param newRelease the new version of the release
+     */
+    public ReleaseChangeSet(Release oldRelease, Release newRelease) {
+        super( oldRelease, newRelease );
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.diff.ChangeSet#getBookmarkId()
+     */
+    public String getBookmarkId() {
+        Release release = (getNewVersion() != null) ? getNewVersion() : getOldVersion();
+        return (release == null) ? "UNKNOWN_PROJECT" : ("rel$" + release.getName());
+    }
 
 }

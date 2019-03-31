@@ -13,11 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.codegen.example;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
+package org.opentravel.schemacompiler.codegen.example;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerationContext;
 import org.opentravel.schemacompiler.codegen.CodeGenerationException;
@@ -30,93 +27,83 @@ import org.opentravel.schemacompiler.model.XSDLibrary;
 import org.opentravel.schemacompiler.xml.XMLPrettyPrinter;
 import org.w3c.dom.Document;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+
 /**
- * Code generator that produces sample XML output for <code>NamedEntity</code>
- * members of the generated libraries.
+ * Code generator that produces sample XML output for <code>NamedEntity</code> members of the generated libraries.
  * 
  * @author S. Livezey, E. Bronson
  * 
  */
 public class XMLExampleCodeGenerator extends AbstractExampleCodeGenerator {
 
-	/**
-	 * The file extension for xml, i.e. filename.xml.
-	 */
-	public static final String XML_FILE_EXTENSION = "xml";
+    /**
+     * The file extension for xml, i.e. filename.xml.
+     */
+    public static final String XML_FILE_EXTENSION = "xml";
 
-	/**
-	 * Default constructor. Initializes the proper file extension.
-	 */
-	public XMLExampleCodeGenerator() {
-		super(XML_FILE_EXTENSION);
-	}
+    /**
+     * Default constructor. Initializes the proper file extension.
+     */
+    public XMLExampleCodeGenerator() {
+        super( XML_FILE_EXTENSION );
+    }
 
-	/**
-	 * @see org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator#doGenerateOutput(org.opentravel.schemacompiler.model.TLModelElement,
-	 *      org.opentravel.schemacompiler.codegen.CodeGenerationContext)
-	 */
-	@Override
-	public void doGenerateOutput(TLModelElement source,
-			CodeGenerationContext context) throws CodeGenerationException {
-		File outputFile = getOutputFile(source, context);
-		
-		try (OutputStream out = new FileOutputStream(outputFile);) {
-			ExampleDocumentBuilder exampleBuilder = new ExampleDocumentBuilder(getOptions(context));
-			exampleBuilder.setModelElement((NamedEntity) source);
+    /**
+     * @see org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator#doGenerateOutput(org.opentravel.schemacompiler.model.ModelElement,
+     *      org.opentravel.schemacompiler.codegen.CodeGenerationContext)
+     */
+    @Override
+    public void doGenerateOutput(TLModelElement source, CodeGenerationContext context) throws CodeGenerationException {
+        File outputFile = getOutputFile( source, context );
 
-			// Register the schema location for each library in the model
-			registerSchemaLocations(exampleBuilder, source.getOwningModel(),
-					context);
+        try (OutputStream out = new FileOutputStream( outputFile );) {
+            ExampleDocumentBuilder exampleBuilder = new ExampleDocumentBuilder( getOptions( context ) );
+            exampleBuilder.setModelElement( (NamedEntity) source );
 
-			// Generate the XML document and send formatted content to the
-			// output file
-			Document domDocument = exampleBuilder.buildTree();
-			new XMLPrettyPrinter().formatDocument(domDocument, out);
+            // Register the schema location for each library in the model
+            registerSchemaLocations( exampleBuilder, source.getOwningModel(), context );
 
-			addGeneratedFile(outputFile);
+            // Generate the XML document and send formatted content to the
+            // output file
+            Document domDocument = exampleBuilder.buildTree();
+            new XMLPrettyPrinter().formatDocument( domDocument, out );
 
-		} catch (Exception e) {
-			throw new CodeGenerationException(e);
-		}
-	}
+            addGeneratedFile( outputFile );
 
-	/**
-	 * Registers schema output locations for all libraries in the specified
-	 * model.
-	 * 
-	 * @param builder
-	 *            the builder for which schema locations should be registered
-	 * @param model
-	 *            the model containing all possible libraries to be resolved
-	 * @param context
-	 *            the code generation context
-	 */
-	private void registerSchemaLocations(ExampleDocumentBuilder builder,
-			TLModel model, CodeGenerationContext context) {
-		if (model != null) {
-			// Register the schema locations of all libraries
-			for (AbstractLibrary library : model.getAllLibraries()) {
-				String schemaPath = context
-						.getValue(CodeGenerationContext.CK_EXAMPLE_SCHEMA_RELATIVE_PATH);
-				String schemaFilename = getFilenameBuilder().buildFilename(
-						library, "xsd");
-				String schemaLocation;
+        } catch (Exception e) {
+            throw new CodeGenerationException( e );
+        }
+    }
 
-				if (library instanceof TLLibrary) {
-					schemaLocation = schemaPath + schemaFilename;
+    /**
+     * Registers schema output locations for all libraries in the specified model.
+     * 
+     * @param builder the builder for which schema locations should be registered
+     * @param model the model containing all possible libraries to be resolved
+     * @param context the code generation context
+     */
+    private void registerSchemaLocations(ExampleDocumentBuilder builder, TLModel model, CodeGenerationContext context) {
+        if (model != null) {
+            // Register the schema locations of all libraries
+            for (AbstractLibrary library : model.getAllLibraries()) {
+                String schemaPath = context.getValue( CodeGenerationContext.CK_EXAMPLE_SCHEMA_RELATIVE_PATH );
+                String schemaFilename = getFilenameBuilder().buildFilename( library, "xsd" );
+                String schemaLocation;
 
-				} else if (library instanceof XSDLibrary) {
-					schemaLocation = schemaPath
-							+ getLegacySchemaOutputLocation(context) + "/"
-							+ schemaFilename;
+                if (library instanceof TLLibrary) {
+                    schemaLocation = schemaPath + schemaFilename;
 
-				} else { // Built-in library
-					schemaLocation = schemaPath
-							+ getBuiltInSchemaOutputLocation(context) + "/"
-							+ schemaFilename;
-				}
-				builder.addSchemaLocation(library, schemaLocation);
-			}
-		}
-	}
+                } else if (library instanceof XSDLibrary) {
+                    schemaLocation = schemaPath + getLegacySchemaOutputLocation( context ) + "/" + schemaFilename;
+
+                } else { // Built-in library
+                    schemaLocation = schemaPath + getBuiltInSchemaOutputLocation( context ) + "/" + schemaFilename;
+                }
+                builder.addSchemaLocation( library, schemaLocation );
+            }
+        }
+    }
 }

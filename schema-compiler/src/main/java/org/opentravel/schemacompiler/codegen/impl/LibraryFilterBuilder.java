@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.codegen.impl;
 
-import javax.xml.namespace.QName;
+package org.opentravel.schemacompiler.codegen.impl;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerationFilter;
 import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
@@ -59,9 +58,11 @@ import org.opentravel.schemacompiler.model.XSDSimpleType;
 import org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter;
 import org.opentravel.schemacompiler.visitor.SchemaDependencyNavigator;
 
+import javax.xml.namespace.QName;
+
 /**
- * Builder used to construct a <code>CodeGenerationFilter</code> that can be used to identify
- * imports and includes for a single OTM library instance.
+ * Builder used to construct a <code>CodeGenerationFilter</code> that can be used to identify imports and includes for a
+ * single OTM library instance.
  * 
  * @author S. Livezey
  */
@@ -73,24 +74,21 @@ public class LibraryFilterBuilder {
     /**
      * Default constructor.
      */
-    public LibraryFilterBuilder() {
-    }
+    public LibraryFilterBuilder() {}
 
     /**
      * Constructor that specifies the library instance for which a filter will be created.
      * 
-     * @param library
-     *            the library for which imports and includes are to be defined
+     * @param library the library for which imports and includes are to be defined
      */
     public LibraryFilterBuilder(AbstractLibrary library) {
-        setLibrary(library);
+        setLibrary( library );
     }
 
     /**
      * Assigns the library instance for which a filter will be created.
      * 
-     * @param library
-     *            the library for which imports and includes are to be defined
+     * @param library the library for which imports and includes are to be defined
      * @return LibraryFilterBuilder
      */
     public LibraryFilterBuilder setLibrary(AbstractLibrary library) {
@@ -99,12 +97,11 @@ public class LibraryFilterBuilder {
     }
 
     /**
-     * Assigns a glober filter for this builder instance. If assigned, the filter that is produced
-     * by the 'build()' method is guaranteed to allow only a subset of the global filter. No
-     * entities that are disallowed by the global filter will be allowed by the resulting filter.
+     * Assigns a glober filter for this builder instance. If assigned, the filter that is produced by the 'build()'
+     * method is guaranteed to allow only a subset of the global filter. No entities that are disallowed by the global
+     * filter will be allowed by the resulting filter.
      * 
-     * @param globalFilter
-     *            the global filter to apply when generating the library-specific filter
+     * @param globalFilter the global filter to apply when generating the library-specific filter
      * @return LibraryFilterBuilder
      */
     public LibraryFilterBuilder setGlobalFilter(CodeGenerationFilter globalFilter) {
@@ -113,30 +110,28 @@ public class LibraryFilterBuilder {
     }
 
     /**
-     * Constructs the filter that can be used to identify the imports and includes of the target
-     * library.
+     * Constructs the filter that can be used to identify the imports and includes of the target library.
      * 
      * @return CodeGenerationFilter
      */
     public CodeGenerationFilter buildFilter() {
         DependencyVisitor visitor = new DependencyVisitor();
-        SchemaDependencyNavigator navigator = new SchemaDependencyNavigator(visitor);
+        SchemaDependencyNavigator navigator = new SchemaDependencyNavigator( visitor );
 
-    	navigator.navigateLibrary(library);
-    	
+        navigator.navigateLibrary( library );
+
         if (library instanceof TLLibrary) {
-        	TLLibrary tlLibrary = (TLLibrary) library;
-        	
+            TLLibrary tlLibrary = (TLLibrary) library;
+
             for (TLContextualFacet ghostFacet : FacetCodegenUtils.findNonLocalGhostFacets( tlLibrary )) {
-            	navigator.navigate( ghostFacet );
+                navigator.navigate( ghostFacet );
             }
         }
         return visitor.getFilter();
     }
 
     /**
-     * Model element visitor that captures all named entities that are required by the
-     * currently-assigned service.
+     * Model element visitor that captures all named entities that are required by the currently-assigned service.
      * 
      * @author S. Livezey
      */
@@ -154,48 +149,43 @@ public class LibraryFilterBuilder {
         }
 
         /**
-         * Internal visitor method that adds the given library element and it's owning library to
-         * the filter that is being populated.
+         * Internal visitor method that adds the given library element and it's owning library to the filter that is
+         * being populated.
          * 
-         * @param entity
-         *            the library element being visited
+         * @param entity the library element being visited
          */
         private void visitLibraryElement(LibraryElement entity) {
-            if ((entity != null) && isAllowedByGlobalFilter(entity)) {
-                filter.addProcessedLibrary(entity.getOwningLibrary());
-                filter.addProcessedElement(entity);
+            if ((entity != null) && isAllowedByGlobalFilter( entity )) {
+                filter.addProcessedLibrary( entity.getOwningLibrary() );
+                filter.addProcessedElement( entity );
             }
         }
 
         /**
          * Returns true if the global filter will allow the inclusion of the given entity.
          * 
-         * @param entity
-         *            the library element being visited
+         * @param entity the library element being visited
          * @return boolean
          */
         private boolean isAllowedByGlobalFilter(LibraryElement entity) {
-            return (globalFilter == null) || globalFilter.processEntity(entity);
+            return (globalFilter == null) || globalFilter.processEntity( entity );
         }
 
         /**
-         * When the compiled XSD includes an implied dependency on a built-in type, this method
-         * ensures it will be imported, even though it is not directly referenced by the source
-         * library.
+         * When the compiled XSD includes an implied dependency on a built-in type, this method ensures it will be
+         * imported, even though it is not directly referenced by the source library.
          * 
-         * @param model
-         *            the model that contains the built-in libraries to be searched
+         * @param model the model that contains the built-in libraries to be searched
          */
         private void visitSchemaDependency(SchemaDependency dependency, TLModel model) {
             QName dependencyQName = dependency.toQName();
 
             for (BuiltInLibrary lib : model.getBuiltInLibraries()) {
-                if (lib.getNamespace().equals(dependencyQName.getNamespaceURI())) {
-                	NamedEntity builtInType = lib.getNamedMember(dependencyQName
-                            .getLocalPart());
+                if (lib.getNamespace().equals( dependencyQName.getNamespaceURI() )) {
+                    NamedEntity builtInType = lib.getNamedMember( dependencyQName.getLocalPart() );
 
                     if (builtInType != null) {
-                        visitLibraryElement(builtInType);
+                        visitLibraryElement( builtInType );
                     }
                 }
             }
@@ -206,8 +196,8 @@ public class LibraryFilterBuilder {
          */
         @Override
         public boolean visitSimple(TLSimple simple) {
-            visitLibraryElement(simple.getParentType());
-            return isAllowedByGlobalFilter(simple);
+            visitLibraryElement( simple.getParentType() );
+            return isAllowedByGlobalFilter( simple );
         }
 
         /**
@@ -216,11 +206,10 @@ public class LibraryFilterBuilder {
         @Override
         public boolean visitValueWithAttributes(TLValueWithAttributes valueWithAttributes) {
             if (valueWithAttributes.getParentType() == null) {
-                visitSchemaDependency(SchemaDependency.getEmptyElement(),
-                        valueWithAttributes.getOwningModel());
+                visitSchemaDependency( SchemaDependency.getEmptyElement(), valueWithAttributes.getOwningModel() );
             }
-            visitLibraryElement(valueWithAttributes.getParentType());
-            return isAllowedByGlobalFilter(valueWithAttributes);
+            visitLibraryElement( valueWithAttributes.getParentType() );
+            return isAllowedByGlobalFilter( valueWithAttributes );
         }
 
         /**
@@ -228,8 +217,8 @@ public class LibraryFilterBuilder {
          */
         @Override
         public boolean visitSimpleFacet(TLSimpleFacet simpleFacet) {
-            visitLibraryElement(simpleFacet.getSimpleType());
-            return isAllowedByGlobalFilter(simpleFacet);
+            visitLibraryElement( simpleFacet.getSimpleType() );
+            return isAllowedByGlobalFilter( simpleFacet );
         }
 
         /**
@@ -237,12 +226,12 @@ public class LibraryFilterBuilder {
          */
         @Override
         public boolean visitAttribute(TLAttribute attribute) {
-        	if (attribute.getType() instanceof TLOpenEnumeration) {
-        		// We have to visit the open enumeration, to catch the dependency for the string extension
-        		visitOpenEnumeration((TLOpenEnumeration) attribute.getType());
-        	}
-            visitLibraryElement(attribute.getType());
-            return isAllowedByGlobalFilter(attribute.getType());
+            if (attribute.getType() instanceof TLOpenEnumeration) {
+                // We have to visit the open enumeration, to catch the dependency for the string extension
+                visitOpenEnumeration( (TLOpenEnumeration) attribute.getType() );
+            }
+            visitLibraryElement( attribute.getType() );
+            return isAllowedByGlobalFilter( attribute.getType() );
         }
 
         /**
@@ -254,7 +243,7 @@ public class LibraryFilterBuilder {
                 XSDComplexType propertyType = (XSDComplexType) element.getType();
 
                 if (propertyType.getIdentityAlias() != null) {
-                    visitLibraryElement(propertyType.getIdentityAlias());
+                    visitLibraryElement( propertyType.getIdentityAlias() );
 
                 } else {
                     AbstractLibrary owningLibrary = propertyType.getOwningLibrary();
@@ -265,13 +254,13 @@ public class LibraryFilterBuilder {
                         // generate an extension schema for the type. Therefore, we should create a
                         // dependency
                         // on the extension schema instead of the legacy schema itself.
-                        filter.addExtensionLibrary((XSDLibrary) propertyType.getOwningLibrary());
-                        filter.addProcessedElement(propertyType);
+                        filter.addExtensionLibrary( (XSDLibrary) propertyType.getOwningLibrary() );
+                        filter.addProcessedElement( propertyType );
                     }
                 }
             }
-            visitLibraryElement(element.getType());
-            return isAllowedByGlobalFilter(element.getType());
+            visitLibraryElement( element.getType() );
+            return isAllowedByGlobalFilter( element.getType() );
         }
 
         /**
@@ -279,8 +268,8 @@ public class LibraryFilterBuilder {
          */
         @Override
         public boolean visitOpenEnumeration(TLOpenEnumeration enumeration) {
-            visitSchemaDependency(SchemaDependency.getEnumExtension(), enumeration.getOwningModel());
-            return isAllowedByGlobalFilter(enumeration);
+            visitSchemaDependency( SchemaDependency.getEnumExtension(), enumeration.getOwningModel() );
+            return isAllowedByGlobalFilter( enumeration );
         }
 
         /**
@@ -288,41 +277,41 @@ public class LibraryFilterBuilder {
          */
         @Override
         public boolean visitRole(TLRole role) {
-            visitSchemaDependency(SchemaDependency.getEnumExtension(), role.getOwningModel());
-            return isAllowedByGlobalFilter(role.getRoleEnumeration().getOwningEntity());
+            visitSchemaDependency( SchemaDependency.getEnumExtension(), role.getOwningModel() );
+            return isAllowedByGlobalFilter( role.getRoleEnumeration().getOwningEntity() );
         }
 
         /**
-		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitContextualFacet(org.opentravel.schemacompiler.model.TLContextualFacet)
-		 */
-		@Override
-		public boolean visitContextualFacet(TLContextualFacet facet) {
-            visitLibraryElement(facet.getOwningEntity());
-			return super.visitContextualFacet(facet);
-		}
+         * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitContextualFacet(org.opentravel.schemacompiler.model.TLContextualFacet)
+         */
+        @Override
+        public boolean visitContextualFacet(TLContextualFacet facet) {
+            visitLibraryElement( facet.getOwningEntity() );
+            return super.visitContextualFacet( facet );
+        }
 
-		/**
+        /**
          * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitClosedEnumeration(org.opentravel.schemacompiler.model.TLClosedEnumeration)
          */
         @Override
         public boolean visitClosedEnumeration(TLClosedEnumeration enumeration) {
-            return isAllowedByGlobalFilter(enumeration);
+            return isAllowedByGlobalFilter( enumeration );
         }
 
         /**
-		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitChoiceObject(org.opentravel.schemacompiler.model.TLChoiceObject)
-		 */
-		@Override
-		public boolean visitChoiceObject(TLChoiceObject choiceObject) {
-            return isAllowedByGlobalFilter(choiceObject);
-		}
+         * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitChoiceObject(org.opentravel.schemacompiler.model.TLChoiceObject)
+         */
+        @Override
+        public boolean visitChoiceObject(TLChoiceObject choiceObject) {
+            return isAllowedByGlobalFilter( choiceObject );
+        }
 
-		/**
+        /**
          * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitCoreObject(org.opentravel.schemacompiler.model.TLCoreObject)
          */
         @Override
         public boolean visitCoreObject(TLCoreObject coreObject) {
-            return isAllowedByGlobalFilter(coreObject);
+            return isAllowedByGlobalFilter( coreObject );
         }
 
         /**
@@ -330,7 +319,7 @@ public class LibraryFilterBuilder {
          */
         @Override
         public boolean visitBusinessObject(TLBusinessObject businessObject) {
-            return isAllowedByGlobalFilter(businessObject);
+            return isAllowedByGlobalFilter( businessObject );
         }
 
         /**
@@ -338,23 +327,23 @@ public class LibraryFilterBuilder {
          */
         @Override
         public boolean visitFacet(TLFacet facet) {
-            return isAllowedByGlobalFilter(facet);
+            return isAllowedByGlobalFilter( facet );
         }
 
-		/**
-		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitActionFacet(org.opentravel.schemacompiler.model.TLActionFacet)
-		 */
-		@Override
-		public boolean visitActionFacet(TLActionFacet facet) {
-            return isAllowedByGlobalFilter(facet);
-		}
+        /**
+         * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitActionFacet(org.opentravel.schemacompiler.model.TLActionFacet)
+         */
+        @Override
+        public boolean visitActionFacet(TLActionFacet facet) {
+            return isAllowedByGlobalFilter( facet );
+        }
 
         /**
          * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitListFacet(org.opentravel.schemacompiler.model.TLListFacet)
          */
         @Override
         public boolean visitListFacet(TLListFacet listFacet) {
-            return isAllowedByGlobalFilter(listFacet);
+            return isAllowedByGlobalFilter( listFacet );
         }
 
         /**
@@ -362,7 +351,7 @@ public class LibraryFilterBuilder {
          */
         @Override
         public boolean visitAlias(TLAlias alias) {
-            return isAllowedByGlobalFilter(alias);
+            return isAllowedByGlobalFilter( alias );
         }
 
         /**
@@ -370,7 +359,7 @@ public class LibraryFilterBuilder {
          */
         @Override
         public boolean visitService(TLService service) {
-            return isAllowedByGlobalFilter(service);
+            return isAllowedByGlobalFilter( service );
         }
 
         /**
@@ -378,71 +367,71 @@ public class LibraryFilterBuilder {
          */
         @Override
         public boolean visitOperation(TLOperation operation) {
-            return isAllowedByGlobalFilter(operation);
+            return isAllowedByGlobalFilter( operation );
         }
 
         /**
-		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitResource(org.opentravel.schemacompiler.model.TLResource)
-		 */
-		@Override
-		public boolean visitResource(TLResource resource) {
-            return isAllowedByGlobalFilter(resource);
-		}
+         * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitResource(org.opentravel.schemacompiler.model.TLResource)
+         */
+        @Override
+        public boolean visitResource(TLResource resource) {
+            return isAllowedByGlobalFilter( resource );
+        }
 
-		/**
-		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitResourceParentRef(org.opentravel.schemacompiler.model.TLResourceParentRef)
-		 */
-		@Override
-		public boolean visitResourceParentRef(TLResourceParentRef parentRef) {
-            return isAllowedByGlobalFilter(parentRef);
-		}
+        /**
+         * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitResourceParentRef(org.opentravel.schemacompiler.model.TLResourceParentRef)
+         */
+        @Override
+        public boolean visitResourceParentRef(TLResourceParentRef parentRef) {
+            return isAllowedByGlobalFilter( parentRef );
+        }
 
-		/**
-		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitParamGroup(org.opentravel.schemacompiler.model.TLParamGroup)
-		 */
-		@Override
-		public boolean visitParamGroup(TLParamGroup paramGroup) {
-            return isAllowedByGlobalFilter(paramGroup);
-		}
+        /**
+         * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitParamGroup(org.opentravel.schemacompiler.model.TLParamGroup)
+         */
+        @Override
+        public boolean visitParamGroup(TLParamGroup paramGroup) {
+            return isAllowedByGlobalFilter( paramGroup );
+        }
 
-		/**
-		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitParameter(org.opentravel.schemacompiler.model.TLParameter)
-		 */
-		@Override
-		public boolean visitParameter(TLParameter parameter) {
-            return isAllowedByGlobalFilter(parameter);
-		}
+        /**
+         * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitParameter(org.opentravel.schemacompiler.model.TLParameter)
+         */
+        @Override
+        public boolean visitParameter(TLParameter parameter) {
+            return isAllowedByGlobalFilter( parameter );
+        }
 
-		/**
-		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitAction(org.opentravel.schemacompiler.model.TLAction)
-		 */
-		@Override
-		public boolean visitAction(TLAction action) {
-            return isAllowedByGlobalFilter(action);
-		}
+        /**
+         * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitAction(org.opentravel.schemacompiler.model.TLAction)
+         */
+        @Override
+        public boolean visitAction(TLAction action) {
+            return isAllowedByGlobalFilter( action );
+        }
 
-		/**
-		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitActionRequest(org.opentravel.schemacompiler.model.TLActionRequest)
-		 */
-		@Override
-		public boolean visitActionRequest(TLActionRequest actionRequest) {
-            return isAllowedByGlobalFilter(actionRequest);
-		}
+        /**
+         * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitActionRequest(org.opentravel.schemacompiler.model.TLActionRequest)
+         */
+        @Override
+        public boolean visitActionRequest(TLActionRequest actionRequest) {
+            return isAllowedByGlobalFilter( actionRequest );
+        }
 
-		/**
-		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitActionResponse(org.opentravel.schemacompiler.model.TLActionResponse)
-		 */
-		@Override
-		public boolean visitActionResponse(TLActionResponse actionResponse) {
-            return isAllowedByGlobalFilter(actionResponse);
-		}
+        /**
+         * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitActionResponse(org.opentravel.schemacompiler.model.TLActionResponse)
+         */
+        @Override
+        public boolean visitActionResponse(TLActionResponse actionResponse) {
+            return isAllowedByGlobalFilter( actionResponse );
+        }
 
-		/**
+        /**
          * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitExtensionPointFacet(org.opentravel.schemacompiler.model.TLExtensionPointFacet)
          */
         @Override
         public boolean visitExtensionPointFacet(TLExtensionPointFacet extensionPointFacet) {
-            return isAllowedByGlobalFilter(extensionPointFacet);
+            return isAllowedByGlobalFilter( extensionPointFacet );
         }
 
         /**
@@ -450,7 +439,7 @@ public class LibraryFilterBuilder {
          */
         @Override
         public boolean visitXSDSimpleType(XSDSimpleType xsdSimple) {
-            return isAllowedByGlobalFilter(xsdSimple);
+            return isAllowedByGlobalFilter( xsdSimple );
         }
 
         /**
@@ -458,7 +447,7 @@ public class LibraryFilterBuilder {
          */
         @Override
         public boolean visitXSDComplexType(XSDComplexType xsdComplex) {
-            return isAllowedByGlobalFilter(xsdComplex);
+            return isAllowedByGlobalFilter( xsdComplex );
         }
 
         /**
@@ -466,7 +455,7 @@ public class LibraryFilterBuilder {
          */
         @Override
         public boolean visitXSDElement(XSDElement xsdElement) {
-            return isAllowedByGlobalFilter(xsdElement);
+            return isAllowedByGlobalFilter( xsdElement );
         }
 
     }

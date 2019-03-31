@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.codegen.json;
 
-import java.util.List;
+package org.opentravel.schemacompiler.codegen.json;
 
 import org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchema;
@@ -26,35 +25,38 @@ import org.opentravel.schemacompiler.codegen.util.EnumCodegenUtils;
 import org.opentravel.schemacompiler.model.TLClosedEnumeration;
 import org.opentravel.schemacompiler.model.TLEnumValue;
 
+import java.util.List;
+
 /**
- * Performs the translation from <code>TLClosedEnumeration</code> objects to the JSON schema elements
- * used to produce the output.
+ * Performs the translation from <code>TLClosedEnumeration</code> objects to the JSON schema elements used to produce
+ * the output.
  */
-public class TLClosedEnumerationJsonCodegenTransformer extends AbstractJsonSchemaTransformer<TLClosedEnumeration, CodegenArtifacts> {
-	
-	/**
-	 * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
-	 */
-	@Override
-	public CodegenArtifacts transform(TLClosedEnumeration source) {
-		JsonSchemaNamedReference closedEnum = new JsonSchemaNamedReference();
-		CodegenArtifacts artifacts = new CodegenArtifacts();
-		JsonSchema schema = new JsonSchema();
-		List<String> enumValues = schema.getEnumValues();
-		
-		closedEnum.setName( getDefinitionName( source ) );
-		closedEnum.setSchema( new JsonSchemaReference( schema ) );
-		
-		transformDocumentation( source, schema );
+public class TLClosedEnumerationJsonCodegenTransformer
+    extends AbstractJsonSchemaTransformer<TLClosedEnumeration,CodegenArtifacts> {
+
+    /**
+     * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
+     */
+    @Override
+    public CodegenArtifacts transform(TLClosedEnumeration source) {
+        JsonSchemaNamedReference closedEnum = new JsonSchemaNamedReference();
+        CodegenArtifacts artifacts = new CodegenArtifacts();
+        JsonSchema schema = new JsonSchema();
+        List<String> enumValues = schema.getEnumValues();
+
+        closedEnum.setName( getDefinitionName( source ) );
+        closedEnum.setSchema( new JsonSchemaReference( schema ) );
+
+        transformDocumentation( source, schema );
         schema.setEntityInfo( jsonUtils.getEntityInfo( source ) );
         schema.setType( JsonType.JSON_STRING );
-		
+
         for (TLEnumValue modelEnum : EnumCodegenUtils.getInheritedValues( source )) {
-        	enumValues.add( modelEnum.getLiteral() );
+            enumValues.add( modelEnum.getLiteral() );
         }
-		artifacts.addArtifact( closedEnum );
-		
-		return artifacts;
-	}
-	
+        artifacts.addArtifact( closedEnum );
+
+        return artifacts;
+    }
+
 }

@@ -13,12 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.version.handlers;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+package org.opentravel.schemacompiler.version.handlers;
 
 import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLContextualFacet;
@@ -29,126 +25,131 @@ import org.opentravel.schemacompiler.model.TLPatchableFacet;
 import org.opentravel.schemacompiler.util.ModelElementCloner;
 import org.opentravel.schemacompiler.version.VersionSchemeException;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 /**
  * <code>VersionHandler</code> implementation for <code>TLBusinessObject</code> model entities.
  *
  * @author S. Livezey
  */
 public class TLBusinessObjectVersionHandler extends TLExtensionOwnerVersionHandler<TLBusinessObject> {
-	
-	/**
-	 * @see org.opentravel.schemacompiler.version.handlers.VersionHandler#createNewVersion(org.opentravel.schemacompiler.version.Versioned,
-	 *      org.opentravel.schemacompiler.model.TLLibrary)
-	 */
-	@Override
-	public TLBusinessObject createNewVersion(TLBusinessObject origVersion, TLLibrary targetLibrary) {
-		ModelElementCloner cloner = getCloner( origVersion );
-		TLBusinessObject newVersion = new TLBusinessObject();
-		
-		newVersion.setName( origVersion.getName() );
-		newVersion.setDocumentation( cloner.clone( origVersion.getDocumentation() ) );
-		setExtension( newVersion, origVersion );
-		
-		for (TLEquivalent equivalent : origVersion.getEquivalents()) {
-			newVersion.addEquivalent( cloner.clone( equivalent ) );
-		}
-		targetLibrary.addNamedMember( newVersion );
-		return newVersion;
-	}
-	
-	/**
-	 * @see org.opentravel.schemacompiler.version.handlers.VersionHandler#rollupMinorVersion(org.opentravel.schemacompiler.version.Versioned,
-	 *      org.opentravel.schemacompiler.model.TLLibrary,
-	 *      org.opentravel.schemacompiler.version.handlers.RollupReferenceHandler)
-	 */
-	@Override
-	public TLBusinessObject rollupMinorVersion(TLBusinessObject minorVersion, TLLibrary majorVersionLibrary,
-			RollupReferenceHandler referenceHandler) throws VersionSchemeException {
-		TLBusinessObject majorVersion = retrieveExistingVersion( minorVersion, majorVersionLibrary );
-		
-		if (majorVersion == null) {
-			ModelElementCloner cloner = getCloner( minorVersion );
-			
-			majorVersion = cloner.clone( minorVersion );
-			assignBaseExtension( majorVersion, minorVersion );
-			
-			ModelElementCloner.addToLibrary( majorVersion, majorVersionLibrary );
-			referenceHandler.captureRollupReferences( majorVersion );
-			
-		} else if (majorVersion instanceof TLBusinessObject) {
-			rollupMinorVersion( minorVersion, majorVersion, referenceHandler );
-		}
-		return majorVersion;
-	}
-	
-	/**
-	 * @see org.opentravel.schemacompiler.version.handlers.VersionHandler#rollupMinorVersion(org.opentravel.schemacompiler.version.Versioned,
-	 *      org.opentravel.schemacompiler.version.Versioned,
-	 *      org.opentravel.schemacompiler.version.handlers.RollupReferenceHandler)
-	 */
-	@Override
-	public void rollupMinorVersion(TLBusinessObject minorVersion, TLBusinessObject majorVersionTarget,
-			RollupReferenceHandler referenceHandler) {
-		VersionHandlerMergeUtils mergeUtils = new VersionHandlerMergeUtils( getFactory() );
-		Map<String,TLFacet> targetFacets = new HashMap<>();
-		Map<String,TLFacet> sourceFacets = new HashMap<>();
-		
-		mergeUtils.addToIdentityFacetMap( majorVersionTarget.getSummaryFacet(), targetFacets );
-		mergeUtils.addToIdentityFacetMap( majorVersionTarget.getDetailFacet(), targetFacets );
-		mergeUtils.addToIdentityFacetMap( minorVersion.getSummaryFacet(), sourceFacets );
-		mergeUtils.addToIdentityFacetMap( minorVersion.getDetailFacet(), sourceFacets );
-		
-		for (TLContextualFacet sourceFacet : minorVersion.getCustomFacets()) {
-			TLContextualFacet targetFacet = majorVersionTarget.getCustomFacet( sourceFacet.getName() );
-			
-			rollupLocalContextualFacet( sourceFacet, targetFacet, majorVersionTarget, sourceFacets, targetFacets,
-					mergeUtils, (t, f) -> {
-						t.getOwningLibrary().addNamedMember( f );
-						t.addCustomFacet( f );
-					} );
-		}
-		
-		for (TLContextualFacet sourceFacet : minorVersion.getQueryFacets()) {
-			TLContextualFacet targetFacet = majorVersionTarget.getQueryFacet( sourceFacet.getName() );
-			
-			rollupLocalContextualFacet( sourceFacet, targetFacet, majorVersionTarget, sourceFacets, targetFacets,
-					mergeUtils, (t, f) -> {
-						t.getOwningLibrary().addNamedMember( f );
-						t.addQueryFacet( f );
-					} );
-		}
-		
-		for (TLContextualFacet sourceFacet : minorVersion.getUpdateFacets()) {
-			TLContextualFacet targetFacet = majorVersionTarget.getUpdateFacet( sourceFacet.getName() );
-			
-			rollupLocalContextualFacet( sourceFacet, targetFacet, majorVersionTarget, sourceFacets, targetFacets,
-					mergeUtils, (t, f) -> {
-						t.getOwningLibrary().addNamedMember( f );
-						t.addQueryFacet( f );
-					} );
-		}
-		mergeUtils.mergeFacets( targetFacets, sourceFacets, referenceHandler );
-	}
 
-	/**
-	 * @see org.opentravel.schemacompiler.version.handlers.VersionHandler#getPatchableFacets(org.opentravel.schemacompiler.version.Versioned)
-	 */
-	@Override
-	public List<TLPatchableFacet> getPatchableFacets(TLBusinessObject entity) {
-		List<TLPatchableFacet> facetList = new ArrayList<>();
-		
-		for (TLFacet customFacet : entity.getCustomFacets()) {
-			facetList.add( customFacet );
-		}
-		for (TLFacet queryFacet : entity.getQueryFacets()) {
-			facetList.add( queryFacet );
-		}
-		for (TLFacet updateFacet : entity.getUpdateFacets()) {
-			facetList.add( updateFacet );
-		}
-		facetList.add( entity.getSummaryFacet() );
-		facetList.add( entity.getDetailFacet() );
-		return facetList;
-	}
-	
+    /**
+     * @see org.opentravel.schemacompiler.version.handlers.VersionHandler#createNewVersion(org.opentravel.schemacompiler.version.Versioned,
+     *      org.opentravel.schemacompiler.model.TLLibrary)
+     */
+    @Override
+    public TLBusinessObject createNewVersion(TLBusinessObject origVersion, TLLibrary targetLibrary) {
+        ModelElementCloner cloner = getCloner( origVersion );
+        TLBusinessObject newVersion = new TLBusinessObject();
+
+        newVersion.setName( origVersion.getName() );
+        newVersion.setDocumentation( cloner.clone( origVersion.getDocumentation() ) );
+        setExtension( newVersion, origVersion );
+
+        for (TLEquivalent equivalent : origVersion.getEquivalents()) {
+            newVersion.addEquivalent( cloner.clone( equivalent ) );
+        }
+        targetLibrary.addNamedMember( newVersion );
+        return newVersion;
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.version.handlers.VersionHandler#rollupMinorVersion(org.opentravel.schemacompiler.version.Versioned,
+     *      org.opentravel.schemacompiler.model.TLLibrary,
+     *      org.opentravel.schemacompiler.version.handlers.RollupReferenceHandler)
+     */
+    @Override
+    public TLBusinessObject rollupMinorVersion(TLBusinessObject minorVersion, TLLibrary majorVersionLibrary,
+        RollupReferenceHandler referenceHandler) throws VersionSchemeException {
+        TLBusinessObject majorVersion = retrieveExistingVersion( minorVersion, majorVersionLibrary );
+
+        if (majorVersion == null) {
+            ModelElementCloner cloner = getCloner( minorVersion );
+
+            majorVersion = cloner.clone( minorVersion );
+            assignBaseExtension( majorVersion, minorVersion );
+
+            ModelElementCloner.addToLibrary( majorVersion, majorVersionLibrary );
+            referenceHandler.captureRollupReferences( majorVersion );
+
+        } else if (majorVersion instanceof TLBusinessObject) {
+            rollupMinorVersion( minorVersion, majorVersion, referenceHandler );
+        }
+        return majorVersion;
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.version.handlers.VersionHandler#rollupMinorVersion(org.opentravel.schemacompiler.version.Versioned,
+     *      org.opentravel.schemacompiler.version.Versioned,
+     *      org.opentravel.schemacompiler.version.handlers.RollupReferenceHandler)
+     */
+    @Override
+    public void rollupMinorVersion(TLBusinessObject minorVersion, TLBusinessObject majorVersionTarget,
+        RollupReferenceHandler referenceHandler) {
+        VersionHandlerMergeUtils mergeUtils = new VersionHandlerMergeUtils( getFactory() );
+        Map<String,TLFacet> targetFacets = new HashMap<>();
+        Map<String,TLFacet> sourceFacets = new HashMap<>();
+
+        mergeUtils.addToIdentityFacetMap( majorVersionTarget.getSummaryFacet(), targetFacets );
+        mergeUtils.addToIdentityFacetMap( majorVersionTarget.getDetailFacet(), targetFacets );
+        mergeUtils.addToIdentityFacetMap( minorVersion.getSummaryFacet(), sourceFacets );
+        mergeUtils.addToIdentityFacetMap( minorVersion.getDetailFacet(), sourceFacets );
+
+        for (TLContextualFacet sourceFacet : minorVersion.getCustomFacets()) {
+            TLContextualFacet targetFacet = majorVersionTarget.getCustomFacet( sourceFacet.getName() );
+
+            rollupLocalContextualFacet( sourceFacet, targetFacet, majorVersionTarget, sourceFacets, targetFacets,
+                mergeUtils, (t, f) -> {
+                    t.getOwningLibrary().addNamedMember( f );
+                    t.addCustomFacet( f );
+                } );
+        }
+
+        for (TLContextualFacet sourceFacet : minorVersion.getQueryFacets()) {
+            TLContextualFacet targetFacet = majorVersionTarget.getQueryFacet( sourceFacet.getName() );
+
+            rollupLocalContextualFacet( sourceFacet, targetFacet, majorVersionTarget, sourceFacets, targetFacets,
+                mergeUtils, (t, f) -> {
+                    t.getOwningLibrary().addNamedMember( f );
+                    t.addQueryFacet( f );
+                } );
+        }
+
+        for (TLContextualFacet sourceFacet : minorVersion.getUpdateFacets()) {
+            TLContextualFacet targetFacet = majorVersionTarget.getUpdateFacet( sourceFacet.getName() );
+
+            rollupLocalContextualFacet( sourceFacet, targetFacet, majorVersionTarget, sourceFacets, targetFacets,
+                mergeUtils, (t, f) -> {
+                    t.getOwningLibrary().addNamedMember( f );
+                    t.addQueryFacet( f );
+                } );
+        }
+        mergeUtils.mergeFacets( targetFacets, sourceFacets, referenceHandler );
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.version.handlers.VersionHandler#getPatchableFacets(org.opentravel.schemacompiler.version.Versioned)
+     */
+    @Override
+    public List<TLPatchableFacet> getPatchableFacets(TLBusinessObject entity) {
+        List<TLPatchableFacet> facetList = new ArrayList<>();
+
+        for (TLFacet customFacet : entity.getCustomFacets()) {
+            facetList.add( customFacet );
+        }
+        for (TLFacet queryFacet : entity.getQueryFacets()) {
+            facetList.add( queryFacet );
+        }
+        for (TLFacet updateFacet : entity.getUpdateFacets()) {
+            facetList.add( updateFacet );
+        }
+        facetList.add( entity.getSummaryFacet() );
+        facetList.add( entity.getDetailFacet() );
+        return facetList;
+    }
+
 }

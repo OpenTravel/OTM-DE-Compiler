@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.model;
 
 import java.util.List;
@@ -23,20 +24,22 @@ import java.util.List;
  * @author S. Livezey
  */
 public interface TLMemberFieldOwner extends ModelElement {
-	
-	/**
-	 * Returns the list of all member fields for the entity.
-	 * 
-	 * @return List<TLMemberField<?>>
-	 */
-	public <O extends TLMemberFieldOwner> List<TLMemberField<O>> getMemberFields();
-	
-	/**
-	 * Returns the member field with the specified name.
-	 * 
-	 * @param fieldName  the name of the field to return
-	 * @return
-	 */
-	public <O extends TLMemberFieldOwner> TLMemberField<O> getMemberField(String fieldName);
-	
+
+    /**
+     * Returns the list of all member fields for the entity.
+     * 
+     * @param <O> the type of the member field's owner
+     * @return List&lt;TLMemberField&lt;?&gt;&gt;
+     */
+    public <O extends TLMemberFieldOwner> List<TLMemberField<O>> getMemberFields();
+
+    /**
+     * Returns the member field with the specified name.
+     * 
+     * @param fieldName the name of the field to return
+     * @param <O> the type of the member field's owner
+     * @return TLMemberField&lt;O&gt;
+     */
+    public <O extends TLMemberFieldOwner> TLMemberField<O> getMemberField(String fieldName);
+
 }

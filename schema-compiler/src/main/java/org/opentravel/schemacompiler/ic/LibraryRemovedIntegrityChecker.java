@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.ic;
 
 import org.opentravel.schemacompiler.event.ModelEventType;
@@ -21,21 +22,20 @@ import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.TLModel;
 
 /**
- * Integrity checker component that automatically releases references to the members of a library
- * when it is removed from the model.
+ * Integrity checker component that automatically releases references to the members of a library when it is removed
+ * from the model.
  * 
  * @author S. Livezey
  */
-public class LibraryRemovedIntegrityChecker extends
-        EntityRemovedIntegrityChecker<TLModel, AbstractLibrary> {
+public class LibraryRemovedIntegrityChecker extends EntityRemovedIntegrityChecker<TLModel,AbstractLibrary> {
 
     /**
      * @see org.opentravel.schemacompiler.event.ModelEventListener#processModelEvent(org.opentravel.schemacompiler.event.ModelEvent)
      */
     @Override
-    public void processModelEvent(OwnershipEvent<TLModel, AbstractLibrary> event) {
+    public void processModelEvent(OwnershipEvent<TLModel,AbstractLibrary> event) {
         if (event.getType() == ModelEventType.LIBRARY_REMOVED) {
-            purgeEntitiesFromModel(event.getAffectedItem(), event.getSource());
+            purgeEntitiesFromModel( event.getAffectedItem(), event.getSource() );
         }
     }
 

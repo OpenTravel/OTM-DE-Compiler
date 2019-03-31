@@ -30,26 +30,26 @@ import org.opentravel.schemacompiler.transform.util.BaseTransformer;
  *
  * @author S. Livezey
  */
-public class DocumentationPatchTransformer extends
-		BaseTransformer<DocumentationPatch, TLDocumentationPatch, DefaultTransformerContext> {
+public class DocumentationPatchTransformer
+    extends BaseTransformer<DocumentationPatch,TLDocumentationPatch,DefaultTransformerContext> {
 
-	/**
-	 * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
-	 */
-	@Override
-	public TLDocumentationPatch transform(DocumentationPatch source) {
-		TLDocumentationPatch target = new TLDocumentationPatch();
-		
-		target.setPatchedVersion( source.getPatchedVersion() );
-		target.setDocPath( source.getDocPath() );
-		
+    /**
+     * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
+     */
+    @Override
+    public TLDocumentationPatch transform(DocumentationPatch source) {
+        TLDocumentationPatch target = new TLDocumentationPatch();
+
+        target.setPatchedVersion( source.getPatchedVersion() );
+        target.setDocPath( source.getDocPath() );
+
         if (source.getDocumentation() != null) {
-            ObjectTransformer<Documentation, TLDocumentation, DefaultTransformerContext> docTransformer =
-            		getTransformerFactory().getTransformer( Documentation.class, TLDocumentation.class );
+            ObjectTransformer<Documentation,TLDocumentation,DefaultTransformerContext> docTransformer =
+                getTransformerFactory().getTransformer( Documentation.class, TLDocumentation.class );
 
             target.setDocumentation( docTransformer.transform( source.getDocumentation() ) );
         }
-		return target;
-	}
-	
+        return target;
+    }
+
 }

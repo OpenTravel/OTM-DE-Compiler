@@ -13,10 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.transform.tl2jaxb16;
 
-import java.util.ArrayList;
-import java.util.List;
+package org.opentravel.schemacompiler.transform.tl2jaxb16;
 
 import org.opentravel.ns.ota2.librarymodel_v01_06.Attribute;
 import org.opentravel.ns.ota2.librarymodel_v01_06.Indicator;
@@ -29,35 +27,33 @@ import org.opentravel.schemacompiler.transform.ObjectTransformer;
 import org.opentravel.schemacompiler.transform.symbols.SymbolResolverTransformerContext;
 import org.opentravel.schemacompiler.transform.util.BaseTransformer;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- * Base class for transformers that must handle nested type definitions such as attributes,
- * elements, and indicators.
+ * Base class for transformers that must handle nested type definitions such as attributes, elements, and indicators.
  * 
- * @param <S>
- *            the source type of the object transformation
- * @param <T>
- *            the target type of the object transformation
+ * @param <S> the source type of the object transformation
+ * @param <T> the target type of the object transformation
  * @author S. Livezey
  */
-public abstract class TLComplexTypeTransformer<S, T> extends
-        BaseTransformer<S, T, SymbolResolverTransformerContext> {
+public abstract class TLComplexTypeTransformer<S, T> extends BaseTransformer<S,T,SymbolResolverTransformerContext> {
 
     /**
-     * Extracts the list of alias names from the given list of model entities and returns them as a
-     * simple list of strings.
+     * Extracts the list of alias names from the given list of model entities and returns them as a simple list of
+     * strings.
      * 
-     * @param aliases
-     *            the list of alias model entities to process
-     * @return List<String>
+     * @param aliases the list of alias model entities to process
+     * @return List&lt;String&gt;
      */
     protected List<String> getAliasNames(List<TLAlias> aliases) {
         List<String> aliasNames = new ArrayList<>();
 
         for (TLAlias alias : aliases) {
-            String aliasName = trimString(alias.getName());
+            String aliasName = trimString( alias.getName() );
 
             if (aliasName != null) {
-                aliasNames.add(aliasName);
+                aliasNames.add( aliasName );
             }
         }
         return aliasNames;
@@ -66,18 +62,17 @@ public abstract class TLComplexTypeTransformer<S, T> extends
     /**
      * Handles the transformation of <code>TLModel</code> attributes into their JAXB equivalents.
      * 
-     * @param modelAttributes
-     *            the list of model attributes to convert
-     * @return List<Attribute>
+     * @param modelAttributes the list of model attributes to convert
+     * @return List&lt;Attribute&gt;
      */
     protected List<Attribute> transformAttributes(List<TLAttribute> modelAttributes) {
-        ObjectTransformer<TLAttribute, Attribute, SymbolResolverTransformerContext> attributeTransformer = getTransformerFactory()
-                .getTransformer(TLAttribute.class, Attribute.class);
+        ObjectTransformer<TLAttribute,Attribute,SymbolResolverTransformerContext> attributeTransformer =
+            getTransformerFactory().getTransformer( TLAttribute.class, Attribute.class );
         List<Attribute> attributes = new ArrayList<>();
 
         if (modelAttributes != null) {
             for (TLAttribute modelAttribute : modelAttributes) {
-                attributes.add(attributeTransformer.transform(modelAttribute));
+                attributes.add( attributeTransformer.transform( modelAttribute ) );
             }
         }
         return attributes;
@@ -86,18 +81,17 @@ public abstract class TLComplexTypeTransformer<S, T> extends
     /**
      * Handles the transformation of <code>TLModel</code> properties into their JAXB equivalents.
      * 
-     * @param modelProperties
-     *            the list of model properties to convert
-     * @return List<Property>
+     * @param modelProperties the list of model properties to convert
+     * @return List&lt;Property&gt;
      */
     protected List<Property> transformElements(List<TLProperty> modelProperties) {
-        ObjectTransformer<TLProperty, Property, SymbolResolverTransformerContext> propertyTransformer = getTransformerFactory()
-                .getTransformer(TLProperty.class, Property.class);
+        ObjectTransformer<TLProperty,Property,SymbolResolverTransformerContext> propertyTransformer =
+            getTransformerFactory().getTransformer( TLProperty.class, Property.class );
         List<Property> properties = new ArrayList<>();
 
         if (modelProperties != null) {
             for (TLProperty modelProperty : modelProperties) {
-                properties.add(propertyTransformer.transform(modelProperty));
+                properties.add( propertyTransformer.transform( modelProperty ) );
             }
         }
         return properties;
@@ -106,20 +100,17 @@ public abstract class TLComplexTypeTransformer<S, T> extends
     /**
      * Handles the transformation of <code>TLModel</code> indicators into their JAXB equivalents.
      * 
-     * @param jaxbIndicators
-     *            the list of JAXB indicators to convert
-     * @param symbolResolver
-     *            the symbol resolver to use for type name construction
-     * @return List<Indicator>
+     * @param modelIndicators the list of indicators to convert
+     * @return List&lt;Indicator&gt;
      */
     protected List<Indicator> transformIndicators(List<TLIndicator> modelIndicators) {
-        ObjectTransformer<TLIndicator, Indicator, SymbolResolverTransformerContext> indicatorTransformer = getTransformerFactory()
-                .getTransformer(TLIndicator.class, Indicator.class);
+        ObjectTransformer<TLIndicator,Indicator,SymbolResolverTransformerContext> indicatorTransformer =
+            getTransformerFactory().getTransformer( TLIndicator.class, Indicator.class );
         List<Indicator> indicators = new ArrayList<>();
 
         if (modelIndicators != null) {
             for (TLIndicator modelIndicator : modelIndicators) {
-                indicators.add(indicatorTransformer.transform(modelIndicator));
+                indicators.add( indicatorTransformer.transform( modelIndicator ) );
             }
         }
         return indicators;

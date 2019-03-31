@@ -13,18 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.codegen.xsd.facet;
 
-import javax.xml.namespace.QName;
+package org.opentravel.schemacompiler.codegen.xsd.facet;
 
 import org.opentravel.schemacompiler.ioc.SchemaDependency;
 import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLFacet;
 
+import javax.xml.namespace.QName;
+
 /**
- * Code generation delegate for <code>TLFacet</code> instances with a facet type of
- * <code>REQUEST</code>, <code>RESPONSE</code>, or <code>NOTIFICATION</code> and a facet owner of
- * type <code>TLOperation</code>.
+ * Code generation delegate for <code>TLFacet</code> instances with a facet type of <code>REQUEST</code>,
+ * <code>RESPONSE</code>, or <code>NOTIFICATION</code> and a facet owner of type <code>TLOperation</code>.
  * 
  * @author S. Livezey
  */
@@ -33,11 +33,10 @@ public class OperationFacetCodegenDelegate extends TLFacetCodegenDelegate {
     /**
      * Constructor that specifies the source facet for which code artifacts are being generated.
      * 
-     * @param sourceFacet
-     *            the source facet
+     * @param sourceFacet the source facet
      */
     public OperationFacetCodegenDelegate(TLFacet sourceFacet) {
-        super(sourceFacet);
+        super( sourceFacet );
     }
 
     /**
@@ -65,7 +64,7 @@ public class OperationFacetCodegenDelegate extends TLFacetCodegenDelegate {
         QName subGrp = null;
 
         if (messagePayload != null) {
-            addCompileTimeDependency(messagePayload);
+            addCompileTimeDependency( messagePayload );
             subGrp = messagePayload.toQName();
         }
         return subGrp;
@@ -80,7 +79,7 @@ public class OperationFacetCodegenDelegate extends TLFacetCodegenDelegate {
         QName typeName = null;
 
         if (messagePayload != null) {
-            addCompileTimeDependency(messagePayload);
+            addCompileTimeDependency( messagePayload );
             typeName = messagePayload.toQName();
         }
         return typeName;
@@ -104,8 +103,8 @@ public class OperationFacetCodegenDelegate extends TLFacetCodegenDelegate {
             case NOTIFICATION:
                 messagePayload = SchemaDependency.getNotifPayload();
                 break;
-			default:
-				break;
+            default:
+                break;
         }
         return messagePayload;
     }
@@ -121,7 +120,7 @@ public class OperationFacetCodegenDelegate extends TLFacetCodegenDelegate {
             SchemaDependency extensionPoint = SchemaDependency.getExtensionPointElement();
 
             extensionPointQName = extensionPoint.toQName();
-            addCompileTimeDependency(extensionPoint);
+            addCompileTimeDependency( extensionPoint );
         }
         return extensionPointQName;
     }

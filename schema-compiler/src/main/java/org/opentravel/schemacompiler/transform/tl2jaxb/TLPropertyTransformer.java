@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.transform.tl2jaxb;
 
 import org.opentravel.ns.ota2.librarymodel_v01_05.Documentation;
@@ -29,52 +30,50 @@ import org.opentravel.schemacompiler.transform.symbols.SymbolResolverTransformer
 import org.opentravel.schemacompiler.transform.util.BaseTransformer;
 
 /**
- * Handles the transformation of objects from the <code>TLProperty</code> type to the
- * <code>Property</code> type.
+ * Handles the transformation of objects from the <code>TLProperty</code> type to the <code>Property</code> type.
  * 
  * @author S. Livezey
  */
-public class TLPropertyTransformer extends
-        BaseTransformer<TLProperty, Property, SymbolResolverTransformerContext> {
+public class TLPropertyTransformer extends BaseTransformer<TLProperty,Property,SymbolResolverTransformerContext> {
 
     /**
      * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
      */
     @Override
     public Property transform(TLProperty source) {
-        ObjectTransformer<TLEquivalent, Equivalent, SymbolResolverTransformerContext> equivTransformer = getTransformerFactory()
-                .getTransformer(TLEquivalent.class, Equivalent.class);
-        ObjectTransformer<TLExample, Example, SymbolResolverTransformerContext> exTransformer = getTransformerFactory()
-                .getTransformer(TLExample.class, Example.class);
+        ObjectTransformer<TLEquivalent,Equivalent,SymbolResolverTransformerContext> equivTransformer =
+            getTransformerFactory().getTransformer( TLEquivalent.class, Equivalent.class );
+        ObjectTransformer<TLExample,Example,SymbolResolverTransformerContext> exTransformer =
+            getTransformerFactory().getTransformer( TLExample.class, Example.class );
         TLPropertyType propertyType = source.getType();
         Property property = new Property();
 
-        property.setName(trimString(source.getName(), false));
-        property.setRepeat(convertRepeatValue(source.getRepeat()));
-        property.setMandatory(source.isMandatory() ? Boolean.TRUE : null);
-        property.setReference(source.isReference() ? Boolean.TRUE : null);
+        property.setName( trimString( source.getName(), false ) );
+        property.setRepeat( convertRepeatValue( source.getRepeat() ) );
+        property.setMandatory( source.isMandatory() ? Boolean.TRUE : null );
+        property.setReference( source.isReference() ? Boolean.TRUE : null );
 
         if ((source.getDocumentation() != null) && !source.getDocumentation().isEmpty()) {
-            ObjectTransformer<TLDocumentation, Documentation, SymbolResolverTransformerContext> docTransformer = getTransformerFactory()
-                    .getTransformer(TLDocumentation.class, Documentation.class);
+            ObjectTransformer<TLDocumentation,Documentation,SymbolResolverTransformerContext> docTransformer =
+                getTransformerFactory().getTransformer( TLDocumentation.class, Documentation.class );
 
-            property.setDocumentation(docTransformer.transform(source.getDocumentation()));
+            property.setDocumentation( docTransformer.transform( source.getDocumentation() ) );
         }
 
         for (TLEquivalent sourceEquiv : source.getEquivalents()) {
-            property.getEquivalent().add(equivTransformer.transform(sourceEquiv));
+            property.getEquivalent().add( equivTransformer.transform( sourceEquiv ) );
         }
 
         for (TLExample sourceEx : source.getExamples()) {
-            property.getExample().add(exTransformer.transform(sourceEx));
+            property.getExample().add( exTransformer.transform( sourceEx ) );
         }
 
         if (source.getType() != null) {
-            property.setType(context.getSymbolResolver().buildEntityName(
-                    propertyType.getNamespace(), propertyType.getLocalName()));
+            property.setType( context.getSymbolResolver().buildEntityName( propertyType.getNamespace(),
+                propertyType.getLocalName() ) );
         }
         if (property.getType() == null) {
-            property.setType(trimString(source.getTypeName(), false));
+            property.setType( trimString( source.getTypeName(), false ) );
         }
         return property;
     }

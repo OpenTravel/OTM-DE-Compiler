@@ -13,10 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.transform.legacy_xsd;
 
-import java.io.File;
-import java.io.InputStream;
+package org.opentravel.schemacompiler.transform.legacy_xsd;
 
 import org.junit.BeforeClass;
 import org.opentravel.schemacompiler.loader.LibraryInputSource;
@@ -30,6 +28,9 @@ import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.validate.FindingMessageFormat;
 import org.opentravel.schemacompiler.validate.FindingType;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
+
+import java.io.File;
+import java.io.InputStream;
 
 /**
  * Abstract base class for test classes that validate the XSD object transformers.
@@ -47,26 +48,24 @@ public class AbstractXSDTestTransformers {
 
     @BeforeClass
     public static void loadTestModel() throws Exception {
-        LibraryNamespaceResolver namespaceResolver = new CatalogLibraryNamespaceResolver(new File(
-                System.getProperty("user.dir"),
-                "/src/test/resources/libraries_1_4/empty-catalog.xml"));
-        LibraryInputSource<InputStream> libraryInput = new LibraryStreamInputSource(new File(
-                System.getProperty("user.dir"),
-                "/src/test/resources/libraries_1_4/test-package_v3/sample_library.xml"));
+        LibraryNamespaceResolver namespaceResolver = new CatalogLibraryNamespaceResolver(
+            new File( System.getProperty( "user.dir" ), "/src/test/resources/libraries_1_4/empty-catalog.xml" ) );
+        LibraryInputSource<InputStream> libraryInput =
+            new LibraryStreamInputSource( new File( System.getProperty( "user.dir" ),
+                "/src/test/resources/libraries_1_4/test-package_v3/sample_library.xml" ) );
         LibraryModelLoader<InputStream> modelLoader = new LibraryModelLoader<InputStream>();
 
-        modelLoader.setNamespaceResolver(namespaceResolver);
-        ValidationFindings findings = modelLoader.loadLibraryModel(libraryInput);
+        modelLoader.setNamespaceResolver( namespaceResolver );
+        ValidationFindings findings = modelLoader.loadLibraryModel( libraryInput );
 
         // Display any error messages to standard output before returning
-        if (findings.hasFinding(FindingType.ERROR)) {
-            String[] messages = findings.getValidationMessages(FindingType.ERROR,
-                    FindingMessageFormat.DEFAULT);
+        if (findings.hasFinding( FindingType.ERROR )) {
+            String[] messages = findings.getValidationMessages( FindingType.ERROR, FindingMessageFormat.DEFAULT );
 
-            System.out.println("Problems occurred while loading the test model:");
+            System.out.println( "Problems occurred while loading the test model:" );
 
             for (String message : messages) {
-                System.out.println("  " + message);
+                System.out.println( "  " + message );
             }
         }
         testModel = modelLoader.getLibraryModel();
@@ -75,9 +74,9 @@ public class AbstractXSDTestTransformers {
     protected NamedEntity getNamedEntity(String namespace, String memberName) {
         NamedEntity entity = null;
 
-        for (AbstractLibrary library : testModel.getLibrariesForNamespace(namespace)) {
+        for (AbstractLibrary library : testModel.getLibrariesForNamespace( namespace )) {
             for (NamedEntity member : library.getNamedMembers()) {
-                if (member.getLocalName().equals(memberName)) {
+                if (member.getLocalName().equals( memberName )) {
                     entity = member;
                     break;
                 }

@@ -13,20 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.codegen.html;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.opentravel.schemacompiler.codegen.html.writers.AbstractWriterTest;
+import org.opentravel.schemacompiler.model.TLLibrary;
 
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
-
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.opentravel.schemacompiler.model.TLLibrary;
-
-import org.opentravel.schemacompiler.codegen.html.writers.AbstractWriterTest;
 
 /**
  * @author Eric.Bronson
@@ -34,38 +34,37 @@ import org.opentravel.schemacompiler.codegen.html.writers.AbstractWriterTest;
  */
 public class LibraryIndexWriterTest extends AbstractWriterTest {
 
-	private static String content;
+    private static String content;
 
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
-		AbstractWriterTest.setUpBeforeClass();
-		String filename = LibraryIndexWriter.DEFAULT_FILENAME;
+    @BeforeClass
+    public static void setUpBeforeClass() throws Exception {
+        AbstractWriterTest.setUpBeforeClass();
+        String filename = LibraryIndexWriter.DEFAULT_FILENAME;
 
-		File f = new File(config.getDestDirName());
-		f.mkdir();
-		LibraryIndexWriter.generate(config);
-		byte[] encoded = Files.readAllBytes(Paths.get(config.getDestDirName()
-				+ filename));
-		content = new String(encoded);
-	}
+        File f = new File( config.getDestDirName() );
+        f.mkdir();
+        LibraryIndexWriter.generate( config );
+        byte[] encoded = Files.readAllBytes( Paths.get( config.getDestDirName() + filename ) );
+        content = new String( encoded );
+    }
 
-	@Test
-	public void testItShouldAddNamespaces() throws Exception {
-		List<TLLibrary> ns = config.getLibraries();
-		assertTrue(ns.size() > 0);
-		for (TLLibrary lib : ns) {
-			assertTrue("No namespace.", content.contains(lib.getName()));
-		}
-	}
+    @Test
+    public void testItShouldAddNamespaces() throws Exception {
+        List<TLLibrary> ns = config.getLibraries();
+        assertTrue( ns.size() > 0 );
+        for (TLLibrary lib : ns) {
+            assertTrue( "No namespace.", content.contains( lib.getName() ) );
+        }
+    }
 
-	@Test
-	public void testItShouldAddTitle() throws Exception {
-		assertTrue("No title.", content.contains(config.getWindowtitle()));
-	}
+    @Test
+    public void testItShouldAddTitle() throws Exception {
+        assertTrue( "No title.", content.contains( config.getWindowtitle() ) );
+    }
 
-	@Test
-	public void testItShouldAddProjectTitle() throws Exception {
-		assertTrue("No title.", content.contains(config.getDoctitle()));
-	}
+    @Test
+    public void testItShouldAddProjectTitle() throws Exception {
+        assertTrue( "No title.", content.contains( config.getDoctitle() ) );
+    }
 
 }

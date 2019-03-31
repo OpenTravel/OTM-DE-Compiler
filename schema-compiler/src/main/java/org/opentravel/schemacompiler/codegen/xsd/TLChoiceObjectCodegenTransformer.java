@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.codegen.xsd;
 
 import org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts;
@@ -23,30 +24,30 @@ import org.opentravel.schemacompiler.model.TLChoiceObject;
 import org.opentravel.schemacompiler.model.TLFacetType;
 
 /**
- * Performs the translation from <code>TLChoiceObject</code> objects to the JAXB nodes used to
- * produce the schema output.
+ * Performs the translation from <code>TLChoiceObject</code> objects to the JAXB nodes used to produce the schema
+ * output.
  * 
  * @author S. Livezey
  */
-public class TLChoiceObjectCodegenTransformer extends
-		AbstractXsdTransformer<TLChoiceObject, CodegenArtifacts> {
-	
-	/**
-	 * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
-	 */
-	@Override
-	public CodegenArtifacts transform(TLChoiceObject source) {
-        FacetCodegenDelegateFactory delegateFactory = new FacetCodegenDelegateFactory(context);
+public class TLChoiceObjectCodegenTransformer extends AbstractXsdTransformer<TLChoiceObject,CodegenArtifacts> {
+
+    /**
+     * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
+     */
+    @Override
+    public CodegenArtifacts transform(TLChoiceObject source) {
+        FacetCodegenDelegateFactory delegateFactory = new FacetCodegenDelegateFactory( context );
         FacetCodegenElements elementArtifacts = new FacetCodegenElements();
         CodegenArtifacts otherArtifacts = new CodegenArtifacts();
 
-        generateFacetArtifacts(delegateFactory.getDelegate(source.getSharedFacet()), elementArtifacts, otherArtifacts, false);
-        
-        generateContextualFacetArtifacts(source.getChoiceFacets(), delegateFactory, elementArtifacts, otherArtifacts);
-        generateContextualFacetArtifacts(FacetCodegenUtils.findGhostFacets(source, TLFacetType.CHOICE),
-        		delegateFactory, elementArtifacts, otherArtifacts);
-        
-        return buildCorrelatedArtifacts(source, elementArtifacts, otherArtifacts);
-	}
-	
+        generateFacetArtifacts( delegateFactory.getDelegate( source.getSharedFacet() ), elementArtifacts,
+            otherArtifacts, false );
+
+        generateContextualFacetArtifacts( source.getChoiceFacets(), delegateFactory, elementArtifacts, otherArtifacts );
+        generateContextualFacetArtifacts( FacetCodegenUtils.findGhostFacets( source, TLFacetType.CHOICE ),
+            delegateFactory, elementArtifacts, otherArtifacts );
+
+        return buildCorrelatedArtifacts( source, elementArtifacts, otherArtifacts );
+    }
+
 }

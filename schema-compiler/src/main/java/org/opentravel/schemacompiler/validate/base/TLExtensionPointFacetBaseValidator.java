@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.validate.base;
 
 import org.opentravel.schemacompiler.model.TLAttribute;
@@ -37,40 +38,36 @@ public class TLExtensionPointFacetBaseValidator extends TLValidatorBase<TLExtens
      */
     @Override
     protected ValidationFindings validateChildren(TLExtensionPointFacet target) {
-        Validator<TLAttribute> attributeValidator = getValidatorFactory().getValidatorForClass(
-                TLAttribute.class);
-        Validator<TLProperty> elementValidator = getValidatorFactory().getValidatorForClass(
-                TLProperty.class);
-        Validator<TLIndicator> indicatorValidator = getValidatorFactory().getValidatorForClass(
-                TLIndicator.class);
+        Validator<TLAttribute> attributeValidator = getValidatorFactory().getValidatorForClass( TLAttribute.class );
+        Validator<TLProperty> elementValidator = getValidatorFactory().getValidatorForClass( TLProperty.class );
+        Validator<TLIndicator> indicatorValidator = getValidatorFactory().getValidatorForClass( TLIndicator.class );
         ValidationFindings findings = new ValidationFindings();
 
         if (target.getExtension() != null) {
-            Validator<TLExtension> extensionValidator = getValidatorFactory().getValidatorForClass(
-                    TLExtension.class);
+            Validator<TLExtension> extensionValidator = getValidatorFactory().getValidatorForClass( TLExtension.class );
 
-            findings.addAll(extensionValidator.validate(target.getExtension()));
+            findings.addAll( extensionValidator.validate( target.getExtension() ) );
         }
         if (target.getAttributes() != null) {
             for (TLAttribute attribute : target.getAttributes()) {
-                findings.addAll(attributeValidator.validate(attribute));
+                findings.addAll( attributeValidator.validate( attribute ) );
             }
         }
         if (target.getElements() != null) {
             for (TLProperty element : target.getElements()) {
-                findings.addAll(elementValidator.validate(element));
+                findings.addAll( elementValidator.validate( element ) );
             }
         }
         if (target.getIndicators() != null) {
             for (TLIndicator indicator : target.getIndicators()) {
-                findings.addAll(indicatorValidator.validate(indicator));
+                findings.addAll( indicatorValidator.validate( indicator ) );
             }
         }
         if (target.getDocumentation() != null) {
-            Validator<TLDocumentation> docValidator = getValidatorFactory().getValidatorForClass(
-                    TLDocumentation.class);
+            Validator<TLDocumentation> docValidator =
+                getValidatorFactory().getValidatorForClass( TLDocumentation.class );
 
-            findings.addAll(docValidator.validate(target.getDocumentation()));
+            findings.addAll( docValidator.validate( target.getDocumentation() ) );
         }
         return findings;
     }

@@ -13,11 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.loader.impl;
 
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
+package org.opentravel.schemacompiler.loader.impl;
 
 import org.opentravel.schemacompiler.loader.LibraryInputSource;
 import org.opentravel.schemacompiler.loader.LibraryLoaderException;
@@ -28,9 +25,12 @@ import org.opentravel.schemacompiler.util.OTM16Upgrade;
 import org.opentravel.schemacompiler.validate.ValidationFinding;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
 
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- * Library module loader that is capable of handling multiple versions of JAXB libraries from stream
- * input sources.
+ * Library module loader that is capable of handling multiple versions of JAXB libraries from stream input sources.
  * 
  * @author S. Livezey
  */
@@ -44,10 +44,10 @@ public class MultiVersionLibraryModuleLoader extends AbstractLibraryModuleLoader
     public MultiVersionLibraryModuleLoader() {
         // Assign the prioritized list of delegate module loaders
         if (OTM16Upgrade.otm16Enabled) {
-            moduleLoaders.add(new LibrarySchema16ModuleLoader());
+            moduleLoaders.add( new LibrarySchema16ModuleLoader() );
         }
-        moduleLoaders.add(new LibrarySchema15ModuleLoader());
-        moduleLoaders.add(new LibrarySchema14ModuleLoader());
+        moduleLoaders.add( new LibrarySchema15ModuleLoader() );
+        moduleLoaders.add( new LibrarySchema14ModuleLoader() );
     }
 
     /**
@@ -56,20 +56,20 @@ public class MultiVersionLibraryModuleLoader extends AbstractLibraryModuleLoader
      */
     @Override
     public LibraryModuleInfo<Object> loadLibrary(LibraryInputSource<InputStream> inputSource,
-            ValidationFindings validationFindings) throws LibraryLoaderException {
+        ValidationFindings validationFindings) throws LibraryLoaderException {
         ValidationFindings firstFindings = null;
         LibraryModuleInfo<Object> moduleInfo = null;
 
         for (LibraryModuleLoader<InputStream> delegateModuleLoader : moduleLoaders) {
             ValidationFindings delegateFindings = new ValidationFindings();
 
-            moduleInfo = delegateModuleLoader.loadLibrary(inputSource, delegateFindings);
+            moduleInfo = delegateModuleLoader.loadLibrary( inputSource, delegateFindings );
 
             if (firstFindings == null) {
                 firstFindings = delegateFindings;
             }
-            if (isSuccessfulLoad(delegateFindings)) {
-                validationFindings.addAll(delegateFindings);
+            if (isSuccessfulLoad( delegateFindings )) {
+                validationFindings.addAll( delegateFindings );
                 break;
             }
         }
@@ -77,25 +77,24 @@ public class MultiVersionLibraryModuleLoader extends AbstractLibraryModuleLoader
         // If none of the delegate loaders were successful, report the findings from the first
         // (preferred loader)
         if ((moduleInfo == null) && (firstFindings != null)) {
-            validationFindings.addAll(firstFindings);
+            validationFindings.addAll( firstFindings );
         }
         return moduleInfo;
     }
 
     /**
-     * If the delegate loader's findings contains the error key for "UNREADABLE_SCHEMA_CONTENT",
-     * this method will return false, indicating a failure. All other situations will return true,
-     * regardless of the number and types of errors in the delegate's findings.
+     * If the delegate loader's findings contains the error key for "UNREADABLE_SCHEMA_CONTENT", this method will return
+     * false, indicating a failure. All other situations will return true, regardless of the number and types of errors
+     * in the delegate's findings.
      * 
-     * @param delegateFindings
-     *            the validation findings from the delegate module loader
+     * @param delegateFindings the validation findings from the delegate module loader
      * @return boolean
      */
     private boolean isSuccessfulLoad(ValidationFindings delegateFindings) {
         boolean success = true;
 
         for (ValidationFinding finding : delegateFindings.getAllFindingsAsList()) {
-            if (LoaderConstants.ERROR_UNREADABLE_LIBRARY_CONTENT.equals(finding.getMessageKey())) {
+            if (LoaderConstants.ERROR_UNREADABLE_LIBRARY_CONTENT.equals( finding.getMessageKey() )) {
                 success = false;
                 break;
             }

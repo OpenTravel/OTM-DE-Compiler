@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.validate.compile;
 
 import org.opentravel.schemacompiler.model.TLOpenEnumeration;
@@ -33,21 +34,21 @@ public class TLOpenEnumerationCompileValidator extends TLOpenEnumerationBaseVali
      */
     @Override
     protected ValidationFindings validateFields(TLOpenEnumeration target) {
-        TLValidationBuilder builder = newValidationBuilder(target);
+        TLValidationBuilder builder = newValidationBuilder( target );
 
-        builder.setProperty("name", target.getName()).setFindingType(FindingType.ERROR)
-                .assertNotNullOrBlank().assertPatternMatch(NAME_XML_PATTERN);
+        builder.setProperty( "name", target.getName() ).setFindingType( FindingType.ERROR ).assertNotNullOrBlank()
+            .assertPatternMatch( NAME_XML_PATTERN );
 
-        builder.setProperty("values", target.getValues()).setFindingType(FindingType.ERROR)
-                .assertNotNull().assertContainsNoNullElements();
-        
+        builder.setProperty( "values", target.getValues() ).setFindingType( FindingType.ERROR ).assertNotNull()
+            .assertContainsNoNullElements();
+
         if (target.getExtension() == null) {
-            builder.setProperty("values", target.getValues()).setFindingType(FindingType.ERROR)
-            		.assertMinimumSize(1);
+            builder.setProperty( "values", target.getValues() ).setFindingType( FindingType.ERROR )
+                .assertMinimumSize( 1 );
         }
 
-        checkSchemaNamingConflicts(target, builder);
-        validateVersioningRules(target, builder);
+        checkSchemaNamingConflicts( target, builder );
+        validateVersioningRules( target, builder );
 
         // TODO: Extension cannot be a closed enum if the extended enum is a prior minor version
         return builder.getFindings();

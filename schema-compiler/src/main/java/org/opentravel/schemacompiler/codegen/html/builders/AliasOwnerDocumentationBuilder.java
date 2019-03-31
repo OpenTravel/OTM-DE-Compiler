@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.codegen.html.builders;
 
 import java.util.List;
@@ -23,5 +24,5 @@ import java.util.List;
  */
 public interface AliasOwnerDocumentationBuilder {
 
-	public List<String> getAliases();
+    public List<String> getAliases();
 }

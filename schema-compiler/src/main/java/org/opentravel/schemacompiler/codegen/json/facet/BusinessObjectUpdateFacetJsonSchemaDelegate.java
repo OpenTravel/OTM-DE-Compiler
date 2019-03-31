@@ -16,11 +16,6 @@
 
 package org.opentravel.schemacompiler.codegen.json.facet;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.xml.namespace.QName;
-
 import org.opentravel.schemacompiler.codegen.json.model.JsonDocumentation;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchema;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaNamedReference;
@@ -31,101 +26,108 @@ import org.opentravel.schemacompiler.model.TLAttribute;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLProperty;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.xml.namespace.QName;
+
 /**
- * Code generation delegate for <code>TLFacet</code> instances with a facet type of
- * <code>UPDATE</code> and a facet owner of type <code>TLBusinessObject</code>.
+ * Code generation delegate for <code>TLFacet</code> instances with a facet type of <code>UPDATE</code> and a facet
+ * owner of type <code>TLBusinessObject</code>.
  */
 public class BusinessObjectUpdateFacetJsonSchemaDelegate extends TLFacetJsonSchemaDelegate {
-	
+
     /**
      * Constructor that specifies the source facet for which code artifacts are being generated.
      * 
-     * @param sourceFacet  the source facet
+     * @param sourceFacet the source facet
      */
     public BusinessObjectUpdateFacetJsonSchemaDelegate(TLFacet sourceFacet) {
-        super(sourceFacet);
+        super( sourceFacet );
     }
 
-	/**
-	 * @see org.opentravel.schemacompiler.codegen.json.facet.TLFacetJsonSchemaDelegate#createDefinitions()
-	 */
-	@Override
-	protected List<JsonSchemaNamedReference> createDefinitions() {
-		List<TLAttribute> attributeList = getAttributes();
-		List<TLProperty> elementList = getElements();
-		List<JsonSchemaNamedReference> definitions = new ArrayList<>();
-		
-		// Add 'update' indicators for optional elements and attributes
-		for (TLAttribute attribute : attributeList) {
-			createDefinition(attribute, definitions);
-		}
-		
-		for (TLProperty element : elementList) {
-			createDefinition(element, definitions);
-		}
-		
-		// Add all of the standard attributes/indicators defined in the model
-		definitions.addAll( super.createDefinitions() );
-		
-		return definitions;
-	}
+    /**
+     * @see org.opentravel.schemacompiler.codegen.json.facet.TLFacetJsonSchemaDelegate#createDefinitions()
+     */
+    @Override
+    protected List<JsonSchemaNamedReference> createDefinitions() {
+        List<TLAttribute> attributeList = getAttributes();
+        List<TLProperty> elementList = getElements();
+        List<JsonSchemaNamedReference> definitions = new ArrayList<>();
 
-	/**
-	 * Creates the JSON schema definition from the OTM attribute provided.
-	 * 
-	 * @param attribute  the OTM attribute for which to generate the schema definition
-	 * @param definitions  the JSON schema definitions being constructed
-	 */
-	private void createDefinition(TLAttribute attribute, List<JsonSchemaNamedReference> definitions) {
-		if (!attribute.isMandatory()) {
-			String indicatorName = XsdCodegenUtils.getUpdateIndicatorName( attribute );
-			String fieldName = attribute.getName();
-			
-			if (attribute.isReference()) {
-				QName elementName = XsdCodegenUtils.getGlobalElementName( attribute.getType() );
-				
-				if (elementName != null) {
-					fieldName = elementName.getLocalPart();
-				}
-			}
-			addUpdateIndicator( indicatorName, fieldName, definitions );
-		}
-	}
-	
-	/**
-	 * Creates the JSON schema definition from the OTM element provided.
-	 * 
-	 * @param element  the OTM element for which to generate the schema definition
-	 * @param definitions  the JSON schema definitions being constructed
-	 */
-	private void createDefinition(TLProperty element, List<JsonSchemaNamedReference> definitions) {
-		if (!element.isMandatory()) {
-			String indicatorName = XsdCodegenUtils.getUpdateIndicatorName( element );
-			QName elementName = XsdCodegenUtils.getGlobalElementName( element.getType() );
-			String fieldName = (elementName != null) ? elementName.getLocalPart() : element.getName();
-			
-			addUpdateIndicator( indicatorName, fieldName, definitions );
-		}
-	}
+        // Add 'update' indicators for optional elements and attributes
+        for (TLAttribute attribute : attributeList) {
+            createDefinition( attribute, definitions );
+        }
 
-	/**
-	 * Adds an 'update' indicator for the optional field with the given name.
-	 * 
-	 * @param indicatorName  the name of the update indicator
-	 * @param fieldName  the name of the optional attribute or element
-	 * @param definitions  the list of JSON schema definitions to which the new indicator will be added
-	 */
-	protected void addUpdateIndicator(String indicatorName, String fieldName, List<JsonSchemaNamedReference> definitions) {
-		JsonSchemaNamedReference updateIndicator = new JsonSchemaNamedReference();
-		JsonDocumentation indicatorDoc = new JsonDocumentation();
-		JsonSchema indicatorSchema = new JsonSchema();
-		
+        for (TLProperty element : elementList) {
+            createDefinition( element, definitions );
+        }
+
+        // Add all of the standard attributes/indicators defined in the model
+        definitions.addAll( super.createDefinitions() );
+
+        return definitions;
+    }
+
+    /**
+     * Creates the JSON schema definition from the OTM attribute provided.
+     * 
+     * @param attribute the OTM attribute for which to generate the schema definition
+     * @param definitions the JSON schema definitions being constructed
+     */
+    private void createDefinition(TLAttribute attribute, List<JsonSchemaNamedReference> definitions) {
+        if (!attribute.isMandatory()) {
+            String indicatorName = XsdCodegenUtils.getUpdateIndicatorName( attribute );
+            String fieldName = attribute.getName();
+
+            if (attribute.isReference()) {
+                QName elementName = XsdCodegenUtils.getGlobalElementName( attribute.getType() );
+
+                if (elementName != null) {
+                    fieldName = elementName.getLocalPart();
+                }
+            }
+            addUpdateIndicator( indicatorName, fieldName, definitions );
+        }
+    }
+
+    /**
+     * Creates the JSON schema definition from the OTM element provided.
+     * 
+     * @param element the OTM element for which to generate the schema definition
+     * @param definitions the JSON schema definitions being constructed
+     */
+    private void createDefinition(TLProperty element, List<JsonSchemaNamedReference> definitions) {
+        if (!element.isMandatory()) {
+            String indicatorName = XsdCodegenUtils.getUpdateIndicatorName( element );
+            QName elementName = XsdCodegenUtils.getGlobalElementName( element.getType() );
+            String fieldName = (elementName != null) ? elementName.getLocalPart() : element.getName();
+
+            addUpdateIndicator( indicatorName, fieldName, definitions );
+        }
+    }
+
+    /**
+     * Adds an 'update' indicator for the optional field with the given name.
+     * 
+     * @param indicatorName the name of the update indicator
+     * @param fieldName the name of the optional attribute or element
+     * @param definitions the list of JSON schema definitions to which the new indicator will be added
+     */
+    protected void addUpdateIndicator(String indicatorName, String fieldName,
+        List<JsonSchemaNamedReference> definitions) {
+        JsonSchemaNamedReference updateIndicator = new JsonSchemaNamedReference();
+        JsonDocumentation indicatorDoc = new JsonDocumentation();
+        JsonSchema indicatorSchema = new JsonSchema();
+
         indicatorSchema.setType( JsonType.JSON_BOOLEAN );
         indicatorSchema.setDocumentation( indicatorDoc );
-        indicatorDoc.setDescriptions( "Indicates whether an update to the '" + fieldName + "' field has been supplied." );
+        indicatorDoc
+            .setDescriptions( "Indicates whether an update to the '" + fieldName + "' field has been supplied." );
         updateIndicator.setName( indicatorName );
         updateIndicator.setSchema( new JsonSchemaReference( indicatorSchema ) );
         definitions.add( updateIndicator );
-	}
-	
+    }
+
 }

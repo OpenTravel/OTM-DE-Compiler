@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.codegen.xsd;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerationFilter;
@@ -22,30 +23,29 @@ import org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegateFacto
 import org.opentravel.schemacompiler.model.TLContextualFacet;
 
 /**
- * Performs the translation from <code>TLBusinessObject</code> objects to the JAXB nodes used to
- * produce the schema output.
+ * Performs the translation from <code>TLBusinessObject</code> objects to the JAXB nodes used to produce the schema
+ * output.
  * 
  * @author S. Livezey
  */
-public class TLContextualFacetCodegenTransformer extends
-        AbstractXsdTransformer<TLContextualFacet, CodegenArtifacts> {
+public class TLContextualFacetCodegenTransformer extends AbstractXsdTransformer<TLContextualFacet,CodegenArtifacts> {
 
     /**
      * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
      */
     @Override
     public CodegenArtifacts transform(TLContextualFacet source) {
-    	CodeGenerationFilter filter = getCodegenFilter();
+        CodeGenerationFilter filter = getCodegenFilter();
         CodegenArtifacts artifacts = new CodegenArtifacts();
-    	
-    	if ((filter == null) || filter.processEntity( source )) {
+
+        if ((filter == null) || filter.processEntity( source )) {
             FacetCodegenDelegateFactory delegateFactory = new FacetCodegenDelegateFactory( context );
             FacetCodegenDelegate<TLContextualFacet> facetDelegate = delegateFactory.getDelegate( source );
-            
+
             artifacts.addAllArtifacts( facetDelegate.generateElements().getAllFacetElements() );
             artifacts.addAllArtifacts( facetDelegate.generateArtifacts() );
-    	}
+        }
         return artifacts;
     }
-    
+
 }

@@ -13,14 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.xml;
 
-import java.util.Arrays;
-import java.util.List;
+package org.opentravel.schemacompiler.xml;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * The line-break processor used to format XML Schema documents.
@@ -28,70 +29,70 @@ import org.w3c.dom.Node;
  * @author S. Livezey
  */
 public class XMLSchemaLineBreakProcessor extends PrettyPrintLineBreakProcessor {
-	
-	private static final String[] LINE_BREAK_ELEMENTS = { "annotation", "complexType", "simpleType", "group",
-			"attributeGroup" };
-	
-	private static final List<String> lineBreakElements = Arrays.asList( LINE_BREAK_ELEMENTS );
-	
-	/**
-	 * @see org.opentravel.schemacompiler.xml.PrettyPrintLineBreakProcessor#insertLineBreakTokens(org.w3c.dom.Document)
-	 */
-	@Override
-	public void insertLineBreakTokens(Document document) {
-		Element rootElement = (Element) document.getFirstChild();
-		Node topLevelNode = rootElement.getFirstChild();
-		boolean importOrIncludeBreakAdded = false;
-		boolean lastTokenWasElement = false;
-		
-		while (topLevelNode != null) {
-			if (topLevelNode.getNodeType() != Node.ELEMENT_NODE) {
-				continue;
-			}
-			boolean addLineBreakToken = false;
-			String elementName = getElementName( topLevelNode );
-			
-			if (lineBreakElements.contains( elementName )) {
-				addLineBreakToken = true;
-				
-			} else if (!importOrIncludeBreakAdded
-					&& (elementName.equals( "import" ) || elementName.equals( "include" ))) {
-				addLineBreakToken = true;
-				importOrIncludeBreakAdded = true;
-			}
-			
-			if (elementName.equals( "element" )) {
-				boolean elementIsAbstract = (topLevelNode.getAttributes().getNamedItem( "abstract" ) != null);
-				
-				addLineBreakToken = elementIsAbstract || !lastTokenWasElement;
-				lastTokenWasElement = true;
-				
-			} else {
-				lastTokenWasElement = false;
-			}
-			
-			if (addLineBreakToken) {
-				topLevelNode.getParentNode().insertBefore( document.createComment( LINE_BREAK_TOKEN ), topLevelNode );
-			}
-			topLevelNode = topLevelNode.getNextSibling();
-		}
-		rootElement.appendChild( document.createComment( LINE_BREAK_TOKEN ) );
-	}
-	
-	/**
-	 * Returns the XML element name for the given node.
-	 * 
-	 * @param node  the node whose name is to be returned
-	 * @return String
-	 */
-	private String getElementName(Node node) {
-		String elementName = node.getNodeName();
-		int colonIdx = elementName.indexOf( ':' );
-		
-		if (colonIdx >= 0) {
-			elementName = elementName.substring( colonIdx + 1 );
-		}
-		return elementName;
-	}
-	
+
+    private static final String[] LINE_BREAK_ELEMENTS =
+        {"annotation", "complexType", "simpleType", "group", "attributeGroup"};
+
+    private static final List<String> lineBreakElements = Arrays.asList( LINE_BREAK_ELEMENTS );
+
+    /**
+     * @see org.opentravel.schemacompiler.xml.PrettyPrintLineBreakProcessor#insertLineBreakTokens(org.w3c.dom.Document)
+     */
+    @Override
+    public void insertLineBreakTokens(Document document) {
+        Element rootElement = (Element) document.getFirstChild();
+        Node topLevelNode = rootElement.getFirstChild();
+        boolean importOrIncludeBreakAdded = false;
+        boolean lastTokenWasElement = false;
+
+        while (topLevelNode != null) {
+            if (topLevelNode.getNodeType() != Node.ELEMENT_NODE) {
+                continue;
+            }
+            boolean addLineBreakToken = false;
+            String elementName = getElementName( topLevelNode );
+
+            if (lineBreakElements.contains( elementName )) {
+                addLineBreakToken = true;
+
+            } else if (!importOrIncludeBreakAdded
+                && (elementName.equals( "import" ) || elementName.equals( "include" ))) {
+                addLineBreakToken = true;
+                importOrIncludeBreakAdded = true;
+            }
+
+            if (elementName.equals( "element" )) {
+                boolean elementIsAbstract = (topLevelNode.getAttributes().getNamedItem( "abstract" ) != null);
+
+                addLineBreakToken = elementIsAbstract || !lastTokenWasElement;
+                lastTokenWasElement = true;
+
+            } else {
+                lastTokenWasElement = false;
+            }
+
+            if (addLineBreakToken) {
+                topLevelNode.getParentNode().insertBefore( document.createComment( LINE_BREAK_TOKEN ), topLevelNode );
+            }
+            topLevelNode = topLevelNode.getNextSibling();
+        }
+        rootElement.appendChild( document.createComment( LINE_BREAK_TOKEN ) );
+    }
+
+    /**
+     * Returns the XML element name for the given node.
+     * 
+     * @param node the node whose name is to be returned
+     * @return String
+     */
+    private String getElementName(Node node) {
+        String elementName = node.getNodeName();
+        int colonIdx = elementName.indexOf( ':' );
+
+        if (colonIdx >= 0) {
+            elementName = elementName.substring( colonIdx + 1 );
+        }
+        return elementName;
+    }
+
 }

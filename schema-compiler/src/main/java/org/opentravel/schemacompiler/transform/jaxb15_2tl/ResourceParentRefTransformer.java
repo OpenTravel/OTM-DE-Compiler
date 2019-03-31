@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.transform.jaxb15_2tl;
 
 import org.opentravel.ns.ota2.librarymodel_v01_05.Documentation;
@@ -29,26 +30,26 @@ import org.opentravel.schemacompiler.transform.symbols.DefaultTransformerContext
  * @author S. Livezey
  */
 public class ResourceParentRefTransformer extends ComplexTypeTransformer<ResourceParentRef,TLResourceParentRef> {
-	
-	/**
-	 * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
-	 */
-	@Override
-	public TLResourceParentRef transform(ResourceParentRef source) {
-		TLResourceParentRef parentRef = new TLResourceParentRef();
-		
-		parentRef.setParentResourceName(trimString(source.getParent()));
-		parentRef.setParentParamGroupName(trimString(source.getParentParamGroup()));
-		parentRef.setPathTemplate(trimString(source.getPathTemplate()));
-		
-        if (source.getDocumentation() != null) {
-            ObjectTransformer<Documentation, TLDocumentation, DefaultTransformerContext> docTransformer = getTransformerFactory()
-                    .getTransformer(Documentation.class, TLDocumentation.class);
 
-            parentRef.setDocumentation(docTransformer.transform(source.getDocumentation()));
+    /**
+     * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
+     */
+    @Override
+    public TLResourceParentRef transform(ResourceParentRef source) {
+        TLResourceParentRef parentRef = new TLResourceParentRef();
+
+        parentRef.setParentResourceName( trimString( source.getParent() ) );
+        parentRef.setParentParamGroupName( trimString( source.getParentParamGroup() ) );
+        parentRef.setPathTemplate( trimString( source.getPathTemplate() ) );
+
+        if (source.getDocumentation() != null) {
+            ObjectTransformer<Documentation,TLDocumentation,DefaultTransformerContext> docTransformer =
+                getTransformerFactory().getTransformer( Documentation.class, TLDocumentation.class );
+
+            parentRef.setDocumentation( docTransformer.transform( source.getDocumentation() ) );
         }
 
-		return parentRef;
-	}
-	
+        return parentRef;
+    }
+
 }

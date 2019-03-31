@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.model;
 
 /**
@@ -32,8 +33,7 @@ public interface TLContextReferrer extends LibraryElement {
     /**
      * Assigns the ID of the context declaration to which this entity refers.
      * 
-     * @param context
-     *            the context ID to assign
+     * @param context the context ID to assign
      */
     public void setContext(String context);
 

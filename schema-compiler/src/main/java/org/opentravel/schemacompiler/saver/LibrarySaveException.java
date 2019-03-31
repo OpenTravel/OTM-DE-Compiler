@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.saver;
 
 import org.opentravel.schemacompiler.util.SchemaCompilerException;
@@ -24,44 +25,39 @@ import org.opentravel.schemacompiler.util.SchemaCompilerException;
  */
 public class LibrarySaveException extends SchemaCompilerException {
 
-	private static final long serialVersionUID = 1538100515442588344L;
+    private static final long serialVersionUID = 1538100515442588344L;
 
-	/**
+    /**
      * Default constructor.
      */
-    public LibrarySaveException() {
-    }
+    public LibrarySaveException() {}
 
     /**
      * Constructs an exception with the specified message.
      * 
-     * @param message
-     *            the exception message
+     * @param message the exception message
      */
     public LibrarySaveException(String message) {
-        super(message);
+        super( message );
     }
 
     /**
      * Constructs an exception with the specified underlying cause.
      * 
-     * @param cause
-     *            the underlying exception that caused this one
+     * @param cause the underlying exception that caused this one
      */
     public LibrarySaveException(Throwable cause) {
-        super(cause);
+        super( cause );
     }
 
     /**
      * Constructs an exception with the specified message and underlying cause.
      * 
-     * @param message
-     *            the exception message
-     * @param cause
-     *            the underlying exception that caused this one
+     * @param message the exception message
+     * @param cause the underlying exception that caused this one
      */
     public LibrarySaveException(String message, Throwable cause) {
-        super(message, cause);
+        super( message, cause );
     }
 
 }

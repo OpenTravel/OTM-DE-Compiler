@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.transform.tl2jaxb16;
 
 import org.opentravel.ns.ota2.librarymodel_v01_06.Documentation;
@@ -26,35 +27,32 @@ import org.opentravel.schemacompiler.transform.symbols.SymbolResolverTransformer
 import org.opentravel.schemacompiler.transform.util.BaseTransformer;
 
 /**
- * Handles the transformation of objects from the <code>TLEnumValue</code> type to the
- * <code>EnumValue</code> type.
+ * Handles the transformation of objects from the <code>TLEnumValue</code> type to the <code>EnumValue</code> type.
  * 
  * @author S. Livezey
  */
-public class TLEnumValueTransformer extends
-        BaseTransformer<TLEnumValue, EnumValue, SymbolResolverTransformerContext> {
+public class TLEnumValueTransformer extends BaseTransformer<TLEnumValue,EnumValue,SymbolResolverTransformerContext> {
 
     /**
-     * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object,
-     *      org.opentravel.schemacompiler.transform.SymbolResolver)
+     * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
      */
     @Override
     public EnumValue transform(TLEnumValue source) {
-        ObjectTransformer<TLEquivalent, Equivalent, SymbolResolverTransformerContext> equivTransformer = getTransformerFactory()
-                .getTransformer(TLEquivalent.class, Equivalent.class);
+        ObjectTransformer<TLEquivalent,Equivalent,SymbolResolverTransformerContext> equivTransformer =
+            getTransformerFactory().getTransformer( TLEquivalent.class, Equivalent.class );
         EnumValue enumValue = new EnumValue();
 
         if ((source.getDocumentation() != null) && !source.getDocumentation().isEmpty()) {
-            ObjectTransformer<TLDocumentation, Documentation, SymbolResolverTransformerContext> docTransformer = getTransformerFactory()
-                    .getTransformer(TLDocumentation.class, Documentation.class);
+            ObjectTransformer<TLDocumentation,Documentation,SymbolResolverTransformerContext> docTransformer =
+                getTransformerFactory().getTransformer( TLDocumentation.class, Documentation.class );
 
-            enumValue.setDocumentation(docTransformer.transform(source.getDocumentation()));
+            enumValue.setDocumentation( docTransformer.transform( source.getDocumentation() ) );
         }
         for (TLEquivalent sourceEquiv : source.getEquivalents()) {
-            enumValue.getEquivalent().add(equivTransformer.transform(sourceEquiv));
+            enumValue.getEquivalent().add( equivTransformer.transform( sourceEquiv ) );
         }
-        enumValue.setLiteral(trimString(source.getLiteral(), false));
-        enumValue.setLabel(trimString(source.getLabel(), false));
+        enumValue.setLiteral( trimString( source.getLiteral(), false ) );
+        enumValue.setLabel( trimString( source.getLabel(), false ) );
         return enumValue;
     }
 

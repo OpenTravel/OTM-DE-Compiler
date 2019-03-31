@@ -13,130 +13,118 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.codegen.html.writers.info;
 
-import java.util.List;
-
-import org.opentravel.schemacompiler.codegen.html.builders.AliasOwnerDocumentationBuilder;
 import org.opentravel.schemacompiler.codegen.html.Configuration;
 import org.opentravel.schemacompiler.codegen.html.Content;
+import org.opentravel.schemacompiler.codegen.html.builders.AliasOwnerDocumentationBuilder;
 import org.opentravel.schemacompiler.codegen.html.markup.HtmlAttr;
+import org.opentravel.schemacompiler.codegen.html.markup.HtmlConstants;
 import org.opentravel.schemacompiler.codegen.html.markup.HtmlStyle;
 import org.opentravel.schemacompiler.codegen.html.markup.HtmlTag;
 import org.opentravel.schemacompiler.codegen.html.markup.HtmlTree;
 import org.opentravel.schemacompiler.codegen.html.markup.RawHtml;
-import org.opentravel.schemacompiler.codegen.html.markup.HtmlConstants;
 import org.opentravel.schemacompiler.codegen.html.writers.SubWriterHolderWriter;
+
+import java.util.List;
 
 /**
  * @author Eric.Bronson
  *
  */
-public class AliasInfoWriter extends AbstractInfoWriter<AliasOwnerDocumentationBuilder>{
+public class AliasInfoWriter extends AbstractInfoWriter<AliasOwnerDocumentationBuilder> {
 
-	/**
-	 * 
-	 */
-	public AliasInfoWriter(SubWriterHolderWriter writer,
-			AliasOwnerDocumentationBuilder owner) {
-		super(writer, owner);
-		caption = writer.newConfiguration().getText("doclet.Aliases");
-	}
+    /**
+     * @param writer the writer for which to create an info-writer
+     * @param owner the owner of the new info-writer
+     */
+    public AliasInfoWriter(SubWriterHolderWriter writer, AliasOwnerDocumentationBuilder owner) {
+        super( writer, owner );
+        caption = writer.newConfiguration().getText( "doclet.Aliases" );
+    }
 
-	
+    /**
+     * @see org.opentravel.schemacompiler.codegen.html.writers.info.InfoWriter#addInfo(org.opentravel.schemacompiler.codegen.html.Content)
+     */
+    public void addInfo(Content memberTree) {
+        Content infoTree = getInfoTree(); // ul
+        Content content = getInfoTreeHeader(); // li
+        addInfoSummary( content );
+        infoTree.addContent( content );
+        memberTree.addContent( infoTree );
+    }
 
-	public void addInfo(Content memberTree) {
-		Content infoTree = getInfoTree(); // ul
-		Content content = getInfoTreeHeader(); // li
-		addInfoSummary(content);
-		infoTree.addContent(content);
-		memberTree.addContent(infoTree);
-	}
+    /**
+     * Add the member summary for the given class.
+     *
+     * @param aliases the list of aliases that are being documented
+     * @param tableTree the content tree to which the documentation will be added
+     */
+    public void addAliasSummary(List<String> aliases, Content tableTree) {
+        HtmlTree tdAliasName = new HtmlTree( HtmlTag.TD );
+        tdAliasName.setStyle( HtmlStyle.COL_ONE );
+        for (String alias : aliases) {
+            if (aliases.indexOf( alias ) != 0) {
+                tdAliasName.addContent( ", " );
+            }
+            addAliasName( alias, tdAliasName );
+        }
 
-	/**
-	 * Add the member summary for the given class.
-	 *
-	 * @param classDoc
-	 *            the class that is being documented
-	 * @param member
-	 *            the member being documented
-	 * @param firstSentenceTags
-	 *            the first sentence tags to be added to the summary
-	 * @param tableTree
-	 *            the content tree to which the documentation will be added
-	 * @param counter
-	 *            the counter for determing style for the table row
-	 */
-	public void addAliasSummary(List<String> aliases, Content tableTree) {
-		HtmlTree tdAliasName = new HtmlTree(HtmlTag.TD);
-		tdAliasName.setStyle(HtmlStyle.COL_ONE);
-		for (String alias : aliases) {
-			if (aliases.indexOf(alias) != 0) {
-				tdAliasName.addContent(", ");
-			}
-			addAliasName(alias, tdAliasName);
-		}
+        HtmlTree tr = HtmlTree.tr( tdAliasName );
+        tr.addAttr( HtmlAttr.CLASS, HtmlStyle.ROW_COLOR + " " + HtmlStyle.ROW_ONE );
+        tableTree.addContent( tr );
+    }
 
-		HtmlTree tr = HtmlTree.tr(tdAliasName);
-		tr.addAttr(HtmlAttr.CLASS, HtmlStyle.ROW_COLOR + " " + HtmlStyle.ROW_ONE);
-		tableTree.addContent(tr);
-	}
+    /**
+     * {@inheritDoc}
+     */
+    protected void addAliasName(String name, Content tdSummaryType) {
+        HtmlTree code = new HtmlTree( HtmlTag.CODE );
+        code.addContent( new RawHtml( name ) );
+        Content strong = HtmlTree.strong( code );
+        tdSummaryType.addContent( strong );
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	protected void addAliasName(String name, Content tdSummaryType) {
-		HtmlTree code = new HtmlTree(HtmlTag.CODE);
-		code.addContent(new RawHtml(name));
-		Content strong = HtmlTree.strong(code);
-		tdSummaryType.addContent(strong);
-	}
+    /**
+     * Get the summary table.
+     *
+     * @return the content tree for the summary table
+     */
+    @Override
+    public Content getTableTree() {
+        HtmlTree table = HtmlTree.table( HtmlStyle.OVERVIEW_SUMMARY, 0, 3, 0, getInfoTableSummary(),
+            writer.getTableCaption( caption ) );
+        table.addStyle( HtmlStyle.BORDER_TOP );
+        return table;
+    }
 
-	/**
-	 * Get the summary table.
-	 *
-	 * @param mw
-	 *            the writer for the member being documented
-	 * @param cd
-	 *            the classdoc to be documented
-	 * @return the content tree for the summary table
-	 */
-	@Override
-	public Content getTableTree() {
-		HtmlTree table = HtmlTree.table(HtmlStyle.OVERVIEW_SUMMARY, 0, 3, 0,
-				getInfoTableSummary(),
-				writer.getTableCaption(caption));
-		table.addStyle(HtmlStyle.BORDER_TOP);
-		return table;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	protected String getInfoTableSummary() {
-		Configuration config = writer.newConfiguration();
-		return config.getText("doclet.Alias_Table_Summary",
-				config.getText("doclet.Alias_Summary"),
-				config.getText("doclet.aliases"));
-	}
+    /**
+     * {@inheritDoc}
+     */
+    protected String getInfoTableSummary() {
+        Configuration config = writer.newConfiguration();
+        return config.getText( "doclet.Alias_Table_Summary", config.getText( "doclet.Alias_Summary" ),
+            config.getText( "doclet.aliases" ) );
+    }
 
 
-	@Override
-	protected String[] getInfoTableHeader() {
-		// no table header for aliases
-		return new String[0];
-	}
+    @Override
+    protected String[] getInfoTableHeader() {
+        // no table header for aliases
+        return new String[0];
+    }
 
-	@Override
-	protected void addInfoSummary(Content memberTree) {
-		Content label = HtmlTree.heading(HtmlConstants.SUMMARY_HEADING,writer.getResource("doclet.Alias_Summary"));
-		memberTree.addContent(label);
-		List<String> aliases = source.getAliases();
-		if (!aliases.isEmpty()) {
-			Content tableTree = getTableTree();
-			addAliasSummary(aliases, tableTree);
-			memberTree.addContent(tableTree);
-		}
-	}
+    @Override
+    protected void addInfoSummary(Content memberTree) {
+        Content label = HtmlTree.heading( HtmlConstants.SUMMARY_HEADING, writer.getResource( "doclet.Alias_Summary" ) );
+        memberTree.addContent( label );
+        List<String> aliases = source.getAliases();
+        if (!aliases.isEmpty()) {
+            Content tableTree = getTableTree();
+            addAliasSummary( aliases, tableTree );
+            memberTree.addContent( tableTree );
+        }
+    }
 
 }

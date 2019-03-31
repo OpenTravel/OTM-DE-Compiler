@@ -13,10 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.codegen.xsd;
 
-import javax.xml.XMLConstants;
-import javax.xml.namespace.QName;
+package org.opentravel.schemacompiler.codegen.xsd;
 
 import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerContext;
 import org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts;
@@ -32,14 +30,17 @@ import org.w3._2001.xmlschema.Restriction;
 import org.w3._2001.xmlschema.SimpleType;
 import org.w3._2001.xmlschema.TopLevelSimpleType;
 
+import javax.xml.XMLConstants;
+import javax.xml.namespace.QName;
+
 /**
- * Performs the translation from <code>TLClosedEnumeration</code> objects to the JAXB nodes used to
- * produce the schema output.
+ * Performs the translation from <code>TLClosedEnumeration</code> objects to the JAXB nodes used to produce the schema
+ * output.
  * 
  * @author S. Livezey
  */
-public class TLClosedEnumerationCodegenTransformer extends
-        TLBaseEnumerationCodegenTransformer<TLClosedEnumeration, CodegenArtifacts> {
+public class TLClosedEnumerationCodegenTransformer
+    extends TLBaseEnumerationCodegenTransformer<TLClosedEnumeration,CodegenArtifacts> {
 
     /**
      * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
@@ -50,25 +51,25 @@ public class TLClosedEnumerationCodegenTransformer extends
         SimpleType xsdEnum = new TopLevelSimpleType();
         Restriction restriction = new Restriction();
 
-        xsdEnum.setName(source.getName());
-        restriction.setBase(new QName(XMLConstants.W3C_XML_SCHEMA_NS_URI, "string"));
+        xsdEnum.setName( source.getName() );
+        restriction.setBase( new QName( XMLConstants.W3C_XML_SCHEMA_NS_URI, "string" ) );
 
         // Generate the documentation BLOCK (if required)
         TLDocumentation sourceDoc = DocumentationFinder.getDocumentation( source );
-        
-        if (sourceDoc != null) {
-            ObjectTransformer<TLDocumentation, Annotation, CodeGenerationTransformerContext> docTransformer =
-            		getTransformerFactory().getTransformer(sourceDoc, Annotation.class);
 
-            xsdEnum.setAnnotation(docTransformer.transform(sourceDoc));
+        if (sourceDoc != null) {
+            ObjectTransformer<TLDocumentation,Annotation,CodeGenerationTransformerContext> docTransformer =
+                getTransformerFactory().getTransformer( sourceDoc, Annotation.class );
+
+            xsdEnum.setAnnotation( docTransformer.transform( sourceDoc ) );
         }
-        XsdCodegenUtils.addAppInfo(source, xsdEnum);
+        XsdCodegenUtils.addAppInfo( source, xsdEnum );
 
         for (TLEnumValue modelEnum : EnumCodegenUtils.getInheritedValues( source )) {
-            restriction.getFacets().add(createEnumValue(modelEnum));
+            restriction.getFacets().add( createEnumValue( modelEnum ) );
         }
-        xsdEnum.setRestriction(restriction);
-        artifacts.addArtifact(xsdEnum);
+        xsdEnum.setRestriction( restriction );
+        artifacts.addArtifact( xsdEnum );
 
         return artifacts;
     }

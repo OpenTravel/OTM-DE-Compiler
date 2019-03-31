@@ -13,11 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.loader.impl;
-
-import java.io.InputStream;
-
-import javax.xml.namespace.QName;
 
 import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
 import org.opentravel.schemacompiler.ioc.SchemaDeclaration;
@@ -32,6 +29,10 @@ import org.opentravel.schemacompiler.transform.TransformerFactory;
 import org.opentravel.schemacompiler.transform.symbols.DefaultTransformerContext;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
 import org.w3._2001.xmlschema.Schema;
+
+import java.io.InputStream;
+
+import javax.xml.namespace.QName;
 
 /**
  * Built-in library loader that obtains its content from a legacy schema (.xsd) file.
@@ -52,36 +53,33 @@ public class LegacySchemaBuiltInLibraryLoader extends AbstractBuiltInLibraryLoad
             // First, load the schema from the specified classpath location
             LibraryModuleLoader<InputStream> moduleLoader = new MultiVersionLibraryModuleLoader();
             ValidationFindings findings = new ValidationFindings();
-            LibraryModuleInfo<Schema> schemaInfo = moduleLoader.loadSchema(inputSource, findings);
+            LibraryModuleInfo<Schema> schemaInfo = moduleLoader.loadSchema( inputSource, findings );
 
             // Next, transform the schema into an XSDLibrary
             if (!findings.hasFinding()) {
                 DefaultTransformerContext transformContext = new DefaultTransformerContext();
                 TransformerFactory<DefaultTransformerContext> transformerFactory = TransformerFactory
-                        .getInstance(SchemaCompilerApplicationContext.LOADER_TRANSFORMER_FACTORY,
-                                transformContext);
-                ObjectTransformer<Schema, XSDLibrary, DefaultTransformerContext> transformer = transformerFactory
-                        .getTransformer(schemaInfo.getJaxbArtifact(), XSDLibrary.class);
-                XSDLibrary xsdLibrary = transformer.transform(schemaInfo.getJaxbArtifact());
+                    .getInstance( SchemaCompilerApplicationContext.LOADER_TRANSFORMER_FACTORY, transformContext );
+                ObjectTransformer<Schema,XSDLibrary,DefaultTransformerContext> transformer =
+                    transformerFactory.getTransformer( schemaInfo.getJaxbArtifact(), XSDLibrary.class );
+                XSDLibrary xsdLibrary = transformer.transform( schemaInfo.getJaxbArtifact() );
 
                 if (xsdLibrary.getPrefix() == null) {
-                    xsdLibrary.setPrefix(getLibraryDeclaration().getDefaultPrefix());
+                    xsdLibrary.setPrefix( getLibraryDeclaration().getDefaultPrefix() );
                 }
 
                 SchemaDeclaration libraryDeclaration = getLibraryDeclaration();
                 QName qualifiedName = new QName( schemaInfo.getJaxbArtifact().getTargetNamespace(),
-                		libraryDeclaration.getName(), libraryDeclaration.getDefaultPrefix() );
+                    libraryDeclaration.getName(), libraryDeclaration.getDefaultPrefix() );
 
-                library = new BuiltInLibrary(qualifiedName,
-                        inputSource.getLibraryURL(), xsdLibrary.getNamedMembers(),
-                        xsdLibrary.getNamespaceImports(), getLibraryDeclaration(),
-                        xsdLibrary.getVersionScheme());
+                library = new BuiltInLibrary( qualifiedName, inputSource.getLibraryURL(), xsdLibrary.getNamedMembers(),
+                    xsdLibrary.getNamespaceImports(), getLibraryDeclaration(), xsdLibrary.getVersionScheme() );
             }
-            
-		} catch (Exception e) {
-			throw new LibraryLoaderException(
-					"Error constructing built-in library instance (" + inputSource.getLibraryURL() + ")");
-		}
+
+        } catch (Exception e) {
+            throw new LibraryLoaderException(
+                "Error constructing built-in library instance (" + inputSource.getLibraryURL() + ")" );
+        }
         return library;
     }
 

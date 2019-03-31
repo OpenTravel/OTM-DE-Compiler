@@ -13,10 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.model;
 
-import java.util.Comparator;
-import java.util.List;
+package org.opentravel.schemacompiler.model;
 
 import org.opentravel.schemacompiler.event.ModelEvent;
 import org.opentravel.schemacompiler.event.ModelEventBuilder;
@@ -24,39 +22,40 @@ import org.opentravel.schemacompiler.event.ModelEventType;
 import org.opentravel.schemacompiler.model.TLEquivalent.EquivalentListManager;
 import org.opentravel.schemacompiler.model.TLExample.ExampleListManager;
 
+import java.util.Comparator;
+import java.util.List;
+
 /**
- * Parameter definition that can be used to reference an existing attribute,
- * element, or indicator.
+ * Parameter definition that can be used to reference an existing attribute, element, or indicator.
  * 
  * @author S. Livezey
  */
-public class TLParameter extends TLModelElement implements TLDocumentationOwner, TLEquivalentOwner,
-		TLExampleOwner {
-	
-	private TLParamGroup owner;
-	private TLMemberField<?> fieldRef;
-	private String fieldRefName;
-	private TLParamLocation location;
+public class TLParameter extends TLModelElement implements TLDocumentationOwner, TLEquivalentOwner, TLExampleOwner {
+
+    private TLParamGroup owner;
+    private TLMemberField<?> fieldRef;
+    private String fieldRefName;
+    private TLParamLocation location;
     private TLDocumentation documentation;
-    private EquivalentListManager equivalentManager = new EquivalentListManager(this);
-    private ExampleListManager exampleManager = new ExampleListManager(this);
-	
-	/**
-	 * @see org.opentravel.schemacompiler.validate.Validatable#getValidationIdentity()
-	 */
-	@Override
-	public String getValidationIdentity() {
+    private EquivalentListManager equivalentManager = new EquivalentListManager( this );
+    private ExampleListManager exampleManager = new ExampleListManager( this );
+
+    /**
+     * @see org.opentravel.schemacompiler.validate.Validatable#getValidationIdentity()
+     */
+    @Override
+    public String getValidationIdentity() {
         StringBuilder identity = new StringBuilder();
         String fieldName = null;
-        
+
         if (owner != null) {
-            identity.append( owner.getValidationIdentity() ).append("/");
+            identity.append( owner.getValidationIdentity() ).append( "/" );
         }
         if (fieldRef != null) {
-        	fieldName = fieldRef.getName();
+            fieldName = fieldRef.getName();
         }
         if (fieldName == null) {
-        	fieldName = fieldRefName;
+            fieldName = fieldRefName;
         }
         if (fieldName == null) {
             identity.append( "[Unnamed Parameter]" );
@@ -64,109 +63,110 @@ public class TLParameter extends TLModelElement implements TLDocumentationOwner,
             identity.append( fieldName );
         }
         return identity.toString();
-	}
+    }
 
     /**
-	 * @see org.opentravel.schemacompiler.model.LibraryElement#getOwningLibrary()
-	 */
-	@Override
-	public AbstractLibrary getOwningLibrary() {
-		return (owner == null) ? null : owner.getOwningLibrary();
-	}
+     * @see org.opentravel.schemacompiler.model.LibraryElement#getOwningLibrary()
+     */
+    @Override
+    public AbstractLibrary getOwningLibrary() {
+        return (owner == null) ? null : owner.getOwningLibrary();
+    }
 
-	/**
-	 * @see org.opentravel.schemacompiler.model.ModelElement#getOwningModel()
-	 */
-	@Override
-	public TLModel getOwningModel() {
-		return (owner == null) ? null : owner.getOwningModel();
-	}
+    /**
+     * @see org.opentravel.schemacompiler.model.ModelElement#getOwningModel()
+     */
+    @Override
+    public TLModel getOwningModel() {
+        return (owner == null) ? null : owner.getOwningModel();
+    }
 
-	/**
-	 * Returns the value of the 'owner' field.
-	 *
-	 * @return TLParamGroup
-	 */
-	public TLParamGroup getOwner() {
-		return owner;
-	}
+    /**
+     * Returns the value of the 'owner' field.
+     *
+     * @return TLParamGroup
+     */
+    public TLParamGroup getOwner() {
+        return owner;
+    }
 
-	/**
-	 * Assigns the value of the 'owner' field.
-	 *
-	 * @param owner  the field value to assign
-	 */
-	public void setOwner(TLParamGroup owner) {
-		this.owner = owner;
-	}
+    /**
+     * Assigns the value of the 'owner' field.
+     *
+     * @param owner the field value to assign
+     */
+    public void setOwner(TLParamGroup owner) {
+        this.owner = owner;
+    }
 
-	/**
-	 * Returns the value of the 'fieldRef' field.
-	 *
-	 * @return TLMemberField<?>
-	 */
-	@SuppressWarnings("unchecked")
-	public <O extends TLMemberFieldOwner> TLMemberField<O> getFieldRef() {
-		return (TLMemberField<O>) fieldRef;
-	}
+    /**
+     * Returns the value of the 'fieldRef' field.
+     *
+     * @param <O> the type of the member field's owner
+     * @return TLMemberField&lt;?&gt;
+     */
+    @SuppressWarnings("unchecked")
+    public <O extends TLMemberFieldOwner> TLMemberField<O> getFieldRef() {
+        return (TLMemberField<O>) fieldRef;
+    }
 
-	/**
-	 * Assigns the value of the 'fieldRef' field.
-	 *
-	 * @param fieldRef  the field value to assign
-	 */
-	public void setFieldRef(TLMemberField<?> fieldRef) {
-        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.FIELD_REF_MODIFIED, this)
-        		.setOldValue(this.fieldRef).setNewValue(fieldRef).buildEvent();
-        
+    /**
+     * Assigns the value of the 'fieldRef' field.
+     *
+     * @param fieldRef the field value to assign
+     */
+    public void setFieldRef(TLMemberField<?> fieldRef) {
+        ModelEvent<?> event = new ModelEventBuilder( ModelEventType.FIELD_REF_MODIFIED, this )
+            .setOldValue( this.fieldRef ).setNewValue( fieldRef ).buildEvent();
+
         if (fieldRef != null) {
-        	this.fieldRefName = fieldRef.getName();
+            this.fieldRefName = fieldRef.getName();
         }
-		this.fieldRef = fieldRef;
-        publishEvent(event);
-	}
+        this.fieldRef = fieldRef;
+        publishEvent( event );
+    }
 
-	/**
-	 * Returns the value of the 'fieldRefName' field.
-	 *
-	 * @return String
-	 */
-	public String getFieldRefName() {
-		return fieldRefName;
-	}
+    /**
+     * Returns the value of the 'fieldRefName' field.
+     *
+     * @return String
+     */
+    public String getFieldRefName() {
+        return fieldRefName;
+    }
 
-	/**
-	 * Assigns the value of the 'fieldRefName' field.
-	 *
-	 * @param fieldRefName  the field value to assign
-	 */
-	public void setFieldRefName(String fieldRefName) {
-		this.fieldRefName = fieldRefName;
-	}
+    /**
+     * Assigns the value of the 'fieldRefName' field.
+     *
+     * @param fieldRefName the field value to assign
+     */
+    public void setFieldRefName(String fieldRefName) {
+        this.fieldRefName = fieldRefName;
+    }
 
-	/**
-	 * Returns the value of the 'location' field.
-	 *
-	 * @return TLParamLocation
-	 */
-	public TLParamLocation getLocation() {
-		return location;
-	}
+    /**
+     * Returns the value of the 'location' field.
+     *
+     * @return TLParamLocation
+     */
+    public TLParamLocation getLocation() {
+        return location;
+    }
 
-	/**
-	 * Assigns the value of the 'location' field.
-	 *
-	 * @param location  the field value to assign
-	 */
-	public void setLocation(TLParamLocation location) {
-        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.LOCATION_MODIFIED, this)
-				.setOldValue(this.location).setNewValue(location).buildEvent();
-        
-		this.location = location;
-        publishEvent(event);
-	}
+    /**
+     * Assigns the value of the 'location' field.
+     *
+     * @param location the field value to assign
+     */
+    public void setLocation(TLParamLocation location) {
+        ModelEvent<?> event = new ModelEventBuilder( ModelEventType.LOCATION_MODIFIED, this )
+            .setOldValue( this.location ).setNewValue( location ).buildEvent();
 
-	/**
+        this.location = location;
+        publishEvent( event );
+    }
+
+    /**
      * @see org.opentravel.schemacompiler.model.TLDocumentationOwner#getDocumentation()
      */
     public TLDocumentation getDocumentation() {
@@ -178,17 +178,17 @@ public class TLParameter extends TLModelElement implements TLDocumentationOwner,
      */
     public void setDocumentation(TLDocumentation documentation) {
         if (documentation != this.documentation) {
-            ModelEvent<?> event = new ModelEventBuilder(ModelEventType.DOCUMENTATION_MODIFIED, this)
-                    .setOldValue(this.documentation).setNewValue(documentation).buildEvent();
+            ModelEvent<?> event = new ModelEventBuilder( ModelEventType.DOCUMENTATION_MODIFIED, this )
+                .setOldValue( this.documentation ).setNewValue( documentation ).buildEvent();
 
             if (documentation != null) {
-                documentation.setOwner(this);
+                documentation.setOwner( this );
             }
             if (this.documentation != null) {
-                this.documentation.setOwner(null);
+                this.documentation.setOwner( null );
             }
             this.documentation = documentation;
-            publishEvent(event);
+            publishEvent( event );
         }
     }
 
@@ -205,7 +205,7 @@ public class TLParameter extends TLModelElement implements TLDocumentationOwner,
      */
     @Override
     public TLEquivalent getEquivalent(String context) {
-        return equivalentManager.getChild(context);
+        return equivalentManager.getChild( context );
     }
 
     /**
@@ -213,7 +213,7 @@ public class TLParameter extends TLModelElement implements TLDocumentationOwner,
      */
     @Override
     public void addEquivalent(TLEquivalent equivalent) {
-        equivalentManager.addChild(equivalent);
+        equivalentManager.addChild( equivalent );
     }
 
     /**
@@ -222,7 +222,7 @@ public class TLParameter extends TLModelElement implements TLDocumentationOwner,
      */
     @Override
     public void addEquivalent(int index, TLEquivalent equivalent) {
-        equivalentManager.addChild(index, equivalent);
+        equivalentManager.addChild( index, equivalent );
     }
 
     /**
@@ -230,23 +230,7 @@ public class TLParameter extends TLModelElement implements TLDocumentationOwner,
      */
     @Override
     public void removeEquivalent(TLEquivalent equivalent) {
-        equivalentManager.removeChild(equivalent);
-    }
-
-    /**
-     * @see org.opentravel.schemacompiler.model.TLEquivalentOwner#moveUp(org.opentravel.schemacompiler.model.TLEquivalent)
-     */
-    @Override
-    public void moveUp(TLEquivalent equivalent) {
-        equivalentManager.moveUp(equivalent);
-    }
-
-    /**
-     * @see org.opentravel.schemacompiler.model.TLEquivalentOwner#moveDown(org.opentravel.schemacompiler.model.TLEquivalent)
-     */
-    @Override
-    public void moveDown(TLEquivalent equivalent) {
-        equivalentManager.moveDown(equivalent);
+        equivalentManager.removeChild( equivalent );
     }
 
     /**
@@ -254,7 +238,7 @@ public class TLParameter extends TLModelElement implements TLDocumentationOwner,
      */
     @Override
     public void sortEquivalents(Comparator<TLEquivalent> comparator) {
-        equivalentManager.sortChildren(comparator);
+        equivalentManager.sortChildren( comparator );
     }
 
     /**
@@ -268,14 +252,14 @@ public class TLParameter extends TLModelElement implements TLDocumentationOwner,
      * @see org.opentravel.schemacompiler.model.TLExampleOwner#getExample(java.lang.String)
      */
     public TLExample getExample(String contextId) {
-        return exampleManager.getChild(contextId);
+        return exampleManager.getChild( contextId );
     }
 
     /**
      * @see org.opentravel.schemacompiler.model.TLExampleOwner#addExample(org.opentravel.schemacompiler.model.TLExample)
      */
     public void addExample(TLExample example) {
-        exampleManager.addChild(example);
+        exampleManager.addChild( example );
     }
 
     /**
@@ -283,35 +267,51 @@ public class TLParameter extends TLModelElement implements TLDocumentationOwner,
      *      org.opentravel.schemacompiler.model.TLExample)
      */
     public void addExample(int index, TLExample example) {
-        exampleManager.addChild(index, example);
+        exampleManager.addChild( index, example );
     }
 
     /**
      * @see org.opentravel.schemacompiler.model.TLExampleOwner#removeExample(org.opentravel.schemacompiler.model.TLExample)
      */
     public void removeExample(TLExample example) {
-        exampleManager.removeChild(example);
-    }
-
-    /**
-     * @see org.opentravel.schemacompiler.model.TLExampleOwner#moveUp(org.opentravel.schemacompiler.model.TLExample)
-     */
-    public void moveUp(TLExample example) {
-        exampleManager.moveUp(example);
-    }
-
-    /**
-     * @see org.opentravel.schemacompiler.model.TLExampleOwner#moveDown(org.opentravel.schemacompiler.model.TLExample)
-     */
-    public void moveDown(TLExample example) {
-        exampleManager.moveDown(example);
+        exampleManager.removeChild( example );
     }
 
     /**
      * @see org.opentravel.schemacompiler.model.TLExampleOwner#sortExamples(java.util.Comparator)
      */
     public void sortExamples(Comparator<TLExample> comparator) {
-        exampleManager.sortChildren(comparator);
+        exampleManager.sortChildren( comparator );
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.model.TLEquivalentOwner#moveUp(org.opentravel.schemacompiler.model.TLEquivalent)
+     */
+    @Override
+    public void moveUp(TLEquivalent equivalent) {
+        equivalentManager.moveUp( equivalent );
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.model.TLExampleOwner#moveUp(org.opentravel.schemacompiler.model.TLExample)
+     */
+    public void moveUp(TLExample example) {
+        exampleManager.moveUp( example );
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.model.TLEquivalentOwner#moveDown(org.opentravel.schemacompiler.model.TLEquivalent)
+     */
+    @Override
+    public void moveDown(TLEquivalent equivalent) {
+        equivalentManager.moveDown( equivalent );
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.model.TLExampleOwner#moveDown(org.opentravel.schemacompiler.model.TLExample)
+     */
+    public void moveDown(TLExample example) {
+        exampleManager.moveDown( example );
     }
 
     /**
@@ -319,17 +319,15 @@ public class TLParameter extends TLModelElement implements TLDocumentationOwner,
      * 
      * @author S. Livezey
      */
-    protected static class ParameterListManager extends
-            ChildEntityListManager<TLParameter, TLParamGroup> {
+    protected static class ParameterListManager extends ChildEntityListManager<TLParameter,TLParamGroup> {
 
         /**
          * Constructor that specifies the owner of the unerlying list.
          * 
-         * @param owner
-         *            the owner of the underlying list of children
+         * @param owner the owner of the underlying list of children
          */
         public ParameterListManager(TLParamGroup owner) {
-            super(owner, ModelEventType.PARAMETER_ADDED, ModelEventType.PARAMETER_REMOVED);
+            super( owner, ModelEventType.PARAMETER_ADDED, ModelEventType.PARAMETER_REMOVED );
         }
 
         /**
@@ -337,14 +335,14 @@ public class TLParameter extends TLModelElement implements TLDocumentationOwner,
          */
         @Override
         protected String getChildName(TLParameter child) {
-        	String childName = null;
-        	
-        	if (child.getFieldRef() != null) {
-        		childName = child.getFieldRef().getName();
-        	}
-        	if (childName == null) {
-        		childName = child.getFieldRefName();
-        	}
+            String childName = null;
+
+            if (child.getFieldRef() != null) {
+                childName = child.getFieldRef().getName();
+            }
+            if (childName == null) {
+                childName = child.getFieldRefName();
+            }
             return childName;
         }
 
@@ -354,7 +352,7 @@ public class TLParameter extends TLModelElement implements TLDocumentationOwner,
          */
         @Override
         protected void assignOwner(TLParameter child, TLParamGroup owner) {
-            child.setOwner(owner);
+            child.setOwner( owner );
         }
 
         /**
@@ -366,7 +364,7 @@ public class TLParameter extends TLModelElement implements TLDocumentationOwner,
             TLModel owningModel = owner.getOwningModel();
 
             if (owningModel != null) {
-                owningModel.publishEvent(event);
+                owningModel.publishEvent( event );
             }
         }
 

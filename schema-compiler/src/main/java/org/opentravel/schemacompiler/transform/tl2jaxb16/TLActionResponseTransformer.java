@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.transform.tl2jaxb16;
 
 import org.opentravel.ns.ota2.librarymodel_v01_06.ActionResponse;
@@ -24,40 +25,40 @@ import org.opentravel.schemacompiler.transform.ObjectTransformer;
 import org.opentravel.schemacompiler.transform.symbols.SymbolResolverTransformerContext;
 
 /**
- * Handles the transformation of objects from the <code>TLActionResponse</code> type to the
- * <code>ActionResponse</code> type.
+ * Handles the transformation of objects from the <code>TLActionResponse</code> type to the <code>ActionResponse</code>
+ * type.
  *
  * @author S. Livezey
  */
 public class TLActionResponseTransformer extends TLComplexTypeTransformer<TLActionResponse,ActionResponse> {
-	
-	/**
-	 * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
-	 */
-	@Override
-	public ActionResponse transform(TLActionResponse source) {
-		NamedEntity sourcePayloadType = source.getPayloadType();
-		ActionResponse response = new ActionResponse();
-		
-		response.getStatusCodes().addAll(source.getStatusCodes());
-		response.getMimeTypes().addAll(TLActionTransformer.transformMimeTypes(source.getMimeTypes()));
-		
-		if (sourcePayloadType != null) {
-			response.setPayloadType(context.getSymbolResolver().buildEntityName(
-					sourcePayloadType.getNamespace(), sourcePayloadType.getLocalName()));
+
+    /**
+     * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
+     */
+    @Override
+    public ActionResponse transform(TLActionResponse source) {
+        NamedEntity sourcePayloadType = source.getPayloadType();
+        ActionResponse response = new ActionResponse();
+
+        response.getStatusCodes().addAll( source.getStatusCodes() );
+        response.getMimeTypes().addAll( TLActionTransformer.transformMimeTypes( source.getMimeTypes() ) );
+
+        if (sourcePayloadType != null) {
+            response.setPayloadType( context.getSymbolResolver().buildEntityName( sourcePayloadType.getNamespace(),
+                sourcePayloadType.getLocalName() ) );
         }
         if (response.getPayloadType() == null) {
-			response.setPayloadType(source.getPayloadTypeName());
-		}
-		
-        if ((source.getDocumentation() != null) && !source.getDocumentation().isEmpty()) {
-            ObjectTransformer<TLDocumentation, Documentation, SymbolResolverTransformerContext> docTransformer = getTransformerFactory()
-                    .getTransformer(TLDocumentation.class, Documentation.class);
-
-            response.setDocumentation(docTransformer.transform(source.getDocumentation()));
+            response.setPayloadType( source.getPayloadTypeName() );
         }
-        
-		return response;
-	}
-	
+
+        if ((source.getDocumentation() != null) && !source.getDocumentation().isEmpty()) {
+            ObjectTransformer<TLDocumentation,Documentation,SymbolResolverTransformerContext> docTransformer =
+                getTransformerFactory().getTransformer( TLDocumentation.class, Documentation.class );
+
+            response.setDocumentation( docTransformer.transform( source.getDocumentation() ) );
+        }
+
+        return response;
+    }
+
 }

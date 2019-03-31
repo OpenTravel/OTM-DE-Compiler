@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.validate.save;
 
 import org.opentravel.schemacompiler.model.TLValueWithAttributes;
@@ -33,19 +34,19 @@ public class TLValueWithAttributesSaveValidator extends TLValueWithAttributesBas
      */
     @Override
     protected ValidationFindings validateFields(TLValueWithAttributes target) {
-        TLValidationBuilder builder = newValidationBuilder(target);
+        TLValidationBuilder builder = newValidationBuilder( target );
 
-        builder.setProperty("name", target.getName()).setFindingType(FindingType.WARNING)
-                .assertPatternMatch(NAME_XML_PATTERN);
+        builder.setProperty( "name", target.getName() ).setFindingType( FindingType.WARNING )
+            .assertPatternMatch( NAME_XML_PATTERN );
 
-        builder.setProperty("attributes", target.getAttributes())
-                .setFindingType(FindingType.WARNING).assertNotNull().assertContainsNoNullElements();
+        builder.setProperty( "attributes", target.getAttributes() ).setFindingType( FindingType.WARNING )
+            .assertNotNull().assertContainsNoNullElements();
 
-        builder.setProperty("indicators", target.getIndicators())
-                .setFindingType(FindingType.WARNING).assertNotNull().assertContainsNoNullElements();
+        builder.setProperty( "indicators", target.getIndicators() ).setFindingType( FindingType.WARNING )
+            .assertNotNull().assertContainsNoNullElements();
 
-        builder.setProperty("equivalents", target.getEquivalents())
-                .setFindingType(FindingType.WARNING).assertNotNull().assertContainsNoNullElements();
+        builder.setProperty( "equivalents", target.getEquivalents() ).setFindingType( FindingType.WARNING )
+            .assertNotNull().assertContainsNoNullElements();
 
         return builder.getFindings();
     }

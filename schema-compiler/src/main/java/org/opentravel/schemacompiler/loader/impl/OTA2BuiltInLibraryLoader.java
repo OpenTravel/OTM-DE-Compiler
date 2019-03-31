@@ -13,11 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.loader.impl;
-
-import java.io.InputStream;
-
-import javax.xml.namespace.QName;
 
 import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
 import org.opentravel.schemacompiler.loader.LibraryInputSource;
@@ -30,6 +27,10 @@ import org.opentravel.schemacompiler.transform.ObjectTransformer;
 import org.opentravel.schemacompiler.transform.TransformerFactory;
 import org.opentravel.schemacompiler.transform.symbols.DefaultTransformerContext;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
+
+import java.io.InputStream;
+
+import javax.xml.namespace.QName;
 
 /**
  * Built-in library loader that obtains its content from an OTA2 <code>TLLibrary</code> file.
@@ -50,32 +51,29 @@ public class OTA2BuiltInLibraryLoader extends AbstractBuiltInLibraryLoader {
             // First, load the schema from the specified classpath location
             LibraryModuleLoader<InputStream> moduleLoader = new MultiVersionLibraryModuleLoader();
             ValidationFindings findings = new ValidationFindings();
-            LibraryModuleInfo<Object> libraryInfo = moduleLoader.loadLibrary(inputSource, findings);
+            LibraryModuleInfo<Object> libraryInfo = moduleLoader.loadLibrary( inputSource, findings );
 
             // Next, transform the schema into an XSDLibrary
             if (!findings.hasFinding()) {
                 DefaultTransformerContext transformContext = new DefaultTransformerContext();
                 TransformerFactory<DefaultTransformerContext> transformFactory = TransformerFactory
-                        .getInstance(SchemaCompilerApplicationContext.LOADER_TRANSFORMER_FACTORY,
-                                transformContext);
-                ObjectTransformer<Object, TLLibrary, DefaultTransformerContext> transformer = transformFactory
-                        .getTransformer(libraryInfo.getJaxbArtifact(), TLLibrary.class);
-                TLLibrary ota2Library = transformer.transform(libraryInfo.getJaxbArtifact());
+                    .getInstance( SchemaCompilerApplicationContext.LOADER_TRANSFORMER_FACTORY, transformContext );
+                ObjectTransformer<Object,TLLibrary,DefaultTransformerContext> transformer =
+                    transformFactory.getTransformer( libraryInfo.getJaxbArtifact(), TLLibrary.class );
+                TLLibrary ota2Library = transformer.transform( libraryInfo.getJaxbArtifact() );
                 QName qualifiedName;
 
                 if (ota2Library.getPrefix() == null) {
-                    ota2Library.setPrefix(getLibraryDeclaration().getDefaultPrefix());
+                    ota2Library.setPrefix( getLibraryDeclaration().getDefaultPrefix() );
                 }
 
-                qualifiedName = new QName( ota2Library.getNamespace(), ota2Library.getName(),
-                        ota2Library.getPrefix() );
-                library = new BuiltInLibrary(qualifiedName, inputSource.getLibraryURL(),
-                        ota2Library.getNamedMembers(), ota2Library.getNamespaceImports(),
-                        getLibraryDeclaration(), ota2Library.getVersionScheme());
+                qualifiedName = new QName( ota2Library.getNamespace(), ota2Library.getName(), ota2Library.getPrefix() );
+                library = new BuiltInLibrary( qualifiedName, inputSource.getLibraryURL(), ota2Library.getNamedMembers(),
+                    ota2Library.getNamespaceImports(), getLibraryDeclaration(), ota2Library.getVersionScheme() );
             }
         } catch (Exception e) {
-            throw new LibraryLoaderException("Error constructing built-in library instance ("
-                    + inputSource.getLibraryURL() + ")", e);
+            throw new LibraryLoaderException(
+                "Error constructing built-in library instance (" + inputSource.getLibraryURL() + ")", e );
         }
         return library;
     }

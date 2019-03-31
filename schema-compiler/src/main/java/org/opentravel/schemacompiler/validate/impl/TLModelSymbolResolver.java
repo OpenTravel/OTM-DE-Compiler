@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.validate.impl;
 
 import org.opentravel.schemacompiler.model.TLModel;
@@ -21,30 +22,27 @@ import org.opentravel.schemacompiler.transform.symbols.AbstractSymbolResolver;
 import org.opentravel.schemacompiler.transform.symbols.SymbolTableFactory;
 
 /**
- * Symbol resolver that utilizes a single symbol table constructed from the members of a
- * <code>TLModel</code> instance.
+ * Symbol resolver that utilizes a single symbol table constructed from the members of a <code>TLModel</code> instance.
  * 
  * @author S. Livezey
  */
 public class TLModelSymbolResolver extends AbstractSymbolResolver {
 
     private SymbolTable modelSymbols;
-    
-	/**
+
+    /**
      * Constructor that initializes its symbol table from the members of the given model.
      * 
-     * @param model
-     *            the model from which to construct the internal symbol table
+     * @param model the model from which to construct the internal symbol table
      */
     public TLModelSymbolResolver(TLModel model) {
-        this((model == null) ? new SymbolTable() : SymbolTableFactory.newSymbolTableFromModel(model));
+        this( (model == null) ? new SymbolTable() : SymbolTableFactory.newSymbolTableFromModel( model ) );
     }
 
     /**
      * Constructor that initializes its symbol table from the members of the given model.
      * 
-     * @param symbolTable
-     *            the symbol table containing all possible symbol lookups required by this resolver
+     * @param symbolTable the symbol table containing all possible symbol lookups required by this resolver
      */
     public TLModelSymbolResolver(SymbolTable symbolTable) {
         this.modelSymbols = symbolTable;
@@ -56,14 +54,14 @@ public class TLModelSymbolResolver extends AbstractSymbolResolver {
      */
     @Override
     public Object resolveQualifiedEntity(String namespace, String localName) {
-        Object entity = modelSymbols.getEntity(namespace, localName);
+        Object entity = modelSymbols.getEntity( namespace, localName );
 
         // If we cannot identify an entity in the requested namespace, attempt to search the
-        // anonymous entities for a match.  Only attempt anonymous lookups if we are searching
+        // anonymous entities for a match. Only attempt anonymous lookups if we are searching
         // the namespace that is currently considered to be the local one
         if ((entity == null) && (namespace != null) && (prefixResolver != null)
-                && namespace.equals(prefixResolver.getLocalNamespace())) {
-            entity = resolveAnonymousEntity(localName, modelSymbols);
+            && namespace.equals( prefixResolver.getLocalNamespace() )) {
+            entity = resolveAnonymousEntity( localName, modelSymbols );
         }
         return entity;
     }
@@ -74,7 +72,7 @@ public class TLModelSymbolResolver extends AbstractSymbolResolver {
      */
     @Override
     protected Object resolveQualifiedOperationEntity(String namespace, String localName) {
-        return modelSymbols.getOperationEntity(namespace, localName);
+        return modelSymbols.getOperationEntity( namespace, localName );
     }
 
     /**
@@ -82,15 +80,15 @@ public class TLModelSymbolResolver extends AbstractSymbolResolver {
      */
     @Override
     public String getEntityNamespace(Object entity) {
-        return modelSymbols.getNamespaceForEntity(entity);
+        return modelSymbols.getNamespaceForEntity( entity );
     }
 
     /**
-	 * @see org.opentravel.schemacompiler.transform.symbols.AbstractSymbolResolver#displaySymbolTable()
-	 */
-	@Override
-	public void displaySymbolTable() {
-    	modelSymbols.displayTable();
-	}
+     * @see org.opentravel.schemacompiler.transform.symbols.AbstractSymbolResolver#displaySymbolTable()
+     */
+    @Override
+    public void displaySymbolTable() {
+        modelSymbols.displayTable();
+    }
 
 }

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.transform.jaxb16_2tl;
 
 import org.opentravel.ns.ota2.librarymodel_v01_06.FacetContextual;
@@ -29,7 +30,7 @@ import org.opentravel.schemacompiler.model.TLProperty;
  * 
  * @author S. Livezey
  */
-public class FacetContextualTransformer extends ComplexTypeTransformer<FacetContextual, TLContextualFacet> {
+public class FacetContextualTransformer extends ComplexTypeTransformer<FacetContextual,TLContextualFacet> {
 
     /**
      * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
@@ -38,51 +39,52 @@ public class FacetContextualTransformer extends ComplexTypeTransformer<FacetCont
     public TLContextualFacet transform(FacetContextual source) {
         final TLContextualFacet facet = new TLContextualFacet();
 
-        facet.setName(trimString(source.getName()));
-        facet.setFacetType(getTargetType(source.getType()));
-        facet.setOwningEntityName(trimString(source.getFacetOwner()));
-        facet.setNotExtendable((source.isNotExtendable() != null) && source.isNotExtendable());
-        facet.setFacetNamespace(trimString(source.getFacetNamespace()));
+        facet.setName( trimString( source.getName() ) );
+        facet.setFacetType( getTargetType( source.getType() ) );
+        facet.setOwningEntityName( trimString( source.getFacetOwner() ) );
+        facet.setNotExtendable( (source.isNotExtendable() != null) && source.isNotExtendable() );
+        facet.setFacetNamespace( trimString( source.getFacetNamespace() ) );
 
-        for (TLAttribute attribute : transformAttributes(source.getAttribute())) {
-            facet.addAttribute(attribute);
+        for (TLAttribute attribute : transformAttributes( source.getAttribute() )) {
+            facet.addAttribute( attribute );
         }
-        for (TLProperty element : transformElements(source.getElement())) {
-            facet.addElement(element);
+        for (TLProperty element : transformElements( source.getElement() )) {
+            facet.addElement( element );
         }
-        for (TLIndicator indicator : transformIndicators(source.getIndicator())) {
-            facet.addIndicator(indicator);
+        for (TLIndicator indicator : transformIndicators( source.getIndicator() )) {
+            facet.addIndicator( indicator );
         }
         return facet;
     }
-    
+
     /**
-     * Returns the model facet type that corresponds with the given JAXB contextual
-     * facet type.
+     * Returns the model facet type that corresponds with the given JAXB contextual facet type.
      * 
-     * @param sourceType  the JAXB contextual facet type
+     * @param sourceType the JAXB contextual facet type
      * @return TLFacetType
      */
     private TLFacetType getTargetType(FacetContextualType sourceType) {
-    	TLFacetType targetType = null;
-    	
-    	if (sourceType != null) {
-    		switch (sourceType) {
-				case CHOICE:
-					targetType = TLFacetType.CHOICE;
-					break;
-				case CUSTOM:
-					targetType = TLFacetType.CUSTOM;
-					break;
-				case QUERY:
-					targetType = TLFacetType.QUERY;
-					break;
-				case UPDATE:
-					targetType = TLFacetType.UPDATE;
-					break;
-    		}
-    	}
-    	return targetType;
+        TLFacetType targetType = null;
+
+        if (sourceType != null) {
+            switch (sourceType) {
+                case CHOICE:
+                    targetType = TLFacetType.CHOICE;
+                    break;
+                case CUSTOM:
+                    targetType = TLFacetType.CUSTOM;
+                    break;
+                case QUERY:
+                    targetType = TLFacetType.QUERY;
+                    break;
+                case UPDATE:
+                    targetType = TLFacetType.UPDATE;
+                    break;
+                default:
+                    // No default action required
+            }
+        }
+        return targetType;
     }
 
 }

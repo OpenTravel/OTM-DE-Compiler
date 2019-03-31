@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.ioc;
 
 import org.springframework.context.ApplicationContext;
 
 /**
- * Constant definitions for the schema declarations that are required in the Spring application
- * context.
+ * Constant definitions for the schema declarations that are required in the Spring application context.
  * 
  * @author S. Livezey
  */
@@ -52,7 +52,7 @@ public class SchemaDeclarations {
     private static final String SCHEMA_FOR_SCHEMAS_ID = "schemaForSchemas";
     private static final String OTM_COMMON_SCHEMA_ID = "otmCommonSchema";
     private static final String OTA2_APPINFO_SCHEMA_ID = "ota2AppInfoSchema";
-    
+
     /**
      * Private constructor to prevent instantiation.
      */
@@ -65,22 +65,22 @@ public class SchemaDeclarations {
         try {
             ApplicationContext appContext = SchemaCompilerApplicationContext.getContext();
 
-            OTA2_LIBRARY_SCHEMA_1_4 = (SchemaDeclaration) appContext.getBean(OTA2_LIBRARY_SCHEMA_1_4_ID);
-            OTA2_LIBRARY_SCHEMA_1_5 = (SchemaDeclaration) appContext.getBean(OTA2_LIBRARY_SCHEMA_1_5_ID);
-            OTA2_LIBRARY_SCHEMA_1_6 = (SchemaDeclaration) appContext.getBean(OTA2_LIBRARY_SCHEMA_1_6_ID);
-            OTA2_CATALOG_SCHEMA = (SchemaDeclaration) appContext.getBean(OTA2_CATALOG_SCHEMA_ID);
-            OTA2_PROJECT_SCHEMA = (SchemaDeclaration) appContext.getBean(OTA2_PROJECT_SCHEMA_ID);
-            OTA2_REPOSITORY_SCHEMA = (SchemaDeclaration) appContext.getBean(OTA2_REPOSITORY_SCHEMA_ID);
-            OTA2_RELEASE_SCHEMA = (SchemaDeclaration) appContext.getBean(OTA2_RELEASE_SCHEMA_ID);
-            OTA2_ASSEMBLY_SCHEMA = (SchemaDeclaration) appContext.getBean(OTA2_ASSEMBLY_SCHEMA_ID);
-            WSDL_SCHEMA = (SchemaDeclaration) appContext.getBean(WSDL_SCHEMA_ID);
-            SOAP_SCHEMA = (SchemaDeclaration) appContext.getBean(SOAP_SCHEMA_ID);
-            SCHEMA_FOR_SCHEMAS = (SchemaDeclaration) appContext.getBean(SCHEMA_FOR_SCHEMAS_ID);
-            OTM_COMMON_SCHEMA = (SchemaDeclaration) appContext.getBean(OTM_COMMON_SCHEMA_ID);
-            OTA2_APPINFO_SCHEMA = (SchemaDeclaration) appContext.getBean(OTA2_APPINFO_SCHEMA_ID);
+            OTA2_LIBRARY_SCHEMA_1_4 = (SchemaDeclaration) appContext.getBean( OTA2_LIBRARY_SCHEMA_1_4_ID );
+            OTA2_LIBRARY_SCHEMA_1_5 = (SchemaDeclaration) appContext.getBean( OTA2_LIBRARY_SCHEMA_1_5_ID );
+            OTA2_LIBRARY_SCHEMA_1_6 = (SchemaDeclaration) appContext.getBean( OTA2_LIBRARY_SCHEMA_1_6_ID );
+            OTA2_CATALOG_SCHEMA = (SchemaDeclaration) appContext.getBean( OTA2_CATALOG_SCHEMA_ID );
+            OTA2_PROJECT_SCHEMA = (SchemaDeclaration) appContext.getBean( OTA2_PROJECT_SCHEMA_ID );
+            OTA2_REPOSITORY_SCHEMA = (SchemaDeclaration) appContext.getBean( OTA2_REPOSITORY_SCHEMA_ID );
+            OTA2_RELEASE_SCHEMA = (SchemaDeclaration) appContext.getBean( OTA2_RELEASE_SCHEMA_ID );
+            OTA2_ASSEMBLY_SCHEMA = (SchemaDeclaration) appContext.getBean( OTA2_ASSEMBLY_SCHEMA_ID );
+            WSDL_SCHEMA = (SchemaDeclaration) appContext.getBean( WSDL_SCHEMA_ID );
+            SOAP_SCHEMA = (SchemaDeclaration) appContext.getBean( SOAP_SCHEMA_ID );
+            SCHEMA_FOR_SCHEMAS = (SchemaDeclaration) appContext.getBean( SCHEMA_FOR_SCHEMAS_ID );
+            OTM_COMMON_SCHEMA = (SchemaDeclaration) appContext.getBean( OTM_COMMON_SCHEMA_ID );
+            OTA2_APPINFO_SCHEMA = (SchemaDeclaration) appContext.getBean( OTA2_APPINFO_SCHEMA_ID );
 
         } catch (Exception e) {
-            throw new ExceptionInInitializerError(e);
+            throw new ExceptionInInitializerError( e );
         }
     }
 

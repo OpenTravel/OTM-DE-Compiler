@@ -13,47 +13,47 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.codegen.html;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.opentravel.schemacompiler.codegen.html.writers.AbstractWriterTest;
+import org.opentravel.schemacompiler.model.TLLibrary;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.opentravel.schemacompiler.model.TLLibrary;
-
-import org.opentravel.schemacompiler.codegen.html.writers.AbstractWriterTest;
-
 /**
  * @author Eric.Bronson
  *
  */
-public class LibraryIndexFrameWriterTest extends AbstractWriterTest{
-	
-	/**
-	 * @throws java.lang.Exception
-	 */
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
-		AbstractWriterTest.setUpBeforeClass();
-		DEST_DIR.mkdir();
-	}
+public class LibraryIndexFrameWriterTest extends AbstractWriterTest {
+
+    /**
+     * @throws java.lang.Exception
+     */
+    @BeforeClass
+    public static void setUpBeforeClass() throws Exception {
+        AbstractWriterTest.setUpBeforeClass();
+        DEST_DIR.mkdir();
+    }
 
 
-	@Test
-	public void testItShouldAddNamespacesForLibraries() throws Exception {
-		String filename = LibraryIndexFrameWriter.DEFAULT_FILENAME;
-		LibraryIndexFrameWriter.generate(config);
-		byte[] encoded = Files.readAllBytes(Paths.get(config.getDestDirName() + filename));
-		 String content = new String(encoded);
-		 List<TLLibrary> ns = config.getLibraries();
-		 assertTrue(ns.size() > 0);
-		 for(TLLibrary lib : ns){
-			 assertTrue("No namespace.", content.contains(lib.getName()));
-		 }
-	}
+    @Test
+    public void testItShouldAddNamespacesForLibraries() throws Exception {
+        String filename = LibraryIndexFrameWriter.DEFAULT_FILENAME;
+        LibraryIndexFrameWriter.generate( config );
+        byte[] encoded = Files.readAllBytes( Paths.get( config.getDestDirName() + filename ) );
+        String content = new String( encoded );
+        List<TLLibrary> ns = config.getLibraries();
+        assertTrue( ns.size() > 0 );
+        for (TLLibrary lib : ns) {
+            assertTrue( "No namespace.", content.contains( lib.getName() ) );
+        }
+    }
 
 }

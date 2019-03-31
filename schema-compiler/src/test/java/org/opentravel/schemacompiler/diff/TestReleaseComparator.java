@@ -13,14 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.diff;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
-import java.io.File;
 
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.junit.Before;
@@ -44,74 +43,78 @@ import org.opentravel.schemacompiler.util.ModelComparator;
 import org.opentravel.schemacompiler.util.SchemaCompilerTestUtils;
 import org.opentravel.schemacompiler.util.URLUtils;
 
+import java.io.File;
+
 /**
- * Verifies the operation of the <code>ReleaseComparator</code> and its
- * associated utility classes.
+ * Verifies the operation of the <code>ReleaseComparator</code> and its associated utility classes.
  */
-@RunWith( MockitoJUnitRunner.class )
+@RunWith(MockitoJUnitRunner.class)
 public class TestReleaseComparator extends AbstractDiffTest {
-    
-    @Mock private RemoteRepository mockRepository;
-    
+
+    @Mock
+    private RemoteRepository mockRepository;
+
     @Before
     public void setup() throws Exception {
         MockitoAnnotations.initMocks( this );
         when( mockRepository.getEndpointUrl() ).thenReturn( "http://www.mock-repository.org" );
     }
-    
+
     @Test
     public void testCompareReleases_withDifferences() throws Exception {
         ModelComparator comparator = new ModelComparator( ModelCompareOptions.getDefaultOptions() );
         ReleaseManager oldRelease = loadRelease( "Release-1", "1.0.0", "/test-package-diff/project-1.xml" );
         ReleaseManager newRelease = loadRelease( "Release-2", "1.0.0", "/test-package-diff/project-2.xml" );
         ReleaseChangeSet changeSet;
-        
+
         changeSet = comparator.compareReleases( oldRelease, newRelease );
         comparator.compareReleases( oldRelease, newRelease, new ByteArrayOutputStream() );
         assertNotNull( changeSet );
         assertTrue( changeSet.getChangeItems().size() > 0 );
-        
+
         changeSet = comparator.compareReleases( newRelease, oldRelease );
         comparator.compareReleases( newRelease, oldRelease, new ByteArrayOutputStream() );
         assertNotNull( changeSet );
         assertTrue( changeSet.getChangeItems().size() > 0 );
     }
-    
+
     @Test
     public void testCompareReleases_noDifferences() throws Exception {
         ModelComparator comparator = new ModelComparator( ModelCompareOptions.getDefaultOptions() );
         ReleaseManager release = loadRelease( "Release-1", "1.0.0", "/test-package-diff/project-1.xml" );
         ReleaseChangeSet changeSet;
-        
+
         changeSet = comparator.compareReleases( release, release );
         comparator.compareReleases( release, release, new ByteArrayOutputStream() );
         assertNotNull( changeSet );
         assertTrue( changeSet.getChangeItems().size() == 0 );
     }
-    
-    protected ReleaseManager loadRelease(String releaseName, String releaseVersion, String libraryPath) throws Exception {
+
+    protected ReleaseManager loadRelease(String releaseName, String releaseVersion, String libraryPath)
+        throws Exception {
         String releaseFilename = releaseName + "_" + releaseVersion.replace( '.', '_' ) + ".otr";
-        File releaseFile = new File( SchemaCompilerTestUtils.getBaseLibraryLocation() + "/releases/" + releaseFilename );
+        File releaseFile =
+            new File( SchemaCompilerTestUtils.getBaseLibraryLocation() + "/releases/" + releaseFilename );
         RepositoryManager mockRepositoryManager = mock( RepositoryManager.class );
         ReleaseManager releaseManager = mock( ReleaseManager.class );
         TLModel model = loadModel( libraryPath );
         Release release = new Release();
-        
+
         when( mockRepository.getEndpointUrl() ).thenReturn( "http://www.mock-repository.org" );
         when( releaseManager.getRelease() ).thenReturn( release );
         when( releaseManager.getModel() ).thenReturn( model );
-        
+
         release.setBaseNamespace( "http://www.opentravel.org/releases" );
         release.setReleaseUrl( URLUtils.toURL( releaseFile ) );
         release.setName( releaseName );
         release.setVersion( releaseVersion );
         release.setStatus( ReleaseStatus.DRAFT );
         release.setCompileOptions( new ReleaseCompileOptions() );
-        
+
         for (TLLibrary library : model.getUserDefinedLibraries()) {
             RepositoryItemImpl item = new RepositoryItemImpl();
             ReleaseMember member = new ReleaseMember();
-            
+
             item.setRepository( mockRepository );
             item.setBaseNamespace( library.getBaseNamespace() );
             item.setNamespace( library.getNamespace() );
@@ -122,12 +125,12 @@ public class TestReleaseComparator extends AbstractDiffTest {
             item.setStatus( library.getStatus() );
             item.setState( RepositoryItemState.MANAGED_UNLOCKED );
             member.setRepositoryItem( item );
-            
-            when( mockRepositoryManager.getRepositoryItem(
-                    URLUtils.toFile( library.getLibraryUrl() ) ) ).thenReturn( item );
+
+            when( mockRepositoryManager.getRepositoryItem( URLUtils.toFile( library.getLibraryUrl() ) ) )
+                .thenReturn( item );
             release.getPrincipalMembers().add( member );
         }
         return releaseManager;
     }
-    
+
 }

@@ -23,26 +23,26 @@ import org.opentravel.schemacompiler.model.TLMemberField;
  * Container for all change items identified during the comparison of two fields.
  */
 public class FieldChangeSet extends ChangeSet<TLMemberField<?>,FieldChangeItem> {
-	
-	/**
-	 * Constructor that assigns the old and new version of a field that was modified.
-	 * 
-	 * @param oldField  the old version of the field
-	 * @param newField  the new version of the field
-	 */
-	public FieldChangeSet(TLMemberField<?> oldField, TLMemberField<?> newField) {
-		super( oldField, newField );
-	}
-	
-	/**
-	 * @see org.opentravel.schemacompiler.diff.ChangeSet#getBookmarkId()
-	 */
-	public String getBookmarkId() {
-		TLMemberField<?> field = (getNewVersion() != null) ? getNewVersion() : getOldVersion();
-		NamedEntity fieldOwner = (field == null) ? null : (NamedEntity) field.getOwner();
-		String fieldName = (field == null) ? null : field.getName();
-		
-		return getBookmarkId( fieldOwner ) + "$" + ((fieldName == null) ? "UNKNOWN_FIELD" : fieldName);
-	}
+
+    /**
+     * Constructor that assigns the old and new version of a field that was modified.
+     * 
+     * @param oldField the old version of the field
+     * @param newField the new version of the field
+     */
+    public FieldChangeSet(TLMemberField<?> oldField, TLMemberField<?> newField) {
+        super( oldField, newField );
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.diff.ChangeSet#getBookmarkId()
+     */
+    public String getBookmarkId() {
+        TLMemberField<?> field = (getNewVersion() != null) ? getNewVersion() : getOldVersion();
+        NamedEntity fieldOwner = (field == null) ? null : (NamedEntity) field.getOwner();
+        String fieldName = (field == null) ? null : field.getName();
+
+        return getBookmarkId( fieldOwner ) + "$" + ((fieldName == null) ? "UNKNOWN_FIELD" : fieldName);
+    }
 
 }

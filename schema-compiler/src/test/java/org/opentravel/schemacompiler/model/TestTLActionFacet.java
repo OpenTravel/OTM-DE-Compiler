@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.model;
 
 import static org.junit.Assert.assertEquals;
@@ -24,23 +25,24 @@ import org.opentravel.schemacompiler.version.VersionSchemeFactory;
  * Verifies the functions of the <code>TLActionFacet</code> class.
  */
 public class TestTLActionFacet extends AbstractModelTest {
-	
-	@Test
-	public void testIdentityFunctions() throws Exception {
-		TLResource resource = addResource( "TestResource", library1 );
-		TLActionFacet actionFacet = addActionFacet( "ActionFacet", TLReferenceType.OPTIONAL, "Summary", 0, null, resource );
-		
-		assertEquals( library1.getNamespace(), actionFacet.getNamespace() );
-		assertEquals( library1.getBaseNamespace(), actionFacet.getBaseNamespace() );
-		assertEquals( resource.getName() + "_" + actionFacet.getName(), actionFacet.getLocalName() );
-		assertEquals( library1.getVersion(), actionFacet.getVersion() );
-		assertEquals( "TestLibrary1.otm : TestResource/ActionFacet", actionFacet.getValidationIdentity() );
-		assertEquals( VersionSchemeFactory.getInstance().getDefaultVersionScheme(), actionFacet.getVersionScheme() );
-	}
-	
-	@Test
-	public void testDocumentationFunctions() throws Exception {
-		testDocumentationFunctions( new TLActionFacet() );
-	}
-	
+
+    @Test
+    public void testIdentityFunctions() throws Exception {
+        TLResource resource = addResource( "TestResource", library1 );
+        TLActionFacet actionFacet =
+            addActionFacet( "ActionFacet", TLReferenceType.OPTIONAL, "Summary", 0, null, resource );
+
+        assertEquals( library1.getNamespace(), actionFacet.getNamespace() );
+        assertEquals( library1.getBaseNamespace(), actionFacet.getBaseNamespace() );
+        assertEquals( resource.getName() + "_" + actionFacet.getName(), actionFacet.getLocalName() );
+        assertEquals( library1.getVersion(), actionFacet.getVersion() );
+        assertEquals( "TestLibrary1.otm : TestResource/ActionFacet", actionFacet.getValidationIdentity() );
+        assertEquals( VersionSchemeFactory.getInstance().getDefaultVersionScheme(), actionFacet.getVersionScheme() );
+    }
+
+    @Test
+    public void testDocumentationFunctions() throws Exception {
+        testDocumentationFunctions( new TLActionFacet() );
+    }
+
 }

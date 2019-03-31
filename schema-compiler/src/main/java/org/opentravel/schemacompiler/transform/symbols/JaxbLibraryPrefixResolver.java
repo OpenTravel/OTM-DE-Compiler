@@ -13,16 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.transform.symbols;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
+package org.opentravel.schemacompiler.transform.symbols;
 
 import org.opentravel.schemacompiler.loader.LibraryModuleImport;
 import org.opentravel.schemacompiler.loader.LibraryModuleInfo;
 import org.opentravel.schemacompiler.transform.AnonymousEntityFilter;
 import org.opentravel.schemacompiler.transform.PrefixResolver;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * Prefix resolver that obtains its prefix mappings from a JAXB Library instance.
@@ -37,19 +38,16 @@ public class JaxbLibraryPrefixResolver implements PrefixResolver {
     /**
      * Constructor that specifies the underlying library that defines the prefix mappings.
      * 
-     * @param libraryInfo
-     *            the JAXB library instance that defines the prefix mappings
-     * @throws IllegalArgumentException
-     *             thrown if the instance provided is not recognized as a supported JAXB library
+     * @param libraryInfo the JAXB library instance that defines the prefix mappings
+     * @throws IllegalArgumentException thrown if the instance provided is not recognized as a supported JAXB library
      */
     public JaxbLibraryPrefixResolver(LibraryModuleInfo<?> libraryInfo) {
         for (LibraryModuleImport nsImport : libraryInfo.getImports()) {
             String prefix = nsImport.getPrefix();
             String namespace = nsImport.getNamespace();
 
-            if ((prefix != null) && (prefix.length() > 0) && (namespace != null)
-                    && (namespace.length() > 0)) {
-                prefixMappings.put(prefix, namespace);
+            if ((prefix != null) && (prefix.length() > 0) && (namespace != null) && (namespace.length() > 0)) {
+                prefixMappings.put( prefix, namespace );
             }
         }
         localNamespace = libraryInfo.getNamespace();
@@ -68,28 +66,28 @@ public class JaxbLibraryPrefixResolver implements PrefixResolver {
      */
     @Override
     public String resolveNamespaceFromPrefix(String prefix) {
-        return prefixMappings.get(prefix);
+        return prefixMappings.get( prefix );
     }
 
     /**
      * @see org.opentravel.schemacompiler.transform.PrefixResolver#getPrefixForNamespace(java.lang.String)
      */
     @Override
-	public String getPrefixForNamespace(String namespace) {
-		String prefix = null;
-		
-		if ((namespace != null) && (namespace.equals(localNamespace)
-				|| namespace.equals(AnonymousEntityFilter.ANONYMOUS_PSEUDO_NAMESPACE))) {
-			prefix = "";
-		} else {
-			for (Entry<String,String> entry : prefixMappings.entrySet()) {
-				if (entry.getValue().equals(namespace)) {
-					prefix = entry.getKey();
-					break;
-				}
-			}
-		}
-		return prefix;
-	}
-	
+    public String getPrefixForNamespace(String namespace) {
+        String prefix = null;
+
+        if ((namespace != null) && (namespace.equals( localNamespace )
+            || namespace.equals( AnonymousEntityFilter.ANONYMOUS_PSEUDO_NAMESPACE ))) {
+            prefix = "";
+        } else {
+            for (Entry<String,String> entry : prefixMappings.entrySet()) {
+                if (entry.getValue().equals( namespace )) {
+                    prefix = entry.getKey();
+                    break;
+                }
+            }
+        }
+        return prefix;
+    }
+
 }

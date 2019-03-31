@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.model;
 
 import java.util.List;
@@ -23,12 +24,12 @@ import java.util.List;
  * @author S. Livezey
  */
 public interface TLFacetOwner extends NamedEntity {
-	
-	/**
-	 * Returns a list of all facets owned by this entity.
-	 * 
-	 * @return List<TLFacet>
-	 */
-	public List<TLFacet> getAllFacets();
-	
+
+    /**
+     * Returns a list of all facets owned by this entity.
+     * 
+     * @return List&lt;TLFacet&gt;
+     */
+    public List<TLFacet> getAllFacets();
+
 }

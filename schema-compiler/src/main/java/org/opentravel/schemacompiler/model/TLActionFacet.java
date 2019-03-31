@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.model;
 
 import org.opentravel.schemacompiler.event.ModelEvent;
@@ -26,8 +27,8 @@ import org.opentravel.schemacompiler.version.Versioned;
  * @author S. Livezey
  */
 public class TLActionFacet extends TLModelElement implements NamedEntity, Versioned, TLDocumentationOwner {
-	
-	private String name;
+
+    private String name;
     private TLResource owningResource;
     private TLReferenceType referenceType;
     private String referenceFacetName;
@@ -35,258 +36,257 @@ public class TLActionFacet extends TLModelElement implements NamedEntity, Versio
     private NamedEntity basePayload;
     private String basePayloadName;
     private TLDocumentation documentation;
-	
+
     /**
-	 * Returns the resource that owns this action facet.
-	 *
-	 * @return TLResource
-	 */
-	public TLResource getOwningResource() {
-		return owningResource;
-	}
+     * Returns the resource that owns this action facet.
+     *
+     * @return TLResource
+     */
+    public TLResource getOwningResource() {
+        return owningResource;
+    }
 
-	/**
-	 * Assigns the resource that owns this action facet.
-	 *
-	 * @param owningResource  the resource instance to assign
-	 */
-	public void setOwningResource(TLResource owningResource) {
-		this.owningResource = owningResource;
-	}
+    /**
+     * Assigns the resource that owns this action facet.
+     *
+     * @param owningResource the resource instance to assign
+     */
+    public void setOwningResource(TLResource owningResource) {
+        this.owningResource = owningResource;
+    }
 
-	/**
-	 * @see org.opentravel.schemacompiler.model.LibraryElement#getOwningLibrary()
-	 */
-	@Override
-	public AbstractLibrary getOwningLibrary() {
-		return (owningResource == null) ? null : owningResource.getOwningLibrary();
-	}
+    /**
+     * @see org.opentravel.schemacompiler.model.LibraryElement#getOwningLibrary()
+     */
+    @Override
+    public AbstractLibrary getOwningLibrary() {
+        return (owningResource == null) ? null : owningResource.getOwningLibrary();
+    }
 
-	/**
-	 * @see org.opentravel.schemacompiler.model.ModelElement#getOwningModel()
-	 */
-	@Override
-	public TLModel getOwningModel() {
-		return (owningResource == null) ? null : owningResource.getOwningModel();
-	}
+    /**
+     * @see org.opentravel.schemacompiler.model.ModelElement#getOwningModel()
+     */
+    @Override
+    public TLModel getOwningModel() {
+        return (owningResource == null) ? null : owningResource.getOwningModel();
+    }
 
-	/**
-	 * @see org.opentravel.schemacompiler.model.NamedEntity#getNamespace()
-	 */
-	@Override
-	public String getNamespace() {
-		return (owningResource == null) ? null : owningResource.getNamespace();
-	}
+    /**
+     * @see org.opentravel.schemacompiler.model.NamedEntity#getNamespace()
+     */
+    @Override
+    public String getNamespace() {
+        return (owningResource == null) ? null : owningResource.getNamespace();
+    }
 
-	/**
-	 * @see org.opentravel.schemacompiler.model.TLAbstractFacet#getLocalName()
-	 */
-	@Override
-	public String getLocalName() {
+    /**
+     * @see org.opentravel.schemacompiler.model.TLAbstractFacet#getLocalName()
+     */
+    @Override
+    public String getLocalName() {
         StringBuilder localName = new StringBuilder();
 
         if (owningResource != null) {
-            localName.append(owningResource.getLocalName()).append('_');
+            localName.append( owningResource.getLocalName() ).append( '_' );
         }
         if (name != null) {
-            localName.append(name);
-            
+            localName.append( name );
+
         } else {
-            localName.append("Unnamed_Facet");
+            localName.append( "Unnamed_Facet" );
         }
         return localName.toString();
-	}
+    }
 
-	/**
-	 * @see org.opentravel.schemacompiler.validate.Validatable#getValidationIdentity()
-	 */
-	@Override
-	public String getValidationIdentity() {
+    /**
+     * @see org.opentravel.schemacompiler.validate.Validatable#getValidationIdentity()
+     */
+    @Override
+    public String getValidationIdentity() {
         StringBuilder identity = new StringBuilder();
-        
+
         if (owningResource != null) {
-            identity.append(owningResource.getValidationIdentity()).append("/");
+            identity.append( owningResource.getValidationIdentity() ).append( "/" );
         }
         if (name == null) {
-            identity.append("[Unnamed Action Facet]");
+            identity.append( "[Unnamed Action Facet]" );
         } else {
-            identity.append(name);
+            identity.append( name );
         }
         return identity.toString();
-	}
-	
+    }
+
     /**
-	 * @see org.opentravel.schemacompiler.version.Versioned#getVersion()
-	 */
-	@Override
-	public String getVersion() {
-		return (owningResource == null) ? null : owningResource.getVersion();
-	}
+     * @see org.opentravel.schemacompiler.version.Versioned#getVersion()
+     */
+    @Override
+    public String getVersion() {
+        return (owningResource == null) ? null : owningResource.getVersion();
+    }
 
-	/**
-	 * @see org.opentravel.schemacompiler.version.Versioned#getVersionScheme()
-	 */
-	@Override
-	public String getVersionScheme() {
-		return (owningResource == null) ? null : owningResource.getVersionScheme();
-	}
+    /**
+     * @see org.opentravel.schemacompiler.version.Versioned#getVersionScheme()
+     */
+    @Override
+    public String getVersionScheme() {
+        return (owningResource == null) ? null : owningResource.getVersionScheme();
+    }
 
-	/**
-	 * @see org.opentravel.schemacompiler.version.Versioned#getBaseNamespace()
-	 */
-	@Override
-	public String getBaseNamespace() {
-		return (owningResource == null) ? null : owningResource.getBaseNamespace();
-	}
+    /**
+     * @see org.opentravel.schemacompiler.version.Versioned#getBaseNamespace()
+     */
+    @Override
+    public String getBaseNamespace() {
+        return (owningResource == null) ? null : owningResource.getBaseNamespace();
+    }
 
-	/**
-	 * @see org.opentravel.schemacompiler.version.Versioned#isLaterVersion(org.opentravel.schemacompiler.version.Versioned)
-	 */
-	@Override
-	public boolean isLaterVersion(Versioned otherVersionedItem) {
-		boolean result = false;
-		
-		if (otherVersionedItem instanceof TLActionFacet) {
-			TLActionFacet otherFacet = ((TLActionFacet) otherVersionedItem);
-			TLResource otherResource = otherFacet.getOwningResource();
-			
-			if (otherFacet.getName().equals( name ) &&
-					(otherResource != null) && (owningResource != null)) {
-				result = owningResource.isLaterVersion( otherResource );
-			}
-		}
-		return result;
-	}
+    /**
+     * @see org.opentravel.schemacompiler.version.Versioned#isLaterVersion(org.opentravel.schemacompiler.version.Versioned)
+     */
+    @Override
+    public boolean isLaterVersion(Versioned otherVersionedItem) {
+        boolean result = false;
 
-	/**
-	 * Returns the value of the 'name' field.
-	 *
-	 * @return String
-	 */
-	public String getName() {
-		return name;
-	}
+        if (otherVersionedItem instanceof TLActionFacet) {
+            TLActionFacet otherFacet = ((TLActionFacet) otherVersionedItem);
+            TLResource otherResource = otherFacet.getOwningResource();
 
-	/**
-	 * Assigns the value of the 'name' field.
-	 *
-	 * @param name  the field value to assign
-	 */
-	public void setName(String name) {
-        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.NAME_MODIFIED, this)
-        		.setOldValue(this.name).setNewValue(name).buildEvent();
+            if (otherFacet.getName().equals( name ) && (otherResource != null) && (owningResource != null)) {
+                result = owningResource.isLaterVersion( otherResource );
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Returns the value of the 'name' field.
+     *
+     * @return String
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * Assigns the value of the 'name' field.
+     *
+     * @param name the field value to assign
+     */
+    public void setName(String name) {
+        ModelEvent<?> event = new ModelEventBuilder( ModelEventType.NAME_MODIFIED, this ).setOldValue( this.name )
+            .setNewValue( name ).buildEvent();
 
         this.name = name;
-        publishEvent(event);
-	}
+        publishEvent( event );
+    }
 
     /**
-	 * Returns the value of the 'referenceType' field.
-	 *
-	 * @return TLReferenceType
-	 */
-	public TLReferenceType getReferenceType() {
-		return referenceType;
-	}
-
-	/**
-	 * Assigns the value of the 'referenceType' field.
-	 *
-	 * @param referenceType  the field value to assign
-	 */
-	public void setReferenceType(TLReferenceType businessObjectReferenceType) {
-        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.REFERENCE_TYPE_MODIFIED,
-                this).setOldValue(this.referenceType).setNewValue(businessObjectReferenceType).buildEvent();
-
-		this.referenceType = businessObjectReferenceType;
-        publishEvent(event);
-	}
-
-	/**
-	 * Returns the value of the 'referenceFacetName' field.
-	 *
-	 * @return String
-	 */
-	public String getReferenceFacetName() {
-		return referenceFacetName;
-	}
-
-	/**
-	 * Assigns the value of the 'referenceFacetName' field.
-	 *
-	 * @param referenceFacetName  the field value to assign
-	 */
-	public void setReferenceFacetName(String businessObjectFacetName) {
-        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.FACET_REF_NAME_MODIFIED,
-                this).setOldValue(this.referenceFacetName).setNewValue(businessObjectFacetName).buildEvent();
-
-		this.referenceFacetName = businessObjectFacetName;
-        publishEvent(event);
-	}
-
-	/**
-	 * Returns the value of the 'referenceRepeat' field.
-	 *
-	 * @return int
-	 */
-	public int getReferenceRepeat() {
-		return referenceRepeat;
-	}
-
-	/**
-	 * Assigns the value of the 'referenceRepeat' field.
-	 *
-	 * @param referenceRepeat  the field value to assign
-	 */
-	public void setReferenceRepeat(int businessObjectRepeat) {
-        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.FACET_REF_REPEAT_MODIFIED,
-                this).setOldValue(this.referenceRepeat).setNewValue(businessObjectRepeat).buildEvent();
-
-		this.referenceRepeat = businessObjectRepeat;
-        publishEvent(event);
-	}
+     * Returns the value of the 'referenceType' field.
+     *
+     * @return TLReferenceType
+     */
+    public TLReferenceType getReferenceType() {
+        return referenceType;
+    }
 
     /**
-	 * Returns the value of the 'basePayload' field.
-	 *
-	 * @return NamedEntity
-	 */
-	public NamedEntity getBasePayload() {
-		return basePayload;
-	}
+     * Assigns the value of the 'referenceType' field.
+     *
+     * @param referenceType the field value to assign
+     */
+    public void setReferenceType(TLReferenceType referenceType) {
+        ModelEvent<?> event = new ModelEventBuilder( ModelEventType.REFERENCE_TYPE_MODIFIED, this )
+            .setOldValue( this.referenceType ).setNewValue( referenceType ).buildEvent();
 
-	/**
-	 * Assigns the value of the 'basePayload' field.
-	 *
-	 * @param basePayload  the field value to assign
-	 */
-	public void setBasePayload(NamedEntity basePayload) {
-        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.BASE_PAYLOAD_MODIFIED, this)
-                .setOldValue(this.basePayload).setNewValue(basePayload).buildEvent();
+        this.referenceType = referenceType;
+        publishEvent( event );
+    }
 
-		this.basePayload = basePayload;
-        publishEvent(event);
-	}
+    /**
+     * Returns the value of the 'referenceFacetName' field.
+     *
+     * @return String
+     */
+    public String getReferenceFacetName() {
+        return referenceFacetName;
+    }
 
-	/**
-	 * Returns the value of the 'basePayloadName' field.
-	 *
-	 * @return String
-	 */
-	public String getBasePayloadName() {
-		return basePayloadName;
-	}
+    /**
+     * Assigns the value of the 'referenceFacetName' field.
+     *
+     * @param referenceFacetName the field value to assign
+     */
+    public void setReferenceFacetName(String referenceFacetName) {
+        ModelEvent<?> event = new ModelEventBuilder( ModelEventType.FACET_REF_NAME_MODIFIED, this )
+            .setOldValue( this.referenceFacetName ).setNewValue( referenceFacetName ).buildEvent();
 
-	/**
-	 * Assigns the value of the 'basePayloadName' field.
-	 *
-	 * @param basePayloadName  the field value to assign
-	 */
-	public void setBasePayloadName(String basePayloadName) {
-		this.basePayloadName = basePayloadName;
-	}
+        this.referenceFacetName = referenceFacetName;
+        publishEvent( event );
+    }
 
-	/**
+    /**
+     * Returns the value of the 'referenceRepeat' field.
+     *
+     * @return int
+     */
+    public int getReferenceRepeat() {
+        return referenceRepeat;
+    }
+
+    /**
+     * Assigns the value of the 'referenceRepeat' field.
+     *
+     * @param referenceRepeat the field value to assign
+     */
+    public void setReferenceRepeat(int referenceRepeat) {
+        ModelEvent<?> event = new ModelEventBuilder( ModelEventType.FACET_REF_REPEAT_MODIFIED, this )
+            .setOldValue( this.referenceRepeat ).setNewValue( referenceRepeat ).buildEvent();
+
+        this.referenceRepeat = referenceRepeat;
+        publishEvent( event );
+    }
+
+    /**
+     * Returns the value of the 'basePayload' field.
+     *
+     * @return NamedEntity
+     */
+    public NamedEntity getBasePayload() {
+        return basePayload;
+    }
+
+    /**
+     * Assigns the value of the 'basePayload' field.
+     *
+     * @param basePayload the field value to assign
+     */
+    public void setBasePayload(NamedEntity basePayload) {
+        ModelEvent<?> event = new ModelEventBuilder( ModelEventType.BASE_PAYLOAD_MODIFIED, this )
+            .setOldValue( this.basePayload ).setNewValue( basePayload ).buildEvent();
+
+        this.basePayload = basePayload;
+        publishEvent( event );
+    }
+
+    /**
+     * Returns the value of the 'basePayloadName' field.
+     *
+     * @return String
+     */
+    public String getBasePayloadName() {
+        return basePayloadName;
+    }
+
+    /**
+     * Assigns the value of the 'basePayloadName' field.
+     *
+     * @param basePayloadName the field value to assign
+     */
+    public void setBasePayloadName(String basePayloadName) {
+        this.basePayloadName = basePayloadName;
+    }
+
+    /**
      * @see org.opentravel.schemacompiler.model.TLDocumentationOwner#getDocumentation()
      */
     public TLDocumentation getDocumentation() {
@@ -298,34 +298,34 @@ public class TLActionFacet extends TLModelElement implements NamedEntity, Versio
      */
     public void setDocumentation(TLDocumentation documentation) {
         if (documentation != this.documentation) {
-            ModelEvent<?> event = new ModelEventBuilder(ModelEventType.DOCUMENTATION_MODIFIED, this)
-                    .setOldValue(this.documentation).setNewValue(documentation).buildEvent();
+            ModelEvent<?> event = new ModelEventBuilder( ModelEventType.DOCUMENTATION_MODIFIED, this )
+                .setOldValue( this.documentation ).setNewValue( documentation ).buildEvent();
 
             if (documentation != null) {
-                documentation.setOwner(this);
+                documentation.setOwner( this );
             }
             if (this.documentation != null) {
-                this.documentation.setOwner(null);
+                this.documentation.setOwner( null );
             }
             this.documentation = documentation;
-            publishEvent(event);
+            publishEvent( event );
         }
     }
 
-	/**
+    /**
      * Manages lists of <code>TLActionFacet</code> entities.
      * 
      * @author S. Livezey
      */
-    protected static class ActionFacetListManager extends ChildEntityListManager<TLActionFacet, TLResource> {
+    protected static class ActionFacetListManager extends ChildEntityListManager<TLActionFacet,TLResource> {
 
         /**
          * Constructor that specifies the owner of the underlying list.
          * 
-         * @param owner  the owner of the underlying list of children
+         * @param owner the owner of the underlying list of children
          */
         public ActionFacetListManager(TLResource owner) {
-            super(owner, ModelEventType.ACTION_FACET_ADDED, ModelEventType.ACTION_FACET_REMOVED);
+            super( owner, ModelEventType.ACTION_FACET_ADDED, ModelEventType.ACTION_FACET_REMOVED );
         }
 
         /**
@@ -333,7 +333,7 @@ public class TLActionFacet extends TLModelElement implements NamedEntity, Versio
          */
         @Override
         protected String getChildName(TLActionFacet child) {
-        	return child.getName();
+            return child.getName();
         }
 
         /**
@@ -342,7 +342,7 @@ public class TLActionFacet extends TLModelElement implements NamedEntity, Versio
          */
         @Override
         protected void assignOwner(TLActionFacet child, TLResource owner) {
-            child.setOwningResource(owner);
+            child.setOwningResource( owner );
         }
 
         /**
@@ -354,7 +354,7 @@ public class TLActionFacet extends TLModelElement implements NamedEntity, Versio
             TLModel owningModel = owner.getOwningModel();
 
             if (owningModel != null) {
-                owningModel.publishEvent(event);
+                owningModel.publishEvent( event );
             }
         }
 

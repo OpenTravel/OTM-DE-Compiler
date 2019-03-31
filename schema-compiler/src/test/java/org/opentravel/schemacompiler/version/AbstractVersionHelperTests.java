@@ -13,18 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.version;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
-
-import java.io.File;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 import org.opentravel.schemacompiler.loader.LibraryInputSource;
 import org.opentravel.schemacompiler.loader.LibraryModelLoader;
@@ -50,24 +44,31 @@ import org.opentravel.schemacompiler.util.URLUtils;
 import org.opentravel.schemacompiler.validate.FindingType;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
 
+import java.io.File;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 /**
  * Base class for all tests for the version helper classes.
  * 
  * @author S. Livezey
  */
 public abstract class AbstractVersionHelperTests {
-    
+
     public static final String TEST_LIBRARY_NAME = "test_library";
     public static final String FACET1_LIBRARY_NAME = "cf1_library";
     public static final String FACET2_LIBRARY_NAME = "cf2_library";
-    
+
     public static final String LIBNAME_VERSION_1 = "library_v01_00";
     public static final String LIBNAME_VERSION_1_0_1 = "library_v01_00_01";
     public static final String LIBNAME_VERSION_1_1 = "library_v01_01";
     public static final String LIBNAME_VERSION_1_2 = "library_v01_02";
     public static final String LIBNAME_VERSION_1_2_1 = "library_v01_02_01";
     public static final String LIBNAME_VERSION_1_2_2 = "library_v01_02_02";
-    
+
     public static final String FILE_VERSION_1 = LIBNAME_VERSION_1 + ".xml";
     public static final String FILE_VERSION_1_0_1 = LIBNAME_VERSION_1_0_1 + ".xml";
     public static final String FILE_VERSION_1_1 = LIBNAME_VERSION_1_1 + ".xml";
@@ -78,7 +79,7 @@ public abstract class AbstractVersionHelperTests {
     public static final String FILE_FACET1_2 = "facets1_v02_00.xml";
     public static final String FILE_FACET2_1 = "facets2_v01_00.xml";
     public static final String FILE_FACET2_2 = "facets2_v02_00.xml";
-    
+
     public static final String BASE_NS = "http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test";
     public static final String NS_VERSION_1 = BASE_NS + "/v01";
     public static final String NS_VERSION_1_0_1 = BASE_NS + "/v01_00_01";
@@ -86,12 +87,12 @@ public abstract class AbstractVersionHelperTests {
     public static final String NS_VERSION_1_2 = BASE_NS + "/v01_02";
     public static final String NS_VERSION_1_2_1 = BASE_NS + "/v01_02_01";
     public static final String NS_VERSION_1_2_2 = BASE_NS + "/v01_02_02";
-    
+
     public static final String NS_FACET1_VERSION_1 = BASE_NS + "/cf1/v01";
     public static final String NS_FACET1_VERSION_2 = BASE_NS + "/cf1/v02";
     public static final String NS_FACET2_VERSION_1 = BASE_NS + "/cf2/v01";
     public static final String NS_FACET2_VERSION_2 = BASE_NS + "/cf2/v02";
-    
+
     /**
      * Returns the folder location of the test library files.
      * 
@@ -99,9 +100,9 @@ public abstract class AbstractVersionHelperTests {
      */
     private static File getTestFolder() {
         return new File( System.getProperty( "user.dir" ),
-                OTM16Upgrade.otm16Enabled ? "/src/test/resources/versions_1_6" : "/src/test/resources/versions" );
+            OTM16Upgrade.otm16Enabled ? "/src/test/resources/versions_1_6" : "/src/test/resources/versions" );
     }
-    
+
     /**
      * Returns the location of the test catalog file.
      * 
@@ -110,7 +111,7 @@ public abstract class AbstractVersionHelperTests {
     private static File getCatalogFile() {
         return new File( getTestFolder(), "/version-catalog.xml" );
     }
-    
+
     /**
      * Loads the specified library and all of its dependencies. Prior to returning the model, it will be checked to
      * ensure that no validation errors exist.
@@ -122,28 +123,29 @@ public abstract class AbstractVersionHelperTests {
     protected static TLModel loadTestModel(String... libraryFilenames) throws Exception {
         return loadTestModel( new TLModel(), false, libraryFilenames );
     }
-    
+
     /**
      * Loads the specified library and all of its dependencies. Prior to returning the model, it will be checked to
      * ensure that no validation errors exist.
      * 
-     * @param existingModel  the model to which the newly loaded libraries will be added
-     * @param ignoreErrrors  flag indicating whether validation errors are to be ignored
+     * @param existingModel the model to which the newly loaded libraries will be added
+     * @param ignoreErrrors flag indicating whether validation errors are to be ignored
      * @param libraryFilenames the list of filename for the library version to load
      * @return TLModel
      * @throws Exception
      */
-    protected static TLModel loadTestModel(TLModel existingModel, boolean ignoreErrrors, String... libraryFilenames) throws Exception {
+    protected static TLModel loadTestModel(TLModel existingModel, boolean ignoreErrrors, String... libraryFilenames)
+        throws Exception {
         LibraryModelLoader<InputStream> modelLoader = new LibraryModelLoader<InputStream>( existingModel );
-        
+
         modelLoader.setNamespaceResolver( new CatalogLibraryNamespaceResolver( getCatalogFile() ) );
-        
+
         for (String libraryFilename : libraryFilenames) {
-            LibraryInputSource<InputStream> libraryInput = new LibraryStreamInputSource(
-                    new File( getTestFolder(), "/" + libraryFilename ) );
+            LibraryInputSource<InputStream> libraryInput =
+                new LibraryStreamInputSource( new File( getTestFolder(), "/" + libraryFilename ) );
             ValidationFindings findings = modelLoader.loadLibraryModel( libraryInput );
-            
-            
+
+
             if (!ignoreErrrors) {
                 SchemaCompilerTestUtils.printFindings( findings, null );
                 assertFalse( findings.hasFinding( FindingType.ERROR ) );
@@ -153,23 +155,23 @@ public abstract class AbstractVersionHelperTests {
         assertNotNull( model );
         return model;
     }
-    
+
     protected List<String> getLibraryNames(List<TLLibrary> libraryList) {
         List<String> libraryNames = new ArrayList<String>();
-        
+
         for (TLLibrary library : libraryList) {
             libraryNames.add( getLibraryName( library ) );
         }
         return libraryNames;
     }
-    
+
     protected String getLibraryName(TLLibrary library) {
         String libraryName = null;
-        
+
         if (library != null) {
             libraryName = URLUtils.getShortRepresentation( library.getLibraryUrl() );
             int dotIdx = libraryName.indexOf( '.' );
-            
+
             if (dotIdx >= 0) {
                 libraryName = libraryName.substring( 0, dotIdx );
             }
@@ -179,7 +181,7 @@ public abstract class AbstractVersionHelperTests {
         }
         return libraryName;
     }
-    
+
     protected File purgeExistingFile(File file) {
         if (file.exists()) {
             file.delete();
@@ -189,10 +191,10 @@ public abstract class AbstractVersionHelperTests {
         }
         return file;
     }
-    
+
     protected void assertContainsAttributes(TLAttributeOwner attrOwner, String... attrNames) {
         Set<String> ownerAttrs = new HashSet<String>();
-        
+
         for (TLAttribute attr : attrOwner.getAttributes()) {
             ownerAttrs.add( attr.getName() );
         }
@@ -202,10 +204,10 @@ public abstract class AbstractVersionHelperTests {
             }
         }
     }
-    
+
     protected void assertContainsElements(TLPropertyOwner elementOwner, String... elementNames) {
         Set<String> ownerElements = new HashSet<String>();
-        
+
         for (TLProperty element : elementOwner.getElements()) {
             ownerElements.add( element.getName() );
         }
@@ -215,10 +217,10 @@ public abstract class AbstractVersionHelperTests {
             }
         }
     }
-    
+
     protected void assertContainsValues(TLAbstractEnumeration valueOwner, String... valueLiterals) {
         Set<String> ownerLiterals = new HashSet<String>();
-        
+
         for (TLEnumValue value : valueOwner.getValues()) {
             ownerLiterals.add( value.getLiteral() );
         }
@@ -228,10 +230,10 @@ public abstract class AbstractVersionHelperTests {
             }
         }
     }
-    
+
     protected void assertContainsParentRefs(TLResource resource, String... pathTemplates) {
         Set<String> resourceParentPaths = new HashSet<String>();
-        
+
         for (TLResourceParentRef parentRef : resource.getParentRefs()) {
             resourceParentPaths.add( parentRef.getPathTemplate() );
         }
@@ -241,10 +243,10 @@ public abstract class AbstractVersionHelperTests {
             }
         }
     }
-    
+
     protected void assertContainsParamGroups(TLResource resource, String... paramGroupNames) {
         Set<String> resourceParamGroups = new HashSet<String>();
-        
+
         for (TLParamGroup paramGroup : resource.getParamGroups()) {
             resourceParamGroups.add( paramGroup.getName() );
         }
@@ -254,10 +256,10 @@ public abstract class AbstractVersionHelperTests {
             }
         }
     }
-    
+
     protected void assertContainsParameters(TLParamGroup paramGroup, String... paramNames) {
         Set<String> pgParameterNames = new HashSet<String>();
-        
+
         for (TLParameter param : paramGroup.getParameters()) {
             if (param.getFieldRef() != null) {
                 pgParameterNames.add( param.getFieldRef().getName() );
@@ -269,10 +271,10 @@ public abstract class AbstractVersionHelperTests {
             }
         }
     }
-    
+
     protected void assertContainsActionFacets(TLResource resource, String... facetNames) {
         Set<String> resourceActionFacets = new HashSet<String>();
-        
+
         for (TLActionFacet facet : resource.getActionFacets()) {
             resourceActionFacets.add( facet.getName() );
         }
@@ -282,10 +284,10 @@ public abstract class AbstractVersionHelperTests {
             }
         }
     }
-    
+
     protected void assertContainsActions(TLResource resource, String... actionIds) {
         Set<String> resourceActionIds = new HashSet<String>();
-        
+
         for (TLAction action : resource.getActions()) {
             resourceActionIds.add( action.getActionId() );
         }
@@ -295,5 +297,5 @@ public abstract class AbstractVersionHelperTests {
             }
         }
     }
-    
+
 }

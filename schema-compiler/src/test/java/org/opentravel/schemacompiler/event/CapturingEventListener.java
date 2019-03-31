@@ -13,34 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.event;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.opentravel.schemacompiler.event.ModelEvent;
-import org.opentravel.schemacompiler.event.ModelEventListener;
-
 /**
  * Model event listener that captures events for later analysis and assertions by test cases.
  * 
  * @author S. Livezey
  */
-public class CapturingEventListener<E extends ModelEvent<S>, S> implements ModelEventListener<E, S> {
+public class CapturingEventListener<E extends ModelEvent<S>, S> implements ModelEventListener<E,S> {
 
     private List<E> capturedEvents = new ArrayList<E>();
     private Class<E> eventClass;
     private Class<S> sourceObjectClass;
 
     /**
-     * Constructor that specifies the run-time types used to identify the event and source object
-     * types to which the listener should respond.
+     * Constructor that specifies the run-time types used to identify the event and source object types to which the
+     * listener should respond.
      * 
-     * @param eventClass
-     *            the type of the events to be processed by this listener
-     * @param sourceObjectClass
-     *            the type of source objects to be processed by this listener
+     * @param eventClass the type of the events to be processed by this listener
+     * @param sourceObjectClass the type of source objects to be processed by this listener
      */
     @SuppressWarnings("unchecked")
     public CapturingEventListener(Class<?> eventClass, Class<?> sourceObjectClass) {
@@ -53,16 +49,16 @@ public class CapturingEventListener<E extends ModelEvent<S>, S> implements Model
      */
     @Override
     public void processModelEvent(E event) {
-        capturedEvents.add((E) event);
+        capturedEvents.add( (E) event );
     }
 
     /**
      * Returns the events that have been captured by this listener.
      * 
-     * @return List<E>
+     * @return List&lt;E&gt;
      */
     public List<E> getCapturedEvents() {
-        return Collections.unmodifiableList(capturedEvents);
+        return Collections.unmodifiableList( capturedEvents );
     }
 
     /**

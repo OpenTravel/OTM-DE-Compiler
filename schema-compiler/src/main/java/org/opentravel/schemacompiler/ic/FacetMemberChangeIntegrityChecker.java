@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.ic;
 
 import org.opentravel.schemacompiler.event.ModelEventType;
@@ -23,29 +24,27 @@ import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLModelElement;
 
 /**
- * Integrity checker component that automatically manages the list of imports and includes
- * maintained by a <code>TLLibrary</code> instance. It is invoked whenever attributes or properties
- * are added or removed from a facet, taking action to add or remove imports/includes as required.
+ * Integrity checker component that automatically manages the list of imports and includes maintained by a
+ * <code>TLLibrary</code> instance. It is invoked whenever attributes or properties are added or removed from a facet,
+ * taking action to add or remove imports/includes as required.
  * 
  * @author S. Livezey
  */
 public class FacetMemberChangeIntegrityChecker
-        extends
-        ImportManagementIntegrityChecker<OwnershipEvent<TLModelElement, NamedEntity>, TLModelElement> {
+    extends ImportManagementIntegrityChecker<OwnershipEvent<TLModelElement,NamedEntity>,TLModelElement> {
 
     /**
      * @see org.opentravel.schemacompiler.event.ModelEventListener#processModelEvent(org.opentravel.schemacompiler.event.ModelEvent)
      */
     @Override
-    public void processModelEvent(OwnershipEvent<TLModelElement, NamedEntity> event) {
-        if ((event.getType() == ModelEventType.ATTRIBUTE_ADDED)
-                || (event.getType() == ModelEventType.PROPERTY_ADDED)
-                || (event.getType() == ModelEventType.ATTRIBUTE_REMOVED)
-                || (event.getType() == ModelEventType.PROPERTY_REMOVED)) {
-            AbstractLibrary owningLibrary = getOwningLibrary(event.getSource());
+    public void processModelEvent(OwnershipEvent<TLModelElement,NamedEntity> event) {
+        if ((event.getType() == ModelEventType.ATTRIBUTE_ADDED) || (event.getType() == ModelEventType.PROPERTY_ADDED)
+            || (event.getType() == ModelEventType.ATTRIBUTE_REMOVED)
+            || (event.getType() == ModelEventType.PROPERTY_REMOVED)) {
+            AbstractLibrary owningLibrary = getOwningLibrary( event.getSource() );
 
             if (owningLibrary instanceof TLLibrary) {
-                verifyReferencedLibraries((TLLibrary) owningLibrary);
+                verifyReferencedLibraries( (TLLibrary) owningLibrary );
             }
         }
     }

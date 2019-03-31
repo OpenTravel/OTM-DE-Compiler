@@ -13,13 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.validate.compile;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+package org.opentravel.schemacompiler.validate.compile;
 
 import org.opentravel.schemacompiler.codegen.util.ResourceCodegenUtils;
 import org.opentravel.schemacompiler.model.TLAction;
@@ -30,6 +25,12 @@ import org.opentravel.schemacompiler.validate.ValidationFindings;
 import org.opentravel.schemacompiler.validate.base.TLActionBaseValidator;
 import org.opentravel.schemacompiler.validate.impl.TLValidationBuilder;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 /**
  * Validator for the <code>TLAction</code> class.
  * 
@@ -37,96 +38,93 @@ import org.opentravel.schemacompiler.validate.impl.TLValidationBuilder;
  */
 public class TLActionCompileValidator extends TLActionBaseValidator {
 
-	private static final String RESPONSES = "responses";
-	
-	public static final String ERROR_MISSING_REQUIRED_REQUEST   = "MISSING_REQUIRED_REQUEST";
-    public static final String ERROR_CONFLICTING_STATUS_CODES   = "CONFLICTING_STATUS_CODES";
+    private static final String RESPONSES = "responses";
+
+    public static final String ERROR_MISSING_REQUIRED_REQUEST = "MISSING_REQUIRED_REQUEST";
+    public static final String ERROR_CONFLICTING_STATUS_CODES = "CONFLICTING_STATUS_CODES";
     public static final String ERROR_MULTIPLE_DEFAULT_RESPONSES = "MULTIPLE_DEFAULT_RESPONSES";
-    public static final String WARNING_IGNORING_REQUEST         = "IGNORING_REQUEST";
-    
-	/**
-	 * @see org.opentravel.schemacompiler.validate.impl.TLValidatorBase#validateFields(org.opentravel.schemacompiler.validate.Validatable)
-	 */
-	@Override
-	protected ValidationFindings validateFields(TLAction target) {
+    public static final String WARNING_IGNORING_REQUEST = "IGNORING_REQUEST";
+
+    /**
+     * @see org.opentravel.schemacompiler.validate.impl.TLValidatorBase#validateFields(org.opentravel.schemacompiler.validate.Validatable)
+     */
+    @Override
+    protected ValidationFindings validateFields(TLAction target) {
         TLActionRequest request = ResourceCodegenUtils.getDeclaredOrInheritedRequest( target );
         List<TLActionResponse> responses = ResourceCodegenUtils.getInheritedResponses( target );
         List<Integer> duplicateResponseCodes = getDuplicateResponseCodes( responses );
-        TLValidationBuilder builder = newValidationBuilder(target);
-        
-        builder.setProperty("actionId", target.getActionId()).setFindingType(FindingType.ERROR)
-        		.assertNotNullOrBlank().assertPatternMatch(NAME_XML_PATTERN);
+        TLValidationBuilder builder = newValidationBuilder( target );
 
-        builder.setProperty("actionId", target.getOwner().getActions())
-        		.setFindingType(FindingType.ERROR)
-        		.assertNoDuplicates( e -> ((TLAction) e).getActionId() );
-        
-    	if (target.isCommonAction()) {
-    		if (request != null) {
-            	builder.addFinding( FindingType.WARNING, "request", WARNING_IGNORING_REQUEST );
-    		}
-    	} else {
-    		if (request == null) {
-            	builder.addFinding( FindingType.ERROR, "request", ERROR_MISSING_REQUIRED_REQUEST );
-    		}
-    	}
-    	
-        builder.setProperty(RESPONSES, ResourceCodegenUtils.getInheritedResponses( target ))
-        		.setFindingType(FindingType.ERROR)
-        		.assertMinimumSize( 1 );
-        
-        if (!duplicateResponseCodes.isEmpty()) {
-        	builder.addFinding( FindingType.ERROR, RESPONSES, ERROR_CONFLICTING_STATUS_CODES,
-        			toCsvString( duplicateResponseCodes ) );
+        builder.setProperty( "actionId", target.getActionId() ).setFindingType( FindingType.ERROR )
+            .assertNotNullOrBlank().assertPatternMatch( NAME_XML_PATTERN );
+
+        builder.setProperty( "actionId", target.getOwner().getActions() ).setFindingType( FindingType.ERROR )
+            .assertNoDuplicates( e -> ((TLAction) e).getActionId() );
+
+        if (target.isCommonAction()) {
+            if (request != null) {
+                builder.addFinding( FindingType.WARNING, "request", WARNING_IGNORING_REQUEST );
+            }
+        } else {
+            if (request == null) {
+                builder.addFinding( FindingType.ERROR, "request", ERROR_MISSING_REQUIRED_REQUEST );
+            }
         }
-        
+
+        builder.setProperty( RESPONSES, ResourceCodegenUtils.getInheritedResponses( target ) )
+            .setFindingType( FindingType.ERROR ).assertMinimumSize( 1 );
+
+        if (!duplicateResponseCodes.isEmpty()) {
+            builder.addFinding( FindingType.ERROR, RESPONSES, ERROR_CONFLICTING_STATUS_CODES,
+                toCsvString( duplicateResponseCodes ) );
+        }
+
         if (getDefaultResponses( responses ).size() > 1) {
-        	builder.addFinding( FindingType.ERROR, RESPONSES, ERROR_MULTIPLE_DEFAULT_RESPONSES );
+            builder.addFinding( FindingType.ERROR, RESPONSES, ERROR_MULTIPLE_DEFAULT_RESPONSES );
         }
         return builder.getFindings();
-	}
-	
-	/**
-	 * Returns the list of duplicate HTTP response codes used across the declared
-	 * and inherited responses.
-	 * 
-	 * @param responseList  the list of declared or inherited responses
-	 * @return List<Integer>
-	 */
-	private List<Integer> getDuplicateResponseCodes(List<TLActionResponse> responseList) {
-		Set<Integer> existingCodes = new HashSet<>();
-		List<Integer> duplicateCodes = new ArrayList<>();
-		
-		for (TLActionResponse response : responseList) {
-			for (Integer statusCode : response.getStatusCodes()) {
-				if (existingCodes.contains( statusCode )) {
-					if (!duplicateCodes.contains( statusCode )) {
-						duplicateCodes.add( statusCode );
-					}
-				} else {
-					existingCodes.add( statusCode );
-				}
-			}
-		}
-		Collections.sort( duplicateCodes );
-		return duplicateCodes;
-	}
-	
-	/**
-	 * Returns the list of 'default' responses from the list provided.
-	 * 
-	 * @param responseList  the list of declared or inherited responses
-	 * @return List<TLActionResponse>
-	 */
-	private List<TLActionResponse> getDefaultResponses(List<TLActionResponse> responseList) {
-		List<TLActionResponse> defaultResponses = new ArrayList<>();
-		
-		for (TLActionResponse response : responseList) {
-			if (response.getStatusCodes().isEmpty()) {
-				defaultResponses.add( response );
-			}
-		}
-		return defaultResponses;
-	}
-	
+    }
+
+    /**
+     * Returns the list of duplicate HTTP response codes used across the declared and inherited responses.
+     * 
+     * @param responseList the list of declared or inherited responses
+     * @return List&lt;Integer&gt;
+     */
+    private List<Integer> getDuplicateResponseCodes(List<TLActionResponse> responseList) {
+        Set<Integer> existingCodes = new HashSet<>();
+        List<Integer> duplicateCodes = new ArrayList<>();
+
+        for (TLActionResponse response : responseList) {
+            for (Integer statusCode : response.getStatusCodes()) {
+                if (existingCodes.contains( statusCode )) {
+                    if (!duplicateCodes.contains( statusCode )) {
+                        duplicateCodes.add( statusCode );
+                    }
+                } else {
+                    existingCodes.add( statusCode );
+                }
+            }
+        }
+        Collections.sort( duplicateCodes );
+        return duplicateCodes;
+    }
+
+    /**
+     * Returns the list of 'default' responses from the list provided.
+     * 
+     * @param responseList the list of declared or inherited responses
+     * @return List&lt;TLActionResponse&gt;
+     */
+    private List<TLActionResponse> getDefaultResponses(List<TLActionResponse> responseList) {
+        List<TLActionResponse> defaultResponses = new ArrayList<>();
+
+        for (TLActionResponse response : responseList) {
+            if (response.getStatusCodes().isEmpty()) {
+                defaultResponses.add( response );
+            }
+        }
+        return defaultResponses;
+    }
+
 }

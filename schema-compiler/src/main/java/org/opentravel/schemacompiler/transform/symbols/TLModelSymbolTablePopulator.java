@@ -13,18 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.transform.symbols;
 
-import java.util.ArrayList;
-import java.util.List;
+package org.opentravel.schemacompiler.transform.symbols;
 
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.transform.SymbolTable;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- * Symbol table populator that creates named entries using the members of the <code>TLModel</code>
- * instance provied.
+ * Symbol table populator that creates named entries using the members of the <code>TLModel</code> instance provied.
  * 
  * @author S. Livezey
  */
@@ -35,11 +35,11 @@ public class TLModelSymbolTablePopulator extends AbstractTLSymbolTablePopulator<
      */
     @Override
     public void populateSymbols(TLModel sourceEntity, SymbolTable symbols) {
-    	List<AbstractLibrary> modelLibraries = new ArrayList<>( sourceEntity.getAllLibraries() );
-        configureSymbolTable(symbols);
+        List<AbstractLibrary> modelLibraries = new ArrayList<>( sourceEntity.getAllLibraries() );
+        configureSymbolTable( symbols );
 
         for (AbstractLibrary library : modelLibraries) {
-            populateLibrarySymbols(library, symbols);
+            populateLibrarySymbols( library, symbols );
         }
     }
 

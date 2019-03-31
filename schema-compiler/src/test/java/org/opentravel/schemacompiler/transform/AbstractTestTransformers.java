@@ -13,12 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.transform;
 
-import java.io.File;
-import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
+package org.opentravel.schemacompiler.transform;
 
 import org.opentravel.schemacompiler.loader.LibraryInputSource;
 import org.opentravel.schemacompiler.loader.LibraryModelLoader;
@@ -34,6 +30,11 @@ import org.opentravel.schemacompiler.transform.util.LibraryPrefixResolver;
 import org.opentravel.schemacompiler.util.SchemaCompilerTestUtils;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
 
+import java.io.File;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Abstract base class for test classes that validate the transformation subsystem.
  * 
@@ -43,37 +44,37 @@ public abstract class AbstractTestTransformers {
 
     public static final String PACKAGE_1_NAMESPACE = "http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/test-package_v1";
     public static final String PACKAGE_2_NAMESPACE = "http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/test-package_v2";
-    public static final String PACKAGE_EXT_NAMESPACE = "http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/test-package-ext_v2";
+    public static final String PACKAGE_EXT_NAMESPACE =
+        "http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/test-package-ext_v2";
 
-    private static Map<String, TLModel> testModelsByBaseLocation = new HashMap<String, TLModel>();
-    
+    private static Map<String,TLModel> testModelsByBaseLocation = new HashMap<String,TLModel>();
+
     /**
-     * Returns the base location (root folder) for the test files that are to be used to load and
-     * construct the model.
+     * Returns the base location (root folder) for the test files that are to be used to load and construct the model.
      */
     protected abstract String getBaseLocation();
 
     protected TLModel getTestModel() throws Exception {
         String baseLocation = getBaseLocation().intern();
-        
+
         synchronized (baseLocation) {
-            TLModel testModel = testModelsByBaseLocation.get(baseLocation);
+            TLModel testModel = testModelsByBaseLocation.get( baseLocation );
 
             if (testModel == null) {
-                LibraryInputSource<InputStream> library1Input = new LibraryStreamInputSource(
-                		new File( getBaseLocation() + "/test-package_v2/library_1_p2.xml" ) );
-                LibraryInputSource<InputStream> library2Input = new LibraryStreamInputSource(
-                		new File( getBaseLocation() + "/test-package_v2/library_2_p2.xml" ) );
-                LibraryInputSource<InputStream> library3Input = new LibraryStreamInputSource(
-                		new File( getBaseLocation() + "/test-package_v2/library_3_p2.xml" ) );
+                LibraryInputSource<InputStream> library1Input =
+                    new LibraryStreamInputSource( new File( getBaseLocation() + "/test-package_v2/library_1_p2.xml" ) );
+                LibraryInputSource<InputStream> library2Input =
+                    new LibraryStreamInputSource( new File( getBaseLocation() + "/test-package_v2/library_2_p2.xml" ) );
+                LibraryInputSource<InputStream> library3Input =
+                    new LibraryStreamInputSource( new File( getBaseLocation() + "/test-package_v2/library_3_p2.xml" ) );
                 LibraryModelLoader<InputStream> modelLoader = new LibraryModelLoader<InputStream>();
                 ValidationFindings findings = modelLoader.loadLibraryModel( library1Input );
                 findings.addAll( modelLoader.loadLibraryModel( library2Input ) );
                 findings.addAll( modelLoader.loadLibraryModel( library3Input ) );
-                SchemaCompilerTestUtils.printFindings(findings);
+                SchemaCompilerTestUtils.printFindings( findings );
 
                 testModel = modelLoader.getLibraryModel();
-                testModelsByBaseLocation.put(baseLocation, testModel);
+                testModelsByBaseLocation.put( baseLocation, testModel );
             }
             return testModel;
         }
@@ -82,8 +83,8 @@ public abstract class AbstractTestTransformers {
     protected TLLibrary getLibrary(String namespace, String libraryName) throws Exception {
         TLLibrary library = null;
 
-        for (AbstractLibrary lib : getTestModel().getLibrariesForNamespace(namespace)) {
-            if (lib.getName().equals(libraryName)) {
+        for (AbstractLibrary lib : getTestModel().getLibrariesForNamespace( namespace )) {
+            if (lib.getName().equals( libraryName )) {
                 library = (TLLibrary) lib;
                 break;
             }
@@ -91,15 +92,15 @@ public abstract class AbstractTestTransformers {
         return library;
     }
 
-    protected SymbolResolverTransformerContext getContextJAXBTransformation(
-            AbstractLibrary contextLibrary) throws Exception {
+    protected SymbolResolverTransformerContext getContextJAXBTransformation(AbstractLibrary contextLibrary)
+        throws Exception {
         SymbolResolverTransformerContext context = new SymbolResolverTransformerContext();
-        SymbolResolver symbolResolver = new TL2JaxbLibrarySymbolResolver(
-                SymbolTableFactory.newSymbolTableFromModel(getTestModel()));
+        SymbolResolver symbolResolver =
+            new TL2JaxbLibrarySymbolResolver( SymbolTableFactory.newSymbolTableFromModel( getTestModel() ) );
 
-        symbolResolver.setPrefixResolver(new LibraryPrefixResolver(contextLibrary));
-        symbolResolver.setAnonymousEntityFilter(new ChameleonFilter(contextLibrary));
-        context.setSymbolResolver(symbolResolver);
+        symbolResolver.setPrefixResolver( new LibraryPrefixResolver( contextLibrary ) );
+        symbolResolver.setAnonymousEntityFilter( new ChameleonFilter( contextLibrary ) );
+        context.setSymbolResolver( symbolResolver );
         return context;
     }
 

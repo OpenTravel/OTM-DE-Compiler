@@ -13,11 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.codegen.html.builders;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+package org.opentravel.schemacompiler.codegen.html.builders;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerationException;
 import org.opentravel.schemacompiler.codegen.html.Content;
@@ -26,86 +23,88 @@ import org.opentravel.schemacompiler.model.TLAbstractEnumeration;
 import org.opentravel.schemacompiler.model.TLEnumValue;
 import org.opentravel.schemacompiler.model.TLOpenEnumeration;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author Eric.Bronson
  *
  */
-public class EnumerationDocumentationBuilder extends
-		NamedEntityDocumentationBuilder<TLAbstractEnumeration> {
+public class EnumerationDocumentationBuilder extends NamedEntityDocumentationBuilder<TLAbstractEnumeration> {
 
-	private boolean isOpen;
+    private boolean isOpen;
 
-	List<EnumValueDocumentationBuilder> values = new ArrayList<>();
+    List<EnumValueDocumentationBuilder> values = new ArrayList<>();
 
-	/**
-	 * @param manager
-	 */
-	public EnumerationDocumentationBuilder(TLAbstractEnumeration t) {
-		super(t);
-		if (t instanceof TLOpenEnumeration) {
-			isOpen = true;
-		}
-		for (TLEnumValue value : t.getValues()) {
-			values.add(new EnumValueDocumentationBuilder(value));
-		}
-	}
+    /**
+     * @param t the enumeration for which to return a builder
+     */
+    public EnumerationDocumentationBuilder(TLAbstractEnumeration t) {
+        super( t );
+        if (t instanceof TLOpenEnumeration) {
+            isOpen = true;
+        }
+        for (TLEnumValue value : t.getValues()) {
+            values.add( new EnumValueDocumentationBuilder( value ) );
+        }
+    }
 
-	public boolean isOpen() {
-		return isOpen;
-	}
+    public boolean isOpen() {
+        return isOpen;
+    }
 
-	public List<EnumValueDocumentationBuilder> getValues() {
-		return values;
-	}
+    public List<EnumValueDocumentationBuilder> getValues() {
+        return values;
+    }
 
-	@Override
-	public DocumentationBuilderType getDocType() {
-		return isOpen ? DocumentationBuilderType.OPEN_ENUM
-				: DocumentationBuilderType.CLOSED_ENUM;
-	}
+    @Override
+    public DocumentationBuilderType getDocType() {
+        return isOpen ? DocumentationBuilderType.OPEN_ENUM : DocumentationBuilderType.CLOSED_ENUM;
+    }
 
-	@Override
-	public void build() throws CodeGenerationException {
-		try {
-			EnumerationWriter writer = new EnumerationWriter(this, prev, next);
-			Content contentTree = writer.getHeader();
-			Content classContentTree = writer.getContentHeader();
-			Content tree = writer.getMemberTree(classContentTree);
-			
-			Content classInfoTree = writer.getMemberInfoItemTree();
-			writer.addDocumentationInfo(classInfoTree);
-			tree.addContent(classInfoTree);
-			
-			classInfoTree = writer.getMemberInfoItemTree();
-			writer.addValueInfo(classInfoTree);
-			tree.addContent(classInfoTree);
-			
-			Content desc = writer.getMemberInfoTree(tree);
-			classContentTree.addContent(desc);
-			contentTree.addContent(classContentTree);
-			writer.addFooter(contentTree);
-			writer.printDocument(contentTree);
-			writer.close();
-			
-		} catch (IOException e) {
-			throw new CodeGenerationException("Error creating doclet writer instance", e);
-		}
-	}
+    @Override
+    public void build() throws CodeGenerationException {
+        try {
+            EnumerationWriter writer = new EnumerationWriter( this, prev, next );
+            Content contentTree = writer.getHeader();
+            Content classContentTree = writer.getContentHeader();
+            Content tree = writer.getMemberTree( classContentTree );
 
-	/**
-	 * @see org.opentravel.schemacompiler.codegen.html.builders.AbstractDocumentationBuilder#hashCode()
-	 */
-	@Override
-	public int hashCode() {
-		return super.hashCode();
-	}
+            Content classInfoTree = writer.getMemberInfoItemTree();
+            writer.addDocumentationInfo( classInfoTree );
+            tree.addContent( classInfoTree );
 
-	/**
-	 * @see org.opentravel.schemacompiler.codegen.html.builders.AbstractDocumentationBuilder#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		return super.equals(obj);
-	}
+            classInfoTree = writer.getMemberInfoItemTree();
+            writer.addValueInfo( classInfoTree );
+            tree.addContent( classInfoTree );
+
+            Content desc = writer.getMemberInfoTree( tree );
+            classContentTree.addContent( desc );
+            contentTree.addContent( classContentTree );
+            writer.addFooter( contentTree );
+            writer.printDocument( contentTree );
+            writer.close();
+
+        } catch (IOException e) {
+            throw new CodeGenerationException( "Error creating doclet writer instance", e );
+        }
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.codegen.html.builders.AbstractDocumentationBuilder#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.codegen.html.builders.AbstractDocumentationBuilder#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+        return super.equals( obj );
+    }
 
 }

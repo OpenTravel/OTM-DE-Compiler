@@ -13,18 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.validate.impl;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
+package org.opentravel.schemacompiler.validate.impl;
 
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.LibraryMember;
@@ -50,12 +40,23 @@ import org.opentravel.schemacompiler.util.URLUtils;
 import org.opentravel.schemacompiler.visitor.DependencyNavigator;
 import org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
 /**
- * Component that recursively analyzes a library's dependencies in order to identify duplicate
- * entities that are included/imported by the various dependent libraries. Any duplicate symbols
- * from different chameleon schemas are reported by this checker, even if they are not directly
- * referenced by any properties or attributes of the model. This is because the duplicate entities
- * will cause compile-time errors for binding tools (e.g. JAXB) when code generation is attempted.
+ * Component that recursively analyzes a library's dependencies in order to identify duplicate entities that are
+ * included/imported by the various dependent libraries. Any duplicate symbols from different chameleon schemas are
+ * reported by this checker, even if they are not directly referenced by any properties or attributes of the model. This
+ * is because the duplicate entities will cause compile-time errors for binding tools (e.g. JAXB) when code generation
+ * is attempted.
  * 
  * @author S. Livezey
  */
@@ -67,8 +68,7 @@ public class ChameleonTypeChecker {
     /**
      * Private constructor that assigns the library to be analyzed.
      * 
-     * @param library
-     *            the library to analyze
+     * @param library the library to analyze
      */
     private ChameleonTypeChecker(AbstractLibrary library) {
         this.sourceLibrary = library;
@@ -77,95 +77,86 @@ public class ChameleonTypeChecker {
     /**
      * Performs the search and returns a list of duplicate chameleon symbols.
      * 
-     * @return Collection<String>
+     * @return Collection&lt;String&gt;
      */
     private Collection<String> findDuplicateSymbols() {
-        DependencyNavigator.navigate(sourceLibrary, new ChameleonVisitor());
+        DependencyNavigator.navigate( sourceLibrary, new ChameleonVisitor() );
         return scanForDuplicateSymbols();
     }
 
     /**
-     * Scans the dependencies of the given library to identify any duplicate symbols from chameleon
-     * schemas that are assigned to the library's namespace.
+     * Scans the dependencies of the given library to identify any duplicate symbols from chameleon schemas that are
+     * assigned to the library's namespace.
      * 
-     * @param library
-     *            the library to analyze
-     * @return Collection<String>
+     * @param library the library to analyze
+     * @return Collection&lt;String&gt;
      */
     public static Collection<String> findDuplicateChameleonSymbols(AbstractLibrary library) {
-        return new ChameleonTypeChecker(library).findDuplicateSymbols();
+        return new ChameleonTypeChecker( library ).findDuplicateSymbols();
     }
 
     /**
-     * Analyzes the declarations of all chameleon schemas found during the dependency search and
-     * returns a list of duplicate symbols.
+     * Analyzes the declarations of all chameleon schemas found during the dependency search and returns a list of
+     * duplicate symbols.
      * 
-     * @return Collection<String>
+     * @return Collection&lt;String&gt;
      */
-	private Collection<String> scanForDuplicateSymbols() {
-		Set<String> duplicateSymbols = new HashSet<>();
-		
-		for (Entry<String, List<XSDLibrary>> entry : chameleonSchemaMappings.entrySet()) {
-			List<XSDLibrary> chameleonSchemas = entry.getValue();
-			Set<String> chameleonTypes = new HashSet<>();
-			Set<String> chameleonElements = new HashSet<>();
-			Set<String> duplicateTypes = new HashSet<>();
-			Set<String> duplicateElements = new HashSet<>();
-			
-			for (XSDLibrary chameleonSchema : chameleonSchemas) {
-				for (LibraryMember member : chameleonSchema.getNamedMembers()) {
-					if ((member instanceof XSDSimpleType) || (member instanceof XSDComplexType)) {
-						checkForDuplicate(member, chameleonTypes, duplicateTypes);
-						
-					} else if (member instanceof XSDElement) {
-						checkForDuplicate(member, chameleonElements, duplicateElements);
-					}
-				}
-			}
-			duplicateSymbols.addAll(duplicateTypes);
-			duplicateSymbols.addAll(duplicateElements);
-		}
-		return duplicateSymbols;
-	}
-	
+    private Collection<String> scanForDuplicateSymbols() {
+        Set<String> duplicateSymbols = new HashSet<>();
+
+        for (Entry<String,List<XSDLibrary>> entry : chameleonSchemaMappings.entrySet()) {
+            List<XSDLibrary> chameleonSchemas = entry.getValue();
+            Set<String> chameleonTypes = new HashSet<>();
+            Set<String> chameleonElements = new HashSet<>();
+            Set<String> duplicateTypes = new HashSet<>();
+            Set<String> duplicateElements = new HashSet<>();
+
+            for (XSDLibrary chameleonSchema : chameleonSchemas) {
+                for (LibraryMember member : chameleonSchema.getNamedMembers()) {
+                    if ((member instanceof XSDSimpleType) || (member instanceof XSDComplexType)) {
+                        checkForDuplicate( member, chameleonTypes, duplicateTypes );
+
+                    } else if (member instanceof XSDElement) {
+                        checkForDuplicate( member, chameleonElements, duplicateElements );
+                    }
+                }
+            }
+            duplicateSymbols.addAll( duplicateTypes );
+            duplicateSymbols.addAll( duplicateElements );
+        }
+        return duplicateSymbols;
+    }
+
     /**
-     * Checks to see if the 'allMembers' set already contains a name that matches the given library
-     * member. If so, the name will be added to the list of duplicates.
+     * Checks to see if the 'allMembers' set already contains a name that matches the given library member. If so, the
+     * name will be added to the list of duplicates.
      * 
-     * @param member
-     *            the library member to check
-     * @param allMembers
-     *            the set of all member names encountered so far
-     * @param duplicateMembers
-     *            the set of duplicate member names discovered so far
+     * @param member the library member to check
+     * @param allMembers the set of all member names encountered so far
+     * @param duplicateMembers the set of duplicate member names discovered so far
      */
-    private void checkForDuplicate(LibraryMember member, Set<String> allMembers,
-            Set<String> duplicateMembers) {
+    private void checkForDuplicate(LibraryMember member, Set<String> allMembers, Set<String> duplicateMembers) {
         String memberName = member.getLocalName();
 
-        if (allMembers.contains(memberName)) {
-            if (!duplicateMembers.contains(memberName)) {
-                duplicateMembers.add(memberName);
+        if (allMembers.contains( memberName )) {
+            if (!duplicateMembers.contains( memberName )) {
+                duplicateMembers.add( memberName );
             }
         } else {
-            allMembers.add(memberName);
+            allMembers.add( memberName );
         }
     }
 
     /**
-     * Recursive method that scans the imports and includes (using 'schemaLocation' URL references)
-     * to identify chameleon schemas that will be assigned to the same namespace as the original
-     * source library.
+     * Recursive method that scans the imports and includes (using 'schemaLocation' URL references) to identify
+     * chameleon schemas that will be assigned to the same namespace as the original source library.
      * 
-     * @param legacySchema
-     *            the legacy schema whose dependencies are to be analyzed
-     * @param referringNamespace
-     *            the namespace of the library that imported or included this one
-     * @param visitedLibraries
-     *            the list of legacy schemas that have already been visited by this method
+     * @param legacySchema the legacy schema whose dependencies are to be analyzed
+     * @param referringNamespace the namespace of the library that imported or included this one
+     * @param visitedLibraries the list of legacy schemas that have already been visited by this method
      */
     private void navigateXSDLibraryDependencies(XSDLibrary legacySchema, String referringNamespace,
-            Collection<XSDLibrary> visitedLibraries) {
+        Collection<XSDLibrary> visitedLibraries) {
         String schemaNamespace = addChameleonSchema( legacySchema, referringNamespace, visitedLibraries );
 
         // Recursively analyze the imported/included schemas
@@ -173,98 +164,90 @@ public class ChameleonTypeChecker {
         navigateXsdImports( legacySchema, schemaNamespace, visitedLibraries );
     }
 
-	/**
-	 * If the schema is a previously-undiscovered chameleon that will be assigned to the source
-	 * namespace, add it to the list of libraries to be checked for duplicate symbols
-	 * 
-	 * @param legacySchema  the legacy schema to process
-	 * @param referringNamespace  the namespace of the schema that is referencing the given one
-	 * @param visitedLibraries  the list of libraries visited so far (prevents infinite loops)
-	 * @return String
-	 */
-	private String addChameleonSchema(XSDLibrary legacySchema, String referringNamespace,
-			Collection<XSDLibrary> visitedLibraries) {
-		String schemaNamespace = legacySchema.getNamespace();
-		
-		if (((schemaNamespace == null) || schemaNamespace
-                .equals(AnonymousEntityFilter.ANONYMOUS_PSEUDO_NAMESPACE))) {
-			chameleonSchemaMappings.computeIfAbsent( referringNamespace,
-					ns -> chameleonSchemaMappings.put( ns, new ArrayList<>() ) );
-            List<XSDLibrary> chameleonSchemas = chameleonSchemaMappings.get(referringNamespace);
+    /**
+     * If the schema is a previously-undiscovered chameleon that will be assigned to the source namespace, add it to the
+     * list of libraries to be checked for duplicate symbols
+     * 
+     * @param legacySchema the legacy schema to process
+     * @param referringNamespace the namespace of the schema that is referencing the given one
+     * @param visitedLibraries the list of libraries visited so far (prevents infinite loops)
+     * @return String
+     */
+    private String addChameleonSchema(XSDLibrary legacySchema, String referringNamespace,
+        Collection<XSDLibrary> visitedLibraries) {
+        String schemaNamespace = legacySchema.getNamespace();
 
-            if (!chameleonSchemas.contains(legacySchema)) {
-                chameleonSchemas.add(legacySchema);
+        if (((schemaNamespace == null) || schemaNamespace.equals( AnonymousEntityFilter.ANONYMOUS_PSEUDO_NAMESPACE ))) {
+            chameleonSchemaMappings.computeIfAbsent( referringNamespace,
+                ns -> chameleonSchemaMappings.put( ns, new ArrayList<>() ) );
+            List<XSDLibrary> chameleonSchemas = chameleonSchemaMappings.get( referringNamespace );
+
+            if (!chameleonSchemas.contains( legacySchema )) {
+                chameleonSchemas.add( legacySchema );
             }
             schemaNamespace = referringNamespace;
         }
-        visitedLibraries.add(legacySchema);
-		return schemaNamespace;
-	}
+        visitedLibraries.add( legacySchema );
+        return schemaNamespace;
+    }
 
-	/**
-	 * Navigates the includes of the given legacy schema.
-	 * 
-	 * @param legacySchema  the legacy schema whose includes are to be navigated
-	 * @param schemaNamespace  the resolved namespace of the legacy schema
-	 * @param visitedLibraries  the list of libraries visited so far (prevents infinite loops)
-	 */
-	private void navigateXsdIncludes(XSDLibrary legacySchema, String schemaNamespace,
-			Collection<XSDLibrary> visitedLibraries) {
-		for (TLInclude include : legacySchema.getIncludes()) {
+    /**
+     * Navigates the includes of the given legacy schema.
+     * 
+     * @param legacySchema the legacy schema whose includes are to be navigated
+     * @param schemaNamespace the resolved namespace of the legacy schema
+     * @param visitedLibraries the list of libraries visited so far (prevents infinite loops)
+     */
+    private void navigateXsdIncludes(XSDLibrary legacySchema, String schemaNamespace,
+        Collection<XSDLibrary> visitedLibraries) {
+        for (TLInclude include : legacySchema.getIncludes()) {
             if (include.getPath() != null) {
-                URL includedUrl = getReferencedLibraryURL(include.getPath(), legacySchema);
-                AbstractLibrary includedLibrary = legacySchema.getOwningModel().getLibrary(
-                        includedUrl);
+                URL includedUrl = getReferencedLibraryURL( include.getPath(), legacySchema );
+                AbstractLibrary includedLibrary = legacySchema.getOwningModel().getLibrary( includedUrl );
 
-                if ((includedLibrary instanceof XSDLibrary)
-                        && !visitedLibraries.contains(includedLibrary)) {
-                    navigateXSDLibraryDependencies((XSDLibrary) includedLibrary, schemaNamespace,
-                            visitedLibraries);
+                if ((includedLibrary instanceof XSDLibrary) && !visitedLibraries.contains( includedLibrary )) {
+                    navigateXSDLibraryDependencies( (XSDLibrary) includedLibrary, schemaNamespace, visitedLibraries );
                 }
             }
         }
-	}
+    }
 
-	/**
-	 * Navigates the imports of the given legacy schema.
-	 * 
-	 * @param legacySchema  the legacy schema whose imports are to be navigated
-	 * @param schemaNamespace  the resolved namespace of the legacy schema
-	 * @param visitedLibraries  the list of libraries visited so far (prevents infinite loops)
-	 */
-	private void navigateXsdImports(XSDLibrary legacySchema, String schemaNamespace,
-			Collection<XSDLibrary> visitedLibraries) {
-		for (TLNamespaceImport nsImport : legacySchema.getNamespaceImports()) {
+    /**
+     * Navigates the imports of the given legacy schema.
+     * 
+     * @param legacySchema the legacy schema whose imports are to be navigated
+     * @param schemaNamespace the resolved namespace of the legacy schema
+     * @param visitedLibraries the list of libraries visited so far (prevents infinite loops)
+     */
+    private void navigateXsdImports(XSDLibrary legacySchema, String schemaNamespace,
+        Collection<XSDLibrary> visitedLibraries) {
+        for (TLNamespaceImport nsImport : legacySchema.getNamespaceImports()) {
             if (nsImport.getFileHints() != null) {
                 for (String fileHint : nsImport.getFileHints()) {
-                    URL importedUrl = getReferencedLibraryURL(fileHint, legacySchema);
-                    AbstractLibrary importedLibrary = legacySchema.getOwningModel().getLibrary(
-                            importedUrl);
+                    URL importedUrl = getReferencedLibraryURL( fileHint, legacySchema );
+                    AbstractLibrary importedLibrary = legacySchema.getOwningModel().getLibrary( importedUrl );
 
-                    if ((importedLibrary instanceof XSDLibrary)
-                            && !visitedLibraries.contains(importedLibrary)) {
-                        navigateXSDLibraryDependencies((XSDLibrary) importedLibrary,
-                                schemaNamespace, visitedLibraries);
+                    if ((importedLibrary instanceof XSDLibrary) && !visitedLibraries.contains( importedLibrary )) {
+                        navigateXSDLibraryDependencies( (XSDLibrary) importedLibrary, schemaNamespace,
+                            visitedLibraries );
                     }
                 }
             }
         }
-	}
+    }
 
     /**
      * Returns the full URL that is referenced by the specified relative URL path.
      * 
-     * @param relativeUrl
-     *            the relative URL path to resolve
-     * @param referringLibrary
-     *            the library that is the
-     * @return
+     * @param relativeUrl the relative URL path to resolve
+     * @param referringLibrary the library that is the
+     * @return URL
      */
     private URL getReferencedLibraryURL(String relativeUrl, AbstractLibrary referringLibrary) {
         URL resolvedUrl = null;
         try {
-            URL libraryFolderUrl = URLUtils.getParentURL(referringLibrary.getLibraryUrl());
-            resolvedUrl = URLUtils.getResolvedURL(relativeUrl, libraryFolderUrl);
+            URL libraryFolderUrl = URLUtils.getParentURL( referringLibrary.getLibraryUrl() );
+            resolvedUrl = URLUtils.getResolvedURL( relativeUrl, libraryFolderUrl );
 
         } catch (MalformedURLException e) {
             // no error - return a null URL
@@ -273,8 +256,7 @@ public class ChameleonTypeChecker {
     }
 
     /**
-     * Visitor that captures all of the chameleon libraries that will be included in the current
-     * library's namespace
+     * Visitor that captures all of the chameleon libraries that will be included in the current library's namespace
      * 
      * @author S. Livezey
      */
@@ -355,15 +337,15 @@ public class ChameleonTypeChecker {
         }
 
         /**
-		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitActionFacet(org.opentravel.schemacompiler.model.TLActionFacet)
-		 */
-		@Override
-		public boolean visitActionFacet(TLActionFacet facet) {
+         * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitActionFacet(org.opentravel.schemacompiler.model.TLActionFacet)
+         */
+        @Override
+        public boolean visitActionFacet(TLActionFacet facet) {
             referringNamespace = facet.getNamespace();
             return true;
-		}
+        }
 
-		/**
+        /**
          * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitAttribute(org.opentravel.schemacompiler.model.TLAttribute)
          */
         @Override
@@ -390,8 +372,7 @@ public class ChameleonTypeChecker {
          */
         @Override
         public boolean visitLegacySchemaLibrary(XSDLibrary library) {
-            return false; // Do not navigate - we are replacing this with the chameleon processing
-                          // routine
+            return false; // Do not navigate - we are replacing this with the chameleon processing routine
         }
 
         /**
@@ -399,7 +380,7 @@ public class ChameleonTypeChecker {
          */
         @Override
         public boolean visitXSDSimpleType(XSDSimpleType xsdSimple) {
-            analyzeLegacySchemaDependencies(xsdSimple);
+            analyzeLegacySchemaDependencies( xsdSimple );
             return true;
         }
 
@@ -408,7 +389,7 @@ public class ChameleonTypeChecker {
          */
         @Override
         public boolean visitXSDComplexType(XSDComplexType xsdComplex) {
-            analyzeLegacySchemaDependencies(xsdComplex);
+            analyzeLegacySchemaDependencies( xsdComplex );
             return true;
         }
 
@@ -417,24 +398,23 @@ public class ChameleonTypeChecker {
          */
         @Override
         public boolean visitXSDElement(XSDElement xsdElement) {
-            analyzeLegacySchemaDependencies(xsdElement);
+            analyzeLegacySchemaDependencies( xsdElement );
             return true;
         }
 
         /**
-         * If the owning library of the given entity is a legacy schema, launch the recusive
-         * analysis of its dependencies.
+         * If the owning library of the given entity is a legacy schema, launch the recusive analysis of its
+         * dependencies.
          * 
-         * @param member
-         *            the library member to analyze
+         * @param member the library member to analyze
          */
         private void analyzeLegacySchemaDependencies(LibraryMember member) {
             if (referringNamespace != null) {
                 AbstractLibrary library = member.getOwningLibrary();
 
                 if (library instanceof XSDLibrary) {
-                    navigateXSDLibraryDependencies((XSDLibrary) library, referringNamespace,
-                            new HashSet<XSDLibrary>());
+                    navigateXSDLibraryDependencies( (XSDLibrary) library, referringNamespace,
+                        new HashSet<XSDLibrary>() );
                 }
             }
         }

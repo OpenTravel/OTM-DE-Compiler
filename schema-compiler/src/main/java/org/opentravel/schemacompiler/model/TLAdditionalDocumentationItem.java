@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.model;
 
 import org.opentravel.schemacompiler.event.ModelEvent;
@@ -20,8 +21,7 @@ import org.opentravel.schemacompiler.event.ModelEventBuilder;
 import org.opentravel.schemacompiler.event.ModelEventType;
 
 /**
- * Encapsulates the context and actual documentation associated with an additional documentation
- * section of the model.
+ * Encapsulates the context and actual documentation associated with an additional documentation section of the model.
  * 
  * @author S. Livezey
  */
@@ -40,11 +40,11 @@ public class TLAdditionalDocumentationItem extends TLDocumentationItem implement
      * @see org.opentravel.schemacompiler.model.TLContextReferrer#setContext(java.lang.String)
      */
     public void setContext(String context) {
-        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.CONTEXT_MODIFIED, this)
-                .setOldValue(this.context).setNewValue(context).buildEvent();
+        ModelEvent<?> event = new ModelEventBuilder( ModelEventType.CONTEXT_MODIFIED, this ).setOldValue( this.context )
+            .setNewValue( context ).buildEvent();
 
         this.context = context;
-        publishEvent(event);
+        publishEvent( event );
     }
 
     /**
@@ -52,22 +52,19 @@ public class TLAdditionalDocumentationItem extends TLDocumentationItem implement
      * 
      * @author S. Livezey
      */
-    protected static class AdditionalDocumentationItemListManager extends
-            ChildEntityListManager<TLAdditionalDocumentationItem, TLDocumentation> {
+    protected static class AdditionalDocumentationItemListManager
+        extends ChildEntityListManager<TLAdditionalDocumentationItem,TLDocumentation> {
 
         /**
          * Constructor that specifies the owner of the unerlying list.
          * 
-         * @param owner
-         *            the owner of the underlying list of children
-         * @param addEventType
-         *            the type of event to publish when a child entity is added
-         * @param removeEventType
-         *            the type of event to publish when a child entity is removed
+         * @param owner the owner of the underlying list of children
+         * @param addEventType the type of event to publish when a child entity is added
+         * @param removeEventType the type of event to publish when a child entity is removed
          */
-        public AdditionalDocumentationItemListManager(TLDocumentation owner,
-                ModelEventType addEventType, ModelEventType removeEventType) {
-            super(owner, addEventType, removeEventType);
+        public AdditionalDocumentationItemListManager(TLDocumentation owner, ModelEventType addEventType,
+            ModelEventType removeEventType) {
+            super( owner, addEventType, removeEventType );
         }
 
         /**
@@ -84,7 +81,7 @@ public class TLAdditionalDocumentationItem extends TLDocumentationItem implement
          */
         @Override
         protected void assignOwner(TLAdditionalDocumentationItem child, TLDocumentation owner) {
-            child.setOwningDocumentation(owner);
+            child.setOwningDocumentation( owner );
         }
 
         /**
@@ -94,7 +91,7 @@ public class TLAdditionalDocumentationItem extends TLDocumentationItem implement
         @Override
         protected void publishEvent(TLDocumentation owner, ModelEvent<?> event) {
             if (owner != null) {
-                owner.publishEvent(event);
+                owner.publishEvent( event );
             }
         }
 

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.codegen.html.builders;
 
 import org.opentravel.schemacompiler.model.NamedEntity;
@@ -22,40 +23,40 @@ import org.opentravel.schemacompiler.model.TLDocumentationOwner;
  * @author Eric.Bronson
  *
  */
-public abstract class NamedEntityDocumentationBuilder<T extends NamedEntity & TLDocumentationOwner> extends
-		AbstractDocumentationBuilder<T> {
-		
-	protected DocumentationBuilder superType;
+public abstract class NamedEntityDocumentationBuilder<T extends NamedEntity & TLDocumentationOwner>
+    extends AbstractDocumentationBuilder<T> {
 
-	/**
-	 * @param element
-	 */
-	public NamedEntityDocumentationBuilder(T element) {
-		super(element);
-		name = element.getLocalName();
-		namespace = element.getNamespace();
-		// prevent cyclic dependencies
-		DocumentationBuilderFactory.addDocumentationBuilder(this, namespace, name);
-	}
-	
-	public DocumentationBuilder getSuperType() {
-		return superType;
-	}
+    protected DocumentationBuilder superType;
 
-	/**
-	 * @see org.opentravel.schemacompiler.codegen.html.builders.AbstractDocumentationBuilder#hashCode()
-	 */
-	@Override
-	public int hashCode() {
-		return super.hashCode();
-	}
+    /**
+     * @param element the named entity for which to create a builder
+     */
+    public NamedEntityDocumentationBuilder(T element) {
+        super( element );
+        name = element.getLocalName();
+        namespace = element.getNamespace();
+        // prevent cyclic dependencies
+        DocumentationBuilderFactory.addDocumentationBuilder( this, namespace, name );
+    }
 
-	/**
-	 * @see org.opentravel.schemacompiler.codegen.html.builders.AbstractDocumentationBuilder#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		return super.equals(obj);
-	}
+    public DocumentationBuilder getSuperType() {
+        return superType;
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.codegen.html.builders.AbstractDocumentationBuilder#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.codegen.html.builders.AbstractDocumentationBuilder#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+        return super.equals( obj );
+    }
 
 }

@@ -13,64 +13,64 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.codegen.json.model;
 
 import com.google.gson.JsonObject;
 
 /**
- * Provides JSON schema documentation about the OTM named entity from which the schema
- * was generated.
+ * Provides JSON schema documentation about the OTM named entity from which the schema was generated.
  */
 public class JsonEntityInfo implements JsonModelObject {
-	
-	private String entityType;
-	private String entityName;
-	
-	/**
-	 * Returns the type of the OTM entity.
-	 *
-	 * @return String
-	 */
-	public String getEntityType() {
-		return entityType;
-	}
-	
-	/**
-	 * Assigns the type of the OTM entity.
-	 *
-	 * @param entityType  the OTM entity type to assign
-	 */
-	public void setEntityType(String entityType) {
-		this.entityType = entityType;
-	}
-	
-	/**
-	 * Returns the local name of the OTM entity.
-	 *
-	 * @return String
-	 */
-	public String getEntityName() {
-		return entityName;
-	}
-	
-	/**
-	 * Assigns the local name of the OTM entity.
-	 *
-	 * @param entityName  the OTM entity name to assign
-	 */
-	public void setEntityName(String entityName) {
-		this.entityName = entityName;
-	}
-	
-	/**
-	 * @see org.opentravel.schemacompiler.codegen.json.model.JsonModelObject#toJson()
-	 */
-	public JsonObject toJson() {
-		JsonObject entityInfo = new JsonObject();
-		
-		addProperty( entityInfo, "EntityType", entityType );
-		addProperty( entityInfo, "EntityName", entityName );
-		return entityInfo;
-	}
-	
+
+    private String entityType;
+    private String entityName;
+
+    /**
+     * Returns the type of the OTM entity.
+     *
+     * @return String
+     */
+    public String getEntityType() {
+        return entityType;
+    }
+
+    /**
+     * Assigns the type of the OTM entity.
+     *
+     * @param entityType the OTM entity type to assign
+     */
+    public void setEntityType(String entityType) {
+        this.entityType = entityType;
+    }
+
+    /**
+     * Returns the local name of the OTM entity.
+     *
+     * @return String
+     */
+    public String getEntityName() {
+        return entityName;
+    }
+
+    /**
+     * Assigns the local name of the OTM entity.
+     *
+     * @param entityName the OTM entity name to assign
+     */
+    public void setEntityName(String entityName) {
+        this.entityName = entityName;
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.codegen.json.model.JsonModelObject#toJson()
+     */
+    public JsonObject toJson() {
+        JsonObject entityInfo = new JsonObject();
+
+        addProperty( entityInfo, "EntityType", entityType );
+        addProperty( entityInfo, "EntityName", entityName );
+        return entityInfo;
+    }
+
 }

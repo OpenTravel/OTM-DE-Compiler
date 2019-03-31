@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.validate.save;
 
 import org.opentravel.schemacompiler.model.TLEnumValue;
@@ -33,13 +34,13 @@ public class TLEnumValueSaveValidator extends TLValidatorBase<TLEnumValue> {
      */
     @Override
     protected ValidationFindings validateChildren(TLEnumValue target) {
-        TLValidationBuilder builder = newValidationBuilder(target);
+        TLValidationBuilder builder = newValidationBuilder( target );
 
-        builder.setProperty("literal", target.getLiteral()).setFindingType(FindingType.WARNING)
-                .assertMaximumLength(80);
+        builder.setProperty( "literal", target.getLiteral() ).setFindingType( FindingType.WARNING )
+            .assertMaximumLength( 80 );
 
-        builder.setProperty("equivalents", target.getEquivalents())
-                .setFindingType(FindingType.WARNING).assertContainsNoNullElements();
+        builder.setProperty( "equivalents", target.getEquivalents() ).setFindingType( FindingType.WARNING )
+            .assertContainsNoNullElements();
 
         return builder.getFindings();
     }

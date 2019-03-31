@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.codegen.html.builders;
 
-import java.io.IOException;
+package org.opentravel.schemacompiler.codegen.html.builders;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerationException;
 import org.opentravel.schemacompiler.codegen.html.Content;
@@ -24,82 +23,85 @@ import org.opentravel.schemacompiler.model.TLAttributeType;
 import org.opentravel.schemacompiler.model.TLDocumentation;
 import org.opentravel.schemacompiler.model.TLValueWithAttributes;
 
+import java.io.IOException;
+
 /**
  * @author Eric.Bronson
  *
  */
-public class VWADocumentationBuilder
-		extends
-		AttributeOwnerDocumentationBuilder<TLValueWithAttributes> {
-		
-	private TLDocumentation valueDoc;
-	
-	public VWADocumentationBuilder(TLValueWithAttributes t) {
-		super(t);
-		TLAttributeType parent = t.getParentType();
-		superType = DocumentationBuilderFactory.getInstance().getDocumentationBuilder(parent);
-		valueDoc = t.getValueDocumentation();
-	}
+public class VWADocumentationBuilder extends AttributeOwnerDocumentationBuilder<TLValueWithAttributes> {
 
-	public TLDocumentation getValueDoc() {
-		return valueDoc;
-	}
+    private TLDocumentation valueDoc;
 
-	@Override
-	public void build() throws CodeGenerationException {
-		try {
-			VWAWriter writer = new VWAWriter(this, prev, next);
-			Content contentTree = writer.getHeader();
-			writer.addMemberInheritanceTree(contentTree);
-			Content classContentTree = writer.getContentHeader();
-			Content tree = writer.getMemberTree(classContentTree);
-			Content classInfoTree = writer.getMemberInfoItemTree();
-			writer.addDocumentationInfo(classInfoTree);
-			tree.addContent(classInfoTree);
-		
-			classInfoTree = writer.getMemberInfoItemTree();
-			writer.addExampleInfo(classInfoTree);
-			tree.addContent(classInfoTree);
+    /**
+     * @param t the VWA for which to create a builder
+     */
+    public VWADocumentationBuilder(TLValueWithAttributes t) {
+        super( t );
+        TLAttributeType parent = t.getParentType();
+        superType = DocumentationBuilderFactory.getInstance().getDocumentationBuilder( parent );
+        valueDoc = t.getValueDocumentation();
+    }
 
-			classInfoTree = writer.getMemberInfoItemTree();
-			writer.addAttributeInfo(classInfoTree);
-			tree.addContent(classInfoTree);
+    public TLDocumentation getValueDoc() {
+        return valueDoc;
+    }
 
-			classInfoTree = writer.getMemberInfoItemTree();
-			writer.addIndicatorInfo(classInfoTree);
-			tree.addContent(classInfoTree);
+    @Override
+    public void build() throws CodeGenerationException {
+        try {
+            VWAWriter writer = new VWAWriter( this, prev, next );
+            Content contentTree = writer.getHeader();
+            writer.addMemberInheritanceTree( contentTree );
+            Content classContentTree = writer.getContentHeader();
+            Content tree = writer.getMemberTree( classContentTree );
+            Content classInfoTree = writer.getMemberInfoItemTree();
+            writer.addDocumentationInfo( classInfoTree );
+            tree.addContent( classInfoTree );
 
-			Content desc = writer.getMemberInfoTree(tree);
-			classContentTree.addContent(desc);
-			contentTree.addContent(classContentTree);
-			writer.addFooter(contentTree);
-			writer.printDocument(contentTree);
-			writer.close();
-			
-		} catch (IOException e) {
-			throw new CodeGenerationException("Error creating doclet writer", e);
-		}
-	}
+            classInfoTree = writer.getMemberInfoItemTree();
+            writer.addExampleInfo( classInfoTree );
+            tree.addContent( classInfoTree );
 
-	@Override
-	public DocumentationBuilderType getDocType() {
-		return DocumentationBuilderType.VWA;
-	}
+            classInfoTree = writer.getMemberInfoItemTree();
+            writer.addAttributeInfo( classInfoTree );
+            tree.addContent( classInfoTree );
 
-	/**
-	 * @see org.opentravel.schemacompiler.codegen.html.builders.AbstractDocumentationBuilder#hashCode()
-	 */
-	@Override
-	public int hashCode() {
-		return super.hashCode();
-	}
+            classInfoTree = writer.getMemberInfoItemTree();
+            writer.addIndicatorInfo( classInfoTree );
+            tree.addContent( classInfoTree );
 
-	/**
-	 * @see org.opentravel.schemacompiler.codegen.html.builders.AbstractDocumentationBuilder#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		return super.equals(obj);
-	}
+            Content desc = writer.getMemberInfoTree( tree );
+            classContentTree.addContent( desc );
+            contentTree.addContent( classContentTree );
+            writer.addFooter( contentTree );
+            writer.printDocument( contentTree );
+            writer.close();
+
+        } catch (IOException e) {
+            throw new CodeGenerationException( "Error creating doclet writer", e );
+        }
+    }
+
+    @Override
+    public DocumentationBuilderType getDocType() {
+        return DocumentationBuilderType.VWA;
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.codegen.html.builders.AbstractDocumentationBuilder#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.codegen.html.builders.AbstractDocumentationBuilder#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+        return super.equals( obj );
+    }
 
 }

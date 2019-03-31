@@ -13,56 +13,52 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.repository;
 
 import org.opentravel.schemacompiler.util.SchemaCompilerException;
 
 /**
- * Exception that is thrown when an error occurs while attempting to access or update a
- * <code>Repository</code> instance.
+ * Exception that is thrown when an error occurs while attempting to access or update a <code>Repository</code>
+ * instance.
  * 
  * @author S. Livezey
  */
 public class RepositoryException extends SchemaCompilerException {
 
-	private static final long serialVersionUID = -2245826052717824634L;
+    private static final long serialVersionUID = -2245826052717824634L;
 
-	/**
+    /**
      * Default constructor.
      */
-    public RepositoryException() {
-    }
+    public RepositoryException() {}
 
     /**
      * Constructs an exception with the specified message.
      * 
-     * @param message
-     *            the exception message
+     * @param message the exception message
      */
     public RepositoryException(String message) {
-        super(message);
+        super( message );
     }
 
     /**
      * Constructs an exception with the specified underlying cause.
      * 
-     * @param cause
-     *            the underlying exception that caused this one
+     * @param cause the underlying exception that caused this one
      */
     public RepositoryException(Throwable cause) {
-        super(cause);
+        super( cause );
     }
 
     /**
      * Constructs an exception with the specified message and underlying cause.
      * 
-     * @param message
-     *            the exception message
-     * @param cause
-     *            the underlying exception that caused this one
+     * @param message the exception message
+     * @param cause the underlying exception that caused this one
      */
     public RepositoryException(String message, Throwable cause) {
-        super(message, cause);
+        super( message, cause );
     }
 
 }

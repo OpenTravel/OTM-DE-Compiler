@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.codegen;
 
 import org.opentravel.schemacompiler.util.SchemaCompilerException;
@@ -24,44 +25,39 @@ import org.opentravel.schemacompiler.util.SchemaCompilerException;
  */
 public class CodeGenerationException extends SchemaCompilerException {
 
-	private static final long serialVersionUID = -8992007234245167340L;
+    private static final long serialVersionUID = -8992007234245167340L;
 
-	/**
+    /**
      * Default constructor.
      */
-    public CodeGenerationException() {
-    }
+    public CodeGenerationException() {}
 
     /**
      * Constructs an exception with the specified message.
      * 
-     * @param message
-     *            the exception message
+     * @param message the exception message
      */
     public CodeGenerationException(String message) {
-        super(message);
+        super( message );
     }
 
     /**
      * Constructs an exception with the specified underlying cause.
      * 
-     * @param cause
-     *            the underlying exception that caused this one
+     * @param cause the underlying exception that caused this one
      */
     public CodeGenerationException(Throwable cause) {
-        super(cause);
+        super( cause );
     }
 
     /**
      * Constructs an exception with the specified message and underlying cause.
      * 
-     * @param message
-     *            the exception message
-     * @param cause
-     *            the underlying exception that caused this one
+     * @param message the exception message
+     * @param cause the underlying exception that caused this one
      */
     public CodeGenerationException(String message, Throwable cause) {
-        super(message, cause);
+        super( message, cause );
     }
 
 }

@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.codegen.json;
 
-import java.util.List;
+package org.opentravel.schemacompiler.codegen.json;
 
 import org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchema;
@@ -28,70 +27,73 @@ import org.opentravel.schemacompiler.model.TLEnumValue;
 import org.opentravel.schemacompiler.model.TLOpenEnumeration;
 import org.opentravel.schemacompiler.util.SimpleTypeInfo;
 
+import java.util.List;
+
 /**
- * Performs the translation from <code>TLOpenEnumeration</code> objects to the JSON schema elements
- * used to produce the output.
+ * Performs the translation from <code>TLOpenEnumeration</code> objects to the JSON schema elements used to produce the
+ * output.
  */
-public class TLOpenEnumerationJsonCodegenTransformer extends AbstractJsonSchemaTransformer<TLOpenEnumeration, CodegenArtifacts> {
-	
-	/**
-	 * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
-	 */
-	@Override
-	public CodegenArtifacts transform(TLOpenEnumeration source) {
-		CodegenArtifacts artifacts = new CodegenArtifacts();
-		
+public class TLOpenEnumerationJsonCodegenTransformer
+    extends AbstractJsonSchemaTransformer<TLOpenEnumeration,CodegenArtifacts> {
+
+    /**
+     * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
+     */
+    @Override
+    public CodegenArtifacts transform(TLOpenEnumeration source) {
+        CodegenArtifacts artifacts = new CodegenArtifacts();
+
         artifacts.addArtifact( createComplexTypeSchema( source ) );
         artifacts.addArtifact( createSimpleTypeSchema( source ) );
-		return artifacts;
-	}
-	
+        return artifacts;
+    }
+
     /**
      * Constructs the complex type schema for the open enumeration.
      * 
-     * @param source  the source meta-model enumeration
+     * @param source the source meta-model enumeration
      * @return JsonSchema
      */
     protected JsonSchemaNamedReference createComplexTypeSchema(TLOpenEnumeration source) {
-		JsonSchemaNamedReference complexEnum = new JsonSchemaNamedReference();
-		JsonSchema schema = new JsonSchema();
-    	
-		complexEnum.setName( getDefinitionName( source ) );
-		complexEnum.setSchema( new JsonSchemaReference( schema ) );
-		
-		transformDocumentation( source, schema );
+        JsonSchemaNamedReference complexEnum = new JsonSchemaNamedReference();
+        JsonSchema schema = new JsonSchema();
+
+        complexEnum.setName( getDefinitionName( source ) );
+        complexEnum.setSchema( new JsonSchemaReference( schema ) );
+
+        transformDocumentation( source, schema );
         schema.setEntityInfo( jsonUtils.getEntityInfo( source ) );
-        
-        schema.getProperties().add( new JsonSchemaNamedReference(
-        		"value", new JsonSchemaReference( jsonUtils.getSchemaReferencePath( source, source ) + "_Base" ) ) );
-        schema.getProperties().add( new JsonSchemaNamedReference(
-        		"extension", new JsonSchemaReference( SimpleTypeInfo.ENUM_EXTENSION_SCHEMA ) ) );
-		return complexEnum;
+
+        schema.getProperties().add( new JsonSchemaNamedReference( "value",
+            new JsonSchemaReference( jsonUtils.getSchemaReferencePath( source, source ) + "_Base" ) ) );
+        schema.getProperties().add( new JsonSchemaNamedReference( "extension",
+            new JsonSchemaReference( SimpleTypeInfo.ENUM_EXTENSION_SCHEMA ) ) );
+        return complexEnum;
     }
-    
+
     /**
      * Constructs the simple type schema of the open enumeration.
      * 
-     * @param source  the source meta-model enumeration
+     * @param source the source meta-model enumeration
      * @return JsonSchema
      */
     protected JsonSchemaNamedReference createSimpleTypeSchema(TLOpenEnumeration source) {
-		JsonSchemaNamedReference simpleEnum = new JsonSchemaNamedReference();
-		JsonSchema schema = new JsonSchema();
-		List<String> enumValues = schema.getEnumValues();
-		
-		simpleEnum.setName( getDefinitionName( source ) + "_Base" );
-		simpleEnum.setSchema( new JsonSchemaReference( schema ) );
-		
-		transformDocumentation( source, schema );
+        JsonSchemaNamedReference simpleEnum = new JsonSchemaNamedReference();
+        JsonSchema schema = new JsonSchema();
+        List<String> enumValues = schema.getEnumValues();
+
+        simpleEnum.setName( getDefinitionName( source ) + "_Base" );
+        simpleEnum.setSchema( new JsonSchemaReference( schema ) );
+
+        transformDocumentation( source, schema );
         schema.setEntityInfo( jsonUtils.getEntityInfo( source ) );
         schema.setType( JsonType.JSON_STRING );
-		
+
         for (TLEnumValue modelEnum : EnumCodegenUtils.getInheritedValues( source )) {
-        	enumValues.add( modelEnum.getLiteral() );
+            enumValues.add( modelEnum.getLiteral() );
         }
         enumValues.add( TLBaseEnumerationCodegenTransformer.OPEN_ENUM_VALUE );
         return simpleEnum;
     }
-    
+
 }

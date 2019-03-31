@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.repository;
 
 import org.opentravel.schemacompiler.model.AbstractLibrary;
@@ -24,51 +25,50 @@ import org.opentravel.schemacompiler.repository.impl.RepositoryUtils;
  * Base class for items returned from a search in a remote repository.
  */
 public abstract class RepositorySearchResult {
-	
-	private RepositoryItem repositoryItem;
 
-	/**
-	 * Initializes the repository item for this search result.
-	 *
-	 * @param repositoryItem  the repository item associated with this search result
-	 */
-	public RepositorySearchResult(RepositoryItem repositoryItem) {
-		this.repositoryItem = repositoryItem;
-	}
-	
-	/**
-	 * Returns the repository item associated with the library or entity for this
-	 * search result.
-	 *
-	 * @return RepositoryItem
-	 */
-	public RepositoryItem getRepositoryItem() {
-		return repositoryItem;
-	}
-	
-	/**
-	 * Returns the library associated with this search result item from the given
-	 * model.  If no matching library exists in the model provided, this method will
-	 * return null.
-	 * 
-	 * @param model  the model from which to retrieve the matching library
-	 */
-	public AbstractLibrary findLibrary(TLModel model) {
-		return model.getLibrary( repositoryItem.getNamespace(), repositoryItem.getLibraryName() );
-	}
-	
-	/**
-	 * If the associated repository item is locked by the local user, change its state to WIP.
-	 * 
-	 * @param manager  the repository manager for the local environment
-	 */
-	void checkItemState(RepositoryManager manager) {
+    private RepositoryItem repositoryItem;
+
+    /**
+     * Initializes the repository item for this search result.
+     *
+     * @param repositoryItem the repository item associated with this search result
+     */
+    public RepositorySearchResult(RepositoryItem repositoryItem) {
+        this.repositoryItem = repositoryItem;
+    }
+
+    /**
+     * Returns the repository item associated with the library or entity for this search result.
+     *
+     * @return RepositoryItem
+     */
+    public RepositoryItem getRepositoryItem() {
+        return repositoryItem;
+    }
+
+    /**
+     * Returns the library associated with this search result item from the given model. If no matching library exists
+     * in the model provided, this method will return null.
+     * 
+     * @param model the model from which to retrieve the matching library
+     * @return AbstractLibrary
+     */
+    public AbstractLibrary findLibrary(TLModel model) {
+        return model.getLibrary( repositoryItem.getNamespace(), repositoryItem.getLibraryName() );
+    }
+
+    /**
+     * If the associated repository item is locked by the local user, change its state to WIP.
+     * 
+     * @param manager the repository manager for the local environment
+     */
+    void checkItemState(RepositoryManager manager) {
         try {
-			RepositoryUtils.checkItemState( (RepositoryItemImpl) getRepositoryItem(), manager );
-			
-		} catch (RepositoryException e) {
-			// Ignore and retain the given item state
-		}
-	}
-	
+            RepositoryUtils.checkItemState( (RepositoryItemImpl) getRepositoryItem(), manager );
+
+        } catch (RepositoryException e) {
+            // Ignore and retain the given item state
+        }
+    }
+
 }

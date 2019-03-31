@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.transform.jaxb14_2tl;
 
 import org.opentravel.ns.ota2.librarymodel_v01_04.Documentation;
@@ -26,12 +27,11 @@ import org.opentravel.schemacompiler.transform.ObjectTransformer;
 import org.opentravel.schemacompiler.transform.symbols.DefaultTransformerContext;
 
 /**
- * Handles the transformation of objects from the <code>Facet</code> type to the
- * <code>TLFacet</code> type.
+ * Handles the transformation of objects from the <code>Facet</code> type to the <code>TLFacet</code> type.
  * 
  * @author S. Livezey
  */
-public class FacetTransformer extends ComplexTypeTransformer<Facet, TLFacet> {
+public class FacetTransformer extends ComplexTypeTransformer<Facet,TLFacet> {
 
     /**
      * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
@@ -40,22 +40,22 @@ public class FacetTransformer extends ComplexTypeTransformer<Facet, TLFacet> {
     public TLFacet transform(Facet source) {
         TLFacet facet = new TLFacet();
 
-        facet.setNotExtendable(false);
+        facet.setNotExtendable( false );
 
         if (source.getDocumentation() != null) {
-            ObjectTransformer<Documentation, TLDocumentation, DefaultTransformerContext> docTransformer = getTransformerFactory()
-                    .getTransformer(Documentation.class, TLDocumentation.class);
+            ObjectTransformer<Documentation,TLDocumentation,DefaultTransformerContext> docTransformer =
+                getTransformerFactory().getTransformer( Documentation.class, TLDocumentation.class );
 
-            facet.setDocumentation(docTransformer.transform(source.getDocumentation()));
+            facet.setDocumentation( docTransformer.transform( source.getDocumentation() ) );
         }
-        for (TLAttribute attribute : transformAttributes(source.getAttribute())) {
-            facet.addAttribute(attribute);
+        for (TLAttribute attribute : transformAttributes( source.getAttribute() )) {
+            facet.addAttribute( attribute );
         }
-        for (TLProperty element : transformElements(source.getElement())) {
-            facet.addElement(element);
+        for (TLProperty element : transformElements( source.getElement() )) {
+            facet.addElement( element );
         }
-        for (TLIndicator indicator : transformIndicators(source.getIndicator())) {
-            facet.addIndicator(indicator);
+        for (TLIndicator indicator : transformIndicators( source.getIndicator() )) {
+            facet.addIndicator( indicator );
         }
         return facet;
     }

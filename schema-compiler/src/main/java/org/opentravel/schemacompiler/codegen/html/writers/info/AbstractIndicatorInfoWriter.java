@@ -13,122 +13,94 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.codegen.html.writers.info;
 
-import java.util.List;
-
-import org.opentravel.schemacompiler.codegen.html.builders.AttributeOwnerDocumentationBuilder;
-import org.opentravel.schemacompiler.codegen.html.builders.IndicatorDocumentationBuilder;
 import org.opentravel.schemacompiler.codegen.html.Configuration;
 import org.opentravel.schemacompiler.codegen.html.Content;
+import org.opentravel.schemacompiler.codegen.html.builders.AttributeOwnerDocumentationBuilder;
+import org.opentravel.schemacompiler.codegen.html.builders.IndicatorDocumentationBuilder;
 import org.opentravel.schemacompiler.codegen.html.markup.HtmlTree;
 import org.opentravel.schemacompiler.codegen.html.writers.SubWriterHolderWriter;
 
+import java.util.List;
+
 /**
  * @author Eric.Bronson
- *
  */
-public abstract class AbstractIndicatorInfoWriter<T extends AttributeOwnerDocumentationBuilder<?>> extends AbstractFieldInfoWriter<T, IndicatorDocumentationBuilder> {
+public abstract class AbstractIndicatorInfoWriter<T extends AttributeOwnerDocumentationBuilder<?>>
+    extends AbstractFieldInfoWriter<T,IndicatorDocumentationBuilder> {
 
-	/**
-	 * @param writer
-	 * @param owner
-	 */
-	public AbstractIndicatorInfoWriter(SubWriterHolderWriter writer,
-			T owner) {
-		super(writer, owner);
-		title = writer.getResource("doclet.Indicator_Summary");
-		caption = writer.newConfiguration().getText("doclet.Indicators");
-	}
+    /**
+     * @param writer the writer for which to create an info-writer
+     * @param owner the owner of the new info-writer
+     */
+    public AbstractIndicatorInfoWriter(SubWriterHolderWriter writer, T owner) {
+        super( writer, owner );
+        title = writer.getResource( "doclet.Indicator_Summary" );
+        caption = writer.newConfiguration().getText( "doclet.Indicators" );
+    }
 
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.opentravel.schemacompiler.codegen.documentation.html.writers.
-	 * AbstractFieldInfoWriter
-	 * #getFieldSummary(org.opentravel.schemacompiler.codegen.documentation.html.Content)
-	 */
-	@Override
-	protected void addInfoSummary(Content summaryTree) {
-		Content label = getInfoLabel();
-		summaryTree.addContent(label);
-		List<IndicatorDocumentationBuilder> indicators = source.getIndicators();
-		if (!indicators.isEmpty()) {
-			Content tableTree = getTableTree();
-			for (IndicatorDocumentationBuilder idb : indicators) {
-				Content propSummary = getInfo(idb, indicators.indexOf(idb), false);
-				tableTree.addContent(propSummary);
-			}
-			summaryTree.addContent(tableTree);
-		}
-	}
+    /**
+     * @see org.opentravel.schemacompiler.codegen.html.writers.info.AbstractInfoWriter#addInfoSummary(org.opentravel.schemacompiler.codegen.html.Content)
+     */
+    @Override
+    protected void addInfoSummary(Content summaryTree) {
+        Content label = getInfoLabel();
+        summaryTree.addContent( label );
+        List<IndicatorDocumentationBuilder> indicators = source.getIndicators();
+        if (!indicators.isEmpty()) {
+            Content tableTree = getTableTree();
+            for (IndicatorDocumentationBuilder idb : indicators) {
+                Content propSummary = getInfo( idb, indicators.indexOf( idb ), false );
+                tableTree.addContent( propSummary );
+            }
+            summaryTree.addContent( tableTree );
+        }
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.opentravel.schemacompiler.codegen.documentation.html.writers.
-	 * AbstractFieldInfoWriter
-	 * #getInheritedFieldSummary(org.opentravel.schemacompiler.codegen
-	 * .documentation.html.Content)
-	 */
-	@Override
-	protected void addInheritedInfoSummary(Content summaryTree) {
-		T parent = getParent(source);
-		while (parent != null) {
-			if (!parent.getIndicators().isEmpty()) {
-				addInheritedInfoHeader(parent, summaryTree,
-						"doclet.Indicators_Inherited_From");
-				addInheritedInfo(parent.getIndicators(), parent, summaryTree);
-			}
-			parent = getParent(parent);
-		}
-	}
+    /**
+     * @see org.opentravel.schemacompiler.codegen.html.writers.info.AbstractInheritedInfoWriter#addInheritedInfoSummary(org.opentravel.schemacompiler.codegen.html.Content)
+     */
+    @Override
+    protected void addInheritedInfoSummary(Content summaryTree) {
+        T parent = getParent( source );
+        while (parent != null) {
+            if (!parent.getIndicators().isEmpty()) {
+                addInheritedInfoHeader( parent, summaryTree, "doclet.Indicators_Inherited_From" );
+                addInheritedInfo( parent.getIndicators(), parent, summaryTree );
+            }
+            parent = getParent( parent );
+        }
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.opentravel.schemacompiler.codegen.documentation.html.writers.
-	 * AbstractFieldInfoWriter
-	 * #addInheritedFieldAnchor(org.opentravel.schemacompiler.codegen
-	 * .documentation.DocumentationBuilder,
-	 * org.opentravel.schemacompiler.codegen.documentation.html.Content)
-	 */
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected void addInheritedInfoAnchor(T parent, Content inheritedTree) {
-		inheritedTree.addContent(writer
-				.getMarkerAnchor("indicators_inherited_from_"
-						+ parent.getQualifiedName()));
-	}
+    /**
+     * @see org.opentravel.schemacompiler.codegen.html.writers.info.AbstractInheritedInfoWriter#addInheritedInfoAnchor(org.opentravel.schemacompiler.codegen.html.builders.AbstractDocumentationBuilder,
+     *      org.opentravel.schemacompiler.codegen.html.Content)
+     */
+    @Override
+    protected void addInheritedInfoAnchor(T parent, Content inheritedTree) {
+        inheritedTree.addContent( writer.getMarkerAnchor( "indicators_inherited_from_" + parent.getQualifiedName() ) );
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.opentravel.schemacompiler.codegen.documentation.html.writers.AbstractInfoWriter
-	 * #getTableSummary()
-	 */
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected String getInfoTableSummary() {
-		Configuration config = writer.newConfiguration();
-		return config.getText("doclet.Indicator_Table_Summary",
-				config.getText("doclet.Indicator_Summary"),
-				config.getText("doclet.indicators"));
-	}
-	
-	protected String getDetailInfoTableSummary(){
-		return "";
-	}
-	
-	@Override
-	protected Content getDetailedInfo(IndicatorDocumentationBuilder field) {
-		return HtmlTree.EMPTY;
-	}
+    /**
+     * @see org.opentravel.schemacompiler.codegen.html.writers.info.AbstractInfoWriter#getInfoTableSummary()
+     */
+    @Override
+    protected String getInfoTableSummary() {
+        Configuration config = writer.newConfiguration();
+        return config.getText( "doclet.Indicator_Table_Summary", config.getText( "doclet.Indicator_Summary" ),
+            config.getText( "doclet.indicators" ) );
+    }
+
+    protected String getDetailInfoTableSummary() {
+        return "";
+    }
+
+    @Override
+    protected Content getDetailedInfo(IndicatorDocumentationBuilder field) {
+        return HtmlTree.EMPTY;
+    }
 
 }

@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.codegen.html.writers;
 
-import java.io.IOException;
+package org.opentravel.schemacompiler.codegen.html.writers;
 
 import org.opentravel.schemacompiler.codegen.html.builders.DocumentationBuilder;
 import org.opentravel.schemacompiler.codegen.html.builders.OperationDocumentationBuilder;
+
+import java.io.IOException;
 
 /**
  * @author Eric.Bronson
@@ -27,14 +28,11 @@ import org.opentravel.schemacompiler.codegen.html.builders.OperationDocumentatio
 @SuppressWarnings("squid:MaximumInheritanceDepth")
 public class OperationWriter extends FacetOwnerWriterImpl<OperationDocumentationBuilder> {
 
-	public OperationWriter(OperationDocumentationBuilder member,
-			DocumentationBuilder prev,
-			DocumentationBuilder next) throws IOException {
-		super(member, prev, next);
-	}
+    public OperationWriter(OperationDocumentationBuilder member, DocumentationBuilder prev, DocumentationBuilder next)
+        throws IOException {
+        super( member, prev, next );
+    }
 
-	
 
-	
 
 }

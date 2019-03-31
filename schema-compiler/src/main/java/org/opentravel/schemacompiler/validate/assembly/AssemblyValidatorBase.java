@@ -28,75 +28,75 @@ import org.opentravel.schemacompiler.version.VersionSchemeFactory;
  * Abstract base class for all <code>ServiceAssembly</code> validators.
  */
 public abstract class AssemblyValidatorBase<T extends Validatable> implements Validator<T> {
-	
-	protected static VersionScheme versionScheme;
-	
+
+    protected static VersionScheme versionScheme;
+
     private AssemblyValidationContext context;
     private ValidatorFactory validatorFactory;
 
-	/**
-	 * @see org.opentravel.schemacompiler.validate.Validator#setValidationContext(org.opentravel.schemacompiler.validate.ValidationContext)
-	 */
-	@Override
-	public void setValidationContext(ValidationContext context) {
+    /**
+     * @see org.opentravel.schemacompiler.validate.Validator#setValidationContext(org.opentravel.schemacompiler.validate.ValidationContext)
+     */
+    @Override
+    public void setValidationContext(ValidationContext context) {
         if (context instanceof AssemblyValidationContext) {
             this.context = (AssemblyValidationContext) context;
 
         } else if (context == null) {
-            throw new NullPointerException("The assembly validation context is requied.");
+            throw new NullPointerException( "The assembly validation context is requied." );
 
         } else {
             throw new IllegalArgumentException(
-                    "The validation context must be an instance of AssemblyValidationContext.");
+                "The validation context must be an instance of AssemblyValidationContext." );
         }
-	}
+    }
 
-	/**
-	 * @see org.opentravel.schemacompiler.validate.Validator#getValidatorFactory()
-	 */
-	@Override
-	public ValidatorFactory getValidatorFactory() {
+    /**
+     * @see org.opentravel.schemacompiler.validate.Validator#getValidatorFactory()
+     */
+    @Override
+    public ValidatorFactory getValidatorFactory() {
         return validatorFactory;
-	}
+    }
 
-	/**
-	 * @see org.opentravel.schemacompiler.validate.Validator#setValidatorFactory(org.opentravel.schemacompiler.validate.ValidatorFactory)
-	 */
-	@Override
-	public void setValidatorFactory(ValidatorFactory factory) {
-		this.validatorFactory = factory;
-	}
-	
-	/**
-	 * Returns the context for the current validation operation.
-	 * 
-	 * @return AssemblyValidationContext
-	 */
-	protected AssemblyValidationContext getValidationContext() {
-		return context;
-	}
+    /**
+     * @see org.opentravel.schemacompiler.validate.Validator#setValidatorFactory(org.opentravel.schemacompiler.validate.ValidatorFactory)
+     */
+    @Override
+    public void setValidatorFactory(ValidatorFactory factory) {
+        this.validatorFactory = factory;
+    }
+
+    /**
+     * Returns the context for the current validation operation.
+     * 
+     * @return AssemblyValidationContext
+     */
+    protected AssemblyValidationContext getValidationContext() {
+        return context;
+    }
 
     /**
      * Creates a new validation builder instance for the given target object.
      * 
-     * @param targetObject  the target object to be validated
+     * @param targetObject the target object to be validated
      * @return AssemblyValidationBuilder
      */
     protected AssemblyValidationBuilder newValidationBuilder(T targetObject) {
-        return new AssemblyValidationBuilder( TLValidatorBase.TLMODEL_PREFIX ).setTargetObject(targetObject);
+        return new AssemblyValidationBuilder( TLValidatorBase.TLMODEL_PREFIX ).setTargetObject( targetObject );
     }
-    
-	/**
-	 * Initialize the default version scheme.
-	 */
-	static {
-		try {
-			VersionSchemeFactory factory = VersionSchemeFactory.getInstance();
-			versionScheme = factory.getVersionScheme( factory.getDefaultVersionScheme() );
-			
-		} catch (Exception e) {
-			throw new ExceptionInInitializerError( e );
-		}
-	}
-	
+
+    /**
+     * Initialize the default version scheme.
+     */
+    static {
+        try {
+            VersionSchemeFactory factory = VersionSchemeFactory.getInstance();
+            versionScheme = factory.getVersionScheme( factory.getDefaultVersionScheme() );
+
+        } catch (Exception e) {
+            throw new ExceptionInInitializerError( e );
+        }
+    }
+
 }

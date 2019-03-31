@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.codegen.html.writers;
 
 import org.opentravel.schemacompiler.codegen.html.Content;
@@ -23,11 +24,10 @@ import org.opentravel.schemacompiler.codegen.html.Content;
  */
 public interface AliasOwnerWriter {
 
-	   /**
+    /**
      * Get the member summary tree.
      *
-     * @param memberTree the content tree used to build the summary tree
-     * @return a content tree for the member summary
+     * @param aliasTree the content tree used to build the summary tree
      */
     public void addAliasInfo(Content aliasTree);
 

@@ -23,47 +23,46 @@ import org.opentravel.schemacompiler.model.TLModelElement;
 import org.opentravel.schemacompiler.model.TLResource;
 
 /**
- * Integrity checker component that automatically manages the list of imports and includes
- * maintained by a <code>TLLibrary</code> instance. It is invoked whenever action facets or
- * param groups are added or removed from a resource, taking action to add or remove
- * imports/includes for the owning library as required.
+ * Integrity checker component that automatically manages the list of imports and includes maintained by a
+ * <code>TLLibrary</code> instance. It is invoked whenever action facets or param groups are added or removed from a
+ * resource, taking action to add or remove imports/includes for the owning library as required.
  *
  * @author S. Livezey
  */
-public class ResourceMemberChangeIntegrityChecker extends
-		ImportManagementIntegrityChecker<OwnershipEvent<TLResource,TLModelElement>,TLResource> {
+public class ResourceMemberChangeIntegrityChecker
+    extends ImportManagementIntegrityChecker<OwnershipEvent<TLResource,TLModelElement>,TLResource> {
 
-	/**
-	 * @see org.opentravel.schemacompiler.event.ModelEventListener#processModelEvent(org.opentravel.schemacompiler.event.ModelEvent)
-	 */
-	@Override
-	public void processModelEvent(OwnershipEvent<TLResource,TLModelElement> event) {
+    /**
+     * @see org.opentravel.schemacompiler.event.ModelEventListener#processModelEvent(org.opentravel.schemacompiler.event.ModelEvent)
+     */
+    @Override
+    public void processModelEvent(OwnershipEvent<TLResource,TLModelElement> event) {
         if ((event.getType() == ModelEventType.ACTION_FACET_ADDED)
-                || (event.getType() == ModelEventType.ACTION_FACET_REMOVED)
-                || (event.getType() == ModelEventType.PARAM_GROUP_ADDED)
-                || (event.getType() == ModelEventType.PARAM_GROUP_REMOVED)) {
-        	TLResource source = event.getSource();
-        	
-        	if ((source != null) && (source.getOwningLibrary() instanceof TLLibrary)) {
+            || (event.getType() == ModelEventType.ACTION_FACET_REMOVED)
+            || (event.getType() == ModelEventType.PARAM_GROUP_ADDED)
+            || (event.getType() == ModelEventType.PARAM_GROUP_REMOVED)) {
+            TLResource source = event.getSource();
+
+            if ((source != null) && (source.getOwningLibrary() instanceof TLLibrary)) {
                 verifyReferencedLibraries( (TLLibrary) source.getOwningLibrary() );
-        	}
+            }
         }
-	}
+    }
 
-	/**
-	 * @see org.opentravel.schemacompiler.event.ModelEventListener#getEventClass()
-	 */
-	@Override
-	public Class<?> getEventClass() {
+    /**
+     * @see org.opentravel.schemacompiler.event.ModelEventListener#getEventClass()
+     */
+    @Override
+    public Class<?> getEventClass() {
         return OwnershipEvent.class;
-	}
+    }
 
-	/**
-	 * @see org.opentravel.schemacompiler.event.ModelEventListener#getSourceObjectClass()
-	 */
-	@Override
-	public Class<TLResource> getSourceObjectClass() {
-		return null;
-	}
-	
+    /**
+     * @see org.opentravel.schemacompiler.event.ModelEventListener#getSourceObjectClass()
+     */
+    @Override
+    public Class<TLResource> getSourceObjectClass() {
+        return null;
+    }
+
 }

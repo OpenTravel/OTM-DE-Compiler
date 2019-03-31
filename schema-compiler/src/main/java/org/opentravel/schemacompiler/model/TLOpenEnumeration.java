@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.model;
 
 /**
@@ -31,12 +32,12 @@ public class TLOpenEnumeration extends TLAbstractEnumeration implements TLAttrib
         StringBuilder identity = new StringBuilder();
 
         if (owningLibrary != null) {
-            identity.append(owningLibrary.getValidationIdentity()).append(" : ");
+            identity.append( owningLibrary.getValidationIdentity() ).append( " : " );
         }
         if (getName() == null) {
-            identity.append("[Unnamed Open Enumeration Type]");
+            identity.append( "[Unnamed Open Enumeration Type]" );
         } else {
-            identity.append(getName());
+            identity.append( getName() );
         }
         return identity.toString();
     }

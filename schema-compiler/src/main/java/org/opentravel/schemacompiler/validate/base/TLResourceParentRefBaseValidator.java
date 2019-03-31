@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.validate.base;
 
 import org.opentravel.schemacompiler.model.TLDocumentation;
@@ -28,19 +29,20 @@ import org.opentravel.schemacompiler.validate.impl.TLValidatorBase;
  */
 public class TLResourceParentRefBaseValidator extends TLValidatorBase<TLResourceParentRef> {
 
-	/**
-	 * @see org.opentravel.schemacompiler.validate.impl.TLValidatorBase#validateChildren(org.opentravel.schemacompiler.validate.Validatable)
-	 */
-	@Override
-	protected ValidationFindings validateChildren(TLResourceParentRef target) {
+    /**
+     * @see org.opentravel.schemacompiler.validate.impl.TLValidatorBase#validateChildren(org.opentravel.schemacompiler.validate.Validatable)
+     */
+    @Override
+    protected ValidationFindings validateChildren(TLResourceParentRef target) {
         ValidationFindings findings = new ValidationFindings();
-        
-        if (target.getDocumentation() != null) {
-            Validator<TLDocumentation> docValidator = getValidatorFactory().getValidatorForClass(TLDocumentation.class);
 
-            findings.addAll(docValidator.validate(target.getDocumentation()));
+        if (target.getDocumentation() != null) {
+            Validator<TLDocumentation> docValidator =
+                getValidatorFactory().getValidatorForClass( TLDocumentation.class );
+
+            findings.addAll( docValidator.validate( target.getDocumentation() ) );
         }
         return findings;
-	}
+    }
 
 }

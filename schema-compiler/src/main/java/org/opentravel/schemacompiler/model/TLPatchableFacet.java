@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.model;
 
 /**
- * Base class for all facets that are capable of accepting patches in the form of
- * <code>TLExtensionPointFacet</code> references.
+ * Base class for all facets that are capable of accepting patches in the form of <code>TLExtensionPointFacet</code>
+ * references.
  */
 public abstract class TLPatchableFacet extends TLAbstractFacet
-		implements TLAttributeOwner, TLPropertyOwner, TLIndicatorOwner {
+    implements TLAttributeOwner, TLPropertyOwner, TLIndicatorOwner {
 
 }

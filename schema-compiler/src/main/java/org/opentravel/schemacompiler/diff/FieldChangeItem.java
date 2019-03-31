@@ -21,31 +21,31 @@ package org.opentravel.schemacompiler.diff;
  * Describes a single change identified during comparison of two OTM fields.
  */
 public class FieldChangeItem extends ChangeItem<FieldChangeType> {
-	
-	private FieldChangeSet changeSet;
-	
-	/**
-	 * Constructor used when a field value was changed.
-	 * 
-	 * @param changeSet  the change set to which this item belongs
-	 * @param changeType  the type of field change
-	 * @param oldValue  the affected value from the old version
-	 * @param newValue  the affected value from the new version
-	 */
-	public FieldChangeItem(FieldChangeSet changeSet, FieldChangeType changeType, String oldValue, String newValue) {
-		this.changeSet = changeSet;
-		this.changeType = changeType;
-		this.oldValue = oldValue;
-		this.newValue = newValue;
-	}
 
-	/**
-	 * Returns the change set to which this item belongs.
-	 *
-	 * @return FieldChangeSet
-	 */
-	public FieldChangeSet getChangeSet() {
-		return changeSet;
-	}
+    private FieldChangeSet changeSet;
+
+    /**
+     * Constructor used when a field value was changed.
+     * 
+     * @param changeSet the change set to which this item belongs
+     * @param changeType the type of field change
+     * @param oldValue the affected value from the old version
+     * @param newValue the affected value from the new version
+     */
+    public FieldChangeItem(FieldChangeSet changeSet, FieldChangeType changeType, String oldValue, String newValue) {
+        this.changeSet = changeSet;
+        this.changeType = changeType;
+        this.oldValue = oldValue;
+        this.newValue = newValue;
+    }
+
+    /**
+     * Returns the change set to which this item belongs.
+     *
+     * @return FieldChangeSet
+     */
+    public FieldChangeSet getChangeSet() {
+        return changeSet;
+    }
 
 }

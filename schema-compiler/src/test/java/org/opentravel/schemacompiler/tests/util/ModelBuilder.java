@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.tests.util;
 
 import org.opentravel.schemacompiler.ic.ModelIntegrityChecker;
@@ -33,7 +34,7 @@ public class ModelBuilder {
         // to attach include and import dependency listener
         ProjectManager pm = new ProjectManager();
         mb.model = pm.getModel();
-        mb.model.addListener(new ModelIntegrityChecker());
+        mb.model.addListener( new ModelIntegrityChecker() );
         return mb;
     }
 
@@ -41,23 +42,23 @@ public class ModelBuilder {
         this.name = name;
         try {
             this.namespace = VersionSchemeFactory.getInstance()
-                    .getVersionScheme(VersionSchemeFactory.getInstance().getDefaultVersionScheme())
-                    .setVersionIdentifier(namespace, version);
+                .getVersionScheme( VersionSchemeFactory.getInstance().getDefaultVersionScheme() )
+                .setVersionIdentifier( namespace, version );
         } catch (VersionSchemeException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException( e );
         }
         return this;
     }
 
     public ModelBuilder newLibrary(String name, String namespace) {
-        return newLibrary(name, namespace, "0.0.0");
+        return newLibrary( name, namespace, "0.0.0" );
     }
 
     public TLLibrary build() {
         TLLibrary library = new TLLibrary();
-        library.setName(name);
-        library.setNamespace(namespace);
-        model.addLibrary(library);
+        library.setName( name );
+        library.setNamespace( namespace );
+        model.addLibrary( library );
         return library;
     }
 

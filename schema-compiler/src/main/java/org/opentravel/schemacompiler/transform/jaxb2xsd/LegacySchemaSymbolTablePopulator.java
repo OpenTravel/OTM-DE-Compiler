@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.transform.jaxb2xsd;
 
 import org.opentravel.schemacompiler.transform.SymbolTable;
@@ -25,8 +26,7 @@ import org.w3._2001.xmlschema.TopLevelElement;
 import org.w3._2001.xmlschema.TopLevelSimpleType;
 
 /**
- * Symbol table populator that creates named entries using the members of the JAXB
- * <code>Schema</code> instance provied.
+ * Symbol table populator that creates named entries using the members of the JAXB <code>Schema</code> instance provied.
  * 
  * @author S. Livezey
  */
@@ -41,10 +41,10 @@ public class LegacySchemaSymbolTablePopulator implements SymbolTablePopulator<Sc
         String namespace = sourceEntity.getTargetNamespace();
 
         for (OpenAttrs schemaTerm : sourceEntity.getSimpleTypeOrComplexTypeOrGroup()) {
-            String localName = getLocalName(schemaTerm);
+            String localName = getLocalName( schemaTerm );
 
             if (localName != null) {
-                symbols.addEntity(namespace, localName, schemaTerm);
+                symbols.addEntity( namespace, localName, schemaTerm );
             }
         }
     }

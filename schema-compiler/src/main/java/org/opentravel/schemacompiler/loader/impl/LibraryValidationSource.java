@@ -13,15 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.loader.impl;
 
-import java.lang.reflect.Method;
+package org.opentravel.schemacompiler.loader.impl;
 
 import org.opentravel.schemacompiler.validate.Validatable;
 
+import java.lang.reflect.Method;
+
 /**
- * Source object wrapper for JAXB library objects used for compatability with the validation
- * framework.
+ * Source object wrapper for JAXB library objects used for compatability with the validation framework.
  * 
  * @author S. Livezey
  */
@@ -32,8 +32,7 @@ public class LibraryValidationSource implements Validatable {
     /**
      * Constructor that specifies the library instance to be wrapped.
      * 
-     * @param library
-     *            the library instance
+     * @param library the library instance
      */
     public LibraryValidationSource(Object library) {
         this.library = library;
@@ -57,8 +56,8 @@ public class LibraryValidationSource implements Validatable {
 
         if (library != null) {
             try {
-                Method getNameMethod = library.getClass().getMethod("getName");
-                Object nameValue = getNameMethod.invoke(library);
+                Method getNameMethod = library.getClass().getMethod( "getName" );
+                Object nameValue = getNameMethod.invoke( library );
 
                 if (nameValue instanceof String) {
                     identity = (String) nameValue;

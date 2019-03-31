@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.loader;
 
 import java.util.List;
@@ -31,12 +32,9 @@ public class LibraryModuleImport {
     /**
      * Full constructor.
      * 
-     * @param namespace
-     *            the namespace that was imported by the library
-     * @param prefix
-     *            the prefix assigned to the imported namespace
-     * @param fileHints
-     *            the file hints for associated resource locations
+     * @param namespace the namespace that was imported by the library
+     * @param prefix the prefix assigned to the imported namespace
+     * @param fileHints the file hints for associated resource locations
      */
     public LibraryModuleImport(String namespace, String prefix, List<String> fileHints) {
         this.namespace = namespace;
@@ -55,14 +53,14 @@ public class LibraryModuleImport {
 
     /**
      * Assigns the namespace that was imported by the library.
-	 *
-	 * @param namespace  the namespace URI to assign
-	 */
-	public void setNamespace(String namespace) {
-		this.namespace = namespace;
-	}
+     *
+     * @param namespace the namespace URI to assign
+     */
+    public void setNamespace(String namespace) {
+        this.namespace = namespace;
+    }
 
-	/**
+    /**
      * Returns the prefix assigned to the imported namespace.
      * 
      * @return String
@@ -71,31 +69,31 @@ public class LibraryModuleImport {
         return prefix;
     }
 
-	/**
+    /**
      * Assigns the prefix assigned to the imported namespace.
-	 *
-	 * @param prefix  the namespace prefix to assign
-	 */
-	public void setPrefix(String prefix) {
-		this.prefix = prefix;
-	}
+     *
+     * @param prefix the namespace prefix to assign
+     */
+    public void setPrefix(String prefix) {
+        this.prefix = prefix;
+    }
 
     /**
      * Returns the file hints for associated resource locations.
      * 
-     * @return List<String>
+     * @return List&lt;String&gt;
      */
     public List<String> getFileHints() {
         return fileHints;
     }
 
-	/**
+    /**
      * Assigns the file hints for associated resource locations.
-	 *
-	 * @param fileHints  the list of file hints to assign
-	 */
-	public void setFileHints(List<String> fileHints) {
-		this.fileHints = fileHints;
-	}
+     *
+     * @param fileHints the list of file hints to assign
+     */
+    public void setFileHints(List<String> fileHints) {
+        this.fileHints = fileHints;
+    }
 
 }

@@ -13,24 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.ic;
 
-import java.util.ArrayList;
-import java.util.List;
+package org.opentravel.schemacompiler.ic;
 
 import org.opentravel.schemacompiler.event.ModelEvent;
 import org.opentravel.schemacompiler.event.ModelEventListener;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- * Event listener that encapsulates a number of nested listeners responsible for maintaining the
- * integrity of a <code>TLModel</code> as changes are performed by an editor or owning applicaiton.
+ * Event listener that encapsulates a number of nested listeners responsible for maintaining the integrity of a
+ * <code>TLModel</code> as changes are performed by an editor or owning applicaiton.
  * 
  * @author S. Livezey
  */
-public abstract class AbstractModelIntegrityChecker implements
-        ModelEventListener<ModelEvent<Object>, Object> {
+public abstract class AbstractModelIntegrityChecker implements ModelEventListener<ModelEvent<Object>,Object> {
 
-    private List<ModelEventListener<ModelEvent<Object>, Object>> listeners;
+    private List<ModelEventListener<ModelEvent<Object>,Object>> listeners;
 
     /**
      * Default constructor.
@@ -40,11 +40,13 @@ public abstract class AbstractModelIntegrityChecker implements
     }
 
     /**
-     * Returns the collection of listeners that should be invoked to ensure the integrity of a
-     * <code>TLModel</code> instance. By default, this method returns an empty list. Sub-classes
-     * should override and add required listeners to the list.
+     * Returns the collection of listeners that should be invoked to ensure the integrity of a <code>TLModel</code>
+     * instance. By default, this method returns an empty list. Sub-classes should override and add required listeners
+     * to the list.
      * 
-     * @return ModelEventListener<E,S>
+     * @param <E> the type of the model event
+     * @param <S> the type of the source object for the event
+     * @return ModelEventListener&lt;E,S&gt;
      */
     protected <E extends ModelEvent<S>, S> List<ModelEventListener<E,S>> getListeners() {
         return new ArrayList<>();
@@ -56,9 +58,9 @@ public abstract class AbstractModelIntegrityChecker implements
     @SuppressWarnings("unchecked")
     @Override
     public void processModelEvent(ModelEvent<Object> event) {
-        for (ModelEventListener<?, ?> listener : listeners) {
-            if (event.canBeProcessedBy(listener)) {
-                ((ModelEventListener<ModelEvent<Object>, ?>) listener).processModelEvent(event);
+        for (ModelEventListener<?,?> listener : listeners) {
+            if (event.canBeProcessedBy( listener )) {
+                ((ModelEventListener<ModelEvent<Object>,?>) listener).processModelEvent( event );
             }
         }
     }

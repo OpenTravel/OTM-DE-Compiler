@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.codegen.xsd;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerationFilenameBuilder;
@@ -38,86 +39,87 @@ import org.w3._2001.xmlschema.Schema;
  * @author S. Livezey
  */
 public class TLLibraryCodegenTransformer extends AbstractXsdTransformer<TLLibrary,Schema> {
-	
-	/**
-	 * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
-	 */
-	@SuppressWarnings("unchecked")
-	@Override
-	public Schema transform(TLLibrary source) {
-		CodeGenerationFilter filter = context.getCodeGenerator().getFilter();
-		Schema schema = createSchema( source.getNamespace(), source.getVersion() );
-		
-		// Add the application info for this library
-		Annotation schemaAnnotation = new Annotation();
-		
-		schemaAnnotation.getAppinfoOrDocumentation()
-			.add( XsdCodegenUtils.getAppInfo( source, context.getCodegenContext() ) );
-		schema.getIncludeOrImportOrRedefine().add( schemaAnnotation );
-		
-		transformLibraryMembers( source, filter, schema );
-		transformNonLocalContextualGhostFacets( source, filter, schema );
-		
-		// Add entries for all imports and includes
-		CodeGenerationFilenameBuilder<?> filenameBuilder = context.getCodeGenerator().getFilenameBuilder();
-		CodeGenerationFilter libraryFilter = new LibraryFilterBuilder( source )
-			.setGlobalFilter( context.getCodeGenerator().getFilter() ).buildFilter();
-		
-		addImports( schema, source, (CodeGenerationFilenameBuilder<AbstractLibrary>) filenameBuilder, libraryFilter );
-		addIncludes( schema, source, (CodeGenerationFilenameBuilder<AbstractLibrary>) filenameBuilder, libraryFilter );
-		
-		return schema;
-	}
 
-	/**
-	 * Transforms each non-service term declaration from the given library and adds it to the XML schema provided.
-	 * 
-	 * @param source the source library being transformed
-	 * @param filter the code generation filter (may be null)
-	 * @param schema the XML schema that will receive the transformed terms
-	 */
-	private void transformLibraryMembers(TLLibrary source, CodeGenerationFilter filter, Schema schema) {
-		for (LibraryMember member : source.getNamedMembers()) {
-			ObjectTransformer<LibraryMember,CodegenArtifacts,CodeGenerationTransformerContext> transformer = getTransformerFactory()
-				.getTransformer( member, CodegenArtifacts.class );
-			boolean isLocalFacet = (member instanceof TLContextualFacet) && ((TLContextualFacet) member).isLocalFacet();
-			
-			if ((transformer != null) && !isLocalFacet && ((filter == null) || filter.processEntity( member ))) {
-				CodegenArtifacts artifacts = transformer.transform( member );
-				
-				if (artifacts != null) {
-					for (OpenAttrs artifact : artifacts.getArtifactsOfType( OpenAttrs.class )) {
-						schema.getSimpleTypeOrComplexTypeOrGroup().add( artifact );
-					}
-				}
-			}
-		}
-	}
-	
-	/**
-	 * Generate output for non-local contextual "ghost" facets in the given library and adds it to the XML schema provided.
-	 * 
-	 * @param source the source library being transformed
-	 * @param filter the code generation filter (may be null)
-	 * @param schema the XML schema that will receive the transformed terms
-	 */
-	private void transformNonLocalContextualGhostFacets(TLLibrary source, CodeGenerationFilter filter, Schema schema) {
-		ObjectTransformer<TLContextualFacet,CodegenArtifacts,CodeGenerationTransformerContext> cfTransformer = getTransformerFactory()
-			.getTransformer( TLContextualFacet.class, CodegenArtifacts.class );
-		
-		for (TLContextualFacet facet : FacetCodegenUtils.findNonLocalGhostFacets( source )) {
-			TLFacetOwner facetOwner = FacetCodegenUtils.getTopLevelOwner( facet );
-			
-			if ((filter == null) || filter.processEntity( facetOwner )) {
-				CodegenArtifacts artifacts = cfTransformer.transform( facet );
-				
-				if (artifacts != null) {
-					for (OpenAttrs artifact : artifacts.getArtifactsOfType( OpenAttrs.class )) {
-						schema.getSimpleTypeOrComplexTypeOrGroup().add( artifact );
-					}
-				}
-			}
-		}
-	}
-	
+    /**
+     * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public Schema transform(TLLibrary source) {
+        CodeGenerationFilter filter = context.getCodeGenerator().getFilter();
+        Schema schema = createSchema( source.getNamespace(), source.getVersion() );
+
+        // Add the application info for this library
+        Annotation schemaAnnotation = new Annotation();
+
+        schemaAnnotation.getAppinfoOrDocumentation()
+            .add( XsdCodegenUtils.getAppInfo( source, context.getCodegenContext() ) );
+        schema.getIncludeOrImportOrRedefine().add( schemaAnnotation );
+
+        transformLibraryMembers( source, filter, schema );
+        transformNonLocalContextualGhostFacets( source, filter, schema );
+
+        // Add entries for all imports and includes
+        CodeGenerationFilenameBuilder<?> filenameBuilder = context.getCodeGenerator().getFilenameBuilder();
+        CodeGenerationFilter libraryFilter =
+            new LibraryFilterBuilder( source ).setGlobalFilter( context.getCodeGenerator().getFilter() ).buildFilter();
+
+        addImports( schema, source, (CodeGenerationFilenameBuilder<AbstractLibrary>) filenameBuilder, libraryFilter );
+        addIncludes( schema, source, (CodeGenerationFilenameBuilder<AbstractLibrary>) filenameBuilder, libraryFilter );
+
+        return schema;
+    }
+
+    /**
+     * Transforms each non-service term declaration from the given library and adds it to the XML schema provided.
+     * 
+     * @param source the source library being transformed
+     * @param filter the code generation filter (may be null)
+     * @param schema the XML schema that will receive the transformed terms
+     */
+    private void transformLibraryMembers(TLLibrary source, CodeGenerationFilter filter, Schema schema) {
+        for (LibraryMember member : source.getNamedMembers()) {
+            ObjectTransformer<LibraryMember,CodegenArtifacts,CodeGenerationTransformerContext> transformer =
+                getTransformerFactory().getTransformer( member, CodegenArtifacts.class );
+            boolean isLocalFacet = (member instanceof TLContextualFacet) && ((TLContextualFacet) member).isLocalFacet();
+
+            if ((transformer != null) && !isLocalFacet && ((filter == null) || filter.processEntity( member ))) {
+                CodegenArtifacts artifacts = transformer.transform( member );
+
+                if (artifacts != null) {
+                    for (OpenAttrs artifact : artifacts.getArtifactsOfType( OpenAttrs.class )) {
+                        schema.getSimpleTypeOrComplexTypeOrGroup().add( artifact );
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Generate output for non-local contextual "ghost" facets in the given library and adds it to the XML schema
+     * provided.
+     * 
+     * @param source the source library being transformed
+     * @param filter the code generation filter (may be null)
+     * @param schema the XML schema that will receive the transformed terms
+     */
+    private void transformNonLocalContextualGhostFacets(TLLibrary source, CodeGenerationFilter filter, Schema schema) {
+        ObjectTransformer<TLContextualFacet,CodegenArtifacts,CodeGenerationTransformerContext> cfTransformer =
+            getTransformerFactory().getTransformer( TLContextualFacet.class, CodegenArtifacts.class );
+
+        for (TLContextualFacet facet : FacetCodegenUtils.findNonLocalGhostFacets( source )) {
+            TLFacetOwner facetOwner = FacetCodegenUtils.getTopLevelOwner( facet );
+
+            if ((filter == null) || filter.processEntity( facetOwner )) {
+                CodegenArtifacts artifacts = cfTransformer.transform( facet );
+
+                if (artifacts != null) {
+                    for (OpenAttrs artifact : artifacts.getArtifactsOfType( OpenAttrs.class )) {
+                        schema.getSimpleTypeOrComplexTypeOrGroup().add( artifact );
+                    }
+                }
+            }
+        }
+    }
+
 }

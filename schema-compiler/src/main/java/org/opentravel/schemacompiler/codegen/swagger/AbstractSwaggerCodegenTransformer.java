@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.codegen.swagger;
 
-import java.util.List;
+package org.opentravel.schemacompiler.codegen.swagger;
 
 import org.opentravel.schemacompiler.codegen.impl.AbstractCodegenTransformer;
 import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerContext;
@@ -30,18 +29,20 @@ import org.opentravel.schemacompiler.model.TLMimeType;
 import org.opentravel.schemacompiler.transform.ObjectTransformer;
 import org.springframework.context.ApplicationContext;
 
+import java.util.List;
+
 /**
- * Base class for all <code>ObjectTransformer</code> implementations that are part of the Swagger
- * code generation subsystem.
+ * Base class for all <code>ObjectTransformer</code> implementations that are part of the Swagger code generation
+ * subsystem.
  * 
- * @param <S>  the source type of the object transformation
- * @param <T>  the target type of the object transformation
+ * @param <S> the source type of the object transformation
+ * @param <T> the target type of the object transformation
  */
-public abstract class AbstractSwaggerCodegenTransformer<S, T> extends AbstractCodegenTransformer<S, T> {
-	
-	protected CodeGenerationSwaggerBindings swaggerBindings;
-	protected JsonSchemaCodegenUtils jsonUtils;
-	
+public abstract class AbstractSwaggerCodegenTransformer<S, T> extends AbstractCodegenTransformer<S,T> {
+
+    protected CodeGenerationSwaggerBindings swaggerBindings;
+    protected JsonSchemaCodegenUtils jsonUtils;
+
     /**
      * Default constructor.
      */
@@ -49,52 +50,51 @@ public abstract class AbstractSwaggerCodegenTransformer<S, T> extends AbstractCo
         ApplicationContext appContext = SchemaCompilerApplicationContext.getContext();
 
         if (appContext.containsBean( SchemaCompilerApplicationContext.CODE_GENERATION_SWAGGER_BINDINGS )) {
-        	swaggerBindings = (CodeGenerationSwaggerBindings) appContext
-                    .getBean( SchemaCompilerApplicationContext.CODE_GENERATION_SWAGGER_BINDINGS );
+            swaggerBindings = (CodeGenerationSwaggerBindings) appContext
+                .getBean( SchemaCompilerApplicationContext.CODE_GENERATION_SWAGGER_BINDINGS );
         }
     }
 
-	/**
-	 * @see org.opentravel.schemacompiler.transform.util.BaseTransformer#setContext(org.opentravel.schemacompiler.transform.ObjectTransformerContext)
-	 */
-	@Override
-	public void setContext(CodeGenerationTransformerContext context) {
-		super.setContext(context);
-		jsonUtils = new JsonSchemaCodegenUtils( context );
-	}
-	
-	/**
-	 * Transforms the OTM documentation for the given owner and assigns it to the
-	 * target JSON schema provided.
-	 * 
-	 * @param docOwner  the OTM documentation owner
-	 * @param targetSchema  the target JSON schema that will receive the documentation
-	 */
-	protected void transformDocumentation(TLDocumentationOwner docOwner, JsonDocumentationOwner targetSchema) {
-		TLDocumentation doc = DocumentationFinder.getDocumentation( docOwner );
-		
-		if (doc != null) {
-	        ObjectTransformer<TLDocumentation, JsonDocumentation, CodeGenerationTransformerContext> transformer =
-	        		getTransformerFactory().getTransformer(doc, JsonDocumentation.class);
-			
-	        targetSchema.setDocumentation( transformer.transform( doc ) );
-		}
-	}
-	
+    /**
+     * @see org.opentravel.schemacompiler.transform.util.BaseTransformer#setContext(org.opentravel.schemacompiler.transform.ObjectTransformerContext)
+     */
+    @Override
+    public void setContext(CodeGenerationTransformerContext context) {
+        super.setContext( context );
+        jsonUtils = new JsonSchemaCodegenUtils( context );
+    }
+
+    /**
+     * Transforms the OTM documentation for the given owner and assigns it to the target JSON schema provided.
+     * 
+     * @param docOwner the OTM documentation owner
+     * @param targetSchema the target JSON schema that will receive the documentation
+     */
+    protected void transformDocumentation(TLDocumentationOwner docOwner, JsonDocumentationOwner targetSchema) {
+        TLDocumentation doc = DocumentationFinder.getDocumentation( docOwner );
+
+        if (doc != null) {
+            ObjectTransformer<TLDocumentation,JsonDocumentation,CodeGenerationTransformerContext> transformer =
+                getTransformerFactory().getTransformer( doc, JsonDocumentation.class );
+
+            targetSchema.setDocumentation( transformer.transform( doc ) );
+        }
+    }
+
     /**
      * Returns true if the give list of MIME types contains at least one of the supported types.
      * 
-     * @param mimeTypes  the list of MIME types to check
-     * @param supportedTypes  the array of supported MIME types
+     * @param mimeTypes the list of MIME types to check
+     * @param supportedTypes the array of supported MIME types
      * @return boolean
      */
     protected boolean containsSupportedType(List<TLMimeType> mimeTypes, TLMimeType... supportedTypes) {
-    	boolean supported = false;
-    	
-    	for (TLMimeType supportedType : supportedTypes) {
-    		supported |= mimeTypes.contains( supportedType );
-    	}
-    	return supported;
+        boolean supported = false;
+
+        for (TLMimeType supportedType : supportedTypes) {
+            supported |= mimeTypes.contains( supportedType );
+        }
+        return supported;
     }
-    
+
 }

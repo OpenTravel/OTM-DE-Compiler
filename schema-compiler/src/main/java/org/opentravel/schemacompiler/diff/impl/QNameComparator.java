@@ -25,56 +25,56 @@ import javax.xml.namespace.QName;
  */
 public class QNameComparator implements Comparator<QName> {
 
-	/**
-	 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
-	 */
-	@Override
-	public int compare(QName qn1, QName qn2) {
-		int result;
-		
-		if (qn1 == null) {
-			result = (qn2 == null) ? 0 : 1;
-			
-		} else if (qn2 == null) {
-			result = -1;
-			
-		} else {
-			result = compareQName(qn1, qn2);
-		}
-		return result;
-	}
+    /**
+     * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
+     */
+    @Override
+    public int compare(QName qn1, QName qn2) {
+        int result;
 
-	/**
-	 * Compares the two qualified names provided.  This method presumes that the two
-	 * parameters have already been determined to be non-null.
-	 * 
-	 * @param qn1  the first qualified name to compare
-	 * @param qn2  the second qualified name to compare
-	 * @return int
-	 */
-	private int compareQName(QName qn1, QName qn2) {
-		int result;
-		String ns1 = qn1.getNamespaceURI();
-		String ns2 = qn2.getNamespaceURI();
-		
-		if (ns1 == null) {
-			result = (ns2 == null) ? 0 : 1;
-			
-		} else if (ns2 == null) {
-			result = -1;
-			
-		} else {
-			String local1 = qn1.getLocalPart();
-			String local2 = qn2.getLocalPart();
-			
-			if (local1 == null) {
-				result = (local2 == null) ? 0 : 1;
-				
-			} else {
-				result = local1.compareTo( local2 );
-			}
-		}
-		return result;
-	}
-	
+        if (qn1 == null) {
+            result = (qn2 == null) ? 0 : 1;
+
+        } else if (qn2 == null) {
+            result = -1;
+
+        } else {
+            result = compareQName( qn1, qn2 );
+        }
+        return result;
+    }
+
+    /**
+     * Compares the two qualified names provided. This method presumes that the two parameters have already been
+     * determined to be non-null.
+     * 
+     * @param qn1 the first qualified name to compare
+     * @param qn2 the second qualified name to compare
+     * @return int
+     */
+    private int compareQName(QName qn1, QName qn2) {
+        int result;
+        String ns1 = qn1.getNamespaceURI();
+        String ns2 = qn2.getNamespaceURI();
+
+        if (ns1 == null) {
+            result = (ns2 == null) ? 0 : 1;
+
+        } else if (ns2 == null) {
+            result = -1;
+
+        } else {
+            String local1 = qn1.getLocalPart();
+            String local2 = qn2.getLocalPart();
+
+            if (local1 == null) {
+                result = (local2 == null) ? 0 : 1;
+
+            } else {
+                result = local1.compareTo( local2 );
+            }
+        }
+        return result;
+    }
+
 }

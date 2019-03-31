@@ -13,18 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.loader.impl;
 
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+package org.opentravel.schemacompiler.loader.impl;
 
 import org.opentravel.schemacompiler.loader.LibraryModuleInfo;
 import org.opentravel.schemacompiler.loader.LibraryNamespaceResolver;
@@ -44,97 +34,105 @@ import org.opentravel.schemacompiler.version.VersionSchemeException;
 import org.opentravel.schemacompiler.version.VersionSchemeFactory;
 import org.w3._2001.xmlschema.Schema;
 
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+
 /**
- * Default implementation of the <code>LibraryNamespaceResolver</code> that utilizes file hints from
- * the library imports to identify the mappings between namespaces and library files.
+ * Default implementation of the <code>LibraryNamespaceResolver</code> that utilizes file hints from the library imports
+ * to identify the mappings between namespaces and library files.
  * 
  * @author S. Livezey
  */
 public class DefaultLibraryNamespaceResolver implements LibraryNamespaceResolver {
-	
-	private Map<String,String> repositoryUrlCache = new HashMap<>();
+
+    private Map<String,String> repositoryUrlCache = new HashMap<>();
     private ProjectManager projectManager;
     private Object contextLibraryOrSchema;
     private String contextVersionScheme;
     private URL libraryUrl;
 
     /**
-     * @see org.opentravel.schemacompiler.loader.LibraryNamespaceResolver#resovleLibraryImport(java.net.URI, java.lang.String, java.lang.String[])
+     * @see org.opentravel.schemacompiler.loader.LibraryNamespaceResolver#resovleLibraryImport(java.net.URI,
+     *      java.lang.String, java.lang.String[])
      */
     @Override
-    public Collection<URL> resovleLibraryImport(URI libraryNamespace, String versionScheme,
-            String[] fileHints) {
+    public Collection<URL> resovleLibraryImport(URI libraryNamespace, String versionScheme, String[] fileHints) {
         Collection<URL> libraryUrls = new HashSet<>();
         String namespace = libraryNamespace.toString();
 
         for (String fileHint : ((fileHints == null) ? new String[0] : fileHints)) {
-            URL url = resolveFileHint(fileHint, namespace, versionScheme);
-            
+            URL url = resolveFileHint( fileHint, namespace, versionScheme );
+
             if (url != null) {
-            	libraryUrls.add( url );
+                libraryUrls.add( url );
             }
         }
         return libraryUrls;
     }
 
-	/**
-	 * Attempts to resolve the given file hint.  If the hint cannot be resolved, this method
-	 * will return null.
-	 * 
-	 * @param fileHint  the file hint to be resolved
-	 * @param namespace  the namespace for the library to resolve from the hint provided
-	 * @param versionScheme  the version scheme of the library to be resolved
-	 * @return URL
-	 */
-	private URL resolveFileHint(String fileHint, String namespace, String versionScheme) {
-		if (fileHint.endsWith("/")) {
-			return null;
-		}
-		
-		// Attempt to resolve the hint from the managed libraries that have already been loaded
-		// into the model
-		URL referencedUrl = resolveFromExistingProjectItems(namespace, fileHint);
+    /**
+     * Attempts to resolve the given file hint. If the hint cannot be resolved, this method will return null.
+     * 
+     * @param fileHint the file hint to be resolved
+     * @param namespace the namespace for the library to resolve from the hint provided
+     * @param versionScheme the version scheme of the library to be resolved
+     * @return URL
+     */
+    private URL resolveFileHint(String fileHint, String namespace, String versionScheme) {
+        if (fileHint.endsWith( "/" )) {
+            return null;
+        }
 
-		// If the hint could not be resolved to an existing item, attempt to resolve it using
-		// default processing
-		if (referencedUrl == null) {
-			URL fileUrl = resolveAsFilePath(fileHint);
-			
-		    // Only use this URL if it is a file URL and that file actually exists
-		    if ((fileUrl != null) && URLUtils.isFileURL(fileUrl) && URLUtils.toFile(fileUrl).exists()) {
-		    	referencedUrl = fileUrl;
-		    }
-		}
+        // Attempt to resolve the hint from the managed libraries that have already been loaded
+        // into the model
+        URL referencedUrl = resolveFromExistingProjectItems( namespace, fileHint );
 
-		// If the hint could not be resolved to a local file, attempt to resolve the
-		// hint as a repository URI
-		if (referencedUrl == null) {
-			referencedUrl = resolveFromRepositoryURI(namespace, fileHint);
-		}
+        // If the hint could not be resolved to an existing item, attempt to resolve it using
+        // default processing
+        if (referencedUrl == null) {
+            URL fileUrl = resolveAsFilePath( fileHint );
 
-		// If none of the previous lookup heuristics have succeeded, attempt a best-effort
-		// search of the repository.
-		if (referencedUrl == null) {
-		    URL bestEffortUrl = resolveWithBestEffortRepsositorySearch(namespace,
-		            versionScheme, fileHint);
+            // Only use this URL if it is a file URL and that file actually exists
+            if ((fileUrl != null) && URLUtils.isFileURL( fileUrl ) && URLUtils.toFile( fileUrl ).exists()) {
+                referencedUrl = fileUrl;
+            }
+        }
 
-		    // Only overwrite the current referencedUrl value if our best-effort search was
-		    // successful
-		    if (bestEffortUrl != null) {
-		        referencedUrl = bestEffortUrl;
-		    }
-		}
-		return referencedUrl;
-	}
+        // If the hint could not be resolved to a local file, attempt to resolve the
+        // hint as a repository URI
+        if (referencedUrl == null) {
+            referencedUrl = resolveFromRepositoryUri( namespace, fileHint );
+        }
+
+        // If none of the previous lookup heuristics have succeeded, attempt a best-effort
+        // search of the repository.
+        if (referencedUrl == null) {
+            URL bestEffortUrl = resolveWithBestEffortRepsositorySearch( namespace, versionScheme, fileHint );
+
+            // Only overwrite the current referencedUrl value if our best-effort search was
+            // successful
+            if (bestEffortUrl != null) {
+                referencedUrl = bestEffortUrl;
+            }
+        }
+        return referencedUrl;
+    }
 
     /**
-     * @see org.opentravel.schemacompiler.loader.LibraryNamespaceResolver#resovleLibraryInclude(java.net.URI,
-     *      java.lang.String)
+     * @see org.opentravel.schemacompiler.loader.LibraryNamespaceResolver#resovleLibraryInclude(java.net.URI,java.lang.String)
      */
     @Override
     public URL resovleLibraryInclude(URI libraryNamespace, String includePath) {
-        Collection<URL> resolvedUrls = resovleLibraryImport(libraryNamespace, contextVersionScheme,
-                new String[] { includePath });
+        Collection<URL> resolvedUrls =
+            resovleLibraryImport( libraryNamespace, contextVersionScheme, new String[] {includePath} );
 
         return resolvedUrls.isEmpty() ? null : resolvedUrls.iterator().next(); // only one possible
                                                                                // since we passed
@@ -147,7 +145,7 @@ public class DefaultLibraryNamespaceResolver implements LibraryNamespaceResolver
     @Override
     public void setModel(TLModel model) {
         if (model != null) {
-            projectManager = ProjectManager.getProjectManager(model);
+            projectManager = ProjectManager.getProjectManager( model );
             repositoryUrlCache.clear();
         }
     }
@@ -166,7 +164,7 @@ public class DefaultLibraryNamespaceResolver implements LibraryNamespaceResolver
     }
 
     /**
-     * @see org.opentravel.schemacompiler.loader.LibraryNamespaceResolver#setContextSchema(org.opentravel.schemacompiler.loader.SchemaModuleInfo,
+     * @see org.opentravel.schemacompiler.loader.LibraryNamespaceResolver#setContextSchema(org.opentravel.schemacompiler.loader.LibraryModuleInfo,
      *      java.net.URL)
      */
     @Override
@@ -179,70 +177,68 @@ public class DefaultLibraryNamespaceResolver implements LibraryNamespaceResolver
     }
 
     /**
-	 * @see org.opentravel.schemacompiler.loader.LibraryNamespaceResolver#setRepositoryLocation(java.lang.String, java.lang.String, java.lang.String)
-	 */
-	@Override
-	public void setRepositoryLocation(String repositoryUri, String namespace, String libraryUrl) {
-        if (repositoryUri.startsWith("otm://")) {
-        	String cacheKey = namespace + "~" + repositoryUri;
-        	repositoryUrlCache.put( cacheKey, libraryUrl );
+     * @see org.opentravel.schemacompiler.loader.LibraryNamespaceResolver#setRepositoryLocation(java.lang.String,
+     *      java.lang.String, java.lang.String)
+     */
+    @Override
+    public void setRepositoryLocation(String repositoryUri, String namespace, String libraryUrl) {
+        if (repositoryUri.startsWith( "otm://" )) {
+            String cacheKey = namespace + "~" + repositoryUri;
+            repositoryUrlCache.put( cacheKey, libraryUrl );
         }
-	}
+    }
 
-	/**
-     * Attempts to resolve a URL for the given namespace and file path using the libraries that have
-     * already been loaded by the project manager. If the current model does not have an associated
-     * project manager, this method will always return null.
-     * 
-     * @param namespace
-     *            the expected namespace of the library to be resolved
-     * @param filePath
-     *            the path and name of the file to be resolved
-     * @return URL
-     */
-	protected URL resolveFromExistingProjectItems(String namespace, String filePath) {
-		URL referencedUrl = null;
-		
-		if (projectManager != null) {
-			int separatorIdx = filePath.lastIndexOf('/');
-			String libraryFilename = (separatorIdx < 0) ? filePath : filePath.substring(separatorIdx + 1);
-			
-			// Search the list of known repository items for a match to this file hint
-			for (ProjectItem item : projectManager.getAllProjectItems()) {
-				// Skip project items that have errors or cannot be resolved, project items that are
-				// unmanaged, or project items that do not match this namespace/file-hint combination
-				if ((item == null) || (item.getNamespace() == null) || (item.getFilename() == null)
-						|| (item.getState() == RepositoryItemState.UNMANAGED)
-						|| !item.getNamespace().equals(namespace)
-						|| !item.getFilename().equals(libraryFilename)) {
-					continue;
-				}
-				referencedUrl = item.getContent().getLibraryUrl();
-			}
-		}
-		return referencedUrl;
-	}
-	
     /**
-     * Attempts to resolve a URL for the given namespace and file path as a repository URI. If the
-     * file path is not a repository URI, this method will return null.
+     * Attempts to resolve a URL for the given namespace and file path using the libraries that have already been loaded
+     * by the project manager. If the current model does not have an associated project manager, this method will always
+     * return null.
      * 
-     * @param namespace  the expected namespace of the library to be resolved
-     * @param filePath  the path and name of the file to be resolved
+     * @param namespace the expected namespace of the library to be resolved
+     * @param filePath the path and name of the file to be resolved
      * @return URL
      */
-    protected URL resolveFromRepositoryURI(String namespace, String filePath) {
+    protected URL resolveFromExistingProjectItems(String namespace, String filePath) {
         URL referencedUrl = null;
 
-        if (filePath.startsWith("otm://")) {
-            referencedUrl = getReferencedUrl(namespace, filePath);
+        if (projectManager != null) {
+            int separatorIdx = filePath.lastIndexOf( '/' );
+            String libraryFilename = (separatorIdx < 0) ? filePath : filePath.substring( separatorIdx + 1 );
+
+            // Search the list of known repository items for a match to this file hint
+            for (ProjectItem item : projectManager.getAllProjectItems()) {
+                // Skip project items that have errors or cannot be resolved, project items that are
+                // unmanaged, or project items that do not match this namespace/file-hint combination
+                if ((item == null) || (item.getNamespace() == null) || (item.getFilename() == null)
+                    || (item.getState() == RepositoryItemState.UNMANAGED) || !item.getNamespace().equals( namespace )
+                    || !item.getFilename().equals( libraryFilename )) {
+                    continue;
+                }
+                referencedUrl = item.getContent().getLibraryUrl();
+            }
+        }
+        return referencedUrl;
+    }
+
+    /**
+     * Attempts to resolve a URL for the given namespace and file path as a repository URI. If the file path is not a
+     * repository URI, this method will return null.
+     * 
+     * @param namespace the expected namespace of the library to be resolved
+     * @param filePath the path and name of the file to be resolved
+     * @return URL
+     */
+    protected URL resolveFromRepositoryUri(String namespace, String filePath) {
+        URL referencedUrl = null;
+
+        if (filePath.startsWith( "otm://" )) {
+            referencedUrl = getReferencedUrl( namespace, filePath );
 
             // If the lookup attempt did not resolve to a valid repository item, attempt to build a
             // URL using the URI string provided. This should provide a validation error when the lookup
             // is attempted by the loader (after this namespace resolver returns its value).
             if (referencedUrl == null) {
                 try {
-                    referencedUrl = new URL(filePath);
+                    referencedUrl = new URL( filePath );
 
                 } catch (MalformedURLException e) {
                     // Return null instead of throwing an exception
@@ -252,47 +248,45 @@ public class DefaultLibraryNamespaceResolver implements LibraryNamespaceResolver
         return referencedUrl;
     }
 
-	/**
-	 * Returns the referenced URL for the library with the given namespace and file path.
-	 * 
-     * @param namespace  the expected namespace of the library to be resolved
-     * @param filePath  the path and name of the file to be resolved
-	 * @return URL
-	 */
-	private URL getReferencedUrl(String namespace, String filePath) {
-		URL referencedUrl = null;
-		
-		try {
-			String cacheKey = namespace + "~" + filePath;
-			String cachedUrl = repositoryUrlCache.get(cacheKey);
-			
-			if (cachedUrl != null) {
-				referencedUrl = new URL( cachedUrl );
-				
-			} else {
-		        RepositoryManager repositoryManager = (projectManager != null) ? projectManager
-		                .getRepositoryManager() : RepositoryManager.getDefault();
-		        RepositoryItem repositoryItem = repositoryManager.getRepositoryItem(filePath,
-		                namespace);
+    /**
+     * Returns the referenced URL for the library with the given namespace and file path.
+     * 
+     * @param namespace the expected namespace of the library to be resolved
+     * @param filePath the path and name of the file to be resolved
+     * @return URL
+     */
+    private URL getReferencedUrl(String namespace, String filePath) {
+        URL referencedUrl = null;
 
-		        if (repositoryItem != null) {
-		            referencedUrl = repositoryManager.getContentLocation(repositoryItem);
-		            repositoryUrlCache.put( cacheKey, referencedUrl.toExternalForm() );
-		        }
-			}
-			
-		} catch (MalformedURLException | URISyntaxException | RepositoryException e) {
-		    // No error - return null
-		}
-		return referencedUrl;
-	}
+        try {
+            String cacheKey = namespace + "~" + filePath;
+            String cachedUrl = repositoryUrlCache.get( cacheKey );
+
+            if (cachedUrl != null) {
+                referencedUrl = new URL( cachedUrl );
+
+            } else {
+                RepositoryManager repositoryManager =
+                    (projectManager != null) ? projectManager.getRepositoryManager() : RepositoryManager.getDefault();
+                RepositoryItem repositoryItem = repositoryManager.getRepositoryItem( filePath, namespace );
+
+                if (repositoryItem != null) {
+                    referencedUrl = repositoryManager.getContentLocation( repositoryItem );
+                    repositoryUrlCache.put( cacheKey, referencedUrl.toExternalForm() );
+                }
+            }
+
+        } catch (MalformedURLException | URISyntaxException | RepositoryException e) {
+            // No error - return null
+        }
+        return referencedUrl;
+    }
 
     /**
-     * Attempts to resolve a URL for the given file path as an absolute URL or a relative URL to the
-     * current context library.
+     * Attempts to resolve a URL for the given file path as an absolute URL or a relative URL to the current context
+     * library.
      * 
-     * @param filePath
-     *            the file path to be resolved
+     * @param filePath the file path to be resolved
      * @return URL
      */
     protected URL resolveAsFilePath(String filePath) {
@@ -300,7 +294,7 @@ public class DefaultLibraryNamespaceResolver implements LibraryNamespaceResolver
 
         try {
             if (filePath != null) {
-                referencedUrl = new URL(filePath);
+                referencedUrl = new URL( filePath );
             }
 
         } catch (MalformedURLException e) {
@@ -309,8 +303,7 @@ public class DefaultLibraryNamespaceResolver implements LibraryNamespaceResolver
                 String contextFolderPath = getContextFolderUrl();
 
                 if (contextFolderPath != null) {
-                    referencedUrl = new URL(new StringBuilder(getContextFolderUrl()).append(
-                            filePath).toString());
+                    referencedUrl = new URL( new StringBuilder( getContextFolderUrl() ).append( filePath ).toString() );
                 }
 
             } catch (MalformedURLException e2) {
@@ -321,20 +314,16 @@ public class DefaultLibraryNamespaceResolver implements LibraryNamespaceResolver
     }
 
     /**
-     * Attempts to resolve a URL for the given namespace and file path using a best-effort search of
-     * the known repositories. If the version scheme provided is null, the search will not be
-     * attempted and this method will return null.
+     * Attempts to resolve a URL for the given namespace and file path using a best-effort search of the known
+     * repositories. If the version scheme provided is null, the search will not be attempted and this method will
+     * return null.
      * 
-     * @param namespace
-     *            the expected namespace of the library to be resolved
-     * @param versionScheme
-     *            the version scheme to apply when interpreting the namespace provided
-     * @param filePath
-     *            the path and name of the file to be resolved
+     * @param namespace the expected namespace of the library to be resolved
+     * @param versionScheme the version scheme to apply when interpreting the namespace provided
+     * @param filePath the path and name of the file to be resolved
      * @return URL
      */
-    protected URL resolveWithBestEffortRepsositorySearch(String namespace, String versionScheme,
-            String filePath) {
+    protected URL resolveWithBestEffortRepsositorySearch(String namespace, String versionScheme, String filePath) {
         RepositoryManager repositoryManager = getRepositoryManager();
         URL referencedUrl = null;
 
@@ -342,34 +331,33 @@ public class DefaultLibraryNamespaceResolver implements LibraryNamespaceResolver
             RepositoryItemImpl repositoryItem = new RepositoryItemImpl();
             List<Repository> repositories = new ArrayList<>();
 
-            repositories.addAll(repositoryManager.listRemoteRepositories());
-            repositories.add(repositoryManager); // the repository manager owns the local repository
+            repositories.addAll( repositoryManager.listRemoteRepositories() );
+            repositories.add( repositoryManager ); // the repository manager owns the local repository
 
             // Configure the repository item using information we know from the requestor
             try {
-                VersionScheme vScheme = VersionSchemeFactory.getInstance().getVersionScheme(
-                        versionScheme);
+                VersionScheme vScheme = VersionSchemeFactory.getInstance().getVersionScheme( versionScheme );
 
-                repositoryItem.setBaseNamespace(vScheme.getBaseNamespace(namespace));
-                repositoryItem.setVersion(vScheme.getVersionIdentifier(namespace));
+                repositoryItem.setBaseNamespace( vScheme.getBaseNamespace( namespace ) );
+                repositoryItem.setVersion( vScheme.getVersionIdentifier( namespace ) );
 
             } catch (VersionSchemeException e) {
-                repositoryItem.setBaseNamespace(namespace);
-                repositoryItem.setVersion(new OTA2VersionScheme().getDefaultVersionIdentifer());
+                repositoryItem.setBaseNamespace( namespace );
+                repositoryItem.setVersion( new OTA2VersionScheme().getDefaultVersionIdentifier() );
 
             } finally {
-                repositoryItem.setNamespace(namespace);
-                repositoryItem.setFilename(getFilename(filePath));
-                repositoryItem.setState(RepositoryItemState.MANAGED_UNLOCKED);
+                repositoryItem.setNamespace( namespace );
+                repositoryItem.setFilename( getFilename( filePath ) );
+                repositoryItem.setState( RepositoryItemState.MANAGED_UNLOCKED );
             }
 
             // Attempt to resolve our mocked-up repository item in each of the known repositories
             if (repositoryItem.getFilename() != null) {
                 for (Repository repository : repositories) {
-                    repositoryItem.setRepository(repository);
+                    repositoryItem.setRepository( repository );
 
                     try {
-                        referencedUrl = repositoryManager.getContentLocation(repositoryItem);
+                        referencedUrl = repositoryManager.getContentLocation( repositoryItem );
                         break; // Stop when we find the first match
 
                     } catch (RepositoryException e) {
@@ -381,16 +369,16 @@ public class DefaultLibraryNamespaceResolver implements LibraryNamespaceResolver
         return referencedUrl;
     }
 
-	/**
-	 * Returns the repository instance from the project manager or the default
-	 * instance of no project manager is present.
-	 * 
-	 * @return RepositoryManager
-	 */
-	private RepositoryManager getRepositoryManager() {
-		RepositoryManager repositoryManager = null;
-		
-		if (projectManager != null) {
+    /**
+     * Returns the repository instance from the project manager or the default instance of no project manager is
+     * present.
+     * 
+     * @return RepositoryManager
+     */
+    private RepositoryManager getRepositoryManager() {
+        RepositoryManager repositoryManager = null;
+
+        if (projectManager != null) {
             repositoryManager = projectManager.getRepositoryManager();
 
         } else {
@@ -401,12 +389,12 @@ public class DefaultLibraryNamespaceResolver implements LibraryNamespaceResolver
                 // No error - method will return null
             }
         }
-		return repositoryManager;
-	}
+        return repositoryManager;
+    }
 
     /**
-     * Returns the URL of the folder that contains the context library (or null if a context library
-     * has not been assigned.
+     * Returns the URL of the folder that contains the context library (or null if a context library has not been
+     * assigned.
      * 
      * @return String
      */
@@ -415,15 +403,14 @@ public class DefaultLibraryNamespaceResolver implements LibraryNamespaceResolver
 
         if (libraryUrl != null) {
             String folderUrl = libraryUrl.toExternalForm();
-            int folderIdx = folderUrl.lastIndexOf('/');
+            int folderIdx = folderUrl.lastIndexOf( '/' );
 
             if (folderIdx >= 0) {
-                contextFolderUrl = folderUrl.substring(0, folderIdx);
+                contextFolderUrl = folderUrl.substring( 0, folderIdx );
             } else {
-                contextFolderUrl = folderUrl.substring(0, folderUrl.length()
-                        - libraryUrl.getFile().length());
+                contextFolderUrl = folderUrl.substring( 0, folderUrl.length() - libraryUrl.getFile().length() );
             }
-            if (!contextFolderUrl.endsWith("/")) {
+            if (!contextFolderUrl.endsWith( "/" )) {
                 contextFolderUrl += "/";
             }
         }
@@ -431,25 +418,23 @@ public class DefaultLibraryNamespaceResolver implements LibraryNamespaceResolver
     }
 
     /**
-     * Returns the filename as the last component of the path provided. If the given file path is
-     * null, or a filename is not specified (i.e. the path ends with '/'), this method will return
-     * null.
+     * Returns the filename as the last component of the path provided. If the given file path is null, or a filename is
+     * not specified (i.e. the path ends with '/'), this method will return null.
      * 
-     * @param filePath
-     *            the file path from which to extract the filename
+     * @param filePath the file path from which to extract the filename
      * @return String
      */
     private String getFilename(String filePath) {
         String filename = null;
 
-        if ((filePath != null) && !filePath.endsWith("/")) {
-            int separatorIdx = filePath.lastIndexOf('/');
+        if ((filePath != null) && !filePath.endsWith( "/" )) {
+            int separatorIdx = filePath.lastIndexOf( '/' );
 
             if (separatorIdx < 0) {
                 filename = filePath;
 
             } else {
-                filename = filePath.substring(separatorIdx + 1);
+                filename = filePath.substring( separatorIdx + 1 );
             }
         }
         return filename;

@@ -13,15 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.codegen.xsd.facet;
 
-import javax.xml.namespace.QName;
+package org.opentravel.schemacompiler.codegen.xsd.facet;
 
 import org.opentravel.schemacompiler.model.TLFacet;
 
+import javax.xml.namespace.QName;
+
 /**
- * Code generation delegate for <code>TLFacet</code> instances with a facet type of <code>ID</code>
- * and a facet owner of type <code>TLBusinessObject</code>.
+ * Code generation delegate for <code>TLFacet</code> instances with a facet type of <code>ID</code> and a facet owner of
+ * type <code>TLBusinessObject</code>.
  * 
  * @author S. Livezey
  */
@@ -30,11 +31,10 @@ public class BusinessObjectIDFacetCodegenDelegate extends BusinessObjectFacetCod
     /**
      * Constructor that specifies the source facet for which code artifacts are being generated.
      * 
-     * @param sourceFacet
-     *            the source facet
+     * @param sourceFacet the source facet
      */
     public BusinessObjectIDFacetCodegenDelegate(TLFacet sourceFacet) {
-        super(sourceFacet);
+        super( sourceFacet );
     }
 
     /**

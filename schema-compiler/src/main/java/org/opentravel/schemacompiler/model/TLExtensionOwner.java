@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.model;
 
 /**
@@ -32,8 +33,7 @@ public interface TLExtensionOwner extends LibraryElement {
     /**
      * Assigns the extension element for this entity.
      * 
-     * @param extension
-     *            the etension element to assign
+     * @param extension the etension element to assign
      */
     public void setExtension(TLExtension extension);
 

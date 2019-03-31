@@ -13,15 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.codegen.swagger;
 
-import java.net.MalformedURLException;
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
+package org.opentravel.schemacompiler.codegen.swagger;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerationContext;
 import org.opentravel.schemacompiler.codegen.CodeGenerationFilter;
@@ -48,249 +41,262 @@ import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.model.TLResource;
 import org.opentravel.schemacompiler.transform.ObjectTransformer;
 
+import java.net.MalformedURLException;
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
 /**
- * Performs the translation from <code>TLResource</code> objects to the Swagger model
- * objects used to produce the output.
+ * Performs the translation from <code>TLResource</code> objects to the Swagger model objects used to produce the
+ * output.
  */
 public class TLResourceSwaggerTransformer extends AbstractSwaggerCodegenTransformer<TLResource,SwaggerDocument> {
-	
-	/**
-	 * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
-	 */
-	@Override
-	public SwaggerDocument transform(TLResource source) {
-		SwaggerDocument swaggerDoc = new SwaggerDocument();
-		URLComponents urlComponents = getUrlComponents();
-		String basePath = urlComponents.getPath();
-		
-		// Populate the network address components of the Swagger document
-		if (basePath.equals("/")) {
-			basePath = source.getBasePath();
-		} else {
-			basePath += source.getBasePath();
-		}
-		if (!basePath.endsWith("/")) {
-			basePath += "/";
-		}
-		basePath += getVersionPathSuffix( source );
-		
-		swaggerDoc.setHost( urlComponents.getAuthority() );
-		swaggerDoc.getSchemes().add( urlComponents.getScheme() );
-		swaggerDoc.setBasePath( basePath );
-		
-		// Populate the information section of the Swagger document
-		JsonLibraryInfo libraryInfo = jsonUtils.getResourceInfo( source );
-		SwaggerOtmResource swaggerResource = new SwaggerOtmResource();
-		SwaggerInfo info = new SwaggerInfo();
-		
-		swaggerResource.setNamespace( source.getNamespace() );
-		swaggerResource.setLocalName( source.getLocalName() );
-		swaggerDoc.setOtmResource( swaggerResource );
-		info.setTitle( source.getName() );
-		info.setLibraryInfo( libraryInfo );
-		info.setVersion( libraryInfo.getLibraryVersion() );
-		transformDocumentation( source, info );
-		swaggerDoc.setInfo( info );
-		
-		// Construct a map of operations indexed by path template and HTTP method
+
+    /**
+     * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
+     */
+    @Override
+    public SwaggerDocument transform(TLResource source) {
+        SwaggerDocument swaggerDoc = new SwaggerDocument();
+        URLComponents urlComponents = getUrlComponents();
+        String basePath = urlComponents.getPath();
+
+        // Populate the network address components of the Swagger document
+        if (basePath.equals( "/" )) {
+            basePath = source.getBasePath();
+        } else {
+            basePath += source.getBasePath();
+        }
+        if (!basePath.endsWith( "/" )) {
+            basePath += "/";
+        }
+        basePath += getVersionPathSuffix( source );
+
+        swaggerDoc.setHost( urlComponents.getAuthority() );
+        swaggerDoc.getSchemes().add( urlComponents.getScheme() );
+        swaggerDoc.setBasePath( basePath );
+
+        // Populate the information section of the Swagger document
+        JsonLibraryInfo libraryInfo = jsonUtils.getResourceInfo( source );
+        SwaggerOtmResource swaggerResource = new SwaggerOtmResource();
+        SwaggerInfo info = new SwaggerInfo();
+
+        swaggerResource.setNamespace( source.getNamespace() );
+        swaggerResource.setLocalName( source.getLocalName() );
+        swaggerDoc.setOtmResource( swaggerResource );
+        info.setTitle( source.getName() );
+        info.setLibraryInfo( libraryInfo );
+        info.setVersion( libraryInfo.getLibraryVersion() );
+        transformDocumentation( source, info );
+        swaggerDoc.setInfo( info );
+
+        // Construct a map of operations indexed by path template and HTTP method
         ObjectTransformer<QualifiedAction,SwaggerOperation,CodeGenerationTransformerContext> actionTransformer =
-        		getTransformerFactory().getTransformer(QualifiedAction.class, SwaggerOperation.class);
-		Map<String,Map<TLHttpMethod,SwaggerOperation>> operationMap = new HashMap<>();
-		List<String> pathList = new ArrayList<>();
-		
-		for (QualifiedAction qAction : ResourceCodegenUtils.getQualifiedActions( source )) {
-			if (qAction.getAction().isCommonAction()) continue;
-			TLActionRequest actionRequest = qAction.getActionRequest();
-			String pathTemplate = qAction.getPathTemplate();
-			TLHttpMethod httpMethod = actionRequest.getHttpMethod();
-			SwaggerOperation operation = actionTransformer.transform( qAction );
-			Map<TLHttpMethod,SwaggerOperation> methodMap = operationMap.get( pathTemplate );
-			
-			if (methodMap == null) {
-				methodMap = new EnumMap<>( TLHttpMethod.class );
-				pathList.add( pathTemplate );
-				operationMap.put( pathTemplate, methodMap );
-			}
-			methodMap.put( httpMethod, operation );
-		}
-		
-		// Use the 'operationMap' to construct the path items for the Swagger document
-		for (String pathTemplate : pathList) {
-			Map<TLHttpMethod,SwaggerOperation> methodMap = operationMap.get( pathTemplate );
-			SwaggerPathItem pathItem = new SwaggerPathItem();
-			
-			for (Entry<TLHttpMethod,SwaggerOperation> entry : methodMap.entrySet()) {
-				switch (entry.getKey()) {
-					case GET:
-						pathItem.setGetOperation( entry.getValue() );
-						break;
-					case POST:
-						pathItem.setPostOperation( entry.getValue() );
-						break;
-					case PUT:
-						pathItem.setPutOperation( entry.getValue() );
-						break;
-					case DELETE:
-						pathItem.setDeleteOperation( entry.getValue() );
-						break;
-					case HEAD:
-						pathItem.setHeadOperation( entry.getValue() );
-						break;
-					case OPTIONS:
-						pathItem.setOptionsOperation( entry.getValue() );
-						break;
-					case PATCH:
-						pathItem.setPatchOperation( entry.getValue() );
-						break;
-				}
-			}
-			pathItem.setPathTemplate( pathTemplate );
-			swaggerDoc.getPathItems().add( pathItem );
-		}
-		
-		// If required, generate definitions for the Swagger document
-		if (isSingleFileEnabled()) {
-			swaggerDoc.getDefinitions().addAll( buildJsonDefinitions( source.getOwningModel() ) );
-		}
-		
-		applyBindingStyle(swaggerDoc);
-		
-		return swaggerDoc;
-	}
-	
-	/**
-	 * Returns the version suffix that will be appended to the base path of the Swagger
-	 * document.
-	 * 
-	 * @param source  the resource being transformed
-	 * @return String
-	 */
-	private String getVersionPathSuffix(TLResource source) {
-	    String[] versionParts = source.getVersion().split( "\\." );
-	    StringBuilder suffix = new StringBuilder();
-	    
-	    if (versionParts.length >= 1) {
-	        suffix.append( "v" ).append( versionParts[0] );
-	    }
+            getTransformerFactory().getTransformer( QualifiedAction.class, SwaggerOperation.class );
+        Map<String,Map<TLHttpMethod,SwaggerOperation>> operationMap = new HashMap<>();
+        List<String> pathList = new ArrayList<>();
+
+        for (QualifiedAction qAction : ResourceCodegenUtils.getQualifiedActions( source )) {
+            if (qAction.getAction().isCommonAction()) {
+                continue;
+            }
+            TLActionRequest actionRequest = qAction.getActionRequest();
+            String pathTemplate = qAction.getPathTemplate();
+            TLHttpMethod httpMethod = actionRequest.getHttpMethod();
+            SwaggerOperation operation = actionTransformer.transform( qAction );
+            Map<TLHttpMethod,SwaggerOperation> methodMap = operationMap.get( pathTemplate );
+
+            if (methodMap == null) {
+                methodMap = new EnumMap<>( TLHttpMethod.class );
+                pathList.add( pathTemplate );
+                operationMap.put( pathTemplate, methodMap );
+            }
+            methodMap.put( httpMethod, operation );
+        }
+
+        // Use the 'operationMap' to construct the path items for the Swagger document
+        for (String pathTemplate : pathList) {
+            Map<TLHttpMethod,SwaggerOperation> methodMap = operationMap.get( pathTemplate );
+            SwaggerPathItem pathItem = new SwaggerPathItem();
+
+            for (Entry<TLHttpMethod,SwaggerOperation> entry : methodMap.entrySet()) {
+                switch (entry.getKey()) {
+                    case GET:
+                        pathItem.setGetOperation( entry.getValue() );
+                        break;
+                    case POST:
+                        pathItem.setPostOperation( entry.getValue() );
+                        break;
+                    case PUT:
+                        pathItem.setPutOperation( entry.getValue() );
+                        break;
+                    case DELETE:
+                        pathItem.setDeleteOperation( entry.getValue() );
+                        break;
+                    case HEAD:
+                        pathItem.setHeadOperation( entry.getValue() );
+                        break;
+                    case OPTIONS:
+                        pathItem.setOptionsOperation( entry.getValue() );
+                        break;
+                    case PATCH:
+                        pathItem.setPatchOperation( entry.getValue() );
+                        break;
+                    default:
+                        // No default action
+                }
+            }
+            pathItem.setPathTemplate( pathTemplate );
+            swaggerDoc.getPathItems().add( pathItem );
+        }
+
+        // If required, generate definitions for the Swagger document
+        if (isSingleFileEnabled()) {
+            swaggerDoc.getDefinitions().addAll( buildJsonDefinitions( source.getOwningModel() ) );
+        }
+
+        applyBindingStyle( swaggerDoc );
+
+        return swaggerDoc;
+    }
+
+    /**
+     * Returns the version suffix that will be appended to the base path of the Swagger document.
+     * 
+     * @param source the resource being transformed
+     * @return String
+     */
+    private String getVersionPathSuffix(TLResource source) {
+        String[] versionParts = source.getVersion().split( "\\." );
+        StringBuilder suffix = new StringBuilder();
+
+        if (versionParts.length >= 1) {
+            suffix.append( "v" ).append( versionParts[0] );
+        }
         if (versionParts.length >= 2) {
             suffix.append( "_" ).append( versionParts[1] );
         }
-	    return suffix.toString();
-	}
+        return suffix.toString();
+    }
 
-	/**
-	 * Add any extensions provided by the Swagger code generation binding style.
-	 * 
-	 * @param swaggerDoc  the swagger document to which binding styles will be applied
-	 */
-	private void applyBindingStyle(SwaggerDocument swaggerDoc) {
-		if (swaggerBindings != null) {
-			if (swaggerBindings.getSupportedSchemes() != null) {
-				for (SwaggerScheme scheme : swaggerBindings.getSupportedSchemes()) {
-					if (!swaggerDoc.getSchemes().contains( scheme )) {
-						swaggerDoc.getSchemes().add( scheme );
-					}
-				}
-			}
-			if (swaggerBindings.getGlobalParameters() != null) {
-				swaggerDoc.getGlobalParameters().addAll( swaggerBindings.getGlobalParameters() );
-			}
-			if (swaggerBindings.getSecuritySchemes() != null) {
-				swaggerDoc.getSecuritySchemes().addAll( swaggerBindings.getSecuritySchemes() );
-			}
-		}
-	}
-	
-	/**
-	 * Builds the set of all definitions that should be included in the Swagger document.  The
-	 * definitions that are included are based on the current code generation filter.
-	 * 
-	 * @param model  the model from which to generate JSON definitions
-	 * @return List<JsonSchemaNamedReference>
-	 */
-	private List<JsonSchemaNamedReference> buildJsonDefinitions(TLModel model) {
-		List<JsonSchemaNamedReference> definitions = new ArrayList<>();
-		CodeGenerationFilter filter = context.getCodeGenerator().getFilter();
-		
-		// Add definitions for all of the OTM entities that are within the
-		// scope of the current filter
-		for (TLLibrary library : model.getUserDefinedLibraries()) {
-			if (!filter.processLibrary(library))
-				continue;
-			
-			for (LibraryMember member : library.getNamedMembers()) {
-				if (member instanceof TLResource) {
-					for (TLActionFacet actionFacet : ((TLResource) member).getActionFacets()) {
-						transformEntity(actionFacet, definitions);
-					}
-					
-				} else {
-					transformEntity(member, definitions);
-				}
-			}
-		}
-		return definitions;
-	}
-	
-	/**
-	 * Transforms the given OTM entity and adds it JSON definition(s) the the list provided.
-	 * 
-	 * @param entity  the OTM entity to be transformed
-	 * @param definitions  the list of JSON definitions being constructed
-	 */
-	private void transformEntity(NamedEntity entity, List<JsonSchemaNamedReference> definitions) {
-        ObjectTransformer<NamedEntity, CodegenArtifacts, CodeGenerationTransformerContext> transformer =
-        		getTransformerFactory().getTransformer(entity, CodegenArtifacts.class);
-		CodeGenerationFilter filter = context.getCodeGenerator().getFilter();
-        
-        if ((transformer != null) && ((filter == null) || filter.processEntity(entity))) {
-            CodegenArtifacts artifacts = transformer.transform(entity);
+    /**
+     * Add any extensions provided by the Swagger code generation binding style.
+     * 
+     * @param swaggerDoc the swagger document to which binding styles will be applied
+     */
+    private void applyBindingStyle(SwaggerDocument swaggerDoc) {
+        if (swaggerBindings != null) {
+            if (swaggerBindings.getSupportedSchemes() != null) {
+                for (SwaggerScheme scheme : swaggerBindings.getSupportedSchemes()) {
+                    if (!swaggerDoc.getSchemes().contains( scheme )) {
+                        swaggerDoc.getSchemes().add( scheme );
+                    }
+                }
+            }
+            if (swaggerBindings.getGlobalParameters() != null) {
+                swaggerDoc.getGlobalParameters().addAll( swaggerBindings.getGlobalParameters() );
+            }
+            if (swaggerBindings.getSecuritySchemes() != null) {
+                swaggerDoc.getSecuritySchemes().addAll( swaggerBindings.getSecuritySchemes() );
+            }
+        }
+    }
 
-            if (artifacts != null) {
-                for (JsonSchemaNamedReference memberDef : artifacts.getArtifactsOfType(JsonSchemaNamedReference.class)) {
-                	definitions.add( memberDef );
+    /**
+     * Builds the set of all definitions that should be included in the Swagger document. The definitions that are
+     * included are based on the current code generation filter.
+     * 
+     * @param model the model from which to generate JSON definitions
+     * @return List&lt;JsonSchemaNamedReference&gt;
+     */
+    private List<JsonSchemaNamedReference> buildJsonDefinitions(TLModel model) {
+        List<JsonSchemaNamedReference> definitions = new ArrayList<>();
+        CodeGenerationFilter filter = context.getCodeGenerator().getFilter();
+
+        // Add definitions for all of the OTM entities that are within the
+        // scope of the current filter
+        for (TLLibrary library : model.getUserDefinedLibraries()) {
+            if (!filter.processLibrary( library )) {
+                continue;
+            }
+
+            for (LibraryMember member : library.getNamedMembers()) {
+                if (member instanceof TLResource) {
+                    for (TLActionFacet actionFacet : ((TLResource) member).getActionFacets()) {
+                        transformEntity( actionFacet, definitions );
+                    }
+
+                } else {
+                    transformEntity( member, definitions );
                 }
             }
         }
-	}
-	
-	/**
-	 * Returns true if single-file Swagger document generation is enabled.
-	 * 
-	 * @return boolean
-	 */
-	private boolean isSingleFileEnabled() {
-		CodeGenerationContext cgContext = (context == null) ? null : context.getCodegenContext();
-		boolean result = false;
-		
-		if (cgContext != null) {
-	         result = "true".equalsIgnoreCase(
-	        		 cgContext.getValue( CodeGenerationContext.CK_ENABLE_SINGLE_FILE_SWAGGER ) );
-		}
-		return result;
-	}
-	
-	/**
-	 * Retrieves the base resource URL from the code generation context and returns
-	 * its components.  If a base URL was not specified, default values are returned.
-	 * 
-	 * @return URLComponents
-	 */
-	private URLComponents getUrlComponents() {
-		String baseUrl = context.getCodegenContext().getValue( CodeGenerationContext.CK_RESOURCE_BASE_URL );
-		URLComponents components = null;
-		
-		try {
-			if (baseUrl != null) {
-				components = ResourceCodegenUtils.parseUrl( baseUrl );
-			}
-		} catch (MalformedURLException e) {
-			// No error - use default values
-		}
-		if (components == null) {
-			components = new URLComponents( SwaggerScheme.HTTP, "127.0.0.1", "/", null );
-		}
-		return components;
-	}
-	
+        return definitions;
+    }
+
+    /**
+     * Transforms the given OTM entity and adds it JSON definition(s) the the list provided.
+     * 
+     * @param entity the OTM entity to be transformed
+     * @param definitions the list of JSON definitions being constructed
+     */
+    private void transformEntity(NamedEntity entity, List<JsonSchemaNamedReference> definitions) {
+        ObjectTransformer<NamedEntity,CodegenArtifacts,CodeGenerationTransformerContext> transformer =
+            getTransformerFactory().getTransformer( entity, CodegenArtifacts.class );
+        CodeGenerationFilter filter = context.getCodeGenerator().getFilter();
+
+        if ((transformer != null) && ((filter == null) || filter.processEntity( entity ))) {
+            CodegenArtifacts artifacts = transformer.transform( entity );
+
+            if (artifacts != null) {
+                for (JsonSchemaNamedReference memberDef : artifacts
+                    .getArtifactsOfType( JsonSchemaNamedReference.class )) {
+                    definitions.add( memberDef );
+                }
+            }
+        }
+    }
+
+    /**
+     * Returns true if single-file Swagger document generation is enabled.
+     * 
+     * @return boolean
+     */
+    private boolean isSingleFileEnabled() {
+        CodeGenerationContext cgContext = (context == null) ? null : context.getCodegenContext();
+        boolean result = false;
+
+        if (cgContext != null) {
+            result =
+                "true".equalsIgnoreCase( cgContext.getValue( CodeGenerationContext.CK_ENABLE_SINGLE_FILE_SWAGGER ) );
+        }
+        return result;
+    }
+
+    /**
+     * Retrieves the base resource URL from the code generation context and returns its components. If a base URL was
+     * not specified, default values are returned.
+     * 
+     * @return URLComponents
+     */
+    private URLComponents getUrlComponents() {
+        String baseUrl = context.getCodegenContext().getValue( CodeGenerationContext.CK_RESOURCE_BASE_URL );
+        URLComponents components = null;
+
+        try {
+            if (baseUrl != null) {
+                components = ResourceCodegenUtils.parseUrl( baseUrl );
+            }
+        } catch (MalformedURLException e) {
+            // No error - use default values
+        }
+        if (components == null) {
+            components = new URLComponents( SwaggerScheme.HTTP, "127.0.0.1", "/", null );
+        }
+        return components;
+    }
+
 }

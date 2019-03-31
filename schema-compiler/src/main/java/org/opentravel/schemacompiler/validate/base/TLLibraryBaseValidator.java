@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.validate.base;
 
 import org.opentravel.schemacompiler.model.LibraryMember;
@@ -40,49 +41,49 @@ public class TLLibraryBaseValidator extends TLValidatorBase<TLLibrary> {
      */
     @Override
     public ValidationFindings validate(TLLibrary target) {
-        setContextLibrary(target); // Assign the context library to use for name resolution
-        return super.validate(target);
+        setContextLibrary( target ); // Assign the context library to use for name resolution
+        return super.validate( target );
     }
 
     /**
      * @see org.opentravel.schemacompiler.validate.impl.TLValidatorBase#validateChildren(org.opentravel.schemacompiler.validate.Validatable)
      */
     @Override
-	protected ValidationFindings validateChildren(TLLibrary target) {
-		Validator<TLContext> contextValidator = getValidatorFactory().getValidatorForClass(TLContext.class);
-		Validator<TLInclude> includeValidator = getValidatorFactory().getValidatorForClass(TLInclude.class);
-		TLValidationBuilder builder = newValidationBuilder(target);
-		
-		for (TLContext context : target.getContexts()) {
-			builder.addFindings(contextValidator.validate(context));
-		}
-		
-		for (TLInclude include : target.getIncludes()) {
-			builder.addFindings(includeValidator.validate(include));
-		}
-		
-		// Now validate each individual member with its own validator
-		for (LibraryMember member : target.getNamedMembers()) {
-			if (!isLocalContextualFacet(member)) {
-				Validator<LibraryMember> childValidator = getValidatorFactory().getValidatorForTarget(member);
-				
-				if (childValidator != null) {
-					builder.addFindings(childValidator.validate(member));
-				}
-			}
-		}
-		return builder.getFindings();
-	}
-    
+    protected ValidationFindings validateChildren(TLLibrary target) {
+        Validator<TLContext> contextValidator = getValidatorFactory().getValidatorForClass( TLContext.class );
+        Validator<TLInclude> includeValidator = getValidatorFactory().getValidatorForClass( TLInclude.class );
+        TLValidationBuilder builder = newValidationBuilder( target );
+
+        for (TLContext context : target.getContexts()) {
+            builder.addFindings( contextValidator.validate( context ) );
+        }
+
+        for (TLInclude include : target.getIncludes()) {
+            builder.addFindings( includeValidator.validate( include ) );
+        }
+
+        // Now validate each individual member with its own validator
+        for (LibraryMember member : target.getNamedMembers()) {
+            if (!isLocalContextualFacet( member )) {
+                Validator<LibraryMember> childValidator = getValidatorFactory().getValidatorForTarget( member );
+
+                if (childValidator != null) {
+                    builder.addFindings( childValidator.validate( member ) );
+                }
+            }
+        }
+        return builder.getFindings();
+    }
+
     /**
-     * Returns true if the given library member is a contextual facet that is local
-     * to its owning entity; and that owning entity is not another contextual facet.
-     *  
-     * @param member  the library member to check
+     * Returns true if the given library member is a contextual facet that is local to its owning entity; and that
+     * owning entity is not another contextual facet.
+     * 
+     * @param member the library member to check
      * @return boolean
      */
     private boolean isLocalContextualFacet(LibraryMember member) {
-    	return (member instanceof TLContextualFacet) && ((TLContextualFacet) member).isLocalFacet();
+        return (member instanceof TLContextualFacet) && ((TLContextualFacet) member).isLocalFacet();
     }
-    
+
 }

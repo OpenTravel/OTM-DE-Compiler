@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.validate.impl;
 
 /**
- * Resolves the identity name of an object during validation, typically for the purpose of
- * identifying duplicate model entities during validation.
+ * Resolves the identity name of an object during validation, typically for the purpose of identifying duplicate model
+ * entities during validation.
  * 
- * @param <E>
- *            the entity type for which names will be resolved
+ * @param <E> the entity type for which names will be resolved
  * @author S. Livezey
  */
 @FunctionalInterface
@@ -29,8 +29,7 @@ public interface IdentityResolver<E> {
     /**
      * Resolves the identity name of the given entity.
      * 
-     * @param entity
-     *            the entity for which to return an identity
+     * @param entity the entity for which to return an identity
      * @return String
      */
     public String getIdentity(E entity);

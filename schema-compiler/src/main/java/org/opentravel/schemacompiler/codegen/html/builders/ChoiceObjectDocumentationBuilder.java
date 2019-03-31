@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.codegen.html.builders;
 
-import java.io.IOException;
+package org.opentravel.schemacompiler.codegen.html.builders;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerationException;
 import org.opentravel.schemacompiler.codegen.html.Content;
@@ -23,67 +22,70 @@ import org.opentravel.schemacompiler.codegen.html.writers.ChoiceObjectWriter;
 import org.opentravel.schemacompiler.model.TLChoiceObject;
 import org.opentravel.schemacompiler.model.TLExtension;
 
+import java.io.IOException;
+
 
 /**
  * @author jason.kramer
- *
  */
-public class ChoiceObjectDocumentationBuilder extends
-		ComplexTypeDocumentationBuilder<TLChoiceObject> {
+public class ChoiceObjectDocumentationBuilder extends ComplexTypeDocumentationBuilder<TLChoiceObject> {
 
-	
-	public ChoiceObjectDocumentationBuilder(TLChoiceObject t) {
-		super(t);
-		TLExtension tle = t.getExtension();
-		if (tle != null) {
-			superType = new ChoiceObjectDocumentationBuilder(
-					(TLChoiceObject) tle.getExtendsEntity());
-		}
-	}
+    /**
+     * Constructs a documentation builder for the given choice object.
+     * 
+     * @param t the choice object instance
+     */
+    public ChoiceObjectDocumentationBuilder(TLChoiceObject t) {
+        super( t );
+        TLExtension tle = t.getExtension();
+        if (tle != null) {
+            superType = new ChoiceObjectDocumentationBuilder( (TLChoiceObject) tle.getExtendsEntity() );
+        }
+    }
 
-	@Override
-	protected void initializeFacets(TLChoiceObject t) {
-		addFacet( t.getSharedFacet() );
-		addContextualFacets( t.getChoiceFacets() );
-	}
+    @Override
+    protected void initializeFacets(TLChoiceObject t) {
+        addFacet( t.getSharedFacet() );
+        addContextualFacets( t.getChoiceFacets() );
+    }
 
-	@Override
-	public DocumentationBuilderType getDocType() {
-		return DocumentationBuilderType.CHOICE_OBJECT;
-	}
-	
-	@Override
-	public void build() throws CodeGenerationException {
-		try {
-			ChoiceObjectWriter writer = new ChoiceObjectWriter(this, prev, next);
-			Content contentTree = writer.getHeader();
-			writer.addMemberInheritanceTree(contentTree);
-			Content classContentTree = writer.getContentHeader();
-			Content tree = writer.getMemberTree(classContentTree);
+    @Override
+    public DocumentationBuilderType getDocType() {
+        return DocumentationBuilderType.CHOICE_OBJECT;
+    }
 
-			Content classInfoTree = writer.getMemberInfoItemTree();
-			writer.addDocumentationInfo(classInfoTree);
-			tree.addContent(classInfoTree);
+    @Override
+    public void build() throws CodeGenerationException {
+        try {
+            ChoiceObjectWriter writer = new ChoiceObjectWriter( this, prev, next );
+            Content contentTree = writer.getHeader();
+            writer.addMemberInheritanceTree( contentTree );
+            Content classContentTree = writer.getContentHeader();
+            Content tree = writer.getMemberTree( classContentTree );
 
-			classInfoTree = writer.getMemberInfoItemTree();
-			writer.addFacetInfo(classInfoTree);
-			tree.addContent(classInfoTree);
+            Content classInfoTree = writer.getMemberInfoItemTree();
+            writer.addDocumentationInfo( classInfoTree );
+            tree.addContent( classInfoTree );
 
-			classInfoTree = writer.getMemberInfoItemTree();
-			writer.addAliasInfo(classInfoTree);
-			tree.addContent(classInfoTree);
+            classInfoTree = writer.getMemberInfoItemTree();
+            writer.addFacetInfo( classInfoTree );
+            tree.addContent( classInfoTree );
 
-			Content desc = writer.getMemberInfoTree(tree);
-			classContentTree.addContent(desc);
-			contentTree.addContent(classContentTree);
-			writer.addFooter(contentTree);
-			writer.printDocument(contentTree);
-			writer.close();
-			super.build();
-			
-		} catch (IOException e) {
-			throw new CodeGenerationException("Error creating doclet writer", e);
-		}
-	}
-	
+            classInfoTree = writer.getMemberInfoItemTree();
+            writer.addAliasInfo( classInfoTree );
+            tree.addContent( classInfoTree );
+
+            Content desc = writer.getMemberInfoTree( tree );
+            classContentTree.addContent( desc );
+            contentTree.addContent( classContentTree );
+            writer.addFooter( contentTree );
+            writer.printDocument( contentTree );
+            writer.close();
+            super.build();
+
+        } catch (IOException e) {
+            throw new CodeGenerationException( "Error creating doclet writer", e );
+        }
+    }
+
 }

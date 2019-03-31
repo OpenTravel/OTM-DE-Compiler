@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.validate.save;
 
 import org.opentravel.schemacompiler.model.TLClosedEnumeration;
@@ -33,13 +34,13 @@ public class TLClosedEnumerationSaveValidator extends TLClosedEnumerationBaseVal
      */
     @Override
     protected ValidationFindings validateFields(TLClosedEnumeration target) {
-        TLValidationBuilder builder = newValidationBuilder(target);
+        TLValidationBuilder builder = newValidationBuilder( target );
 
-        builder.setProperty("name", target.getName()).setFindingType(FindingType.WARNING)
-                .assertPatternMatch(NAME_XML_PATTERN);
+        builder.setProperty( "name", target.getName() ).setFindingType( FindingType.WARNING )
+            .assertPatternMatch( NAME_XML_PATTERN );
 
-        builder.setProperty("values", target.getValues()).setFindingType(FindingType.WARNING)
-                .assertMinimumSize(1);
+        builder.setProperty( "values", target.getValues() ).setFindingType( FindingType.WARNING )
+            .assertMinimumSize( 1 );
 
         return builder.getFindings();
     }

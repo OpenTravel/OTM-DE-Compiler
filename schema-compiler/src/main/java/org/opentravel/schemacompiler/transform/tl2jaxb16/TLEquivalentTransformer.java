@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.transform.tl2jaxb16;
 
 import org.opentravel.ns.ota2.librarymodel_v01_06.Equivalent;
@@ -21,13 +22,11 @@ import org.opentravel.schemacompiler.transform.symbols.SymbolResolverTransformer
 import org.opentravel.schemacompiler.transform.util.BaseTransformer;
 
 /**
- * Handles the transformation of objects from the <code>TLEquivalent</code> type to the
- * <code>Equivalent</code> type.
+ * Handles the transformation of objects from the <code>TLEquivalent</code> type to the <code>Equivalent</code> type.
  * 
  * @author S. Livezey
  */
-public class TLEquivalentTransformer extends
-        BaseTransformer<TLEquivalent, Equivalent, SymbolResolverTransformerContext> {
+public class TLEquivalentTransformer extends BaseTransformer<TLEquivalent,Equivalent,SymbolResolverTransformerContext> {
 
     /**
      * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
@@ -36,8 +35,8 @@ public class TLEquivalentTransformer extends
     public Equivalent transform(TLEquivalent source) {
         Equivalent equiv = new Equivalent();
 
-        equiv.setContext(trimString(source.getContext(), false));
-        equiv.setValue(trimString(source.getDescription()));
+        equiv.setContext( trimString( source.getContext(), false ) );
+        equiv.setValue( trimString( source.getDescription() ) );
         return equiv;
     }
 

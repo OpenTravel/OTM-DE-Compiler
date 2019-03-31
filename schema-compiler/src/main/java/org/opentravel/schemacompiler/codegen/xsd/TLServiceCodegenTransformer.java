@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.codegen.xsd;
 
 import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerContext;
@@ -22,25 +23,23 @@ import org.opentravel.schemacompiler.model.TLService;
 import org.opentravel.schemacompiler.transform.ObjectTransformer;
 
 /**
- * Performs the translation from <code>TLService</code> objects to the JAXB nodes used to produce
- * the schema output.
+ * Performs the translation from <code>TLService</code> objects to the JAXB nodes used to produce the schema output.
  * 
  * @author S. Livezey
  */
-public class TLServiceCodegenTransformer extends
-        AbstractXsdTransformer<TLService, CodegenArtifacts> {
+public class TLServiceCodegenTransformer extends AbstractXsdTransformer<TLService,CodegenArtifacts> {
 
     /**
      * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
      */
     @Override
     public CodegenArtifacts transform(TLService source) {
-        ObjectTransformer<TLOperation, CodegenArtifacts, CodeGenerationTransformerContext> opTransformer = getTransformerFactory()
-                .getTransformer(TLOperation.class, CodegenArtifacts.class);
+        ObjectTransformer<TLOperation,CodegenArtifacts,CodeGenerationTransformerContext> opTransformer =
+            getTransformerFactory().getTransformer( TLOperation.class, CodegenArtifacts.class );
         CodegenArtifacts artifacts = new CodegenArtifacts();
 
         for (TLOperation operation : source.getOperations()) {
-            artifacts.addAllArtifacts(opTransformer.transform(operation));
+            artifacts.addAllArtifacts( opTransformer.transform( operation ) );
         }
         return artifacts;
     }

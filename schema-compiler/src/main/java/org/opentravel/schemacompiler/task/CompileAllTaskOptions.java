@@ -13,55 +13,51 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.task;
 
 /**
- * Interface that consolidates the options that are required for the simultaneous execution of all
- * code generation tasks.
+ * Interface that consolidates the options that are required for the simultaneous execution of all code generation
+ * tasks.
  * 
  * @author S. Livezey
  */
-public interface CompileAllTaskOptions extends SchemaCompilerTaskOptions,
-        ServiceCompilerTaskOptions, ResourceCompilerTaskOptions {
+public interface CompileAllTaskOptions
+    extends SchemaCompilerTaskOptions, ServiceCompilerTaskOptions, ResourceCompilerTaskOptions {
 
     /**
-     * Returns the option flag indicating that XML schema (XSD) files should be generated for all
-     * libraries.
+     * Returns the option flag indicating that XML schema (XSD) files should be generated for all libraries.
      * 
      * @return boolean
      */
     public boolean isCompileSchemas();
 
     /**
-     * Returns the option flag indicating that JSON schema files should be generated for all
-     * libraries.
+     * Returns the option flag indicating that JSON schema files should be generated for all libraries.
      * 
      * @return boolean
      */
     public boolean isCompileJsonSchemas();
 
     /**
-     * Returns the option flag indicating that service (WSDL) files should be generated for service
-     * definitions.
+     * Returns the option flag indicating that service (WSDL) files should be generated for service definitions.
      * 
      * @return boolean
      */
     public boolean isCompileServices();
-    
+
     /**
-     * Returns the option flag indicating that Swagger API descriptors should be generated for
-     * resource definitions.
+     * Returns the option flag indicating that Swagger API descriptors should be generated for resource definitions.
      * 
      * @return boolean
      */
-	public boolean isCompileSwagger();
-	
-	/**
-     * Returns the option flag indicating that HTML documentation files should be generated for
-     * user libraries.
+    public boolean isCompileSwagger();
+
+    /**
+     * Returns the option flag indicating that HTML documentation files should be generated for user libraries.
      * 
      * @return boolean
      */
-	public boolean isCompileHtml();
-    
+    public boolean isCompileHtml();
+
 }

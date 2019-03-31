@@ -19,29 +19,29 @@ package org.opentravel.schemacompiler.ioc;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.util.List;
-
 import org.junit.Test;
+
+import java.util.List;
 
 /**
  * Verifies the functions of the <code>CompilerExtensionRegistry</code> class.
  */
 public class TestCompilerExtensionRegistry {
-	
-	@Test
-	public void testGetAvailableExtensionIds() throws Exception {
-		List<String> extensionIds = CompilerExtensionRegistry.getAvailableExtensionIds();
-		
-		assertTrue( extensionIds.contains( "OTA2" ) );
-		assertTrue( extensionIds.contains( "XYZ" ) );
-	}
-	
-	@Test
-	public void testSetActiveExtension() throws Exception {
-		assertEquals( "OTA2", CompilerExtensionRegistry.getActiveExtension() ); // Default value
-		
-		CompilerExtensionRegistry.setActiveExtension( "XYZ" );
-		assertEquals( "XYZ", CompilerExtensionRegistry.getActiveExtension() );
-	}
-	
+
+    @Test
+    public void testGetAvailableExtensionIds() throws Exception {
+        List<String> extensionIds = CompilerExtensionRegistry.getAvailableExtensionIds();
+
+        assertTrue( extensionIds.contains( "OTA2" ) );
+        assertTrue( extensionIds.contains( "XYZ" ) );
+    }
+
+    @Test
+    public void testSetActiveExtension() throws Exception {
+        assertEquals( "OTA2", CompilerExtensionRegistry.getActiveExtension() ); // Default value
+
+        CompilerExtensionRegistry.setActiveExtension( "XYZ" );
+        assertEquals( "XYZ", CompilerExtensionRegistry.getActiveExtension() );
+    }
+
 }

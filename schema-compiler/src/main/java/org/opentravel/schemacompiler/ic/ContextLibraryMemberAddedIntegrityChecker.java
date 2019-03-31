@@ -13,10 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.ic;
 
-import java.util.HashSet;
-import java.util.Set;
+package org.opentravel.schemacompiler.ic;
 
 import org.opentravel.schemacompiler.event.ModelEventType;
 import org.opentravel.schemacompiler.event.OwnershipEvent;
@@ -25,32 +23,35 @@ import org.opentravel.schemacompiler.model.TLContextReferrer;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.visitor.ModelNavigator;
 
+import java.util.HashSet;
+import java.util.Set;
+
 /**
- * Integrity checker component that automatically searches for new contexts that need to be created
- * when a library member is added to the model.
+ * Integrity checker component that automatically searches for new contexts that need to be created when a library
+ * member is added to the model.
  * 
  * @author S. Livezey
  */
-public class ContextLibraryMemberAddedIntegrityChecker extends
-        ContextAutoCreateIntegrityChecker<OwnershipEvent<TLLibrary, LibraryMember>, TLLibrary> {
+public class ContextLibraryMemberAddedIntegrityChecker
+    extends ContextAutoCreateIntegrityChecker<OwnershipEvent<TLLibrary,LibraryMember>,TLLibrary> {
 
     /**
      * @see org.opentravel.schemacompiler.event.ModelEventListener#processModelEvent(org.opentravel.schemacompiler.event.ModelEvent)
      */
     @Override
-    public void processModelEvent(OwnershipEvent<TLLibrary, LibraryMember> event) {
+    public void processModelEvent(OwnershipEvent<TLLibrary,LibraryMember> event) {
         if ((event.getType() == ModelEventType.MEMBER_ADDED)) {
-            ContextReferrerVisitor visitor = new ContextReferrerVisitor(null);
+            ContextReferrerVisitor visitor = new ContextReferrerVisitor( null );
             Set<String> visitedContextIds = new HashSet<>();
 
-            ModelNavigator.navigate(event.getAffectedItem(), visitor);
+            ModelNavigator.navigate( event.getAffectedItem(), visitor );
 
             for (TLContextReferrer contextReferrer : visitor.getContextReferrers()) {
                 String contextId = contextReferrer.getContext();
 
-                if (!visitedContextIds.contains(contextId)) {
-                    autoCreateContextDeclaration(event.getSource(), contextId);
-                    visitedContextIds.add(contextId);
+                if (!visitedContextIds.contains( contextId )) {
+                    autoCreateContextDeclaration( event.getSource(), contextId );
+                    visitedContextIds.add( contextId );
                 }
             }
         }

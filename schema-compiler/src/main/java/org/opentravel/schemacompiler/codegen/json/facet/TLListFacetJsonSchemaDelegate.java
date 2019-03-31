@@ -13,23 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.codegen.json.facet;
 
 import org.opentravel.schemacompiler.model.TLListFacet;
 
 /**
- * Base class for facet code generation delegates used to generate code artifacts for
- * <code>TLListFacet</code> model elements.
+ * Base class for facet code generation delegates used to generate code artifacts for <code>TLListFacet</code> model
+ * elements.
  */
 public abstract class TLListFacetJsonSchemaDelegate extends FacetJsonSchemaDelegate<TLListFacet> {
-	
+
     /**
      * Constructor that specifies the source facet for which code artifacts are being generated.
      * 
-     * @param sourceFacet  the source facet
+     * @param sourceFacet the source facet
      */
     public TLListFacetJsonSchemaDelegate(TLListFacet sourceFacet) {
-        super(sourceFacet);
+        super( sourceFacet );
     }
 
 }

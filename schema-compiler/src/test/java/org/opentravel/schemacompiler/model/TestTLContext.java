@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.model;
 
 import static org.junit.Assert.assertEquals;
@@ -23,26 +24,26 @@ import org.junit.Test;
  * Verifies the functions of the <code>TLContext</code> class.
  */
 public class TestTLContext extends AbstractModelTest {
-	
-	@Test
-	public void testIdentityFunctions() throws Exception {
-		TLContext context = addContext( "TestContext", library1 );
-		
-		assertEquals( "TestLibrary1.otm : TestContext", context.getValidationIdentity() );
-	}
-	
-	@Test
-	public void testDocumentationFunctions() throws Exception {
-		testDocumentationFunctions( addContext( "TestContext", library1 ) );
-	}
-	
-	private TLContext addContext(String contextId, TLLibrary library) throws Exception {
-		TLContext context = new TLContext();
-		
-		context.setContextId( contextId );
-		context.setApplicationContext( "http://www.opentravel.org/contexts/" + contextId );
-		library.addContext( context );
-		return context;
-	}
-	
+
+    @Test
+    public void testIdentityFunctions() throws Exception {
+        TLContext context = addContext( "TestContext", library1 );
+
+        assertEquals( "TestLibrary1.otm : TestContext", context.getValidationIdentity() );
+    }
+
+    @Test
+    public void testDocumentationFunctions() throws Exception {
+        testDocumentationFunctions( addContext( "TestContext", library1 ) );
+    }
+
+    private TLContext addContext(String contextId, TLLibrary library) throws Exception {
+        TLContext context = new TLContext();
+
+        context.setContextId( contextId );
+        context.setApplicationContext( "http://www.opentravel.org/contexts/" + contextId );
+        library.addContext( context );
+        return context;
+    }
+
 }

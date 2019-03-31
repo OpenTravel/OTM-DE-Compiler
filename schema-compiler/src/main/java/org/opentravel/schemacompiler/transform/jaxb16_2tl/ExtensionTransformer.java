@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.transform.jaxb16_2tl;
 
 import org.opentravel.ns.ota2.librarymodel_v01_06.Documentation;
@@ -24,13 +25,11 @@ import org.opentravel.schemacompiler.transform.symbols.DefaultTransformerContext
 import org.opentravel.schemacompiler.transform.util.BaseTransformer;
 
 /**
- * Handles the transformation of objects from the <code>Extension</code> type to the
- * <code>TLExtension</code> type.
+ * Handles the transformation of objects from the <code>Extension</code> type to the <code>TLExtension</code> type.
  * 
  * @author S. Livezey
  */
-public class ExtensionTransformer extends
-        BaseTransformer<Extension, TLExtension, DefaultTransformerContext> {
+public class ExtensionTransformer extends BaseTransformer<Extension,TLExtension,DefaultTransformerContext> {
 
     /**
      * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
@@ -39,13 +38,13 @@ public class ExtensionTransformer extends
     public TLExtension transform(Extension source) {
         final TLExtension extension = new TLExtension();
 
-        extension.setExtendsEntityName(source.getExtends());
+        extension.setExtendsEntityName( source.getExtends() );
 
         if (source.getDocumentation() != null) {
-            ObjectTransformer<Documentation, TLDocumentation, DefaultTransformerContext> docTransformer = getTransformerFactory()
-                    .getTransformer(Documentation.class, TLDocumentation.class);
+            ObjectTransformer<Documentation,TLDocumentation,DefaultTransformerContext> docTransformer =
+                getTransformerFactory().getTransformer( Documentation.class, TLDocumentation.class );
 
-            extension.setDocumentation(docTransformer.transform(source.getDocumentation()));
+            extension.setDocumentation( docTransformer.transform( source.getDocumentation() ) );
         }
 
         return extension;

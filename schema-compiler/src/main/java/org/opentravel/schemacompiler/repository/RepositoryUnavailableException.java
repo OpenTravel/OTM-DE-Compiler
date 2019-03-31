@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.repository;
 
 /**
@@ -22,44 +23,39 @@ package org.opentravel.schemacompiler.repository;
  */
 public class RepositoryUnavailableException extends RepositoryException {
 
-	private static final long serialVersionUID = -155864920147747357L;
+    private static final long serialVersionUID = -155864920147747357L;
 
-	/**
+    /**
      * Default constructor.
      */
-    public RepositoryUnavailableException() {
-    }
+    public RepositoryUnavailableException() {}
 
     /**
      * Constructs an exception with the specified message.
      * 
-     * @param message
-     *            the exception message
+     * @param message the exception message
      */
     public RepositoryUnavailableException(String message) {
-        super(message);
+        super( message );
     }
 
     /**
      * Constructs an exception with the specified underlying cause.
      * 
-     * @param cause
-     *            the underlying exception that caused this one
+     * @param cause the underlying exception that caused this one
      */
     public RepositoryUnavailableException(Throwable cause) {
-        super(cause);
+        super( cause );
     }
 
     /**
      * Constructs an exception with the specified message and underlying cause.
      * 
-     * @param message
-     *            the exception message
-     * @param cause
-     *            the underlying exception that caused this one
+     * @param message the exception message
+     * @param cause the underlying exception that caused this one
      */
     public RepositoryUnavailableException(String message, Throwable cause) {
-        super(message, cause);
+        super( message, cause );
     }
 
 }

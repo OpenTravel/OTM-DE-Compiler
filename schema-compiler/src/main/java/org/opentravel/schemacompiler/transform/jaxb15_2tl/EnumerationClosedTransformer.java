@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.transform.jaxb15_2tl;
 
 import org.opentravel.ns.ota2.librarymodel_v01_05.Documentation;
@@ -33,36 +34,36 @@ import org.opentravel.schemacompiler.transform.util.BaseTransformer;
  * 
  * @author S. Livezey
  */
-public class EnumerationClosedTransformer extends
-        BaseTransformer<EnumerationClosed, TLClosedEnumeration, DefaultTransformerContext> {
+public class EnumerationClosedTransformer
+    extends BaseTransformer<EnumerationClosed,TLClosedEnumeration,DefaultTransformerContext> {
 
     /**
      * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
      */
     @Override
     public TLClosedEnumeration transform(EnumerationClosed source) {
-        ObjectTransformer<Extension, TLExtension, DefaultTransformerContext> extTransformer = getTransformerFactory()
-                .getTransformer(Extension.class, TLExtension.class);
-        ObjectTransformer<Documentation, TLDocumentation, DefaultTransformerContext> docTransformer = getTransformerFactory()
-                .getTransformer(Documentation.class, TLDocumentation.class);
+        ObjectTransformer<Extension,TLExtension,DefaultTransformerContext> extTransformer =
+            getTransformerFactory().getTransformer( Extension.class, TLExtension.class );
+        ObjectTransformer<Documentation,TLDocumentation,DefaultTransformerContext> docTransformer =
+            getTransformerFactory().getTransformer( Documentation.class, TLDocumentation.class );
         TLClosedEnumeration enumType = new TLClosedEnumeration();
 
-        enumType.setName(source.getName());
+        enumType.setName( source.getName() );
 
         if (source.getExtension() != null) {
-        	enumType.setExtension(extTransformer.transform(source.getExtension()));
+            enumType.setExtension( extTransformer.transform( source.getExtension() ) );
         }
-        
+
         if (source.getDocumentation() != null) {
-            enumType.setDocumentation(docTransformer.transform(source.getDocumentation()));
+            enumType.setDocumentation( docTransformer.transform( source.getDocumentation() ) );
         }
 
         if (source.getValue() != null) {
-            ObjectTransformer<EnumValue, TLEnumValue, DefaultTransformerContext> valueTransformer = getTransformerFactory()
-                    .getTransformer(EnumValue.class, TLEnumValue.class);
+            ObjectTransformer<EnumValue,TLEnumValue,DefaultTransformerContext> valueTransformer =
+                getTransformerFactory().getTransformer( EnumValue.class, TLEnumValue.class );
 
             for (EnumValue jaxbValue : source.getValue()) {
-                enumType.addValue(valueTransformer.transform(jaxbValue));
+                enumType.addValue( valueTransformer.transform( jaxbValue ) );
             }
         }
         return enumType;

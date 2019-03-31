@@ -13,17 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.codegen.xsd.facet;
 
-import javax.xml.namespace.QName;
+package org.opentravel.schemacompiler.codegen.xsd.facet;
 
 import org.opentravel.schemacompiler.ioc.SchemaDependency;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLFacet;
 
+import javax.xml.namespace.QName;
+
 /**
- * Code generation delegate for <code>TLFacet</code> instances with a facet type of
- * <code>DETAIL</code> and a facet owner of type <code>TLBusinessObject</code>.
+ * Code generation delegate for <code>TLFacet</code> instances with a facet type of <code>DETAIL</code> and a facet
+ * owner of type <code>TLBusinessObject</code>.
  * 
  * @author S. Livezey
  */
@@ -32,11 +33,10 @@ public class BusinessObjectDetailFacetCodegenDelegate extends BusinessObjectFace
     /**
      * Constructor that specifies the source facet for which code artifacts are being generated.
      * 
-     * @param sourceFacet
-     *            the source facet
+     * @param sourceFacet the source facet
      */
     public BusinessObjectDetailFacetCodegenDelegate(TLFacet sourceFacet) {
-        super(sourceFacet);
+        super( sourceFacet );
     }
 
     /**
@@ -48,15 +48,14 @@ public class BusinessObjectDetailFacetCodegenDelegate extends BusinessObjectFace
         TLFacet baseFacet = null;
 
         if (sourceFacet.getOwningEntity() instanceof TLBusinessObject) {
-            FacetCodegenDelegateFactory factory = new FacetCodegenDelegateFactory(
-                    transformerContext);
+            FacetCodegenDelegateFactory factory = new FacetCodegenDelegateFactory( transformerContext );
             TLBusinessObject businessObject = (TLBusinessObject) sourceFacet.getOwningEntity();
             TLFacet parentFacet = businessObject.getSummaryFacet();
 
-            if (!factory.getDelegate(parentFacet).hasContent()) {
+            if (!factory.getDelegate( parentFacet ).hasContent()) {
                 parentFacet = businessObject.getIdFacet();
             }
-            if (factory.getDelegate(parentFacet).hasContent()) {
+            if (factory.getDelegate( parentFacet ).hasContent()) {
                 baseFacet = parentFacet;
             }
         }
@@ -68,18 +67,18 @@ public class BusinessObjectDetailFacetCodegenDelegate extends BusinessObjectFace
      */
     @Override
     public QName getExtensionPointElement() {
-    	TLBusinessObject bo = (TLBusinessObject) getSourceFacet().getOwningEntity();
+        TLBusinessObject bo = (TLBusinessObject) getSourceFacet().getOwningEntity();
         SchemaDependency extensionPoint;
         QName extensionPointQName;
-        
+
         if (declaresOrInheritsFacetContent( bo.getSummaryFacet() )) {
-        	extensionPoint = SchemaDependency.getExtensionPointDetailElement();
-        	
+            extensionPoint = SchemaDependency.getExtensionPointDetailElement();
+
         } else {
-        	extensionPoint = SchemaDependency.getExtensionPointElement();
+            extensionPoint = SchemaDependency.getExtensionPointElement();
         }
         extensionPointQName = extensionPoint.toQName();
-        addCompileTimeDependency(extensionPoint);
+        addCompileTimeDependency( extensionPoint );
         return extensionPointQName;
     }
 

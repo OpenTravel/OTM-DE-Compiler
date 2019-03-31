@@ -13,48 +13,47 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.repository;
 
 /**
- * Exception thrown when a remote repository item cannot be locked because it is out
- * of sync with the local copy.
+ * Exception thrown when a remote repository item cannot be locked because it is out of sync with the local copy.
  */
 public class RepositoryOutOfSyncException extends RepositoryException {
-	
-	private static final long serialVersionUID = -4427861907347318795L;
 
-	/**
+    private static final long serialVersionUID = -4427861907347318795L;
+
+    /**
      * Default constructor.
      */
-    public RepositoryOutOfSyncException() {
-    }
-    
+    public RepositoryOutOfSyncException() {}
+
     /**
      * Constructs an exception with the specified message.
      * 
-     * @param message  the exception message
+     * @param message the exception message
      */
     public RepositoryOutOfSyncException(String message) {
-        super(message);
+        super( message );
     }
-    
+
     /**
      * Constructs an exception with the specified underlying cause.
      * 
-     * @param cause  the underlying exception that caused this one
+     * @param cause the underlying exception that caused this one
      */
     public RepositoryOutOfSyncException(Throwable cause) {
-        super(cause);
+        super( cause );
     }
-    
+
     /**
      * Constructs an exception with the specified message and underlying cause.
      * 
-     * @param message  the exception message
-     * @param cause  the underlying exception that caused this one
+     * @param message the exception message
+     * @param cause the underlying exception that caused this one
      */
     public RepositoryOutOfSyncException(String message, Throwable cause) {
-        super(message, cause);
+        super( message, cause );
     }
-    
+
 }

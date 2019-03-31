@@ -13,12 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.model;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+package org.opentravel.schemacompiler.model;
 
 import org.opentravel.schemacompiler.event.ModelElementListener;
 import org.opentravel.schemacompiler.event.ModelEvent;
@@ -26,85 +22,88 @@ import org.opentravel.schemacompiler.event.OwnershipEvent;
 import org.opentravel.schemacompiler.event.ValueChangeEvent;
 import org.opentravel.schemacompiler.util.ModelElementCloner;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
 /**
  * Base class for all type library model elements.
  * 
  * @author S. Livezey
  */
 public abstract class TLModelElement implements ModelElement {
-	
-	private List<ModelElementListener> listeners = new ArrayList<>();
-	
+
+    private List<ModelElementListener> listeners = new ArrayList<>();
+
     /**
      * @see org.opentravel.schemacompiler.model.ModelElement#addListener(org.opentravel.schemacompiler.event.ModelElementListener)
      */
     public void addListener(ModelElementListener listener) {
-    	if ((listener != null) && !listeners.contains( listener )) {
-    		listeners.add( listener );
-    	}
+        if ((listener != null) && !listeners.contains( listener )) {
+            listeners.add( listener );
+        }
     }
-    
+
     /**
      * @see org.opentravel.schemacompiler.model.ModelElement#removeListener(org.opentravel.schemacompiler.event.ModelElementListener)
      */
     public void removeListener(ModelElementListener listener) {
-    	if (listener != null) {
-    		listeners.remove( listener );
-    	}
+        if (listener != null) {
+            listeners.remove( listener );
+        }
     }
-    
+
     /**
      * @see org.opentravel.schemacompiler.model.ModelElement#getListeners()
      */
     public Collection<ModelElementListener> getListeners() {
-    	return Collections.unmodifiableCollection( listeners );
+        return Collections.unmodifiableCollection( listeners );
     }
 
     /**
-     * Publishes the given event to all registered listeners of the owning model that are capable of
-     * processing it.
+     * Publishes the given event to all registered listeners of the owning model that are capable of processing it.
      * 
-     * @param event  the event to publish
+     * @param event the event to publish
      */
-	protected void publishEvent(ModelEvent<?> event) {
-		TLModel owningModel = getOwningModel();
-		
-		if (owningModel != null) {
-			owningModel.publishEvent(event);
-		}
-		
-		if ((owningModel == null) || owningModel.isListenersEnabled()) {
-			if (event instanceof ValueChangeEvent) {
-				List<ModelElementListener> tempListeners = new ArrayList<>(listeners);
-				
-				for (ModelElementListener listener : tempListeners) {
-					listener.processValueChangeEvent((ValueChangeEvent<?, ?>) event);
-				}
-				
-			} else if (event instanceof OwnershipEvent) {
-				List<ModelElementListener> tempListeners = new ArrayList<>(listeners);
-				
-				for (ModelElementListener listener : tempListeners) {
-					listener.processOwnershipEvent((OwnershipEvent<?, ?>) event);
-				}
-			}
-		}
-	}
-	
+    protected void publishEvent(ModelEvent<?> event) {
+        TLModel owningModel = getOwningModel();
+
+        if (owningModel != null) {
+            owningModel.publishEvent( event );
+        }
+
+        if ((owningModel == null) || owningModel.isListenersEnabled()) {
+            if (event instanceof ValueChangeEvent) {
+                List<ModelElementListener> tempListeners = new ArrayList<>( listeners );
+
+                for (ModelElementListener listener : tempListeners) {
+                    listener.processValueChangeEvent( (ValueChangeEvent<?,?>) event );
+                }
+
+            } else if (event instanceof OwnershipEvent) {
+                List<ModelElementListener> tempListeners = new ArrayList<>( listeners );
+
+                for (ModelElementListener listener : tempListeners) {
+                    listener.processOwnershipEvent( (OwnershipEvent<?,?>) event );
+                }
+            }
+        }
+    }
+
     /**
      * @see org.opentravel.schemacompiler.model.ModelElement#cloneElement()
      */
     public LibraryElement cloneElement() {
-        return cloneElement((this instanceof LibraryElement) ? ((LibraryElement) this)
-                .getOwningLibrary() : null);
+        return cloneElement( (this instanceof LibraryElement) ? ((LibraryElement) this).getOwningLibrary() : null );
     }
 
     /**
      * @see org.opentravel.schemacompiler.model.ModelElement#cloneElement(org.opentravel.schemacompiler.model.AbstractLibrary)
      */
     public LibraryElement cloneElement(AbstractLibrary namingContext) {
-        return (LibraryElement) new ModelElementCloner((namingContext == null) ? null
-                : namingContext.getOwningModel()).clone(this, namingContext);
+        return (LibraryElement) new ModelElementCloner(
+            (namingContext == null) ? null : namingContext.getOwningModel() ).clone( this, namingContext );
     }
 
 }

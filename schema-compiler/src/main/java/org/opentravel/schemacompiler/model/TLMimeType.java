@@ -13,59 +13,58 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.model;
 
 /**
- * Enumeration that specified all of the supported MIME types for OTM REST request
- * and response payloads.
+ * Enumeration that specified all of the supported MIME types for OTM REST request and response payloads.
  * 
  * @author S. Livezey
  */
 public enum TLMimeType {
-	
-    APPLICATION_XML( "application/xml" ),
-    TEXT_XML( "text/xml" ),
-    APPLICATION_JSON( "application/json" ),
-    TEXT_JSON( "text/json" );
-    
+
+    APPLICATION_XML("application/xml"),
+    TEXT_XML("text/xml"),
+    APPLICATION_JSON("application/json"),
+    TEXT_JSON("text/json");
+
     private String contentType;
-    
+
     /**
      * Constructor that specifies the content type for each MIME type value.
      * 
-     * @param contentType  the W3C content type string
+     * @param contentType the W3C content type string
      */
     private TLMimeType(String contentType) {
-    	this.contentType = contentType;
+        this.contentType = contentType;
     }
-    
+
     /**
      * Returns the W3C content type for this MIME type value.
      * 
      * @return String
      */
     public String toContentType() {
-    	return contentType;
+        return contentType;
     }
-    
+
     /**
-     * Returns the <code>TLMimeType</code> value associated with the given
-     * content type.  If no such MIME type exists, this method will return
-     * null.
+     * Returns the <code>TLMimeType</code> value associated with the given content type. If no such MIME type exists,
+     * this method will return null.
      * 
-     * @param contentType  the content type string for which to return a value
+     * @param contentType the content type string for which to return a value
      * @return TLMimeType
      */
     public TLMimeType fromContentType(String contentType) {
-    	TLMimeType value = null;
-    	
-    	for (TLMimeType mt : values()) {
-    		if (mt.toContentType().equals( contentType )) {
-    			value = mt;
-    			break;
-    		}
-    	}
-    	return value;
+        TLMimeType value = null;
+
+        for (TLMimeType mt : values()) {
+            if (mt.toContentType().equals( contentType )) {
+                value = mt;
+                break;
+            }
+        }
+        return value;
     }
-    
+
 }

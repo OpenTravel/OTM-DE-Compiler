@@ -13,10 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.codegen.example;
 
-import java.io.StringWriter;
-import java.io.Writer;
+package org.opentravel.schemacompiler.codegen.example;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerationException;
 import org.opentravel.schemacompiler.model.NamedEntity;
@@ -26,40 +24,40 @@ import org.opentravel.schemacompiler.validate.ValidationException;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
 import org.opentravel.schemacompiler.validate.compile.TLModelCompileValidator;
 
+import java.io.StringWriter;
+import java.io.Writer;
+
 /**
- * Builder component that is capable of producing EXAMPLE output for model entities in a variety
- * of formats (e.g. Object Tree, text, and streaming output).
+ * Builder component that is capable of producing EXAMPLE output for model entities in a variety of formats (e.g. Object
+ * Tree, text, and streaming output).
  * 
  * @author S. Livezey, E. Bronson
  */
 public abstract class ExampleBuilder<T> {
-	
-	protected ExampleGeneratorOptions options = new ExampleGeneratorOptions();
+
+    protected ExampleGeneratorOptions options = new ExampleGeneratorOptions();
     protected NamedEntity modelElement;
-    
+
     /**
      * Default constructor.
      */
-    public ExampleBuilder() {
-    }
-    
+    public ExampleBuilder() {}
+
     /**
-     * Constructor that assigns the EXAMPLE generation options to use when constructing the EXAMPLE
-     * content and formatting the text/stream output.
+     * Constructor that assigns the EXAMPLE generation options to use when constructing the EXAMPLE content and
+     * formatting the text/stream output.
      * 
-     * @param options
-     *            the EXAMPLE generation options
+     * @param options the EXAMPLE generation options
      */
     public ExampleBuilder(ExampleGeneratorOptions options) {
-        setOptions(options);
+        setOptions( options );
     }
 
     /**
-     * Assigns the EXAMPLE generation options for this builder instance. Assigning a null value to
-     * this method will result in the default option values being used.
+     * Assigns the EXAMPLE generation options for this builder instance. Assigning a null value to this method will
+     * result in the default option values being used.
      * 
-     * @param options
-     *            the EXAMPLE generation options to assign
+     * @param options the EXAMPLE generation options to assign
      * @return ExampleDocumentBuilder
      */
     public ExampleBuilder<T> setOptions(ExampleGeneratorOptions options) {
@@ -70,76 +68,64 @@ public abstract class ExampleBuilder<T> {
     /**
      * Assigns the model element for which EXAMPLE output is to be generated.
      * 
-     * @param modelElement
-     *            the model element for which to create EXAMPLE output
+     * @param modelElement the model element for which to create EXAMPLE output
      * @return ExampleDocumentBuilder
      */
     public ExampleBuilder<T> setModelElement(NamedEntity modelElement) {
         this.modelElement = modelElement;
         return this;
     }
-    
+
     /**
-     * Validates the current model element and all of its dependencies and throws a
-     * <code>ValidationException</code> if one or more errors are detected.
+     * Validates the current model element and all of its dependencies and throws a <code>ValidationException</code> if
+     * one or more errors are detected.
      * 
-     * @throws ValidationException
-     *             thrown if one or more of the entities for which content is to be generated
-     *             contains errors (warnings are acceptable and will not produce an exception)
+     * @throws ValidationException thrown if one or more of the entities for which content is to be generated contains
+     *         errors (warnings are acceptable and will not produce an exception)
      */
     protected void validateModelElement() throws ValidationException {
         if (modelElement == null) {
-            throw new NullPointerException("The model element for EXAMPLE output cannot be null.");
+            throw new NullPointerException( "The model element for EXAMPLE output cannot be null." );
         }
-        ValidationFindings findings = TLModelCompileValidator
-                .validateModelElement((TLModelElement) modelElement);
+        ValidationFindings findings = TLModelCompileValidator.validateModelElement( (TLModelElement) modelElement );
 
-        if (findings.hasFinding(FindingType.ERROR)) {
-            throw new ValidationException(
-                    "Unable to generate EXAMPLE content due to validation errors.", findings);
+        if (findings.hasFinding( FindingType.ERROR )) {
+            throw new ValidationException( "Unable to generate EXAMPLE content due to validation errors.", findings );
         }
     }
-    
+
     /**
      * Generates the EXAMPLE output and returns a string containing the content.
      * 
      * @return String
-     * @throws ValidationException
-     *             thrown if one or more of the entities for which content is to be generated
-     *             contains errors (warnings are acceptable and will not produce an exception)
-     * @throws CodeGenerationException
-     *             thrown if an error occurs during EXAMPLE content generation
+     * @throws ValidationException thrown if one or more of the entities for which content is to be generated contains
+     *         errors (warnings are acceptable and will not produce an exception)
+     * @throws CodeGenerationException thrown if an error occurs during EXAMPLE content generation
      */
     public String buildString() throws ValidationException, CodeGenerationException {
         StringWriter writer = new StringWriter();
 
-        buildToStream(writer);
+        buildToStream( writer );
         return writer.toString();
     }
 
     /**
      * Generates the EXAMPLE output and directs the resuting content to the specified writer.
      * 
-     * @param buffer
-     *            the output writer to which the EXAMPLE content should be directed
-     * @return String
-     * @throws ValidationException
-     *             thrown if one or more of the entities for which content is to be generated
-     *             contains errors (warnings are acceptable and will not produce an exception)
-     * @throws CodeGenerationException
-     *             thrown if an error occurs during EXAMPLE content generation
+     * @param buffer the output writer to which the EXAMPLE content should be directed
+     * @throws ValidationException thrown if one or more of the entities for which content is to be generated contains
+     *         errors (warnings are acceptable and will not produce an exception)
+     * @throws CodeGenerationException thrown if an error occurs during EXAMPLE content generation
      */
     public abstract void buildToStream(Writer buffer) throws ValidationException, CodeGenerationException;
-    
+
     /**
      * Generates the EXAMPLE output as a structure and returns the raw tree content.
      * 
      * @return Tree
-     * @throws ValidationException
-     *             thrown if one or more of the entities for which content is to be generated
-     *             contains errors (warnings are acceptable and will not produce an exception)
-     * @throws CodeGenerationException
-     *             thrown if an error occurs during EXAMPLE content generation
+     * @throws ValidationException thrown if one or more of the entities for which content is to be generated contains
+     *         errors (warnings are acceptable and will not produce an exception)
+     * @throws CodeGenerationException thrown if an error occurs during EXAMPLE content generation
      */
     public abstract T buildTree() throws ValidationException, CodeGenerationException;
 

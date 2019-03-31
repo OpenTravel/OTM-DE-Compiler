@@ -13,11 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.task;
 
 import static org.junit.Assert.assertFalse;
-
-import java.io.File;
 
 import org.junit.Test;
 import org.opentravel.schemacompiler.codegen.CodeGeneratorTestAssertions;
@@ -27,162 +26,161 @@ import org.opentravel.schemacompiler.validate.FindingMessageFormat;
 import org.opentravel.schemacompiler.validate.FindingType;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
 
+import java.io.File;
+
 /**
  * Validates the operation of the schema compiler task default implementations.
  * 
  * @author S. Livezey
  */
 public class TestSchemaCompilerTask {
-	
+
     @Test
     public void testSchemaCompilerTask() throws Exception {
-    	compileTestModel( "testSchemaCompilerTask", "OTA2" );
+        compileTestModel( "testSchemaCompilerTask", "OTA2" );
     }
-    
+
     @Test
     public void testSchemaCompilerTask_customBinding() throws Exception {
-    	compileTestModel( "testSchemaCompilerTask_customBinding", "XYZ" );
+        compileTestModel( "testSchemaCompilerTask_customBinding", "XYZ" );
     }
-    
-    private void compileTestModel(String testOutputFolder, String bindingStyle) throws Exception {
-        File catalogFile = new File(SchemaCompilerTestUtils.getBaseLibraryLocation()
-                + "/library-catalog.xml");
-        File sourceFile = new File(SchemaCompilerTestUtils.getBaseLibraryLocation()
-                + "/test-package_v2/library_1_p2.xml");
-        File targetFolder = new File(System.getProperty("user.dir")
-                + "/target/codegen-output/" + testOutputFolder);
-        CompileAllCompilerTask compilerTask = TaskFactory.getTask(CompileAllCompilerTask.class);
 
-        compilerTask.setCatalogLocation(catalogFile.getAbsolutePath());
-        compilerTask.setOutputFolder(targetFolder.getAbsolutePath());
-        compilerTask.setCompileSchemas(true);
-        compilerTask.setCompileJsonSchemas(true);
-        compilerTask.setCompileServices(true);
-        compilerTask.setCompileSwagger(true);
-        compilerTask.setCompileHtml(true);
-        compilerTask.setGenerateExamples(true);
+    private void compileTestModel(String testOutputFolder, String bindingStyle) throws Exception {
+        File catalogFile = new File( SchemaCompilerTestUtils.getBaseLibraryLocation() + "/library-catalog.xml" );
+        File sourceFile =
+            new File( SchemaCompilerTestUtils.getBaseLibraryLocation() + "/test-package_v2/library_1_p2.xml" );
+        File targetFolder = new File( System.getProperty( "user.dir" ) + "/target/codegen-output/" + testOutputFolder );
+        CompileAllCompilerTask compilerTask = TaskFactory.getTask( CompileAllCompilerTask.class );
+
+        compilerTask.setCatalogLocation( catalogFile.getAbsolutePath() );
+        compilerTask.setOutputFolder( targetFolder.getAbsolutePath() );
+        compilerTask.setCompileSchemas( true );
+        compilerTask.setCompileJsonSchemas( true );
+        compilerTask.setCompileServices( true );
+        compilerTask.setCompileSwagger( true );
+        compilerTask.setCompileHtml( true );
+        compilerTask.setGenerateExamples( true );
         compilerTask.setExampleMaxRepeat( 3 );
-        compilerTask.setServiceEndpointUrl("http://www.OpenTravel.org/services");
-        compilerTask.setResourceBaseUrl("http://www.OpenTravel.org");
-        compilerTask.setSuppressOtmExtensions(false);
+        compilerTask.setServiceEndpointUrl( "http://www.OpenTravel.org/services" );
+        compilerTask.setResourceBaseUrl( "http://www.OpenTravel.org" );
+        compilerTask.setSuppressOtmExtensions( false );
         CompilerExtensionRegistry.setActiveExtension( bindingStyle );
 
-        ValidationFindings findings = compilerTask.compileOutput(sourceFile);
+        ValidationFindings findings = compilerTask.compileOutput( sourceFile );
 
-        SchemaCompilerTestUtils.printFindings(findings);
-        assertFalse(findings.hasFinding(FindingType.ERROR));
+        SchemaCompilerTestUtils.printFindings( findings );
+        assertFalse( findings.hasFinding( FindingType.ERROR ) );
         CodeGeneratorTestAssertions.validateGeneratedFiles( compilerTask.getGeneratedFiles() );
     }
 
     @Test
     public void testSchemaGenerationForInheritance() throws Exception {
-        File sourceFile = new File(SchemaCompilerTestUtils.getBaseLibraryLocation()
-                + "/test-package-inheritance/extended_service.xml");
-        File targetFolder = new File(System.getProperty("user.dir")
-                + "/target/codegen-output/testSchemaGenerationForInheritance");
-        CompileAllCompilerTask compilerTask = TaskFactory.getTask(CompileAllCompilerTask.class);
+        File sourceFile = new File(
+            SchemaCompilerTestUtils.getBaseLibraryLocation() + "/test-package-inheritance/extended_service.xml" );
+        File targetFolder =
+            new File( System.getProperty( "user.dir" ) + "/target/codegen-output/testSchemaGenerationForInheritance" );
+        CompileAllCompilerTask compilerTask = TaskFactory.getTask( CompileAllCompilerTask.class );
 
-        compilerTask.setOutputFolder(targetFolder.getAbsolutePath());
-        compilerTask.setCompileSchemas(true);
-        compilerTask.setCompileJsonSchemas(true);
-        compilerTask.setCompileServices(true);
-        compilerTask.setCompileSwagger(true);
-        compilerTask.setCompileHtml(true);
-        compilerTask.setGenerateExamples(true);
-        compilerTask.setServiceEndpointUrl("http://www.OpenTravel.org/services");
-        compilerTask.setResourceBaseUrl("http://www.OpenTravel.org/resources");
+        compilerTask.setOutputFolder( targetFolder.getAbsolutePath() );
+        compilerTask.setCompileSchemas( true );
+        compilerTask.setCompileJsonSchemas( true );
+        compilerTask.setCompileServices( true );
+        compilerTask.setCompileSwagger( true );
+        compilerTask.setCompileHtml( true );
+        compilerTask.setGenerateExamples( true );
+        compilerTask.setServiceEndpointUrl( "http://www.OpenTravel.org/services" );
+        compilerTask.setResourceBaseUrl( "http://www.OpenTravel.org/resources" );
         CompilerExtensionRegistry.setActiveExtension( "OTA2" );
-        
-        ValidationFindings findings = compilerTask.compileOutput(sourceFile);
 
-        SchemaCompilerTestUtils.printFindings(findings);
-        assertFalse(findings.hasFinding(FindingType.ERROR));
+        ValidationFindings findings = compilerTask.compileOutput( sourceFile );
+
+        SchemaCompilerTestUtils.printFindings( findings );
+        assertFalse( findings.hasFinding( FindingType.ERROR ) );
         CodeGeneratorTestAssertions.validateGeneratedFiles( compilerTask.getGeneratedFiles() );
     }
 
     @Test
     public void testSchemaGenerationForProjects() throws Exception {
-        File projectTestFolder = new File(SchemaCompilerTestUtils.getBaseProjectLocation());
-        File sourceFile = new File(projectTestFolder, "/project_3.otp");
-        File targetFolder = new File(System.getProperty("user.dir")
-                + "/target/codegen-output/testSchemaGenerationForProjects");
-        CompileAllCompilerTask compilerTask = TaskFactory.getTask(CompileAllCompilerTask.class);
+        File projectTestFolder = new File( SchemaCompilerTestUtils.getBaseProjectLocation() );
+        File sourceFile = new File( projectTestFolder, "/project_3.otp" );
+        File targetFolder =
+            new File( System.getProperty( "user.dir" ) + "/target/codegen-output/testSchemaGenerationForProjects" );
+        CompileAllCompilerTask compilerTask = TaskFactory.getTask( CompileAllCompilerTask.class );
 
-        compilerTask.setOutputFolder(targetFolder.getAbsolutePath());
-        compilerTask.setCompileSchemas(true);
-        compilerTask.setCompileJsonSchemas(true);
-        compilerTask.setCompileServices(true);
-        compilerTask.setCompileSwagger(true);
-        compilerTask.setCompileHtml(true);
-        compilerTask.setGenerateExamples(true);
-        compilerTask.setServiceEndpointUrl("http://www.OpenTravel.org/services");
-        compilerTask.setResourceBaseUrl("http://www.OpenTravel.org/resources");
+        compilerTask.setOutputFolder( targetFolder.getAbsolutePath() );
+        compilerTask.setCompileSchemas( true );
+        compilerTask.setCompileJsonSchemas( true );
+        compilerTask.setCompileServices( true );
+        compilerTask.setCompileSwagger( true );
+        compilerTask.setCompileHtml( true );
+        compilerTask.setGenerateExamples( true );
+        compilerTask.setServiceEndpointUrl( "http://www.OpenTravel.org/services" );
+        compilerTask.setResourceBaseUrl( "http://www.OpenTravel.org/resources" );
         CompilerExtensionRegistry.setActiveExtension( "OTA2" );
 
-        ValidationFindings findings = compilerTask.compileOutput(sourceFile);
+        ValidationFindings findings = compilerTask.compileOutput( sourceFile );
 
-        SchemaCompilerTestUtils.printFindings(findings);
-        assertFalse(findings.hasFinding(FindingType.ERROR));
+        SchemaCompilerTestUtils.printFindings( findings );
+        assertFalse( findings.hasFinding( FindingType.ERROR ) );
         CodeGeneratorTestAssertions.validateGeneratedFiles( compilerTask.getGeneratedFiles() );
     }
 
     @Test
     public void testServiceGenerationForVersions() throws Exception {
-        File catalogFile = new File(SchemaCompilerTestUtils.getBaseLibraryLocation()
-                + "/../versions/version-catalog.xml");
-        File sourceFile = new File(SchemaCompilerTestUtils.getBaseLibraryLocation()
-                + "/../versions/library_v01_02_02.xml");
-        File targetFolder = new File(System.getProperty("user.dir")
-                + "/target/codegen-output/testServiceGenerationForVersions");
-        CompileAllCompilerTask compilerTask = TaskFactory.getTask(CompileAllCompilerTask.class);
+        File catalogFile =
+            new File( SchemaCompilerTestUtils.getBaseLibraryLocation() + "/../versions/version-catalog.xml" );
+        File sourceFile =
+            new File( SchemaCompilerTestUtils.getBaseLibraryLocation() + "/../versions/library_v01_02_02.xml" );
+        File targetFolder =
+            new File( System.getProperty( "user.dir" ) + "/target/codegen-output/testServiceGenerationForVersions" );
+        CompileAllCompilerTask compilerTask = TaskFactory.getTask( CompileAllCompilerTask.class );
 
-        compilerTask.setCatalogLocation(catalogFile.getAbsolutePath());
-        compilerTask.setOutputFolder(targetFolder.getAbsolutePath());
-        compilerTask.setCompileSchemas(true);
-        compilerTask.setCompileJsonSchemas(true);
-        compilerTask.setCompileServices(true);
-        compilerTask.setCompileSwagger(true);
-        compilerTask.setCompileHtml(true);
-        compilerTask.setGenerateExamples(true);
-        compilerTask.setServiceEndpointUrl("http://www.OpenTravel.org/services");
-        compilerTask.setResourceBaseUrl("http://www.OpenTravel.org/resources");
+        compilerTask.setCatalogLocation( catalogFile.getAbsolutePath() );
+        compilerTask.setOutputFolder( targetFolder.getAbsolutePath() );
+        compilerTask.setCompileSchemas( true );
+        compilerTask.setCompileJsonSchemas( true );
+        compilerTask.setCompileServices( true );
+        compilerTask.setCompileSwagger( true );
+        compilerTask.setCompileHtml( true );
+        compilerTask.setGenerateExamples( true );
+        compilerTask.setServiceEndpointUrl( "http://www.OpenTravel.org/services" );
+        compilerTask.setResourceBaseUrl( "http://www.OpenTravel.org/resources" );
         CompilerExtensionRegistry.setActiveExtension( "OTA2" );
 
-        ValidationFindings findings = compilerTask.compileOutput(sourceFile);
+        ValidationFindings findings = compilerTask.compileOutput( sourceFile );
 
-        SchemaCompilerTestUtils.printFindings(findings);
-        assertFalse(findings.hasFinding(FindingType.ERROR));
+        SchemaCompilerTestUtils.printFindings( findings );
+        assertFalse( findings.hasFinding( FindingType.ERROR ) );
         CodeGeneratorTestAssertions.validateGeneratedFiles( compilerTask.getGeneratedFiles() );
     }
 
     // @Test
     public void testSchemaCompilerTask_manualTest() throws Exception {
-        System.setProperty("ota2.legacyFacetNaming", "true");
-        File sourceFile = new File(System.getProperty("user.dir"),
-                "../../../temp/amtrak/_ARWS_Model/libraries/Amtrak_Solution_v01_00/v67/Amtrak_Solution.otm");
-        File targetFolder = new File(System.getProperty("user.dir")
-                + "/target/codegen-output/testSchemaCompilerTask_manualTest");
-        CompileAllCompilerTask compilerTask = TaskFactory.getTask(CompileAllCompilerTask.class);
+        System.setProperty( "ota2.legacyFacetNaming", "true" );
+        File sourceFile = new File( System.getProperty( "user.dir" ),
+            "../../../temp/amtrak/_ARWS_Model/libraries/Amtrak_Solution_v01_00/v67/Amtrak_Solution.otm" );
+        File targetFolder =
+            new File( System.getProperty( "user.dir" ) + "/target/codegen-output/testSchemaCompilerTask_manualTest" );
+        CompileAllCompilerTask compilerTask = TaskFactory.getTask( CompileAllCompilerTask.class );
 
-        compilerTask.setOutputFolder(targetFolder.getAbsolutePath());
-        compilerTask.setCompileSchemas(true);
-        compilerTask.setCompileJsonSchemas(true);
-        compilerTask.setCompileServices(true);
-        compilerTask.setServiceEndpointUrl("http://www.OpenTravel.org/services");
-        compilerTask.setResourceBaseUrl("http://www.OpenTravel.org/resources");
+        compilerTask.setOutputFolder( targetFolder.getAbsolutePath() );
+        compilerTask.setCompileSchemas( true );
+        compilerTask.setCompileJsonSchemas( true );
+        compilerTask.setCompileServices( true );
+        compilerTask.setServiceEndpointUrl( "http://www.OpenTravel.org/services" );
+        compilerTask.setResourceBaseUrl( "http://www.OpenTravel.org/resources" );
         CompilerExtensionRegistry.setActiveExtension( "OTA2" );
 
-        ValidationFindings findings = compilerTask.compileOutput(sourceFile);
+        ValidationFindings findings = compilerTask.compileOutput( sourceFile );
 
         if (findings.hasFinding()) {
-            System.out.println("Errors / Warnings:");
+            System.out.println( "Errors / Warnings:" );
 
-            for (String message : findings
-                    .getAllValidationMessages(FindingMessageFormat.IDENTIFIED_FORMAT)) {
-                System.out.println("  " + message);
+            for (String message : findings.getAllValidationMessages( FindingMessageFormat.IDENTIFIED_FORMAT )) {
+                System.out.println( "  " + message );
             }
         }
-        assertFalse(findings.hasFinding(FindingType.ERROR));
+        assertFalse( findings.hasFinding( FindingType.ERROR ) );
     }
 
 }

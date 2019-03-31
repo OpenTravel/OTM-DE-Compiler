@@ -13,39 +13,42 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.codegen.html.writers;
 
-import java.io.IOException;
+package org.opentravel.schemacompiler.codegen.html.writers;
 
 import org.opentravel.schemacompiler.codegen.html.Content;
 import org.opentravel.schemacompiler.codegen.html.builders.DocumentationBuilder;
 import org.opentravel.schemacompiler.codegen.html.builders.FacetOwnerDocumentationBuilder;
 import org.opentravel.schemacompiler.codegen.html.writers.info.FacetInfoWriter;
 
+import java.io.IOException;
+
 /**
  * @author Eric.Bronson
  *
  */
 @SuppressWarnings("squid:MaximumInheritanceDepth")
-public class FacetOwnerWriterImpl<T extends FacetOwnerDocumentationBuilder<?>> extends NamedEntityWriter<T> implements
-		FacetOwnerWriter {
+public class FacetOwnerWriterImpl<T extends FacetOwnerDocumentationBuilder<?>> extends NamedEntityWriter<T>
+    implements FacetOwnerWriter {
 
 
-	public FacetOwnerWriterImpl(T member,
-			DocumentationBuilder prev,
-			DocumentationBuilder next) throws IOException {
-		super(member, prev, next);
-	}
+    public FacetOwnerWriterImpl(T member, DocumentationBuilder prev, DocumentationBuilder next) throws IOException {
+        super( member, prev, next );
+    }
 
-	/* (non-Javadoc)
-	 * @see org.opentravel.schemacompiler.codegen.html.writers.FacetOwnerWriter#addFacetInfo(org.opentravel.schemacompiler.codegen.html.Content)
-	 */
-	@Override
-	public void addFacetInfo(Content objectTree) {
-		if(!member.getFacets().isEmpty()){
-			FacetInfoWriter facetWriter = new FacetInfoWriter(this, member);
-			facetWriter.addInfo(objectTree);
-		}
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.opentravel.schemacompiler.codegen.html.writers.FacetOwnerWriter#addFacetInfo(org.opentravel.schemacompiler.
+     * codegen.html.Content)
+     */
+    @Override
+    public void addFacetInfo(Content objectTree) {
+        if (!member.getFacets().isEmpty()) {
+            FacetInfoWriter facetWriter = new FacetInfoWriter( this, member );
+            facetWriter.addInfo( objectTree );
+        }
+    }
 
 }

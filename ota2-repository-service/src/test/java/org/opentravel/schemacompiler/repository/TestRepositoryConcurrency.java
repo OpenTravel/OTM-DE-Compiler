@@ -224,7 +224,7 @@ public class TestRepositoryConcurrency {
 				"http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/concurrency-test",
 				"Library_" + userId + "_1_0_0.otm", "1.0.0" );
         File repositoryFile = URLUtils.toFile( repositoryManager.get().getContentLocation( item ) );
-        File wipFile = repositoryManager.get().getFileManager().getLibraryWIPContentLocation(
+        File wipFile = repositoryManager.get().getFileManager().getLibraryWipContentLocation(
                 item.getBaseNamespace(), item.getFilename());
 		
 		repositoryManager.get().lock( item );

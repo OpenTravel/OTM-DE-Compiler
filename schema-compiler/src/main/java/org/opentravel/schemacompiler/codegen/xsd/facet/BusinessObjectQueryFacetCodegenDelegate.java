@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.codegen.xsd.facet;
 
-import javax.xml.namespace.QName;
+package org.opentravel.schemacompiler.codegen.xsd.facet;
 
 import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
 import org.opentravel.schemacompiler.ioc.SchemaDependency;
@@ -25,9 +24,11 @@ import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLFacetOwner;
 
+import javax.xml.namespace.QName;
+
 /**
- * Code generation delegate for <code>TLFacet</code> instances with a facet type of <code>QUERY</code>
- * and a facet owner of type <code>TLBusinessObject</code>.
+ * Code generation delegate for <code>TLFacet</code> instances with a facet type of <code>QUERY</code> and a facet owner
+ * of type <code>TLBusinessObject</code>.
  * 
  * @author S. Livezey
  */
@@ -36,14 +37,13 @@ public class BusinessObjectQueryFacetCodegenDelegate extends BusinessObjectFacet
     /**
      * Constructor that specifies the source facet for which code artifacts are being generated.
      * 
-     * @param sourceFacet
-     *            the source facet
+     * @param sourceFacet the source facet
      */
     public BusinessObjectQueryFacetCodegenDelegate(TLFacet sourceFacet) {
-        super(sourceFacet);
+        super( sourceFacet );
     }
 
-	/**
+    /**
      * @see org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegate#hasContent()
      */
     @Override
@@ -56,20 +56,20 @@ public class BusinessObjectQueryFacetCodegenDelegate extends BusinessObjectFacet
      */
     @Override
     public TLFacet getLocalBaseFacet() {
-        FacetCodegenDelegateFactory factory = new FacetCodegenDelegateFactory(transformerContext);
+        FacetCodegenDelegateFactory factory = new FacetCodegenDelegateFactory( transformerContext );
         TLFacet sourceFacet = getSourceFacet();
         TLFacetOwner facetOwner = sourceFacet.getOwningEntity();
         TLFacet baseFacet = null;
 
         while ((baseFacet == null) && (facetOwner instanceof TLContextualFacet)) {
-        	TLContextualFacet owningFacet = (TLContextualFacet) facetOwner;
-        	
-        	if (factory.getDelegate(owningFacet).hasContent()) {
-        		baseFacet = owningFacet;
-        		
-        	} else {
-        		facetOwner = owningFacet.getOwningEntity();
-        	}
+            TLContextualFacet owningFacet = (TLContextualFacet) facetOwner;
+
+            if (factory.getDelegate( owningFacet ).hasContent()) {
+                baseFacet = owningFacet;
+
+            } else {
+                facetOwner = owningFacet.getOwningEntity();
+            }
         }
         return baseFacet;
     }
@@ -79,16 +79,16 @@ public class BusinessObjectQueryFacetCodegenDelegate extends BusinessObjectFacet
      */
     @Override
     protected QName getSubstitutionGroup(TLAlias facetAlias) {
-    	TLContextualFacet facet = (TLContextualFacet) getSourceFacet();
-    	QName subGrp = null;
-    	
-    	if (facet.getOwningEntity() instanceof TLContextualFacet) {
-    		while (facet.getOwningEntity() instanceof TLContextualFacet) {
-    			facet = (TLContextualFacet) facet.getOwningEntity();
-    		}
-    		subGrp = XsdCodegenUtils.getGlobalElementName( facet );
-    	}
-    	return subGrp;
+        TLContextualFacet facet = (TLContextualFacet) getSourceFacet();
+        QName subGrp = null;
+
+        if (facet.getOwningEntity() instanceof TLContextualFacet) {
+            while (facet.getOwningEntity() instanceof TLContextualFacet) {
+                facet = (TLContextualFacet) facet.getOwningEntity();
+            }
+            subGrp = XsdCodegenUtils.getGlobalElementName( facet );
+        }
+        return subGrp;
     }
 
     /**
@@ -96,17 +96,17 @@ public class BusinessObjectQueryFacetCodegenDelegate extends BusinessObjectFacet
      */
     @Override
     public QName getExtensionPointElement() {
-    	TLFacetOwner facetOwner = getSourceFacet().getOwningEntity();
+        TLFacetOwner facetOwner = getSourceFacet().getOwningEntity();
         QName extensionPointQName;
-    	
+
         if (facetOwner instanceof TLBusinessObject) {
             SchemaDependency extensionPoint = SchemaDependency.getExtensionPointElement();
-            
+
             extensionPointQName = extensionPoint.toQName();
-            addCompileTimeDependency(extensionPoint);
-            
+            addCompileTimeDependency( extensionPoint );
+
         } else {
-        	extensionPointQName = null;
+            extensionPointQName = null;
         }
         return extensionPointQName;
     }

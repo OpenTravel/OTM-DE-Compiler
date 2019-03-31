@@ -13,11 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.model;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+package org.opentravel.schemacompiler.model;
 
 import org.opentravel.schemacompiler.event.ModelEvent;
 import org.opentravel.schemacompiler.event.ModelEventBuilder;
@@ -26,26 +23,29 @@ import org.opentravel.schemacompiler.model.TLAttribute.AttributeListManager;
 import org.opentravel.schemacompiler.model.TLIndicator.IndicatorListManager;
 import org.opentravel.schemacompiler.model.TLProperty.PropertyListManager;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+
 /**
- * Facet definition for types that are designed to be encapsulated within another facet's extension
- * point element.
+ * Facet definition for types that are designed to be encapsulated within another facet's extension point element.
  * 
  * <p>
  * NOTE: In spite of its name, developers should note this class <u>does not</u> extends the
- * <code>TLAbstractFacet</code> class. This is because several of the key facet behaviors are not
- * applicable to extension point facets (e.g. they are not assignable as property types and cannot
- * be assigned to an arbitrary <code>TLFacetOwner</code>). Instead, the key behaviors for extension
- * point facets were inherited from the interfaces that define the required behaviors.
+ * <code>TLAbstractFacet</code> class. This is because several of the key facet behaviors are not applicable to
+ * extension point facets (e.g. they are not assignable as property types and cannot be assigned to an arbitrary
+ * <code>TLFacetOwner</code>). Instead, the key behaviors for extension point facets were inherited from the interfaces
+ * that define the required behaviors.
  * 
  * @author S. Livezey
  */
-public class TLExtensionPointFacet extends TLLibraryMember implements LibraryElement,
-        TLExtensionOwner, TLAttributeOwner, TLPropertyOwner, TLIndicatorOwner, TLDocumentationOwner {
+public class TLExtensionPointFacet extends TLLibraryMember implements LibraryElement, TLExtensionOwner,
+    TLAttributeOwner, TLPropertyOwner, TLIndicatorOwner, TLDocumentationOwner {
 
     private TLExtension extension;
-    private AttributeListManager attributeManager = new AttributeListManager(this);
-    private PropertyListManager elementManager = new PropertyListManager(this);
-    private IndicatorListManager indicatorManager = new IndicatorListManager(this);
+    private AttributeListManager attributeManager = new AttributeListManager( this );
+    private PropertyListManager elementManager = new PropertyListManager( this );
+    private IndicatorListManager indicatorManager = new IndicatorListManager( this );
     private TLDocumentation documentation;
 
     /**
@@ -58,12 +58,12 @@ public class TLExtensionPointFacet extends TLLibraryMember implements LibraryEle
         String localName = getLocalName();
 
         if (owningLibrary != null) {
-            identity.append(owningLibrary.getValidationIdentity()).append(" : ");
+            identity.append( owningLibrary.getValidationIdentity() ).append( " : " );
         }
         if (localName == null) {
-            identity.append("[Unnamed Extension Point Facet]");
+            identity.append( "[Unnamed Extension Point Facet]" );
         } else {
-            identity.append(localName);
+            identity.append( localName );
         }
         return identity.toString();
     }
@@ -161,20 +161,20 @@ public class TLExtensionPointFacet extends TLLibraryMember implements LibraryEle
             // Even though there is only one extension, send to events so that all extension owners
             // behave the same (as if there is a list of multiple extensions).
             if (this.extension != null) {
-                ModelEvent<?> event = new ModelEventBuilder(ModelEventType.EXTENDS_REMOVED, this)
-                        .setAffectedItem(this.extension).buildEvent();
+                ModelEvent<?> event = new ModelEventBuilder( ModelEventType.EXTENDS_REMOVED, this )
+                    .setAffectedItem( this.extension ).buildEvent();
 
-                this.extension.setOwner(null);
+                this.extension.setOwner( null );
                 this.extension = null;
-                publishEvent(event);
+                publishEvent( event );
             }
             if (extension != null) {
-                ModelEvent<?> event = new ModelEventBuilder(ModelEventType.EXTENDS_ADDED, this)
-                        .setAffectedItem(extension).buildEvent();
+                ModelEvent<?> event = new ModelEventBuilder( ModelEventType.EXTENDS_ADDED, this )
+                    .setAffectedItem( extension ).buildEvent();
 
-                extension.setOwner(this);
+                extension.setOwner( this );
                 this.extension = extension;
-                publishEvent(event);
+                publishEvent( event );
             }
         }
     }
@@ -190,14 +190,14 @@ public class TLExtensionPointFacet extends TLLibraryMember implements LibraryEle
      * @see org.opentravel.schemacompiler.model.TLAttributeOwner#getAttribute(java.lang.String)
      */
     public TLAttribute getAttribute(String attributeName) {
-        return attributeManager.getChild(attributeName);
+        return attributeManager.getChild( attributeName );
     }
 
     /**
      * @see org.opentravel.schemacompiler.model.TLAttributeOwner#addAttribute(org.opentravel.schemacompiler.model.TLAttribute)
      */
     public void addAttribute(TLAttribute attribute) {
-        attributeManager.addChild(attribute);
+        attributeManager.addChild( attribute );
     }
 
     /**
@@ -206,30 +206,14 @@ public class TLExtensionPointFacet extends TLLibraryMember implements LibraryEle
      */
     @Override
     public void addAttribute(int index, TLAttribute attribute) {
-        attributeManager.addChild(index, attribute);
+        attributeManager.addChild( index, attribute );
     }
 
     /**
      * @see org.opentravel.schemacompiler.model.TLAttributeOwner#removeAttribute(org.opentravel.schemacompiler.model.TLAttribute)
      */
     public void removeAttribute(TLAttribute attribute) {
-        attributeManager.removeChild(attribute);
-    }
-
-    /**
-     * @see org.opentravel.schemacompiler.model.TLAttributeOwner#moveUp(org.opentravel.schemacompiler.model.TLAttribute)
-     */
-    @Override
-    public void moveUp(TLAttribute attribute) {
-        attributeManager.moveUp(attribute);
-    }
-
-    /**
-     * @see org.opentravel.schemacompiler.model.TLAttributeOwner#moveDown(org.opentravel.schemacompiler.model.TLAttribute)
-     */
-    @Override
-    public void moveDown(TLAttribute attribute) {
-        attributeManager.moveDown(attribute);
+        attributeManager.removeChild( attribute );
     }
 
     /**
@@ -237,7 +221,7 @@ public class TLExtensionPointFacet extends TLLibraryMember implements LibraryEle
      */
     @Override
     public void sortAttributes(Comparator<TLAttribute> comparator) {
-        attributeManager.sortChildren(comparator);
+        attributeManager.sortChildren( comparator );
     }
 
     /**
@@ -253,7 +237,7 @@ public class TLExtensionPointFacet extends TLLibraryMember implements LibraryEle
      */
     @Override
     public TLProperty getElement(String elementName) {
-        return elementManager.getChild(elementName);
+        return elementManager.getChild( elementName );
     }
 
     /**
@@ -261,7 +245,7 @@ public class TLExtensionPointFacet extends TLLibraryMember implements LibraryEle
      */
     @Override
     public void addElement(TLProperty element) {
-        elementManager.addChild(element);
+        elementManager.addChild( element );
     }
 
     /**
@@ -270,7 +254,7 @@ public class TLExtensionPointFacet extends TLLibraryMember implements LibraryEle
      */
     @Override
     public void addElement(int index, TLProperty element) {
-        elementManager.addChild(index, element);
+        elementManager.addChild( index, element );
     }
 
     /**
@@ -278,23 +262,7 @@ public class TLExtensionPointFacet extends TLLibraryMember implements LibraryEle
      */
     @Override
     public void removeProperty(TLProperty element) {
-        elementManager.removeChild(element);
-    }
-
-    /**
-     * @see org.opentravel.schemacompiler.model.TLPropertyOwner#moveUp(org.opentravel.schemacompiler.model.TLProperty)
-     */
-    @Override
-    public void moveUp(TLProperty element) {
-        elementManager.moveUp(element);
-    }
-
-    /**
-     * @see org.opentravel.schemacompiler.model.TLPropertyOwner#moveDown(org.opentravel.schemacompiler.model.TLProperty)
-     */
-    @Override
-    public void moveDown(TLProperty element) {
-        elementManager.moveDown(element);
+        elementManager.removeChild( element );
     }
 
     /**
@@ -302,7 +270,7 @@ public class TLExtensionPointFacet extends TLLibraryMember implements LibraryEle
      */
     @Override
     public void sortElements(Comparator<TLProperty> comparator) {
-        elementManager.sortChildren(comparator);
+        elementManager.sortChildren( comparator );
     }
 
     /**
@@ -318,7 +286,7 @@ public class TLExtensionPointFacet extends TLLibraryMember implements LibraryEle
      */
     @Override
     public TLIndicator getIndicator(String indicatorName) {
-        return indicatorManager.getChild(indicatorName);
+        return indicatorManager.getChild( indicatorName );
     }
 
     /**
@@ -326,7 +294,7 @@ public class TLExtensionPointFacet extends TLLibraryMember implements LibraryEle
      */
     @Override
     public void addIndicator(TLIndicator indicator) {
-        indicatorManager.addChild(indicator);
+        indicatorManager.addChild( indicator );
     }
 
     /**
@@ -335,7 +303,7 @@ public class TLExtensionPointFacet extends TLLibraryMember implements LibraryEle
      */
     @Override
     public void addIndicator(int index, TLIndicator indicator) {
-        indicatorManager.addChild(index, indicator);
+        indicatorManager.addChild( index, indicator );
     }
 
     /**
@@ -343,23 +311,7 @@ public class TLExtensionPointFacet extends TLLibraryMember implements LibraryEle
      */
     @Override
     public void removeIndicator(TLIndicator indicator) {
-        indicatorManager.removeChild(indicator);
-    }
-
-    /**
-     * @see org.opentravel.schemacompiler.model.TLIndicatorOwner#moveUp(org.opentravel.schemacompiler.model.TLIndicator)
-     */
-    @Override
-    public void moveUp(TLIndicator indicator) {
-        indicatorManager.moveUp(indicator);
-    }
-
-    /**
-     * @see org.opentravel.schemacompiler.model.TLIndicatorOwner#moveDown(org.opentravel.schemacompiler.model.TLIndicator)
-     */
-    @Override
-    public void moveDown(TLIndicator indicator) {
-        indicatorManager.moveDown(indicator);
+        indicatorManager.removeChild( indicator );
     }
 
     /**
@@ -367,41 +319,89 @@ public class TLExtensionPointFacet extends TLLibraryMember implements LibraryEle
      */
     @Override
     public void sortIndicators(Comparator<TLIndicator> comparator) {
-        indicatorManager.sortChildren(comparator);
+        indicatorManager.sortChildren( comparator );
     }
 
     /**
-	 * @see org.opentravel.schemacompiler.model.TLMemberFieldOwner#getMemberFields()
-	 */
-	@SuppressWarnings("unchecked")
-	@Override
-	public <O extends TLMemberFieldOwner> List<TLMemberField<O>> getMemberFields() {
-		List<TLMemberField<O>> memberFields = new ArrayList<>();
-		
-		getAttributes().forEach( f -> memberFields.add( (TLMemberField<O>) f ) );
-		getElements().forEach( f -> memberFields.add( (TLMemberField<O>) f ) );
-		getIndicators().forEach( f -> memberFields.add( (TLMemberField<O>) f ) );
-		return memberFields;
-	}
+     * @see org.opentravel.schemacompiler.model.TLAttributeOwner#moveUp(org.opentravel.schemacompiler.model.TLAttribute)
+     */
+    @Override
+    public void moveUp(TLAttribute attribute) {
+        attributeManager.moveUp( attribute );
+    }
 
-	/**
-	 * @see org.opentravel.schemacompiler.model.TLMemberFieldOwner#getMemberField(java.lang.String)
-	 */
-	@SuppressWarnings("unchecked")
-	@Override
-	public <O extends TLMemberFieldOwner> TLMemberField<O> getMemberField(String fieldName) {
-		TLMemberField<O> memberField = (TLMemberField<O>) getAttribute( fieldName );
-		
-		if (memberField == null) {
-			memberField = (TLMemberField<O>) getElement( fieldName );
-		}
-		if (memberField == null) {
-			memberField = (TLMemberField<O>) getIndicator( fieldName );
-		}
-		return memberField;
-	}
+    /**
+     * @see org.opentravel.schemacompiler.model.TLPropertyOwner#moveUp(org.opentravel.schemacompiler.model.TLProperty)
+     */
+    @Override
+    public void moveUp(TLProperty element) {
+        elementManager.moveUp( element );
+    }
 
-	/**
+    /**
+     * @see org.opentravel.schemacompiler.model.TLIndicatorOwner#moveUp(org.opentravel.schemacompiler.model.TLIndicator)
+     */
+    @Override
+    public void moveUp(TLIndicator indicator) {
+        indicatorManager.moveUp( indicator );
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.model.TLAttributeOwner#moveDown(org.opentravel.schemacompiler.model.TLAttribute)
+     */
+    @Override
+    public void moveDown(TLAttribute attribute) {
+        attributeManager.moveDown( attribute );
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.model.TLPropertyOwner#moveDown(org.opentravel.schemacompiler.model.TLProperty)
+     */
+    @Override
+    public void moveDown(TLProperty element) {
+        elementManager.moveDown( element );
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.model.TLIndicatorOwner#moveDown(org.opentravel.schemacompiler.model.TLIndicator)
+     */
+    @Override
+    public void moveDown(TLIndicator indicator) {
+        indicatorManager.moveDown( indicator );
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.model.TLMemberFieldOwner#getMemberFields()
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public <O extends TLMemberFieldOwner> List<TLMemberField<O>> getMemberFields() {
+        List<TLMemberField<O>> memberFields = new ArrayList<>();
+
+        getAttributes().forEach( f -> memberFields.add( (TLMemberField<O>) f ) );
+        getElements().forEach( f -> memberFields.add( (TLMemberField<O>) f ) );
+        getIndicators().forEach( f -> memberFields.add( (TLMemberField<O>) f ) );
+        return memberFields;
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.model.TLMemberFieldOwner#getMemberField(java.lang.String)
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public <O extends TLMemberFieldOwner> TLMemberField<O> getMemberField(String fieldName) {
+        TLMemberField<O> memberField = (TLMemberField<O>) getAttribute( fieldName );
+
+        if (memberField == null) {
+            memberField = (TLMemberField<O>) getElement( fieldName );
+        }
+        if (memberField == null) {
+            memberField = (TLMemberField<O>) getIndicator( fieldName );
+        }
+        return memberField;
+    }
+
+    /**
      * @see org.opentravel.schemacompiler.model.TLDocumentationOwner#getDocumentation()
      */
     public TLDocumentation getDocumentation() {
@@ -413,17 +413,17 @@ public class TLExtensionPointFacet extends TLLibraryMember implements LibraryEle
      */
     public void setDocumentation(TLDocumentation documentation) {
         if (documentation != this.documentation) {
-            ModelEvent<?> event = new ModelEventBuilder(ModelEventType.DOCUMENTATION_MODIFIED, this)
-                    .setOldValue(this.documentation).setNewValue(documentation).buildEvent();
+            ModelEvent<?> event = new ModelEventBuilder( ModelEventType.DOCUMENTATION_MODIFIED, this )
+                .setOldValue( this.documentation ).setNewValue( documentation ).buildEvent();
 
             if (documentation != null) {
-                documentation.setOwner(this);
+                documentation.setOwner( this );
             }
             if (this.documentation != null) {
-                this.documentation.setOwner(null);
+                this.documentation.setOwner( null );
             }
             this.documentation = documentation;
-            publishEvent(event);
+            publishEvent( event );
         }
     }
 

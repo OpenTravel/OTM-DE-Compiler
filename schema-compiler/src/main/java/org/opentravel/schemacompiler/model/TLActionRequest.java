@@ -13,15 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.model;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+package org.opentravel.schemacompiler.model;
 
 import org.opentravel.schemacompiler.event.ModelEvent;
 import org.opentravel.schemacompiler.event.ModelEventBuilder;
 import org.opentravel.schemacompiler.event.ModelEventType;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Model element that specifies the parameters and payload for a REST Action request.
@@ -29,254 +30,254 @@ import org.opentravel.schemacompiler.event.ModelEventType;
  * @author S. Livezey
  */
 public class TLActionRequest extends TLModelElement implements TLDocumentationOwner {
-	
-	private TLAction owner;
-	private TLHttpMethod httpMethod;
-	private TLParamGroup paramGroup;
-	private String paramGroupName;
-	private String pathTemplate;
-	private TLActionFacet payloadType;
-	private String payloadTypeName;
-	private List<TLMimeType> mimeTypes = new ArrayList<>();
-    private TLDocumentation documentation;
-	
-	/**
-	 * @see org.opentravel.schemacompiler.validate.Validatable#getValidationIdentity()
-	 */
-	@Override
-	public String getValidationIdentity() {
-        StringBuilder identity = new StringBuilder();
-        
-        if (owner == null) {
-            identity.append("[Unnamed Action]");
-            
-        } else {
-            identity.append(owner.getValidationIdentity()).append("/");
-        }
-        identity.append("Request");
-        return identity.toString();
-	}
 
-	/**
-	 * @see org.opentravel.schemacompiler.model.LibraryElement#getOwningLibrary()
-	 */
-	@Override
-	public AbstractLibrary getOwningLibrary() {
-		return (owner == null) ? null : owner.getOwningLibrary();
-	}
+    private TLAction owner;
+    private TLHttpMethod httpMethod;
+    private TLParamGroup paramGroup;
+    private String paramGroupName;
+    private String pathTemplate;
+    private TLActionFacet payloadType;
+    private String payloadTypeName;
+    private List<TLMimeType> mimeTypes = new ArrayList<>();
+    private TLDocumentation documentation;
 
     /**
-	 * @see org.opentravel.schemacompiler.model.ModelElement#getOwningModel()
-	 */
-	@Override
-	public TLModel getOwningModel() {
-		return (owner == null) ? null : owner.getOwningModel();
-	}
+     * @see org.opentravel.schemacompiler.validate.Validatable#getValidationIdentity()
+     */
+    @Override
+    public String getValidationIdentity() {
+        StringBuilder identity = new StringBuilder();
 
-	/**
-	 * Returns the value of the 'owner' field.
-	 *
-	 * @return TLAction
-	 */
-	public TLAction getOwner() {
-		return owner;
-	}
+        if (owner == null) {
+            identity.append( "[Unnamed Action]" );
 
-	/**
-	 * Assigns the value of the 'owner' field.
-	 *
-	 * @param owner  the field value to assign
-	 */
-	public void setOwner(TLAction owningAction) {
-		this.owner = owningAction;
-	}
+        } else {
+            identity.append( owner.getValidationIdentity() ).append( "/" );
+        }
+        identity.append( "Request" );
+        return identity.toString();
+    }
 
-	/**
-	 * Returns the value of the 'httpMethod' field.
-	 *
-	 * @return TLHttpMethod
-	 */
-	public TLHttpMethod getHttpMethod() {
-		return httpMethod;
-	}
+    /**
+     * @see org.opentravel.schemacompiler.model.LibraryElement#getOwningLibrary()
+     */
+    @Override
+    public AbstractLibrary getOwningLibrary() {
+        return (owner == null) ? null : owner.getOwningLibrary();
+    }
 
-	/**
-	 * Assigns the value of the 'httpMethod' field.
-	 *
-	 * @param httpMethod  the field value to assign
-	 */
-	public void setHttpMethod(TLHttpMethod httpMethod) {
-        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.HTTP_METHOD_MODIFIED, this)
-        		.setOldValue(this.httpMethod).setNewValue(httpMethod).buildEvent();
+    /**
+     * @see org.opentravel.schemacompiler.model.ModelElement#getOwningModel()
+     */
+    @Override
+    public TLModel getOwningModel() {
+        return (owner == null) ? null : owner.getOwningModel();
+    }
 
-		this.httpMethod = httpMethod;
-        publishEvent(event);
-	}
+    /**
+     * Returns the value of the 'owner' field.
+     *
+     * @return TLAction
+     */
+    public TLAction getOwner() {
+        return owner;
+    }
 
-	/**
-	 * Returns the value of the 'paramGroup' field.
-	 *
-	 * @return TLParamGroup
-	 */
-	public TLParamGroup getParamGroup() {
-		return paramGroup;
-	}
+    /**
+     * Assigns the value of the 'owner' field.
+     *
+     * @param owner the field value to assign
+     */
+    public void setOwner(TLAction owner) {
+        this.owner = owner;
+    }
 
-	/**
-	 * Assigns the value of the 'paramGroup' field.
-	 *
-	 * @param paramGroup  the field value to assign
-	 */
-	public void setParamGroup(TLParamGroup paramGroup) {
-        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.PARAM_GROUP_MODIFIED, this)
-        		.setOldValue(this.paramGroup).setNewValue(paramGroup).buildEvent();
-        
-		this.paramGroupName = (paramGroup == null) ? null : paramGroup.getName();
-		this.paramGroup = paramGroup;
-        publishEvent(event);
-	}
+    /**
+     * Returns the value of the 'httpMethod' field.
+     *
+     * @return TLHttpMethod
+     */
+    public TLHttpMethod getHttpMethod() {
+        return httpMethod;
+    }
 
-	/**
-	 * Returns the value of the 'paramGroupName' field.
-	 *
-	 * @return String
-	 */
-	public String getParamGroupName() {
-		return paramGroupName;
-	}
+    /**
+     * Assigns the value of the 'httpMethod' field.
+     *
+     * @param httpMethod the field value to assign
+     */
+    public void setHttpMethod(TLHttpMethod httpMethod) {
+        ModelEvent<?> event = new ModelEventBuilder( ModelEventType.HTTP_METHOD_MODIFIED, this )
+            .setOldValue( this.httpMethod ).setNewValue( httpMethod ).buildEvent();
 
-	/**
-	 * Assigns the value of the 'paramGroupName' field.
-	 *
-	 * @param paramGroupName  the field value to assign
-	 */
-	public void setParamGroupName(String paramGroupName) {
-		this.paramGroupName = paramGroupName;
-	}
+        this.httpMethod = httpMethod;
+        publishEvent( event );
+    }
 
-	/**
-	 * Returns the value of the 'pathTemplate' field.
-	 *
-	 * @return String
-	 */
-	public String getPathTemplate() {
-		return pathTemplate;
-	}
+    /**
+     * Returns the value of the 'paramGroup' field.
+     *
+     * @return TLParamGroup
+     */
+    public TLParamGroup getParamGroup() {
+        return paramGroup;
+    }
 
-	/**
-	 * Assigns the value of the 'pathTemplate' field.
-	 *
-	 * @param pathTemplate  the field value to assign
-	 */
-	public void setPathTemplate(String pathTemplate) {
-        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.PATH_TEMPLATE_MODIFIED, this)
-				.setOldValue(this.pathTemplate).setNewValue(pathTemplate).buildEvent();
+    /**
+     * Assigns the value of the 'paramGroup' field.
+     *
+     * @param paramGroup the field value to assign
+     */
+    public void setParamGroup(TLParamGroup paramGroup) {
+        ModelEvent<?> event = new ModelEventBuilder( ModelEventType.PARAM_GROUP_MODIFIED, this )
+            .setOldValue( this.paramGroup ).setNewValue( paramGroup ).buildEvent();
 
-		this.pathTemplate = pathTemplate;
-        publishEvent(event);
-	}
+        this.paramGroupName = (paramGroup == null) ? null : paramGroup.getName();
+        this.paramGroup = paramGroup;
+        publishEvent( event );
+    }
 
-	/**
-	 * Returns the value of the 'payloadType' field.
-	 *
-	 * @return TLActionFacet
-	 */
-	public TLActionFacet getPayloadType() {
-		return payloadType;
-	}
+    /**
+     * Returns the value of the 'paramGroupName' field.
+     *
+     * @return String
+     */
+    public String getParamGroupName() {
+        return paramGroupName;
+    }
 
-	/**
-	 * Assigns the value of the 'payloadType' field.
-	 *
-	 * @param actionFacet  the field value to assign
-	 */
-	public void setPayloadType(TLActionFacet payloadType) {
-        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.PAYLOAD_TYPE_MODIFIED, this)
-        		.setOldValue(this.payloadType).setNewValue(payloadType).buildEvent();
+    /**
+     * Assigns the value of the 'paramGroupName' field.
+     *
+     * @param paramGroupName the field value to assign
+     */
+    public void setParamGroupName(String paramGroupName) {
+        this.paramGroupName = paramGroupName;
+    }
 
-		this.payloadType = payloadType;
-        publishEvent(event);
-	}
+    /**
+     * Returns the value of the 'pathTemplate' field.
+     *
+     * @return String
+     */
+    public String getPathTemplate() {
+        return pathTemplate;
+    }
 
-	/**
-	 * Returns the value of the 'payloadTypeName' field.
-	 *
-	 * @return String
-	 */
-	public String getPayloadTypeName() {
-		return payloadTypeName;
-	}
+    /**
+     * Assigns the value of the 'pathTemplate' field.
+     *
+     * @param pathTemplate the field value to assign
+     */
+    public void setPathTemplate(String pathTemplate) {
+        ModelEvent<?> event = new ModelEventBuilder( ModelEventType.PATH_TEMPLATE_MODIFIED, this )
+            .setOldValue( this.pathTemplate ).setNewValue( pathTemplate ).buildEvent();
 
-	/**
-	 * Assigns the value of the 'payloadTypeName' field.
-	 *
-	 * @param payloadTypeName  the field value to assign
-	 */
-	public void setPayloadTypeName(String payloadTypeName) {
-		this.payloadTypeName = payloadTypeName;
-	}
+        this.pathTemplate = pathTemplate;
+        publishEvent( event );
+    }
 
-	/**
-	 * Returns the value of the 'mimeTypes' field.
-	 *
-	 * @return List<MimeType>
-	 */
-	public List<TLMimeType> getMimeTypes() {
-		return Collections.unmodifiableList( mimeTypes );
-	}
+    /**
+     * Returns the value of the 'payloadType' field.
+     *
+     * @return TLActionFacet
+     */
+    public TLActionFacet getPayloadType() {
+        return payloadType;
+    }
 
-	/**
-	 * Assigns the value of the 'mimeTypes' field.
-	 *
-	 * @param mimeTypes  the field value to assign
-	 */
-	public void setMimeTypes(List<TLMimeType> mimeTypes) {
-        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.MIME_TYPES_MODIFIED, this)
-        		.setOldValue(this.mimeTypes).setNewValue(mimeTypes).buildEvent();
+    /**
+     * Assigns the value of the 'payloadType' field.
+     *
+     * @param payloadType the field value to assign
+     */
+    public void setPayloadType(TLActionFacet payloadType) {
+        ModelEvent<?> event = new ModelEventBuilder( ModelEventType.PAYLOAD_TYPE_MODIFIED, this )
+            .setOldValue( this.payloadType ).setNewValue( payloadType ).buildEvent();
 
-		this.mimeTypes = (mimeTypes == null) ? new ArrayList<>() : new ArrayList<>( mimeTypes );
-        publishEvent(event);
-	}
-	
-	/**
-	 * Adds a MIME type to the current list.
-	 * 
-	 * @param mimeType  the MIME type to add
-	 */
-	public void addMimeType(TLMimeType mimeType) {
-		ModelEventBuilder eventBuilder = null;
-		
-		if (!this.mimeTypes.contains(mimeType)) {
-			eventBuilder = new ModelEventBuilder(ModelEventType.MIME_TYPES_MODIFIED, this)
-    				.setOldValue( new ArrayList<>( this.mimeTypes ) );
-		}
-		this.mimeTypes.add( mimeType );
-		
-		if (eventBuilder != null) {
-			publishEvent( eventBuilder.setNewValue( new ArrayList<>( this.mimeTypes ) ).buildEvent() );
-		}
-	}
+        this.payloadType = payloadType;
+        publishEvent( event );
+    }
 
-	/**
-	 * Removes a MIME type from the current list.
-	 * 
-	 * @param mimeType  the MIME type to remove
-	 */
-	public void removeMimeType(TLMimeType mimeType) {
-		ModelEventBuilder eventBuilder = null;
-		
-		if (this.mimeTypes.contains(mimeType)) {
-			eventBuilder = new ModelEventBuilder(ModelEventType.MIME_TYPES_MODIFIED, this)
-    				.setOldValue( new ArrayList<>( this.mimeTypes ) );
-		}
-		this.mimeTypes.remove( mimeType );
-		
-		if (eventBuilder != null) {
-			publishEvent( eventBuilder.setNewValue( new ArrayList<>( this.mimeTypes ) ).buildEvent() );
-		}
-	}
+    /**
+     * Returns the value of the 'payloadTypeName' field.
+     *
+     * @return String
+     */
+    public String getPayloadTypeName() {
+        return payloadTypeName;
+    }
 
-	/**
+    /**
+     * Assigns the value of the 'payloadTypeName' field.
+     *
+     * @param payloadTypeName the field value to assign
+     */
+    public void setPayloadTypeName(String payloadTypeName) {
+        this.payloadTypeName = payloadTypeName;
+    }
+
+    /**
+     * Returns the value of the 'mimeTypes' field.
+     *
+     * @return List&lt;MimeType&gt;
+     */
+    public List<TLMimeType> getMimeTypes() {
+        return Collections.unmodifiableList( mimeTypes );
+    }
+
+    /**
+     * Assigns the value of the 'mimeTypes' field.
+     *
+     * @param mimeTypes the field value to assign
+     */
+    public void setMimeTypes(List<TLMimeType> mimeTypes) {
+        ModelEvent<?> event = new ModelEventBuilder( ModelEventType.MIME_TYPES_MODIFIED, this )
+            .setOldValue( this.mimeTypes ).setNewValue( mimeTypes ).buildEvent();
+
+        this.mimeTypes = (mimeTypes == null) ? new ArrayList<>() : new ArrayList<>( mimeTypes );
+        publishEvent( event );
+    }
+
+    /**
+     * Adds a MIME type to the current list.
+     * 
+     * @param mimeType the MIME type to add
+     */
+    public void addMimeType(TLMimeType mimeType) {
+        ModelEventBuilder eventBuilder = null;
+
+        if (!this.mimeTypes.contains( mimeType )) {
+            eventBuilder = new ModelEventBuilder( ModelEventType.MIME_TYPES_MODIFIED, this )
+                .setOldValue( new ArrayList<>( this.mimeTypes ) );
+        }
+        this.mimeTypes.add( mimeType );
+
+        if (eventBuilder != null) {
+            publishEvent( eventBuilder.setNewValue( new ArrayList<>( this.mimeTypes ) ).buildEvent() );
+        }
+    }
+
+    /**
+     * Removes a MIME type from the current list.
+     * 
+     * @param mimeType the MIME type to remove
+     */
+    public void removeMimeType(TLMimeType mimeType) {
+        ModelEventBuilder eventBuilder = null;
+
+        if (this.mimeTypes.contains( mimeType )) {
+            eventBuilder = new ModelEventBuilder( ModelEventType.MIME_TYPES_MODIFIED, this )
+                .setOldValue( new ArrayList<>( this.mimeTypes ) );
+        }
+        this.mimeTypes.remove( mimeType );
+
+        if (eventBuilder != null) {
+            publishEvent( eventBuilder.setNewValue( new ArrayList<>( this.mimeTypes ) ).buildEvent() );
+        }
+    }
+
+    /**
      * @see org.opentravel.schemacompiler.model.TLDocumentationOwner#getDocumentation()
      */
     public TLDocumentation getDocumentation() {
@@ -288,17 +289,17 @@ public class TLActionRequest extends TLModelElement implements TLDocumentationOw
      */
     public void setDocumentation(TLDocumentation documentation) {
         if (documentation != this.documentation) {
-            ModelEvent<?> event = new ModelEventBuilder(ModelEventType.DOCUMENTATION_MODIFIED, this)
-                    .setOldValue(this.documentation).setNewValue(documentation).buildEvent();
+            ModelEvent<?> event = new ModelEventBuilder( ModelEventType.DOCUMENTATION_MODIFIED, this )
+                .setOldValue( this.documentation ).setNewValue( documentation ).buildEvent();
 
             if (documentation != null) {
-                documentation.setOwner(this);
+                documentation.setOwner( this );
             }
             if (this.documentation != null) {
-                this.documentation.setOwner(null);
+                this.documentation.setOwner( null );
             }
             this.documentation = documentation;
-            publishEvent(event);
+            publishEvent( event );
         }
     }
 

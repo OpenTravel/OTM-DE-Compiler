@@ -13,22 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.repository.impl;
 
-import java.io.File;
-
 import org.opentravel.schemacompiler.model.TLLibrary;
+
+import java.io.File;
 
 /**
  * Wrapper class that contains the <code>TLLibrary</code> content as well as an indicator of whether the library was
  * originally saved in the 1.6 format.
  */
 public class LibraryContentWrapper {
-    
+
     private TLLibrary content;
     private File contentFile;
     private boolean is16Library;
-    
+
     /**
      * Full constructor.
      * 
@@ -41,7 +42,7 @@ public class LibraryContentWrapper {
         this.setContentFile( contentFile );
         this.setIs16Library( is16Library );
     }
-    
+
     /**
      * Returns the value of the 'content' field.
      *
@@ -50,7 +51,7 @@ public class LibraryContentWrapper {
     public TLLibrary getContent() {
         return content;
     }
-    
+
     /**
      * Assigns the value of the 'content' field.
      *
@@ -59,7 +60,7 @@ public class LibraryContentWrapper {
     public void setContent(TLLibrary content) {
         this.content = content;
     }
-    
+
     /**
      * Returns the value of the 'contentFile' field.
      *
@@ -68,7 +69,7 @@ public class LibraryContentWrapper {
     public File getContentFile() {
         return contentFile;
     }
-    
+
     /**
      * Assigns the value of the 'contentFile' field.
      *
@@ -77,7 +78,7 @@ public class LibraryContentWrapper {
     public void setContentFile(File contentFile) {
         this.contentFile = contentFile;
     }
-    
+
     /**
      * Returns the value of the 'is16Library' field.
      *
@@ -86,7 +87,7 @@ public class LibraryContentWrapper {
     public boolean isIs16Library() {
         return is16Library;
     }
-    
+
     /**
      * Assigns the value of the 'is16Library' field.
      *
@@ -95,5 +96,5 @@ public class LibraryContentWrapper {
     public void setIs16Library(boolean is16Library) {
         this.is16Library = is16Library;
     }
-    
+
 }

@@ -13,14 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.codegen.xsd.facet;
 
 import org.opentravel.schemacompiler.model.TLListFacet;
 import org.w3._2001.xmlschema.Annotated;
 
 /**
- * Code generation delegate for <code>TLListFacet</code> instances with a facet type of
- * <code>INFO</code> and a facet owner of type <code>TLCoreObject</code>.
+ * Code generation delegate for <code>TLListFacet</code> instances with a facet type of <code>INFO</code> and a facet
+ * owner of type <code>TLCoreObject</code>.
  * 
  * @author S. Livezey
  */
@@ -29,11 +30,10 @@ public class CoreObjectListFacetCodegenDelegate extends TLListFacetCodegenDelega
     /**
      * Constructor that specifies the source facet for which code artifacts are being generated.
      * 
-     * @param sourceFacet
-     *            the source facet
+     * @param sourceFacet the source facet
      */
     public CoreObjectListFacetCodegenDelegate(TLListFacet sourceFacet) {
-        super(sourceFacet);
+        super( sourceFacet );
     }
 
     /**

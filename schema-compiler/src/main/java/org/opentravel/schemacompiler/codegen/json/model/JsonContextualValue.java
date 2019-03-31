@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.codegen.json.model;
 
 import com.google.gson.JsonObject;
@@ -21,55 +22,55 @@ import com.google.gson.JsonObject;
  * Represents a single contextual value within the JSON schema documentation.
  */
 public class JsonContextualValue implements JsonModelObject {
-	
-	private String context;
-	private String value;
-	
-	/**
-	 * Returns the context name associated with the value.
-	 *
-	 * @return String
-	 */
-	public String getContext() {
-		return context;
-	}
-	
-	/**
-	 * Assigns the context name associated with the value.
-	 *
-	 * @param context  the context name to assign
-	 */
-	public void setContext(String context) {
-		this.context = context;
-	}
-	
-	/**
-	 * Returns the contextual value.
-	 *
-	 * @return String
-	 */
-	public String getValue() {
-		return value;
-	}
-	
-	/**
-	 * Assigns the contextual value.
-	 *
-	 * @param value  the contextual value to assign
-	 */
-	public void setValue(String value) {
-		this.value = value;
-	}
-	
-	/**
-	 * @see org.opentravel.schemacompiler.codegen.json.model.JsonModelObject#toJson()
-	 */
-	public JsonObject toJson() {
-		JsonObject jsonObj = new JsonObject();
-		
-		addProperty( jsonObj, "context", context );
-		addProperty( jsonObj, "value", value );
-		return jsonObj;
-	}
-	
+
+    private String context;
+    private String value;
+
+    /**
+     * Returns the context name associated with the value.
+     *
+     * @return String
+     */
+    public String getContext() {
+        return context;
+    }
+
+    /**
+     * Assigns the context name associated with the value.
+     *
+     * @param context the context name to assign
+     */
+    public void setContext(String context) {
+        this.context = context;
+    }
+
+    /**
+     * Returns the contextual value.
+     *
+     * @return String
+     */
+    public String getValue() {
+        return value;
+    }
+
+    /**
+     * Assigns the contextual value.
+     *
+     * @param value the contextual value to assign
+     */
+    public void setValue(String value) {
+        this.value = value;
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.codegen.json.model.JsonModelObject#toJson()
+     */
+    public JsonObject toJson() {
+        JsonObject jsonObj = new JsonObject();
+
+        addProperty( jsonObj, "context", context );
+        addProperty( jsonObj, "value", value );
+        return jsonObj;
+    }
+
 }

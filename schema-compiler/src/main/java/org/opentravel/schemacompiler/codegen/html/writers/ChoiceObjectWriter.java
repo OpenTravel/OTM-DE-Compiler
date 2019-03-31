@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.codegen.html.writers;
 
-import java.io.IOException;
+package org.opentravel.schemacompiler.codegen.html.writers;
 
 import org.opentravel.schemacompiler.codegen.html.builders.ChoiceObjectDocumentationBuilder;
 import org.opentravel.schemacompiler.codegen.html.builders.DocumentationBuilder;
+
+import java.io.IOException;
 
 /**
  * @author jason.kramer
@@ -27,20 +28,15 @@ import org.opentravel.schemacompiler.codegen.html.builders.DocumentationBuilder;
 @SuppressWarnings("squid:MaximumInheritanceDepth")
 public class ChoiceObjectWriter extends ComplexObjectWriter<ChoiceObjectDocumentationBuilder> {
 
-	/**
-	 * @param choiceObject
-	 *            the class being documented.
-	 * @param prev
-	 *            the previous class that was documented.
-	 * @param next
-	 *            the next class being documented.
-	 * @param classTree
-	 *            the class tree for the given class.
-	 */
-	public ChoiceObjectWriter(ChoiceObjectDocumentationBuilder choiceObject,
-			DocumentationBuilder prev, DocumentationBuilder next)
-			throws IOException {
-		super(choiceObject, prev, next);
-	}
+    /**
+     * @param choiceObject the class being documented.
+     * @param prev the previous class that was documented.
+     * @param next the next class being documented.
+     * @throws IOException thrown if an error occurs during writer initialization
+     */
+    public ChoiceObjectWriter(ChoiceObjectDocumentationBuilder choiceObject, DocumentationBuilder prev,
+        DocumentationBuilder next) throws IOException {
+        super( choiceObject, prev, next );
+    }
 
 }

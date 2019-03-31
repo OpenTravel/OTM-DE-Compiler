@@ -13,26 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.repository;
 
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.LibraryInfoType;
 import org.opentravel.schemacompiler.repository.impl.RepositoryUtils;
 
 /**
- * Search result from a remote repository that encapsulates an OTM library that
- * matched the search criteria.
+ * Search result from a remote repository that encapsulates an OTM library that matched the search criteria.
  */
 public class LibrarySearchResult extends RepositorySearchResult {
-	
-	/**
-	 * Constructor that initializes the search result item using the information provided.
-	 * 
-	 * @param libraryInfo  library meta-data returned from the remote repository
-	 * @param manager  the repository manager for the local environment
-	 */
-	public LibrarySearchResult(LibraryInfoType libraryInfo, RepositoryManager manager) {
-		super( RepositoryUtils.createRepositoryItem( manager, libraryInfo ) );
-		checkItemState( manager );
-	}
-	
+
+    /**
+     * Constructor that initializes the search result item using the information provided.
+     * 
+     * @param libraryInfo library meta-data returned from the remote repository
+     * @param manager the repository manager for the local environment
+     */
+    public LibrarySearchResult(LibraryInfoType libraryInfo, RepositoryManager manager) {
+        super( RepositoryUtils.createRepositoryItem( manager, libraryInfo ) );
+        checkItemState( manager );
+    }
+
 }

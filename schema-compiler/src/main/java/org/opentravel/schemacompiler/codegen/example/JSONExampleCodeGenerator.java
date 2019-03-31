@@ -13,11 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.codegen.example;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
+package org.opentravel.schemacompiler.codegen.example;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerationContext;
 import org.opentravel.schemacompiler.codegen.CodeGenerationException;
@@ -28,62 +25,63 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+
 /**
- * Code generator that produces sample JSON output for <code>NamedEntity</code>
- * members of the generated libraries.
+ * Code generator that produces sample JSON output for <code>NamedEntity</code> members of the generated libraries.
  * 
  * @author E. Bronson
  * 
  */
-public class JSONExampleCodeGenerator extends
-		AbstractExampleCodeGenerator {
-	
-	/**
-	 * The file extension for json, i.e. filename.json.
-	 */
-	public static final String JSON_FILE_EXTENSION = "json";
-	
-	/**
-	 * Default constructor. Initializes the proper file extension.
-	 */
-	public JSONExampleCodeGenerator() {
-		super(JSON_FILE_EXTENSION);
-	}
+public class JSONExampleCodeGenerator extends AbstractExampleCodeGenerator {
 
-	/**
-	 * Responsible for creating the json output.
-	 */
-	private ObjectMapper mapper;
+    /**
+     * The file extension for json, i.e. filename.json.
+     */
+    public static final String JSON_FILE_EXTENSION = "json";
 
-	/**
-	 * @see org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator#doGenerateOutput(org.opentravel.schemacompiler.model.TLModelElement,
-	 *      org.opentravel.schemacompiler.codegen.CodeGenerationContext)
-	 */
-	@Override
-	public void doGenerateOutput(TLModelElement source,
-			CodeGenerationContext context) throws CodeGenerationException {
-		File outputFile = getOutputFile(source, context);
-		try (OutputStream out = new FileOutputStream(outputFile);) {
-			ExampleJsonBuilder exampleBuilder = new ExampleJsonBuilder(
-					getOptions(context));
-			exampleBuilder.setModelElement((NamedEntity) source);
-			JsonNode node = exampleBuilder.buildTree();
-			getObjectMapper().writeValue(out, node);
-			addGeneratedFile(outputFile);
-		} catch (Exception e) {
-			throw new CodeGenerationException(e);
-		}
-	}
+    /**
+     * Default constructor. Initializes the proper file extension.
+     */
+    public JSONExampleCodeGenerator() {
+        super( JSON_FILE_EXTENSION );
+    }
 
-	/**
-	 * Lazy initialization of the ObjectMapper.
-	 * @return the configured ObjectMapper
-	 */
-	private ObjectMapper getObjectMapper() {
-		if(mapper == null){
-			mapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
-		}
-		return mapper;
-	}
+    /**
+     * Responsible for creating the json output.
+     */
+    private ObjectMapper mapper;
+
+    /**
+     * @see org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator#doGenerateOutput(org.opentravel.schemacompiler.model.ModelElement,
+     *      org.opentravel.schemacompiler.codegen.CodeGenerationContext)
+     */
+    @Override
+    public void doGenerateOutput(TLModelElement source, CodeGenerationContext context) throws CodeGenerationException {
+        File outputFile = getOutputFile( source, context );
+        try (OutputStream out = new FileOutputStream( outputFile );) {
+            ExampleJsonBuilder exampleBuilder = new ExampleJsonBuilder( getOptions( context ) );
+            exampleBuilder.setModelElement( (NamedEntity) source );
+            JsonNode node = exampleBuilder.buildTree();
+            getObjectMapper().writeValue( out, node );
+            addGeneratedFile( outputFile );
+        } catch (Exception e) {
+            throw new CodeGenerationException( e );
+        }
+    }
+
+    /**
+     * Lazy initialization of the ObjectMapper.
+     * 
+     * @return the configured ObjectMapper
+     */
+    private ObjectMapper getObjectMapper() {
+        if (mapper == null) {
+            mapper = new ObjectMapper().enable( SerializationFeature.INDENT_OUTPUT );
+        }
+        return mapper;
+    }
 
 }

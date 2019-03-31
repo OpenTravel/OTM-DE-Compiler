@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.transform.tl2jaxb;
 
 import org.opentravel.ns.ota2.librarymodel_v01_05.Documentation;
@@ -33,34 +34,34 @@ import org.opentravel.schemacompiler.transform.util.BaseTransformer;
  * 
  * @author S. Livezey
  */
-public class TLOpenEnumerationTransformer extends
-        BaseTransformer<TLOpenEnumeration, EnumerationOpen, SymbolResolverTransformerContext> {
+public class TLOpenEnumerationTransformer
+    extends BaseTransformer<TLOpenEnumeration,EnumerationOpen,SymbolResolverTransformerContext> {
 
     /**
      * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
      */
     @Override
     public EnumerationOpen transform(TLOpenEnumeration source) {
-        ObjectTransformer<TLExtension, Extension, SymbolResolverTransformerContext> extTransformer = getTransformerFactory()
-                .getTransformer(TLExtension.class, Extension.class);
-        ObjectTransformer<TLDocumentation, Documentation, SymbolResolverTransformerContext> docTransformer = getTransformerFactory()
-                .getTransformer(TLDocumentation.class, Documentation.class);
-        ObjectTransformer<TLEnumValue, EnumValue, SymbolResolverTransformerContext> valueTransformer = getTransformerFactory()
-                .getTransformer(TLEnumValue.class, EnumValue.class);
+        ObjectTransformer<TLExtension,Extension,SymbolResolverTransformerContext> extTransformer =
+            getTransformerFactory().getTransformer( TLExtension.class, Extension.class );
+        ObjectTransformer<TLDocumentation,Documentation,SymbolResolverTransformerContext> docTransformer =
+            getTransformerFactory().getTransformer( TLDocumentation.class, Documentation.class );
+        ObjectTransformer<TLEnumValue,EnumValue,SymbolResolverTransformerContext> valueTransformer =
+            getTransformerFactory().getTransformer( TLEnumValue.class, EnumValue.class );
         EnumerationOpen enumType = new EnumerationOpen();
 
-        enumType.setName(trimString(source.getName(), false));
+        enumType.setName( trimString( source.getName(), false ) );
 
         if (source.getExtension() != null) {
-        	enumType.setExtension(extTransformer.transform(source.getExtension()));
+            enumType.setExtension( extTransformer.transform( source.getExtension() ) );
         }
-        
+
         if ((source.getDocumentation() != null) && !source.getDocumentation().isEmpty()) {
-            enumType.setDocumentation(docTransformer.transform(source.getDocumentation()));
+            enumType.setDocumentation( docTransformer.transform( source.getDocumentation() ) );
         }
 
         for (TLEnumValue modelValue : source.getValues()) {
-            enumType.getValue().add(valueTransformer.transform(modelValue));
+            enumType.getValue().add( valueTransformer.transform( modelValue ) );
         }
         return enumType;
     }

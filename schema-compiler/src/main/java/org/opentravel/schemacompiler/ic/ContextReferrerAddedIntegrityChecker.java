@@ -13,42 +13,39 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.ic;
 
-import java.util.Arrays;
-import java.util.List;
+package org.opentravel.schemacompiler.ic;
 
 import org.opentravel.schemacompiler.event.ModelEventType;
 import org.opentravel.schemacompiler.event.OwnershipEvent;
 import org.opentravel.schemacompiler.model.TLContextReferrer;
 import org.opentravel.schemacompiler.model.TLModelElement;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
- * Integrity checker component that automatically creates a <code>TLContext</code> declaration when
- * a <code>ContextReferrer</code> is added to a library member and a matching context declaration
- * does not yet exist.
+ * Integrity checker component that automatically creates a <code>TLContext</code> declaration when a
+ * <code>ContextReferrer</code> is added to a library member and a matching context declaration does not yet exist.
  * 
  * @author S. Livezey
  */
 public class ContextReferrerAddedIntegrityChecker
-        extends
-        ContextAutoCreateIntegrityChecker<OwnershipEvent<TLModelElement, TLContextReferrer>, TLModelElement> {
+    extends ContextAutoCreateIntegrityChecker<OwnershipEvent<TLModelElement,TLContextReferrer>,TLModelElement> {
 
-    private static final ModelEventType[] ELIGIBLE_EVENT_TYPES = { ModelEventType.CUSTOM_FACET_ADDED,
-            ModelEventType.QUERY_FACET_ADDED, ModelEventType.EXAMPLE_ADDED,
-            ModelEventType.EQUIVALENT_ADDED, ModelEventType.DOC_OTHER_DOCS_ADDED };
+    private static final ModelEventType[] ELIGIBLE_EVENT_TYPES =
+        {ModelEventType.CUSTOM_FACET_ADDED, ModelEventType.QUERY_FACET_ADDED, ModelEventType.EXAMPLE_ADDED,
+            ModelEventType.EQUIVALENT_ADDED, ModelEventType.DOC_OTHER_DOCS_ADDED};
 
-    private List<ModelEventType> eligibleEvents = Arrays.asList(ELIGIBLE_EVENT_TYPES);
+    private List<ModelEventType> eligibleEvents = Arrays.asList( ELIGIBLE_EVENT_TYPES );
 
     /**
      * @see org.opentravel.schemacompiler.event.ModelEventListener#processModelEvent(org.opentravel.schemacompiler.event.ModelEvent)
      */
     @Override
-    public void processModelEvent(OwnershipEvent<TLModelElement, TLContextReferrer> event) {
-        if (eligibleEvents.contains(event.getType())
-                && (event.getAffectedItem() instanceof TLContextReferrer)) {
-            autoCreateContextDeclaration(getOwningLibrary(event.getSource()),
-                    event.getAffectedItem().getContext());
+    public void processModelEvent(OwnershipEvent<TLModelElement,TLContextReferrer> event) {
+        if (eligibleEvents.contains( event.getType() ) && (event.getAffectedItem() instanceof TLContextReferrer)) {
+            autoCreateContextDeclaration( getOwningLibrary( event.getSource() ), event.getAffectedItem().getContext() );
         }
     }
 

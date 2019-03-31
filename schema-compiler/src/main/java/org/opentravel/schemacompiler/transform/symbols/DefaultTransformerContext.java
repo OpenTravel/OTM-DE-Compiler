@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.transform.symbols;
 
-import java.util.HashMap;
-import java.util.Map;
+package org.opentravel.schemacompiler.transform.symbols;
 
 import org.opentravel.schemacompiler.transform.ObjectTransformerContext;
 import org.opentravel.schemacompiler.transform.TransformerFactory;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Default implementation of the <code> implements ObjectTransformerContext</code>.
@@ -35,7 +36,7 @@ public class DefaultTransformerContext implements ObjectTransformerContext {
      * @see org.opentravel.schemacompiler.transform.ObjectTransformerContext#getTransformerFactory()
      */
     @SuppressWarnings("unchecked")
-	@Override
+    @Override
     public <C extends ObjectTransformerContext> TransformerFactory<C> getTransformerFactory() {
         return (TransformerFactory<C>) factory;
     }
@@ -47,21 +48,22 @@ public class DefaultTransformerContext implements ObjectTransformerContext {
     public void setTransformerFactory(TransformerFactory<?> factory) {
         this.factory = factory;
     }
-    
-	/**
-	 * @see org.opentravel.schemacompiler.transform.ObjectTransformerContext#getContextCacheEntry(java.lang.String)
-	 */
-	@Override
-	public Object getContextCacheEntry(String cacheKey) {
-		return contextCache.get( cacheKey );
-	}
-	
-	/**
-	 * @see org.opentravel.schemacompiler.transform.ObjectTransformerContext#setContextCacheEntry(java.lang.String, java.lang.Object)
-	 */
-	@Override
-	public void setContextCacheEntry(String cacheKey, Object cacheValue) {
-		contextCache.put( cacheKey, cacheValue );
-	}
-	
+
+    /**
+     * @see org.opentravel.schemacompiler.transform.ObjectTransformerContext#getContextCacheEntry(java.lang.String)
+     */
+    @Override
+    public Object getContextCacheEntry(String cacheKey) {
+        return contextCache.get( cacheKey );
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.transform.ObjectTransformerContext#setContextCacheEntry(java.lang.String,
+     *      java.lang.Object)
+     */
+    @Override
+    public void setContextCacheEntry(String cacheKey, Object cacheValue) {
+        contextCache.put( cacheKey, cacheValue );
+    }
+
 }

@@ -13,17 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.codegen.xsd;
-
-import java.io.File;
-import java.io.InputStream;
-import java.util.Collection;
-
-import javax.xml.XMLConstants;
-import javax.xml.bind.JAXBContext;
-import javax.xml.transform.stream.StreamSource;
-import javax.xml.validation.Schema;
-import javax.xml.validation.SchemaFactory;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerationContext;
 import org.opentravel.schemacompiler.codegen.CodeGenerationException;
@@ -47,15 +38,23 @@ import org.opentravel.schemacompiler.validate.ValidationException;
 import org.opentravel.schemacompiler.xml.PrettyPrintLineBreakProcessor;
 import org.opentravel.schemacompiler.xml.XMLSchemaLineBreakProcessor;
 
+import java.io.File;
+import java.io.InputStream;
+import java.util.Collection;
+
+import javax.xml.XMLConstants;
+import javax.xml.bind.JAXBContext;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
+
 /**
  * Abstract base class for all code generators capable of producing XSD output.
  * 
- * @param <S>
- *            the source type for which output content will be generated
+ * @param <S> the source type for which output content will be generated
  * @author S. Livezey
  */
-public abstract class AbstractXsdCodeGenerator<S extends ModelElement> extends
-        AbstractJaxbCodeGenerator<S> {
+public abstract class AbstractXsdCodeGenerator<S extends ModelElement> extends AbstractJaxbCodeGenerator<S> {
 
     public static final String SCHEMA_CONTEXT = ":org.w3._2001.xmlschema:org.opentravel.ns.ota2.appinfo_v01_00";
 
@@ -69,32 +68,32 @@ public abstract class AbstractXsdCodeGenerator<S extends ModelElement> extends
      * Default constructor.
      */
     public AbstractXsdCodeGenerator() {
-        transformerFactory = TransformerFactory.getInstance(
-                SchemaCompilerApplicationContext.XSD_CODEGEN_TRANSFORMER_FACTORY,
-                new CodeGenerationTransformerContext(this));
+        transformerFactory =
+            TransformerFactory.getInstance( SchemaCompilerApplicationContext.XSD_CODEGEN_TRANSFORMER_FACTORY,
+                new CodeGenerationTransformerContext( this ) );
     }
 
     /**
-     * @see org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator#generateOutput(org.opentravel.schemacompiler.model.TLModelElement,
+     * @see org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator#generateOutput(org.opentravel.schemacompiler.model.ModelElement,
      *      org.opentravel.schemacompiler.codegen.CodeGenerationContext)
      */
     @Override
     public Collection<File> generateOutput(final S source, CodeGenerationContext context)
-            throws ValidationException, CodeGenerationException {
+        throws ValidationException, CodeGenerationException {
         // If a filter has not already been defined, create one that will allow processing of all
         // members and only
         // those libraries that are directly required by the members of the current source library
         if (getFilter() == null) {
-            final AbstractLibrary sourceLibrary = getLibrary(source);
+            final AbstractLibrary sourceLibrary = getLibrary( source );
             final CodeGenerationFilter libraryFilter;
 
             if (source instanceof LibraryMember) {
-                libraryFilter = new DependencyFilterBuilder((LibraryMember) source).buildFilter();
+                libraryFilter = new DependencyFilterBuilder( (LibraryMember) source ).buildFilter();
             } else {
-                libraryFilter = new DependencyFilterBuilder(sourceLibrary).buildFilter();
+                libraryFilter = new DependencyFilterBuilder( sourceLibrary ).buildFilter();
             }
 
-            setFilter(new CodeGenerationFilter() {
+            setFilter( new CodeGenerationFilter() {
 
                 @Override
                 public boolean processEntity(LibraryElement entity) {
@@ -103,12 +102,12 @@ public abstract class AbstractXsdCodeGenerator<S extends ModelElement> extends
 
                 @Override
                 public boolean processExtendedLibrary(XSDLibrary legacySchema) {
-                    return libraryFilter.processExtendedLibrary(legacySchema);
+                    return libraryFilter.processExtendedLibrary( legacySchema );
                 }
 
                 @Override
                 public boolean processLibrary(AbstractLibrary library) {
-                    return (library == sourceLibrary) || libraryFilter.processLibrary(library);
+                    return (library == sourceLibrary) || libraryFilter.processLibrary( library );
                 }
 
                 /**
@@ -116,18 +115,18 @@ public abstract class AbstractXsdCodeGenerator<S extends ModelElement> extends
                  */
                 @Override
                 public void addBuiltInLibrary(BuiltInLibrary library) {
-                    libraryFilter.addBuiltInLibrary(library);
+                    libraryFilter.addBuiltInLibrary( library );
                 }
 
-            });
+            } );
         }
-        return super.generateOutput(source, context);
+        return super.generateOutput( source, context );
     }
 
     /**
-     * Returns the schema locations to use when generating import declarations for the output
-     * schema. If no schema locations are explicitly assigned for the code generator, default
-     * locations will be assumed for each of the import declarations.
+     * Returns the schema locations to use when generating import declarations for the output schema. If no schema
+     * locations are explicitly assigned for the code generator, default locations will be assumed for each of the
+     * import declarations.
      * 
      * @return ImportSchemaLocations
      */
@@ -136,19 +135,18 @@ public abstract class AbstractXsdCodeGenerator<S extends ModelElement> extends
     }
 
     /**
-     * Assigns the schema locations to use when generating import declarations for the output
-     * schema. If no schema locations are explicitly assigned for the code generator, default
-     * locations will be assumed for each of the import declarations.
+     * Assigns the schema locations to use when generating import declarations for the output schema. If no schema
+     * locations are explicitly assigned for the code generator, default locations will be assumed for each of the
+     * import declarations.
      * 
-     * @param importSchemaLocations
-     *            the collection of import schema locations
+     * @param importSchemaLocations the collection of import schema locations
      */
     public void setImportSchemaLocations(ImportSchemaLocations importSchemaLocations) {
         this.importSchemaLocations = importSchemaLocations;
     }
 
     /**
-     * @see org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator#isSupportedSourceObject(java.lang.Object)
+     * @see org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator#isSupportedSourceObject(org.opentravel.schemacompiler.model.ModelElement)
      */
     @Override
     protected boolean isSupportedSourceObject(S source) {
@@ -160,56 +158,56 @@ public abstract class AbstractXsdCodeGenerator<S extends ModelElement> extends
      */
     @Override
     protected TransformerFactory<CodeGenerationTransformerContext> getTransformerFactory(
-            CodeGenerationContext codegenContext) {
-        transformerFactory.getContext().setCodegenContext(codegenContext);
+        CodeGenerationContext codegenContext) {
+        transformerFactory.getContext().setCodegenContext( codegenContext );
         return transformerFactory;
     }
 
     /**
-     * @see org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator#canGenerateOutput(org.opentravel.schemacompiler.model.TLModelElement,
+     * @see org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator#canGenerateOutput(org.opentravel.schemacompiler.model.ModelElement,
      *      org.opentravel.schemacompiler.codegen.CodeGenerationContext)
      */
     @Override
     protected boolean canGenerateOutput(S source, CodeGenerationContext context) {
         CodeGenerationFilter filter = getFilter();
 
-        return super.canGenerateOutput(source, context)
-                && ((filter == null) || filter.processLibrary(getLibrary(source)));
+        return super.canGenerateOutput( source, context )
+            && ((filter == null) || filter.processLibrary( getLibrary( source ) ));
     }
 
     /**
-     * @see org.opentravel.schemacompiler.codegen.impl.AbstractJaxbCodeGenerator#transformSourceObjectToJaxb(java.lang.Object,
+     * @see org.opentravel.schemacompiler.codegen.impl.AbstractJaxbCodeGenerator#transformSourceObjectToJaxb(org.opentravel.schemacompiler.model.ModelElement,
      *      org.opentravel.schemacompiler.codegen.CodeGenerationContext)
      */
     @Override
     protected Object transformSourceObjectToJaxb(S source, CodeGenerationContext context)
-            throws CodeGenerationException {
-        ObjectTransformer<S, ?, CodeGenerationTransformerContext> transformer = getTransformerFactory(
-                context).getTransformer(source, org.w3._2001.xmlschema.Schema.class);
+        throws CodeGenerationException {
+        ObjectTransformer<S,?,CodeGenerationTransformerContext> transformer =
+            getTransformerFactory( context ).getTransformer( source, org.w3._2001.xmlschema.Schema.class );
 
         if (transformer != null) {
-            return transformer.transform(source);
+            return transformer.transform( source );
 
         } else {
             String sourceType = (source == null) ? "UNKNOWN" : source.getClass().getSimpleName();
             throw new CodeGenerationException(
-                    "No object transformer available for model element of type " + sourceType);
+                "No object transformer available for model element of type " + sourceType );
         }
     }
 
     /**
-     * @see org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator#getOutputFile(org.opentravel.schemacompiler.model.TLModelElement,
+     * @see org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator#getOutputFile(org.opentravel.schemacompiler.model.ModelElement,
      *      org.opentravel.schemacompiler.codegen.CodeGenerationContext)
      */
     @Override
     protected File getOutputFile(S source, CodeGenerationContext context) {
-        File outputFolder = getOutputFolder(context, getLibrary(source).getLibraryUrl());
-        String filename = context.getValue(CodeGenerationContext.CK_SCHEMA_FILENAME);
+        File outputFolder = getOutputFolder( context, getLibrary( source ).getLibraryUrl() );
+        String filename = context.getValue( CodeGenerationContext.CK_SCHEMA_FILENAME );
 
-        if ((filename == null) || filename.trim().equals("")) {
-            filename = getFilenameBuilder().buildFilename(source, "xsd");
+        if ((filename == null) || filename.trim().equals( "" )) {
+            filename = getFilenameBuilder().buildFilename( source, "xsd" );
         }
-        return new File(outputFolder, filename);
+        return new File( outputFolder, filename );
     }
 
     /**
@@ -225,17 +223,16 @@ public abstract class AbstractXsdCodeGenerator<S extends ModelElement> extends
      */
     static {
         try {
-            SchemaFactory schemaFactory = SchemaFactory
-                    .newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-            InputStream schemaStream = SchemaDeclarations.SCHEMA_FOR_SCHEMAS.getContent(
-            		CodeGeneratorFactory.XSD_TARGET_FORMAT);
+            SchemaFactory schemaFactory = SchemaFactory.newInstance( XMLConstants.W3C_XML_SCHEMA_NS_URI );
+            InputStream schemaStream =
+                SchemaDeclarations.SCHEMA_FOR_SCHEMAS.getContent( CodeGeneratorFactory.XSD_TARGET_FORMAT );
 
-            schemaFactory.setResourceResolver(new ClasspathResourceResolver());
-            validationSchema = schemaFactory.newSchema(new StreamSource(schemaStream));
-            jaxbContext = JAXBContext.newInstance(SCHEMA_CONTEXT);
+            schemaFactory.setResourceResolver( new ClasspathResourceResolver() );
+            validationSchema = schemaFactory.newSchema( new StreamSource( schemaStream ) );
+            jaxbContext = JAXBContext.newInstance( SCHEMA_CONTEXT );
 
         } catch (Exception e) {
-            throw new ExceptionInInitializerError(e);
+            throw new ExceptionInInitializerError( e );
         }
     }
 

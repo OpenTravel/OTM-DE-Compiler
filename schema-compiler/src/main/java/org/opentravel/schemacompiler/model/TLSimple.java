@@ -13,10 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.model;
 
-import java.util.Comparator;
-import java.util.List;
+package org.opentravel.schemacompiler.model;
 
 import org.opentravel.schemacompiler.event.ModelEvent;
 import org.opentravel.schemacompiler.event.ModelEventBuilder;
@@ -26,13 +24,16 @@ import org.opentravel.schemacompiler.model.TLExample.ExampleListManager;
 import org.opentravel.schemacompiler.util.XSDFacetProfileLocator;
 import org.opentravel.schemacompiler.version.Versioned;
 
+import java.util.Comparator;
+import java.util.List;
+
 /**
  * Simple data type for library types.
  * 
  * @author S. Livezey
  */
-public class TLSimple extends TLLibraryMember implements Versioned, TLAttributeType,
-        TLDocumentationOwner, TLEquivalentOwner, TLExampleOwner {
+public class TLSimple extends TLLibraryMember
+    implements Versioned, TLAttributeType, TLDocumentationOwner, TLEquivalentOwner, TLExampleOwner {
 
     private String name;
     private TLDocumentation documentation;
@@ -48,8 +49,8 @@ public class TLSimple extends TLLibraryMember implements Versioned, TLAttributeT
     private String maxInclusive;
     private String minExclusive;
     private String maxExclusive;
-    private EquivalentListManager equivalentManager = new EquivalentListManager(this);
-    private ExampleListManager exampleManager = new ExampleListManager(this);
+    private EquivalentListManager equivalentManager = new EquivalentListManager( this );
+    private ExampleListManager exampleManager = new ExampleListManager( this );
 
     /**
      * @see org.opentravel.schemacompiler.validate.Validatable#getValidationIdentity()
@@ -60,12 +61,12 @@ public class TLSimple extends TLLibraryMember implements Versioned, TLAttributeT
         StringBuilder identity = new StringBuilder();
 
         if (owningLibrary != null) {
-            identity.append(owningLibrary.getValidationIdentity()).append(" : ");
+            identity.append( owningLibrary.getValidationIdentity() ).append( " : " );
         }
         if (name == null) {
-            identity.append("[Unnamed Simple Type]");
+            identity.append( "[Unnamed Simple Type]" );
         } else {
-            identity.append(name);
+            identity.append( name );
         }
         return identity.toString();
     }
@@ -121,11 +122,10 @@ public class TLSimple extends TLLibraryMember implements Versioned, TLAttributeT
     public boolean isLaterVersion(Versioned otherVersionedItem) {
         boolean result = false;
 
-        if ((otherVersionedItem != null) && otherVersionedItem.getClass().equals(this.getClass())
-                && (this.getOwningLibrary() != null)
-                && (otherVersionedItem.getOwningLibrary() != null) && (this.getLocalName() != null)
-                && this.getLocalName().equals(otherVersionedItem.getLocalName())) {
-            result = this.getOwningLibrary().isLaterVersion(otherVersionedItem.getOwningLibrary());
+        if ((otherVersionedItem != null) && otherVersionedItem.getClass().equals( this.getClass() )
+            && (this.getOwningLibrary() != null) && (otherVersionedItem.getOwningLibrary() != null)
+            && (this.getLocalName() != null) && this.getLocalName().equals( otherVersionedItem.getLocalName() )) {
+            result = this.getOwningLibrary().isLaterVersion( otherVersionedItem.getOwningLibrary() );
         }
         return result;
     }
@@ -142,15 +142,14 @@ public class TLSimple extends TLLibraryMember implements Versioned, TLAttributeT
     /**
      * Assigns the value of the 'name' field.
      * 
-     * @param name
-     *            the field value to assign
+     * @param name the field value to assign
      */
     public void setName(String name) {
-        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.NAME_MODIFIED, this)
-                .setOldValue(this.name).setNewValue(name).buildEvent();
+        ModelEvent<?> event = new ModelEventBuilder( ModelEventType.NAME_MODIFIED, this ).setOldValue( this.name )
+            .setNewValue( name ).buildEvent();
 
         this.name = name;
-        publishEvent(event);
+        publishEvent( event );
     }
 
     /**
@@ -173,17 +172,17 @@ public class TLSimple extends TLLibraryMember implements Versioned, TLAttributeT
      */
     public void setDocumentation(TLDocumentation documentation) {
         if (documentation != this.documentation) {
-            ModelEvent<?> event = new ModelEventBuilder(ModelEventType.DOCUMENTATION_MODIFIED, this)
-                    .setOldValue(this.documentation).setNewValue(documentation).buildEvent();
+            ModelEvent<?> event = new ModelEventBuilder( ModelEventType.DOCUMENTATION_MODIFIED, this )
+                .setOldValue( this.documentation ).setNewValue( documentation ).buildEvent();
 
             if (documentation != null) {
-                documentation.setOwner(this);
+                documentation.setOwner( this );
             }
             if (this.documentation != null) {
-                this.documentation.setOwner(null);
+                this.documentation.setOwner( null );
             }
             this.documentation = documentation;
-            publishEvent(event);
+            publishEvent( event );
         }
     }
 
@@ -199,15 +198,14 @@ public class TLSimple extends TLLibraryMember implements Versioned, TLAttributeT
     /**
      * Assigns the value of the 'parentType' field.
      * 
-     * @param parentType
-     *            the field value to assign
+     * @param parentType the field value to assign
      */
     public void setParentType(TLAttributeType parentType) {
-        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.TYPE_ASSIGNMENT_MODIFIED, this)
-                .setOldValue(this.parentType).setNewValue(parentType).buildEvent();
+        ModelEvent<?> event = new ModelEventBuilder( ModelEventType.TYPE_ASSIGNMENT_MODIFIED, this )
+            .setOldValue( this.parentType ).setNewValue( parentType ).buildEvent();
 
         this.parentType = parentType;
-        publishEvent(event);
+        publishEvent( event );
     }
 
     /**
@@ -222,8 +220,7 @@ public class TLSimple extends TLLibraryMember implements Versioned, TLAttributeT
     /**
      * Assigns the value of the 'parentTypeName' field.
      * 
-     * @param parentTypeName
-     *            the field value to assign
+     * @param parentTypeName the field value to assign
      */
     public void setParentTypeName(String parentTypeName) {
         this.parentTypeName = parentTypeName;
@@ -241,15 +238,14 @@ public class TLSimple extends TLLibraryMember implements Versioned, TLAttributeT
     /**
      * Assigns the value of the 'listTypeInd' field.
      * 
-     * @param listTypeInd
-     *            the field value to assign
+     * @param listTypeInd the field value to assign
      */
     public void setListTypeInd(boolean listTypeInd) {
-        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.LIST_TYPE_INDICATOR_MODIFIED,
-                this).setOldValue(this.listTypeInd).setNewValue(listTypeInd).buildEvent();
+        ModelEvent<?> event = new ModelEventBuilder( ModelEventType.LIST_TYPE_INDICATOR_MODIFIED, this )
+            .setOldValue( this.listTypeInd ).setNewValue( listTypeInd ).buildEvent();
 
         this.listTypeInd = listTypeInd;
-        publishEvent(event);
+        publishEvent( event );
     }
 
     /**
@@ -257,8 +253,8 @@ public class TLSimple extends TLLibraryMember implements Versioned, TLAttributeT
      */
     @Override
     public XSDFacetProfile getXSDFacetProfile() {
-        return ((parentType == null) || (parentType == this)) ?
-        		XSDFacetProfile.FP_UNKNOWN : XSDFacetProfileLocator.getXSDFacetProfile( parentType );
+        return ((parentType == null) || (parentType == this)) ? XSDFacetProfile.FP_UNKNOWN
+            : XSDFacetProfileLocator.getXSDFacetProfile( parentType );
     }
 
     /**
@@ -273,15 +269,14 @@ public class TLSimple extends TLLibraryMember implements Versioned, TLAttributeT
     /**
      * Assigns the value of the 'pattern' field.
      * 
-     * @param pattern
-     *            the field value to assign
+     * @param pattern the field value to assign
      */
     public void setPattern(String pattern) {
-        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.PATTERN_MODIFIED, this)
-                .setOldValue(this.pattern).setNewValue(pattern).buildEvent();
+        ModelEvent<?> event = new ModelEventBuilder( ModelEventType.PATTERN_MODIFIED, this ).setOldValue( this.pattern )
+            .setNewValue( pattern ).buildEvent();
 
         this.pattern = pattern;
-        publishEvent(event);
+        publishEvent( event );
     }
 
     /**
@@ -296,15 +291,14 @@ public class TLSimple extends TLLibraryMember implements Versioned, TLAttributeT
     /**
      * Assigns the value of the 'minLength' field.
      * 
-     * @param minLength
-     *            the field value to assign
+     * @param minLength the field value to assign
      */
     public void setMinLength(int minLength) {
-        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.MIN_LENGTH_MODIFIED, this)
-                .setOldValue(this.minLength).setNewValue(minLength).buildEvent();
+        ModelEvent<?> event = new ModelEventBuilder( ModelEventType.MIN_LENGTH_MODIFIED, this )
+            .setOldValue( this.minLength ).setNewValue( minLength ).buildEvent();
 
         this.minLength = minLength;
-        publishEvent(event);
+        publishEvent( event );
     }
 
     /**
@@ -319,15 +313,14 @@ public class TLSimple extends TLLibraryMember implements Versioned, TLAttributeT
     /**
      * Assigns the value of the 'maxLength' field.
      * 
-     * @param maxLength
-     *            the field value to assign
+     * @param maxLength the field value to assign
      */
     public void setMaxLength(int maxLength) {
-        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.MAX_LENGTH_MODIFIED, this)
-                .setOldValue(this.maxLength).setNewValue(maxLength).buildEvent();
+        ModelEvent<?> event = new ModelEventBuilder( ModelEventType.MAX_LENGTH_MODIFIED, this )
+            .setOldValue( this.maxLength ).setNewValue( maxLength ).buildEvent();
 
         this.maxLength = maxLength;
-        publishEvent(event);
+        publishEvent( event );
     }
 
     /**
@@ -342,15 +335,14 @@ public class TLSimple extends TLLibraryMember implements Versioned, TLAttributeT
     /**
      * Assigns the value of the 'fractionDigits' field.
      * 
-     * @param fractionDigits
-     *            the field value to assign
+     * @param fractionDigits the field value to assign
      */
     public void setFractionDigits(int fractionDigits) {
-        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.FRACTION_DIGITS_MODIFIED, this)
-                .setOldValue(this.maxLength).setNewValue(maxLength).buildEvent();
+        ModelEvent<?> event = new ModelEventBuilder( ModelEventType.FRACTION_DIGITS_MODIFIED, this )
+            .setOldValue( this.maxLength ).setNewValue( maxLength ).buildEvent();
 
         this.fractionDigits = fractionDigits;
-        publishEvent(event);
+        publishEvent( event );
     }
 
     /**
@@ -365,15 +357,14 @@ public class TLSimple extends TLLibraryMember implements Versioned, TLAttributeT
     /**
      * Assigns the value of the 'totalDigits' field.
      * 
-     * @param totalDigits
-     *            the field value to assign
+     * @param totalDigits the field value to assign
      */
     public void setTotalDigits(int totalDigits) {
-        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.TOTAL_DIGITS_MODIFIED, this)
-                .setOldValue(this.maxLength).setNewValue(maxLength).buildEvent();
+        ModelEvent<?> event = new ModelEventBuilder( ModelEventType.TOTAL_DIGITS_MODIFIED, this )
+            .setOldValue( this.maxLength ).setNewValue( maxLength ).buildEvent();
 
         this.totalDigits = totalDigits;
-        publishEvent(event);
+        publishEvent( event );
     }
 
     /**
@@ -388,15 +379,14 @@ public class TLSimple extends TLLibraryMember implements Versioned, TLAttributeT
     /**
      * Assigns the value of the 'minInclusive' field.
      * 
-     * @param minInclusive
-     *            the field value to assign
+     * @param minInclusive the field value to assign
      */
     public void setMinInclusive(String minInclusive) {
-        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.MIN_INCLUSIVE_MODIFIED, this)
-                .setOldValue(this.minInclusive).setNewValue(minInclusive).buildEvent();
+        ModelEvent<?> event = new ModelEventBuilder( ModelEventType.MIN_INCLUSIVE_MODIFIED, this )
+            .setOldValue( this.minInclusive ).setNewValue( minInclusive ).buildEvent();
 
         this.minInclusive = minInclusive;
-        publishEvent(event);
+        publishEvent( event );
     }
 
     /**
@@ -411,15 +401,14 @@ public class TLSimple extends TLLibraryMember implements Versioned, TLAttributeT
     /**
      * Assigns the value of the 'maxInclusive' field.
      * 
-     * @param maxInclusive
-     *            the field value to assign
+     * @param maxInclusive the field value to assign
      */
     public void setMaxInclusive(String maxInclusive) {
-        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.MAX_INCLUSIVE_MODIFIED, this)
-                .setOldValue(this.maxInclusive).setNewValue(maxInclusive).buildEvent();
+        ModelEvent<?> event = new ModelEventBuilder( ModelEventType.MAX_INCLUSIVE_MODIFIED, this )
+            .setOldValue( this.maxInclusive ).setNewValue( maxInclusive ).buildEvent();
 
         this.maxInclusive = maxInclusive;
-        publishEvent(event);
+        publishEvent( event );
     }
 
     /**
@@ -434,15 +423,14 @@ public class TLSimple extends TLLibraryMember implements Versioned, TLAttributeT
     /**
      * Assigns the value of the 'minExclusive' field.
      * 
-     * @param minExclusive
-     *            the field value to assign
+     * @param minExclusive the field value to assign
      */
     public void setMinExclusive(String minExclusive) {
-        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.MIN_EXCLUSIVE_MODIFIED, this)
-                .setOldValue(this.minExclusive).setNewValue(minExclusive).buildEvent();
+        ModelEvent<?> event = new ModelEventBuilder( ModelEventType.MIN_EXCLUSIVE_MODIFIED, this )
+            .setOldValue( this.minExclusive ).setNewValue( minExclusive ).buildEvent();
 
         this.minExclusive = minExclusive;
-        publishEvent(event);
+        publishEvent( event );
     }
 
     /**
@@ -457,15 +445,14 @@ public class TLSimple extends TLLibraryMember implements Versioned, TLAttributeT
     /**
      * Assigns the value of the 'maxExclusive' field.
      * 
-     * @param maxExclusive
-     *            the field value to assign
+     * @param maxExclusive the field value to assign
      */
     public void setMaxExclusive(String maxExclusive) {
-        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.MAX_EXCLUSIVE_MODIFIED, this)
-                .setOldValue(this.maxExclusive).setNewValue(maxExclusive).buildEvent();
+        ModelEvent<?> event = new ModelEventBuilder( ModelEventType.MAX_EXCLUSIVE_MODIFIED, this )
+            .setOldValue( this.maxExclusive ).setNewValue( maxExclusive ).buildEvent();
 
         this.maxExclusive = maxExclusive;
-        publishEvent(event);
+        publishEvent( event );
     }
 
     /**
@@ -481,7 +468,7 @@ public class TLSimple extends TLLibraryMember implements Versioned, TLAttributeT
      */
     @Override
     public TLEquivalent getEquivalent(String context) {
-        return equivalentManager.getChild(context);
+        return equivalentManager.getChild( context );
     }
 
     /**
@@ -489,7 +476,7 @@ public class TLSimple extends TLLibraryMember implements Versioned, TLAttributeT
      */
     @Override
     public void addEquivalent(TLEquivalent equivalent) {
-        equivalentManager.addChild(equivalent);
+        equivalentManager.addChild( equivalent );
     }
 
     /**
@@ -498,7 +485,7 @@ public class TLSimple extends TLLibraryMember implements Versioned, TLAttributeT
      */
     @Override
     public void addEquivalent(int index, TLEquivalent equivalent) {
-        equivalentManager.addChild(index, equivalent);
+        equivalentManager.addChild( index, equivalent );
     }
 
     /**
@@ -506,23 +493,7 @@ public class TLSimple extends TLLibraryMember implements Versioned, TLAttributeT
      */
     @Override
     public void removeEquivalent(TLEquivalent equivalent) {
-        equivalentManager.removeChild(equivalent);
-    }
-
-    /**
-     * @see org.opentravel.schemacompiler.model.TLEquivalentOwner#moveUp(org.opentravel.schemacompiler.model.TLEquivalent)
-     */
-    @Override
-    public void moveUp(TLEquivalent equivalent) {
-        equivalentManager.moveUp(equivalent);
-    }
-
-    /**
-     * @see org.opentravel.schemacompiler.model.TLEquivalentOwner#moveDown(org.opentravel.schemacompiler.model.TLEquivalent)
-     */
-    @Override
-    public void moveDown(TLEquivalent equivalent) {
-        equivalentManager.moveDown(equivalent);
+        equivalentManager.removeChild( equivalent );
     }
 
     /**
@@ -530,7 +501,7 @@ public class TLSimple extends TLLibraryMember implements Versioned, TLAttributeT
      */
     @Override
     public void sortEquivalents(Comparator<TLEquivalent> comparator) {
-        equivalentManager.sortChildren(comparator);
+        equivalentManager.sortChildren( comparator );
     }
 
     /**
@@ -544,14 +515,14 @@ public class TLSimple extends TLLibraryMember implements Versioned, TLAttributeT
      * @see org.opentravel.schemacompiler.model.TLExampleOwner#getExample(java.lang.String)
      */
     public TLExample getExample(String contextId) {
-        return exampleManager.getChild(contextId);
+        return exampleManager.getChild( contextId );
     }
 
     /**
      * @see org.opentravel.schemacompiler.model.TLExampleOwner#addExample(org.opentravel.schemacompiler.model.TLExample)
      */
     public void addExample(TLExample example) {
-        exampleManager.addChild(example);
+        exampleManager.addChild( example );
     }
 
     /**
@@ -559,35 +530,51 @@ public class TLSimple extends TLLibraryMember implements Versioned, TLAttributeT
      *      org.opentravel.schemacompiler.model.TLExample)
      */
     public void addExample(int index, TLExample example) {
-        exampleManager.addChild(index, example);
+        exampleManager.addChild( index, example );
     }
 
     /**
      * @see org.opentravel.schemacompiler.model.TLExampleOwner#removeExample(org.opentravel.schemacompiler.model.TLExample)
      */
     public void removeExample(TLExample example) {
-        exampleManager.removeChild(example);
-    }
-
-    /**
-     * @see org.opentravel.schemacompiler.model.TLExampleOwner#moveUp(org.opentravel.schemacompiler.model.TLExample)
-     */
-    public void moveUp(TLExample example) {
-        exampleManager.moveUp(example);
-    }
-
-    /**
-     * @see org.opentravel.schemacompiler.model.TLExampleOwner#moveDown(org.opentravel.schemacompiler.model.TLExample)
-     */
-    public void moveDown(TLExample example) {
-        exampleManager.moveDown(example);
+        exampleManager.removeChild( example );
     }
 
     /**
      * @see org.opentravel.schemacompiler.model.TLExampleOwner#sortExamples(java.util.Comparator)
      */
     public void sortExamples(Comparator<TLExample> comparator) {
-        exampleManager.sortChildren(comparator);
+        exampleManager.sortChildren( comparator );
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.model.TLEquivalentOwner#moveUp(org.opentravel.schemacompiler.model.TLEquivalent)
+     */
+    @Override
+    public void moveUp(TLEquivalent equivalent) {
+        equivalentManager.moveUp( equivalent );
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.model.TLExampleOwner#moveUp(org.opentravel.schemacompiler.model.TLExample)
+     */
+    public void moveUp(TLExample example) {
+        exampleManager.moveUp( example );
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.model.TLEquivalentOwner#moveDown(org.opentravel.schemacompiler.model.TLEquivalent)
+     */
+    @Override
+    public void moveDown(TLEquivalent equivalent) {
+        equivalentManager.moveDown( equivalent );
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.model.TLExampleOwner#moveDown(org.opentravel.schemacompiler.model.TLExample)
+     */
+    public void moveDown(TLExample example) {
+        exampleManager.moveDown( example );
     }
 
 }

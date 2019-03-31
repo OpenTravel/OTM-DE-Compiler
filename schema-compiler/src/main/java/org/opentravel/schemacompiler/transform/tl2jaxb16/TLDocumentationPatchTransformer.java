@@ -30,26 +30,26 @@ import org.opentravel.schemacompiler.transform.util.BaseTransformer;
  *
  * @author S. Livezey
  */
-public class TLDocumentationPatchTransformer extends
-		BaseTransformer<TLDocumentationPatch, DocumentationPatch, SymbolResolverTransformerContext> {
+public class TLDocumentationPatchTransformer
+    extends BaseTransformer<TLDocumentationPatch,DocumentationPatch,SymbolResolverTransformerContext> {
 
-	/**
-	 * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
-	 */
-	@Override
-	public DocumentationPatch transform(TLDocumentationPatch source) {
-		DocumentationPatch target = new DocumentationPatch();
-		
-		target.setPatchedVersion( source.getPatchedVersion() );
-		target.setDocPath( source.getDocPath() );
-		
+    /**
+     * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
+     */
+    @Override
+    public DocumentationPatch transform(TLDocumentationPatch source) {
+        DocumentationPatch target = new DocumentationPatch();
+
+        target.setPatchedVersion( source.getPatchedVersion() );
+        target.setDocPath( source.getDocPath() );
+
         if ((source.getDocumentation() != null) && !source.getDocumentation().isEmpty()) {
-            ObjectTransformer<TLDocumentation, Documentation, SymbolResolverTransformerContext> docTransformer =
-            		getTransformerFactory().getTransformer( TLDocumentation.class, Documentation.class );
+            ObjectTransformer<TLDocumentation,Documentation,SymbolResolverTransformerContext> docTransformer =
+                getTransformerFactory().getTransformer( TLDocumentation.class, Documentation.class );
 
             target.setDocumentation( docTransformer.transform( source.getDocumentation() ) );
         }
         return target;
-	}
-	
+    }
+
 }

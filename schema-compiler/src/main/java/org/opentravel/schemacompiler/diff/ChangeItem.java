@@ -16,73 +16,72 @@
 
 package org.opentravel.schemacompiler.diff;
 
-import java.util.Locale;
-
 import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
 import org.springframework.context.NoSuchMessageException;
+
+import java.util.Locale;
 
 /**
  * Abstract base class for all OTM-Diff change items.
  *
- * @param <T>  the change type enumeration for this change item
+ * @param <T> the change type enumeration for this change item
  */
 public abstract class ChangeItem<T extends Enum<T>> {
-	
-	T changeType;
-	String oldValue;
-	String newValue;
-	
-	/**
-	 * Returns a user-displayable string that describes the finding for this
-	 * change item.
-	 * 
-	 * @return String
-	 */
-	public String getDisplayMessage() {
-		String displayMessage;
-		
-		if (changeType != null) {
-	        String messageKey = changeType.getClass().getSimpleName() + "." + changeType.toString();
 
-	        try {
-	        	displayMessage = SchemaCompilerApplicationContext.getContext().getMessage(
-	            		messageKey, new Object[] { oldValue, newValue }, Locale.getDefault());
+    T changeType;
+    String oldValue;
+    String newValue;
 
-	        } catch (NoSuchMessageException e) {
-	        	displayMessage = messageKey; // No error - just use the raw message key
-	        }
-	        
-		} else {
-			displayMessage = null;
-		}
-		return displayMessage;
-	}
-	
-	/**
-	 * Returns the type of project change.
-	 *
-	 * @return T
-	 */
-	public T getChangeType() {
-		return changeType;
-	}
+    /**
+     * Returns a user-displayable string that describes the finding for this change item.
+     * 
+     * @return String
+     */
+    public String getDisplayMessage() {
+        String displayMessage;
 
-	/**
-	 * Returns the affected value from the old version.
-	 *
-	 * @return String
-	 */
-	public String getOldValue() {
-		return oldValue;
-	}
+        if (changeType != null) {
+            String messageKey = changeType.getClass().getSimpleName() + "." + changeType.toString();
 
-	/**
-	 * Returns the affected value from the new version.
-	 *
-	 * @return String
-	 */
-	public String getNewValue() {
-		return newValue;
-	}
+            try {
+                displayMessage = SchemaCompilerApplicationContext.getContext().getMessage( messageKey,
+                    new Object[] {oldValue, newValue}, Locale.getDefault() );
+
+            } catch (NoSuchMessageException e) {
+                displayMessage = messageKey; // No error - just use the raw message key
+            }
+
+        } else {
+            displayMessage = null;
+        }
+        return displayMessage;
+    }
+
+    /**
+     * Returns the type of project change.
+     *
+     * @return T
+     */
+    public T getChangeType() {
+        return changeType;
+    }
+
+    /**
+     * Returns the affected value from the old version.
+     *
+     * @return String
+     */
+    public String getOldValue() {
+        return oldValue;
+    }
+
+    /**
+     * Returns the affected value from the new version.
+     *
+     * @return String
+     */
+    public String getNewValue() {
+        return newValue;
+    }
 
 }

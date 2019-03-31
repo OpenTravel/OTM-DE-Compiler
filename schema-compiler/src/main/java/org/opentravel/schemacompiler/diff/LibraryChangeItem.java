@@ -23,161 +23,164 @@ import org.opentravel.schemacompiler.model.TLResource;
  * Describes a single change identified during comparison of two OTM libraries.
  */
 public class LibraryChangeItem extends ChangeItem<LibraryChangeType> {
-	
-	private LibraryChangeSet changeSet;
-	private NamedEntity addedEntity;
-	private NamedEntity deletedEntity;
-	private EntityChangeSet modifiedEntity;
-	private TLResource addedResource;
-	private TLResource deletedResource;
-	private ResourceChangeSet modifiedResource;
-	
-	/**
-	 * Constructor used when an entity was added or deleted from its owning library.
-	 * 
-	 * @param changeSet  the change set to which this item belongs
-	 * @param changeType  the type of library change
-	 * @param affectedEntity  the entity that was added or removed
-	 */
-	public LibraryChangeItem(LibraryChangeSet changeSet, LibraryChangeType changeType, NamedEntity affectedEntity) {
-		this.changeSet = changeSet;
-		this.changeType = changeType;
-		
-		switch (changeType) {
-			case MEMBER_ADDED:
-				this.addedEntity = affectedEntity;
-				break;
-			case MEMBER_DELETED:
-				this.deletedEntity = affectedEntity;
-				break;
-			default:
-				throw new IllegalArgumentException("Illegal change type for entity addition or deletion: " + changeType);
-		}
-	}
-	
-	/**
-	 * Constructor used when a library entity was modified.
-	 * 
-	 * @param changeSet  the change set to which this item belongs
-	 * @param modifiedEntity  the change set for a modified entity
-	 */
-	public LibraryChangeItem(LibraryChangeSet changeSet, EntityChangeSet modifiedEntity) {
-		this.changeSet = changeSet;
-		this.changeType = LibraryChangeType.MEMBER_CHANGED;
-		this.modifiedEntity = modifiedEntity;
-	}
-	
-	/**
-	 * Constructor used when a resource was added or deleted from its owning library.
-	 * 
-	 * @param changeSet  the change set to which this item belongs
-	 * @param changeType  the type of library change
-	 * @param affectedResource  the resource that was added or removed
-	 */
-	public LibraryChangeItem(LibraryChangeSet changeSet, LibraryChangeType changeType, TLResource affectedResource) {
-		this.changeSet = changeSet;
-		this.changeType = changeType;
-		
-		switch (changeType) {
-			case RESOURCE_ADDED:
-				this.addedResource = affectedResource;
-				break;
-			case RESOURCE_DELETED:
-				this.deletedResource = affectedResource;
-				break;
-			default:
-				throw new IllegalArgumentException("Illegal change type for entity addition or deletion: " + changeType);
-		}
-	}
-	
-	/**
-	 * Constructor used when a library resource was modified.
-	 * 
-	 * @param changeSet  the change set to which this item belongs
-	 * @param modifiedResource  the change set for a modified resource
-	 */
-	public LibraryChangeItem(LibraryChangeSet changeSet, ResourceChangeSet modifiedResource) {
-		this.changeSet = changeSet;
-		this.changeType = LibraryChangeType.RESOURCE_CHANGED;
-		this.modifiedResource = modifiedResource;
-	}
-	
-	/**
-	 * Constructor used when a library value was changed.
-	 * 
-	 * @param changeSet  the change set to which this item belongs
-	 * @param changeType  the type of library change
-	 * @param oldValue  the affected value from the old version
-	 * @param newValue  the affected value from the new version
-	 */
-	public LibraryChangeItem(LibraryChangeSet changeSet, LibraryChangeType changeType, String oldValue, String newValue) {
-		this.changeSet = changeSet;
-		this.changeType = changeType;
-		this.oldValue = oldValue;
-		this.newValue = newValue;
-	}
 
-	/**
-	 * Returns the change set to which this item belongs.
-	 *
-	 * @return LibraryChangeSet
-	 */
-	public LibraryChangeSet getChangeSet() {
-		return changeSet;
-	}
+    private LibraryChangeSet changeSet;
+    private NamedEntity addedEntity;
+    private NamedEntity deletedEntity;
+    private EntityChangeSet modifiedEntity;
+    private TLResource addedResource;
+    private TLResource deletedResource;
+    private ResourceChangeSet modifiedResource;
 
-	/**
-	 * Returns the entity that was added.
-	 *
-	 * @return NamedEntity
-	 */
-	public NamedEntity getAddedEntity() {
-		return addedEntity;
-	}
+    /**
+     * Constructor used when an entity was added or deleted from its owning library.
+     * 
+     * @param changeSet the change set to which this item belongs
+     * @param changeType the type of library change
+     * @param affectedEntity the entity that was added or removed
+     */
+    public LibraryChangeItem(LibraryChangeSet changeSet, LibraryChangeType changeType, NamedEntity affectedEntity) {
+        this.changeSet = changeSet;
+        this.changeType = changeType;
 
-	/**
-	 * Returns the entity that was deleted.
-	 *
-	 * @return NamedEntity
-	 */
-	public NamedEntity getDeletedEntity() {
-		return deletedEntity;
-	}
+        switch (changeType) {
+            case MEMBER_ADDED:
+                this.addedEntity = affectedEntity;
+                break;
+            case MEMBER_DELETED:
+                this.deletedEntity = affectedEntity;
+                break;
+            default:
+                throw new IllegalArgumentException(
+                    "Illegal change type for entity addition or deletion: " + changeType );
+        }
+    }
 
-	/**
-	 * Returns the change set for a modified entity.
-	 *
-	 * @return EntityChangeSet
-	 */
-	public EntityChangeSet getModifiedEntity() {
-		return modifiedEntity;
-	}
+    /**
+     * Constructor used when a library entity was modified.
+     * 
+     * @param changeSet the change set to which this item belongs
+     * @param modifiedEntity the change set for a modified entity
+     */
+    public LibraryChangeItem(LibraryChangeSet changeSet, EntityChangeSet modifiedEntity) {
+        this.changeSet = changeSet;
+        this.changeType = LibraryChangeType.MEMBER_CHANGED;
+        this.modifiedEntity = modifiedEntity;
+    }
 
-	/**
-	 * Returns the resource that was added.
-	 *
-	 * @return TLResource
-	 */
-	public TLResource getAddedResource() {
-		return addedResource;
-	}
+    /**
+     * Constructor used when a resource was added or deleted from its owning library.
+     * 
+     * @param changeSet the change set to which this item belongs
+     * @param changeType the type of library change
+     * @param affectedResource the resource that was added or removed
+     */
+    public LibraryChangeItem(LibraryChangeSet changeSet, LibraryChangeType changeType, TLResource affectedResource) {
+        this.changeSet = changeSet;
+        this.changeType = changeType;
 
-	/**
-	 * Returns the resource that was deleted.
-	 *
-	 * @return TLResource
-	 */
-	public TLResource getDeletedResource() {
-		return deletedResource;
-	}
+        switch (changeType) {
+            case RESOURCE_ADDED:
+                this.addedResource = affectedResource;
+                break;
+            case RESOURCE_DELETED:
+                this.deletedResource = affectedResource;
+                break;
+            default:
+                throw new IllegalArgumentException(
+                    "Illegal change type for entity addition or deletion: " + changeType );
+        }
+    }
 
-	/**
-	 * Returns the change set for a modified resource.
-	 *
-	 * @return ResourceChangeSet
-	 */
-	public ResourceChangeSet getModifiedResource() {
-		return modifiedResource;
-	}
+    /**
+     * Constructor used when a library resource was modified.
+     * 
+     * @param changeSet the change set to which this item belongs
+     * @param modifiedResource the change set for a modified resource
+     */
+    public LibraryChangeItem(LibraryChangeSet changeSet, ResourceChangeSet modifiedResource) {
+        this.changeSet = changeSet;
+        this.changeType = LibraryChangeType.RESOURCE_CHANGED;
+        this.modifiedResource = modifiedResource;
+    }
+
+    /**
+     * Constructor used when a library value was changed.
+     * 
+     * @param changeSet the change set to which this item belongs
+     * @param changeType the type of library change
+     * @param oldValue the affected value from the old version
+     * @param newValue the affected value from the new version
+     */
+    public LibraryChangeItem(LibraryChangeSet changeSet, LibraryChangeType changeType, String oldValue,
+        String newValue) {
+        this.changeSet = changeSet;
+        this.changeType = changeType;
+        this.oldValue = oldValue;
+        this.newValue = newValue;
+    }
+
+    /**
+     * Returns the change set to which this item belongs.
+     *
+     * @return LibraryChangeSet
+     */
+    public LibraryChangeSet getChangeSet() {
+        return changeSet;
+    }
+
+    /**
+     * Returns the entity that was added.
+     *
+     * @return NamedEntity
+     */
+    public NamedEntity getAddedEntity() {
+        return addedEntity;
+    }
+
+    /**
+     * Returns the entity that was deleted.
+     *
+     * @return NamedEntity
+     */
+    public NamedEntity getDeletedEntity() {
+        return deletedEntity;
+    }
+
+    /**
+     * Returns the change set for a modified entity.
+     *
+     * @return EntityChangeSet
+     */
+    public EntityChangeSet getModifiedEntity() {
+        return modifiedEntity;
+    }
+
+    /**
+     * Returns the resource that was added.
+     *
+     * @return TLResource
+     */
+    public TLResource getAddedResource() {
+        return addedResource;
+    }
+
+    /**
+     * Returns the resource that was deleted.
+     *
+     * @return TLResource
+     */
+    public TLResource getDeletedResource() {
+        return deletedResource;
+    }
+
+    /**
+     * Returns the change set for a modified resource.
+     *
+     * @return ResourceChangeSet
+     */
+    public ResourceChangeSet getModifiedResource() {
+        return modifiedResource;
+    }
 
 }

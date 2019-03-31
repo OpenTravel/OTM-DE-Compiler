@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.validate;
 
 /**
- * Interface used to define a human-readable identify for an object that is capable of being
- * validated.
+ * Interface used to define a human-readable identify for an object that is capable of being validated.
  * 
  * @author S. Livezey
  */

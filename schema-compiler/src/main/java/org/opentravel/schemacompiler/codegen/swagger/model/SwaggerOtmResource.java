@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.codegen.swagger.model;
 
 import org.opentravel.schemacompiler.codegen.json.model.JsonModelObject;
@@ -23,55 +24,55 @@ import com.google.gson.JsonObject;
  * Class that defines the OTM resource information for a Swagger document.
  */
 public class SwaggerOtmResource implements JsonModelObject {
-	
-	private String namespace;
-	private String localName;
-	
-	/**
-	 * Returns the value of the 'namespace' field.
-	 *
-	 * @return String
-	 */
-	public String getNamespace() {
-		return namespace;
-	}
-	
-	/**
-	 * Assigns the value of the 'namespace' field.
-	 *
-	 * @param namespace  the field value to assign
-	 */
-	public void setNamespace(String namespace) {
-		this.namespace = namespace;
-	}
-	
-	/**
-	 * Returns the value of the 'localName' field.
-	 *
-	 * @return String
-	 */
-	public String getLocalName() {
-		return localName;
-	}
-	
-	/**
-	 * Assigns the value of the 'localName' field.
-	 *
-	 * @param localName  the field value to assign
-	 */
-	public void setLocalName(String localName) {
-		this.localName = localName;
-	}
-	
-	/**
-	 * @see org.opentravel.schemacompiler.codegen.json.model.JsonModelObject#toJson()
-	 */
-	public JsonObject toJson() {
-		JsonObject json = new JsonObject();
-		
-		addProperty( json, "namespace", namespace );
-		addProperty( json, "localName", localName );
-		return json;
-	}
-	
+
+    private String namespace;
+    private String localName;
+
+    /**
+     * Returns the value of the 'namespace' field.
+     *
+     * @return String
+     */
+    public String getNamespace() {
+        return namespace;
+    }
+
+    /**
+     * Assigns the value of the 'namespace' field.
+     *
+     * @param namespace the field value to assign
+     */
+    public void setNamespace(String namespace) {
+        this.namespace = namespace;
+    }
+
+    /**
+     * Returns the value of the 'localName' field.
+     *
+     * @return String
+     */
+    public String getLocalName() {
+        return localName;
+    }
+
+    /**
+     * Assigns the value of the 'localName' field.
+     *
+     * @param localName the field value to assign
+     */
+    public void setLocalName(String localName) {
+        this.localName = localName;
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.codegen.json.model.JsonModelObject#toJson()
+     */
+    public JsonObject toJson() {
+        JsonObject json = new JsonObject();
+
+        addProperty( json, "namespace", namespace );
+        addProperty( json, "localName", localName );
+        return json;
+    }
+
 }

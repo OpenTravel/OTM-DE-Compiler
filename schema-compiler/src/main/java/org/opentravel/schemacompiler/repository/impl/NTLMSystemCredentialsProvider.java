@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.repository.impl;
 
 import org.apache.http.auth.AuthScope;
@@ -27,21 +28,21 @@ import org.apache.http.impl.client.SystemDefaultCredentialsProvider;
  * @author Pawel Jedruch
  */
 public class NTLMSystemCredentialsProvider extends SystemDefaultCredentialsProvider {
-	
-	@Override
+
+    @Override
     public Credentials getCredentials(final AuthScope authscope) {
-        Credentials credentials = super.getCredentials(authscope);
-        
-        if (AuthSchemes.NTLM.equalsIgnoreCase(authscope.getScheme())) {
-            credentials = super.getCredentials(authscope);
-            return traslateToNTLMCredentials(credentials);
+        Credentials credentials = super.getCredentials( authscope );
+
+        if (AuthSchemes.NTLM.equalsIgnoreCase( authscope.getScheme() )) {
+            credentials = super.getCredentials( authscope );
+            return traslateToNTLMCredentials( credentials );
         }
         return credentials;
     }
 
     private NTCredentials traslateToNTLMCredentials(Credentials credentials) {
         String fullUserName = credentials.getUserPrincipal().getName();
-        String[] tokens = fullUserName.split("\\\\", 2);
+        String[] tokens = fullUserName.split( "\\\\", 2 );
         String userName = "";
         String domain = null;
         if (tokens.length == 2) {
@@ -53,6 +54,6 @@ public class NTLMSystemCredentialsProvider extends SystemDefaultCredentialsProvi
             userName = tokens[0];
         }
         String workstation = null; // how to support workstation ???
-        return new NTCredentials(userName, credentials.getPassword(), workstation, domain);
+        return new NTCredentials( userName, credentials.getPassword(), workstation, domain );
     }
 }

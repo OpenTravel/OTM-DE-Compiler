@@ -13,10 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.codegen.xsd;
 
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
+package org.opentravel.schemacompiler.codegen.xsd;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerationContext;
 import org.opentravel.schemacompiler.codegen.CodeGenerationFilenameBuilder;
@@ -25,16 +23,18 @@ import org.opentravel.schemacompiler.codegen.impl.LibraryMemberFilenameBuilder;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.LibraryMember;
 
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+
 /**
  * Code generator implementation used to generate XSD documents from meta-model components.
  * 
  * <p>
  * The following context variable(s) are required when invoking this code generation module:
  * <ul>
- * <li><code>schemacompiler.OutputFolder</code> - the folder where generated XSD schema files should
- * be stored</li>
- * <li><code>schemacompiler.SchemaFilename</code> - the name of the XSD schema file to be generated
- * (uses library name/version if not specified)</li>
+ * <li><code>schemacompiler.OutputFolder</code> - the folder where generated XSD schema files should be stored</li>
+ * <li><code>schemacompiler.SchemaFilename</code> - the name of the XSD schema file to be generated (uses library
+ * name/version if not specified)</li>
  * </ul>
  * 
  * @author S. Livezey
@@ -42,7 +42,7 @@ import org.opentravel.schemacompiler.model.LibraryMember;
 public class XsdLibraryMemberCodeGenerator extends AbstractXsdCodeGenerator<LibraryMember> {
 
     /**
-     * @see org.opentravel.schemacompiler.codegen.xsd.AbstractXsdCodeGenerator#canGenerateOutput(org.opentravel.schemacompiler.model.TLModelElement,
+     * @see org.opentravel.schemacompiler.codegen.xsd.AbstractXsdCodeGenerator#canGenerateOutput(org.opentravel.schemacompiler.model.ModelElement,
      *      org.opentravel.schemacompiler.codegen.CodeGenerationContext)
      */
     @Override
@@ -51,7 +51,7 @@ public class XsdLibraryMemberCodeGenerator extends AbstractXsdCodeGenerator<Libr
     }
 
     /**
-     * @see org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator#getLibrary(java.lang.Object)
+     * @see org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator#getLibrary(org.opentravel.schemacompiler.model.ModelElement)
      */
     @Override
     protected AbstractLibrary getLibrary(LibraryMember source) {
@@ -67,17 +67,17 @@ public class XsdLibraryMemberCodeGenerator extends AbstractXsdCodeGenerator<Libr
     }
 
     /**
-     * @see org.opentravel.schemacompiler.codegen.impl.AbstractJaxbCodeGenerator#getMarshaller(org.opentravel.schemacompiler.model.TLModelElement,
+     * @see org.opentravel.schemacompiler.codegen.impl.AbstractJaxbCodeGenerator#getMarshaller(org.opentravel.schemacompiler.model.ModelElement,
      *      org.w3._2001.xmlschema.Schema)
      */
     @Override
     protected Marshaller getMarshaller(LibraryMember source, org.w3._2001.xmlschema.Schema schema)
-            throws JAXBException {
+        throws JAXBException {
         Marshaller m = jaxbContext.createMarshaller();
 
-        m.setSchema(validationSchema);
-        m.setProperty("com.sun.xml.bind.namespacePrefixMapper", new CodegenNamespacePrefixMapper(
-                getLibrary(source), false, this, schema));
+        m.setSchema( validationSchema );
+        m.setProperty( "com.sun.xml.bind.namespacePrefixMapper",
+            new CodegenNamespacePrefixMapper( getLibrary( source ), false, this, schema ) );
         return m;
     }
 

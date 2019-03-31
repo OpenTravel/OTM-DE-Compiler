@@ -13,36 +13,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.validate.compile;
 
 import static org.junit.Assert.assertTrue;
-
-import java.util.Set;
 
 import org.junit.Test;
 import org.opentravel.schemacompiler.model.TLSimple;
 import org.opentravel.schemacompiler.validate.AbstractValidatorTest;
 
+import java.util.Set;
+
 /**
  * Verifies the functions of the <code>TLSimpleCompileValidator</code> class.
  */
 public class TestTLSimpleCompileValidator extends AbstractValidatorTest {
-    
+
     @Test
     public void testInvalidConstraints() throws Exception {
         TLSimple simple = getMember( TLIBRARY_ERROR1_V1, "TestConstraintError", TLSimple.class );
         Set<String> messageKeys = getFindingMessageKeys( simple );
-        
+
         assertTrue( messageKeys.contains( TLSimpleCompileValidator.ERROR_INVALID_RESTRICTION ) );
         assertTrue( messageKeys.contains( TLSimpleCompileValidator.ERROR_RESTRICTION_NOT_APPLICABLE ) );
     }
-    
+
     @Test
     public void testInvalidPattern() throws Exception {
         TLSimple simple = getMember( TLIBRARY_ERROR1_V1, "TestPatternError", TLSimple.class );
         Set<String> messageKeys = getFindingMessageKeys( simple );
-        
+
         assertTrue( messageKeys.contains( TLSimpleCompileValidator.ERROR_INVALID_PATTERN ) );
     }
-    
+
 }

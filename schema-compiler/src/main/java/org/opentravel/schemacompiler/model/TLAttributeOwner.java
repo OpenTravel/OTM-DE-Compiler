@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.model;
 
 import java.util.Comparator;
@@ -28,15 +29,14 @@ public interface TLAttributeOwner extends NamedEntity, TLMemberFieldOwner {
     /**
      * Returns the value of the 'attributes' field.
      * 
-     * @return List<TLAttribute>
+     * @return List&lt;TLAttribute&gt;
      */
     public List<TLAttribute> getAttributes();
 
     /**
      * Returns the attribute with the specified name.
      * 
-     * @param attributeName
-     *            the name of the attribute to return
+     * @param attributeName the name of the attribute to return
      * @return TLAttribute
      */
     public TLAttribute getAttribute(String attributeName);
@@ -44,54 +44,46 @@ public interface TLAttributeOwner extends NamedEntity, TLMemberFieldOwner {
     /**
      * Adds a <code>TLAttribute</code> element to the current list.
      * 
-     * @param attribute
-     *            the attribute value to add
+     * @param attribute the attribute value to add
      */
     public void addAttribute(TLAttribute attribute);
 
     /**
      * Adds a <code>TLAttribute</code> element to the current list.
      * 
-     * @param index
-     *            the index at which the given attribute should be added
-     * @param attribute
-     *            the attribute value to add
-     * @throws IndexOutOfBoundsException
-     *             thrown if the index is out of range (index < 0 || index > size())
+     * @param index the index at which the given attribute should be added
+     * @param attribute the attribute value to add
+     * @throws IndexOutOfBoundsException thrown if the index is out of range (index &lt; 0 || index &gt; size())
      */
     public void addAttribute(int index, TLAttribute attribute);
 
     /**
      * Removes the specified <code>TLAttribute</code> from the current list.
      * 
-     * @param attribute
-     *            the attribute value to remove
+     * @param attribute the attribute value to remove
      */
     public void removeAttribute(TLAttribute attribute);
 
     /**
-     * Moves this attribute up by one position in the list. If the attribute is not owned by this
-     * object or it is already at the front of the list, this method has no effect.
+     * Moves this attribute up by one position in the list. If the attribute is not owned by this object or it is
+     * already at the front of the list, this method has no effect.
      * 
-     * @param attribute
-     *            the attribute to move
+     * @param attribute the attribute to move
      */
     public void moveUp(TLAttribute attribute);
 
     /**
-     * Moves this attribute down by one position in the list. If the attribute is not owned by this
-     * object or it is already at the end of the list, this method has no effect.
+     * Moves this attribute down by one position in the list. If the attribute is not owned by this object or it is
+     * already at the end of the list, this method has no effect.
      * 
-     * @param attribute
-     *            the attribute to move
+     * @param attribute the attribute to move
      */
     public void moveDown(TLAttribute attribute);
 
     /**
      * Sorts the list of attributes using the comparator provided.
      * 
-     * @param comparator
-     *            the comparator to use when sorting the list
+     * @param comparator the comparator to use when sorting the list
      */
     public void sortAttributes(Comparator<TLAttribute> comparator);
 

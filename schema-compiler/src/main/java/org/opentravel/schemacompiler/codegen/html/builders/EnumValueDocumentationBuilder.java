@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.codegen.html.builders;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerationException;
@@ -23,22 +24,22 @@ import org.opentravel.schemacompiler.model.TLEnumValue;
  *
  */
 public class EnumValueDocumentationBuilder extends AbstractDocumentationBuilder<TLEnumValue> {
-	
-	/**
-	 * @param manager
-	 */
-	public EnumValueDocumentationBuilder(TLEnumValue t) {
-		super(t);
-		name = t.getLiteral();
-	}
 
-	@Override
-	public DocumentationBuilderType getDocType() {
-		return null;
-	}
+    /**
+     * @param t the enumeration value for which to return a builder
+     */
+    public EnumValueDocumentationBuilder(TLEnumValue t) {
+        super( t );
+        name = t.getLiteral();
+    }
 
-	@Override
-	public void build() throws CodeGenerationException {
-		// No action required
-	}
+    @Override
+    public DocumentationBuilderType getDocType() {
+        return null;
+    }
+
+    @Override
+    public void build() throws CodeGenerationException {
+        // No action required
+    }
 }

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.validate.compile;
 
 import org.opentravel.schemacompiler.codegen.util.EnumCodegenUtils;
@@ -34,17 +35,17 @@ public class TLEnumValueCompileValidator extends TLValidatorBase<TLEnumValue> {
      */
     @Override
     protected ValidationFindings validateChildren(TLEnumValue target) {
-        TLValidationBuilder builder = newValidationBuilder(target);
+        TLValidationBuilder builder = newValidationBuilder( target );
 
-        builder.setProperty("literal", target.getLiteral()).setFindingType(FindingType.ERROR)
-                .assertNotNullOrBlank().assertMaximumLength(80);
+        builder.setProperty( "literal", target.getLiteral() ).setFindingType( FindingType.ERROR ).assertNotNullOrBlank()
+            .assertMaximumLength( 80 );
 
-        builder.setProperty("literal", EnumCodegenUtils.getInheritedValues(target.getOwningEnum()))
-                .setFindingType(FindingType.ERROR)
-                .assertNoDuplicates( e -> (e == null) ? null : ((TLEnumValue) e).getLiteral() );
+        builder.setProperty( "literal", EnumCodegenUtils.getInheritedValues( target.getOwningEnum() ) )
+            .setFindingType( FindingType.ERROR )
+            .assertNoDuplicates( e -> (e == null) ? null : ((TLEnumValue) e).getLiteral() );
 
-        builder.setProperty("equivalents", target.getEquivalents())
-                .setFindingType(FindingType.ERROR).assertNotNull().assertContainsNoNullElements();
+        builder.setProperty( "equivalents", target.getEquivalents() ).setFindingType( FindingType.ERROR )
+            .assertNotNull().assertContainsNoNullElements();
 
         return builder.getFindings();
     }

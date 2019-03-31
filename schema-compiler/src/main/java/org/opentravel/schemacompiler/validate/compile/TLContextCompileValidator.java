@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.validate.compile;
 
 import org.opentravel.schemacompiler.model.TLContext;
@@ -35,21 +36,20 @@ public class TLContextCompileValidator extends TLContextBaseValidator {
      */
     @Override
     protected ValidationFindings validateFields(TLContext target) {
-        TLValidationBuilder builder = newValidationBuilder(target);
+        TLValidationBuilder builder = newValidationBuilder( target );
 
-        builder.setProperty("contextId", target.getContextId()).setFindingType(FindingType.ERROR)
-                .assertNotNullOrBlank();
+        builder.setProperty( "contextId", target.getContextId() ).setFindingType( FindingType.ERROR )
+            .assertNotNullOrBlank();
 
-        builder.setProperty("applicationContext", target.getApplicationContext())
-                .setFindingType(FindingType.ERROR).assertNotNullOrBlank();
+        builder.setProperty( "applicationContext", target.getApplicationContext() ).setFindingType( FindingType.ERROR )
+            .assertNotNullOrBlank();
 
-        builder.setProperty("applicationContext", target.getOwningLibrary().getContexts())
-                .setFindingType(FindingType.ERROR)
-                .assertNoDuplicates( e -> (e == null) ? null : ((TLContext) e).getApplicationContext() );
+        builder.setProperty( "applicationContext", target.getOwningLibrary().getContexts() )
+            .setFindingType( FindingType.ERROR )
+            .assertNoDuplicates( e -> (e == null) ? null : ((TLContext) e).getApplicationContext() );
 
-        builder.setProperty("contextId", target.getOwningLibrary().getContexts())
-                .setFindingType(FindingType.ERROR)
-                .assertNoDuplicates( e -> (e == null) ? null : ((TLContext) e).getContextId() );
+        builder.setProperty( "contextId", target.getOwningLibrary().getContexts() ).setFindingType( FindingType.ERROR )
+            .assertNoDuplicates( e -> (e == null) ? null : ((TLContext) e).getContextId() );
 
         return builder.getFindings();
     }

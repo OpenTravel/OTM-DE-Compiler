@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.codegen.xsd.facet;
 
-import javax.xml.namespace.QName;
+package org.opentravel.schemacompiler.codegen.xsd.facet;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerator;
 import org.opentravel.schemacompiler.codegen.impl.AbstractJaxbCodeGenerator;
@@ -30,17 +29,19 @@ import org.w3._2001.xmlschema.Annotated;
 import org.w3._2001.xmlschema.Element;
 import org.w3._2001.xmlschema.TopLevelElement;
 
+import javax.xml.namespace.QName;
+
 /**
- * Code generation delegate for facet used to separate logic and break up the complexity of the
- * facet artifact generation process.
+ * Code generation delegate for facet used to separate logic and break up the complexity of the facet artifact
+ * generation process.
  * 
- * @param <F>
- *            the type of facet for which the delegate will generate artifacts
+ * @param <F> the type of facet for which the delegate will generate artifacts
  * @author S. Livezey
  */
 public abstract class FacetCodegenDelegate<F extends TLAbstractFacet> {
 
-    protected static org.w3._2001.xmlschema.ObjectFactory jaxbObjectFactory = new org.w3._2001.xmlschema.ObjectFactory();
+    protected static org.w3._2001.xmlschema.ObjectFactory jaxbObjectFactory =
+        new org.w3._2001.xmlschema.ObjectFactory();
 
     protected CodeGenerationTransformerContext transformerContext;
     private F sourceFacet;
@@ -48,8 +49,7 @@ public abstract class FacetCodegenDelegate<F extends TLAbstractFacet> {
     /**
      * Constructor that specifies the source facet for which code artifacts are being generated.
      * 
-     * @param sourceFacet
-     *            the source facet
+     * @param sourceFacet the source facet
      */
     public FacetCodegenDelegate(F sourceFacet) {
         this.sourceFacet = sourceFacet;
@@ -67,45 +67,41 @@ public abstract class FacetCodegenDelegate<F extends TLAbstractFacet> {
     /**
      * Assigns the transformer context to use when processing facet sub-elements.
      * 
-     * @param transformerContext
-     *            the transformer context to assign
+     * @param transformerContext the transformer context to assign
      */
     public void setTransformerContext(CodeGenerationTransformerContext transformerContext) {
         this.transformerContext = transformerContext;
     }
 
     /**
-     * Adds the schemas associated with the given compile-time dependency to the current list of
-     * dependencies maintained by the orchestrating code generator.
+     * Adds the schemas associated with the given compile-time dependency to the current list of dependencies maintained
+     * by the orchestrating code generator.
      * 
-     * @param dependency
-     *            the compile-time dependency to add
+     * @param dependency the compile-time dependency to add
      */
     protected void addCompileTimeDependency(SchemaDependency dependency) {
         if (transformerContext != null) {
             CodeGenerator<?> codeGenerator = transformerContext.getCodeGenerator();
 
             if (codeGenerator instanceof AbstractJaxbCodeGenerator) {
-                ((AbstractJaxbCodeGenerator<?>) codeGenerator).addCompileTimeDependency(dependency
-                        .getSchemaDeclaration());
+                ((AbstractJaxbCodeGenerator<?>) codeGenerator)
+                    .addCompileTimeDependency( dependency.getSchemaDeclaration() );
             }
         }
     }
 
     /**
-     * Returns the transformer factory to use when obtaining object transformers for facet
-     * sub-elements.
+     * Returns the transformer factory to use when obtaining object transformers for facet sub-elements.
      * 
-     * @return TransformerFactory<CodeGenerationTransformerContext>
+     * @return TransformerFactory&lt;CodeGenerationTransformerContext&gt;
      */
     protected TransformerFactory<CodeGenerationTransformerContext> getTransformerFactory() {
         return transformerContext.getTransformerFactory();
     }
 
     /**
-     * Generates the code artifacts of the facet. Typically, the artifacts produced for each facet
-     * include a JAXB type and a global element definition. Sub-classes may extend this method to
-     * add additional artifacts as required.
+     * Generates the code artifacts of the facet. Typically, the artifacts produced for each facet include a JAXB type
+     * and a global element definition. Sub-classes may extend this method to add additional artifacts as required.
      * 
      * @return CodegenArtifacts
      */
@@ -113,7 +109,7 @@ public abstract class FacetCodegenDelegate<F extends TLAbstractFacet> {
         CodegenArtifacts artifacts = new CodegenArtifacts();
 
         if (hasContent()) {
-            artifacts.addArtifact(createType());
+            artifacts.addArtifact( createType() );
         }
         return artifacts;
     }
@@ -121,23 +117,20 @@ public abstract class FacetCodegenDelegate<F extends TLAbstractFacet> {
     /**
      * Creates a list of global XML schema elements that will represent the source facet.
      * 
-     * @param elementType
-     *            the local name of the element type (namespace is assumed to be tns)
-     * @return Annotated
+     * @return FacetCodegenElements
      */
     public FacetCodegenElements generateElements() {
         FacetCodegenElements codegenElements = new FacetCodegenElements();
 
         if (hasContent()) {
-            codegenElements.addFacetElement(
-            		getSourceFacet().getOwningEntity(), createElement(null));
+            codegenElements.addFacetElement( getSourceFacet().getOwningEntity(), createElement( null ) );
         }
         return codegenElements;
     }
 
     /**
-     * Returns true if the given source facet declares any content. May be overridden to introduce
-     * new logic (i.e. inheritance) that will introduce generated content from indirect sources.
+     * Returns true if the given source facet declares any content. May be overridden to introduce new logic (i.e.
+     * inheritance) that will introduce generated content from indirect sources.
      * 
      * @return boolean
      */
@@ -155,9 +148,8 @@ public abstract class FacetCodegenDelegate<F extends TLAbstractFacet> {
     }
 
     /**
-     * Returns the facet instance that should serve as the base type for the source facet. The facet
-     * that is returned by this method will always belong to the same owner as the given source
-     * facet.
+     * Returns the facet instance that should serve as the base type for the source facet. The facet that is returned by
+     * this method will always belong to the same owner as the given source facet.
      * 
      * @return F
      */
@@ -176,50 +168,47 @@ public abstract class FacetCodegenDelegate<F extends TLAbstractFacet> {
      * @return String
      */
     protected String getTypeName() {
-    	return XsdCodegenUtils.getGlobalTypeName( getSourceFacet() );
+        return XsdCodegenUtils.getGlobalTypeName( getSourceFacet() );
     }
 
     /**
      * Returns a single top-level XML schema element using the information provided.
      * 
-     * @param facetAlias
-     *            the alias of the source facet element being created (may be null)
+     * @param facetAlias the alias of the source facet element being created (may be null)
      * @return Element
      */
     protected Element createElement(TLAlias facetAlias) {
         Element element = new TopLevelElement();
 
-        element.setName(getElementName(facetAlias));
-        element.setType(new QName(sourceFacet.getNamespace(), getTypeName()));
-        element.setSubstitutionGroup(getSubstitutionGroup(facetAlias));
+        element.setName( getElementName( facetAlias ) );
+        element.setType( new QName( sourceFacet.getNamespace(), getTypeName() ) );
+        element.setSubstitutionGroup( getSubstitutionGroup( facetAlias ) );
         return element;
     }
 
     /**
      * Returns the name of the element used to represent the source facet or the specified alias.
      * 
-     * @param facetAlias
-     *            the alias of the source facet element being created (may be null)
+     * @param facetAlias the alias of the source facet element being created (may be null)
      * @return String
      */
     public String getElementName(TLAlias facetAlias) {
         String elementName;
 
         if (facetAlias == null) {
-            elementName = XsdCodegenUtils.getGlobalElementName(sourceFacet).getLocalPart();
+            elementName = XsdCodegenUtils.getGlobalElementName( sourceFacet ).getLocalPart();
         } else {
-            elementName = XsdCodegenUtils.getGlobalElementName(facetAlias).getLocalPart();
+            elementName = XsdCodegenUtils.getGlobalElementName( facetAlias ).getLocalPart();
         }
         return elementName;
     }
 
     /**
-     * Returns the substitution group for the source facet. By default, the substitution group for
-     * an element is null (not defined); sub-classes may override to assign a substitution group to
-     * the element(s) that are generated for the facet.
+     * Returns the substitution group for the source facet. By default, the substitution group for an element is null
+     * (not defined); sub-classes may override to assign a substitution group to the element(s) that are generated for
+     * the facet.
      * 
-     * @param facetAlias
-     *            the alias of the source facet element being created (may be null)
+     * @param facetAlias the alias of the source facet element being created (may be null)
      * @return QName
      */
     protected QName getSubstitutionGroup(TLAlias facetAlias) {

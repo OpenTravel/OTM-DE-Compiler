@@ -13,10 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.model;
 
-import java.util.Comparator;
-import java.util.List;
+package org.opentravel.schemacompiler.model;
 
 import org.opentravel.schemacompiler.event.ModelEvent;
 import org.opentravel.schemacompiler.event.ModelEventBuilder;
@@ -24,21 +22,24 @@ import org.opentravel.schemacompiler.event.ModelEventType;
 import org.opentravel.schemacompiler.model.TLEquivalent.EquivalentListManager;
 import org.opentravel.schemacompiler.util.OTM16Upgrade;
 
+import java.util.Comparator;
+import java.util.List;
+
 /**
- * Abstract class that represents the common fields for complex object types such as Core and
- * Business Objects.
+ * Abstract class that represents the common fields for complex object types such as Core and Business Objects.
  * 
  * @author S. Livezey
  */
-public abstract class TLComplexTypeBase extends TLLibraryMember implements TLPropertyType,
-        TLVersionedExtensionOwner, TLDocumentationOwner, TLEquivalentOwner {
+public abstract class TLComplexTypeBase extends TLLibraryMember
+    implements TLPropertyType, TLVersionedExtensionOwner, TLDocumentationOwner, TLEquivalentOwner {
 
-	protected static final String FACETS_CANNOT_BE_MODIFIED = "Facets cannot be modified once their owner has been assigned to a model.";
-	
+    protected static final String FACETS_CANNOT_BE_MODIFIED =
+        "Facets cannot be modified once their owner has been assigned to a model.";
+
     private String name;
     private boolean notExtendable;
     private TLExtension extension;
-    private EquivalentListManager equivalentManager = new EquivalentListManager(this);
+    private EquivalentListManager equivalentManager = new EquivalentListManager( this );
     private TLDocumentation documentation;
 
     /**
@@ -53,15 +54,14 @@ public abstract class TLComplexTypeBase extends TLLibraryMember implements TLPro
     /**
      * Assigns the value of the 'name' field.
      * 
-     * @param name
-     *            the field value to assign
+     * @param name the field value to assign
      */
     public void setName(String name) {
-        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.NAME_MODIFIED, this)
-                .setOldValue(this.name).setNewValue(name).buildEvent();
+        ModelEvent<?> event = new ModelEventBuilder( ModelEventType.NAME_MODIFIED, this ).setOldValue( this.name )
+            .setNewValue( name ).buildEvent();
 
         this.name = name;
-        publishEvent(event);
+        publishEvent( event );
     }
 
     /**
@@ -84,15 +84,14 @@ public abstract class TLComplexTypeBase extends TLLibraryMember implements TLPro
     /**
      * Assigns the value of the 'notExtendable' field.
      * 
-     * @param notExtendable
-     *            the field value to assign
+     * @param notExtendable the field value to assign
      */
     public void setNotExtendable(boolean notExtendable) {
-        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.NOT_EXTENDABLE_FLAG_MODIFIED,
-                this).setOldValue(this.notExtendable).setNewValue(notExtendable).buildEvent();
+        ModelEvent<?> event = new ModelEventBuilder( ModelEventType.NOT_EXTENDABLE_FLAG_MODIFIED, this )
+            .setOldValue( this.notExtendable ).setNewValue( notExtendable ).buildEvent();
 
         this.notExtendable = notExtendable;
-        publishEvent(event);
+        publishEvent( event );
     }
 
     /**
@@ -112,20 +111,20 @@ public abstract class TLComplexTypeBase extends TLLibraryMember implements TLPro
             // Even though there is only one extension, send to events so that all extension owners
             // behave the same (as if there is a list of multiple extensions).
             if (this.extension != null) {
-                ModelEvent<?> event = new ModelEventBuilder(ModelEventType.EXTENDS_REMOVED, this)
-                        .setAffectedItem(this.extension).buildEvent();
+                ModelEvent<?> event = new ModelEventBuilder( ModelEventType.EXTENDS_REMOVED, this )
+                    .setAffectedItem( this.extension ).buildEvent();
 
-                this.extension.setOwner(null);
+                this.extension.setOwner( null );
                 this.extension = null;
-                publishEvent(event);
+                publishEvent( event );
             }
             if (extension != null) {
-                ModelEvent<?> event = new ModelEventBuilder(ModelEventType.EXTENDS_ADDED, this)
-                        .setAffectedItem(extension).buildEvent();
+                ModelEvent<?> event = new ModelEventBuilder( ModelEventType.EXTENDS_ADDED, this )
+                    .setAffectedItem( extension ).buildEvent();
 
-                extension.setOwner(this);
+                extension.setOwner( this );
                 this.extension = extension;
-                publishEvent(event);
+                publishEvent( event );
             }
         }
     }
@@ -143,7 +142,7 @@ public abstract class TLComplexTypeBase extends TLLibraryMember implements TLPro
      */
     @Override
     public TLEquivalent getEquivalent(String context) {
-        return equivalentManager.getChild(context);
+        return equivalentManager.getChild( context );
     }
 
     /**
@@ -151,7 +150,7 @@ public abstract class TLComplexTypeBase extends TLLibraryMember implements TLPro
      */
     @Override
     public void addEquivalent(TLEquivalent equivalent) {
-        equivalentManager.addChild(equivalent);
+        equivalentManager.addChild( equivalent );
     }
 
     /**
@@ -160,7 +159,7 @@ public abstract class TLComplexTypeBase extends TLLibraryMember implements TLPro
      */
     @Override
     public void addEquivalent(int index, TLEquivalent equivalent) {
-        equivalentManager.addChild(index, equivalent);
+        equivalentManager.addChild( index, equivalent );
     }
 
     /**
@@ -168,7 +167,7 @@ public abstract class TLComplexTypeBase extends TLLibraryMember implements TLPro
      */
     @Override
     public void removeEquivalent(TLEquivalent equivalent) {
-        equivalentManager.removeChild(equivalent);
+        equivalentManager.removeChild( equivalent );
     }
 
     /**
@@ -176,7 +175,7 @@ public abstract class TLComplexTypeBase extends TLLibraryMember implements TLPro
      */
     @Override
     public void moveUp(TLEquivalent equivalent) {
-        equivalentManager.moveUp(equivalent);
+        equivalentManager.moveUp( equivalent );
     }
 
     /**
@@ -184,7 +183,7 @@ public abstract class TLComplexTypeBase extends TLLibraryMember implements TLPro
      */
     @Override
     public void moveDown(TLEquivalent equivalent) {
-        equivalentManager.moveDown(equivalent);
+        equivalentManager.moveDown( equivalent );
     }
 
     /**
@@ -192,7 +191,7 @@ public abstract class TLComplexTypeBase extends TLLibraryMember implements TLPro
      */
     @Override
     public void sortEquivalents(Comparator<TLEquivalent> comparator) {
-        equivalentManager.sortChildren(comparator);
+        equivalentManager.sortChildren( comparator );
     }
 
     /**
@@ -207,51 +206,49 @@ public abstract class TLComplexTypeBase extends TLLibraryMember implements TLPro
      */
     public void setDocumentation(TLDocumentation documentation) {
         if (documentation != this.documentation) {
-            ModelEvent<?> event = new ModelEventBuilder(ModelEventType.DOCUMENTATION_MODIFIED, this)
-                    .setOldValue(this.documentation).setNewValue(documentation).buildEvent();
+            ModelEvent<?> event = new ModelEventBuilder( ModelEventType.DOCUMENTATION_MODIFIED, this )
+                .setOldValue( this.documentation ).setNewValue( documentation ).buildEvent();
 
             if (documentation != null) {
-                documentation.setOwner(this);
+                documentation.setOwner( this );
             }
             if (this.documentation != null) {
-                this.documentation.setOwner(null);
+                this.documentation.setOwner( null );
             }
             this.documentation = documentation;
-            publishEvent(event);
+            publishEvent( event );
         }
     }
-    
-	/**
-     * Called when a contextual facet is added to this entity, regardless of
-     * its facet type.
+
+    /**
+     * Called when a contextual facet is added to this entity, regardless of its facet type.
      * 
-     * @param facet  the contextual facet that was added
+     * @param facet the contextual facet that was added
      */
     protected void contextualFacetAdded(TLContextualFacet facet) {
-    	if (!OTM16Upgrade.otm16Enabled) {
-    		AbstractLibrary owningLibrary = getOwningLibrary();
-    		
-    		if (owningLibrary != null) {
-    			owningLibrary.addNamedMember( facet );
-    		}
-    		facet.setOwningEntityName( getLocalName() );
-    	}
+        if (!OTM16Upgrade.otm16Enabled) {
+            AbstractLibrary owningLibrary = getOwningLibrary();
+
+            if (owningLibrary != null) {
+                owningLibrary.addNamedMember( facet );
+            }
+            facet.setOwningEntityName( getLocalName() );
+        }
     }
-    
+
     /**
-     * Called when a contextual facet is removed from this entity, regardless of
-     * its facet type.
+     * Called when a contextual facet is removed from this entity, regardless of its facet type.
      * 
-     * @param facet  the contextual facet that was removed
+     * @param facet the contextual facet that was removed
      */
     protected void contextualFacetRemoved(TLContextualFacet facet) {
-    	if (!OTM16Upgrade.otm16Enabled) {
-    		AbstractLibrary owningLibrary = getOwningLibrary();
-    		
-    		if (owningLibrary != null) {
-    			owningLibrary.removeNamedMember( facet );
-    		}
-    	}
+        if (!OTM16Upgrade.otm16Enabled) {
+            AbstractLibrary owningLibrary = getOwningLibrary();
+
+            if (owningLibrary != null) {
+                owningLibrary.removeNamedMember( facet );
+            }
+        }
     }
-    
+
 }

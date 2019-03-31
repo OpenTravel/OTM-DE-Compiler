@@ -13,18 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.codegen.html.writers;
 
+import org.opentravel.schemacompiler.codegen.html.Content;
 import org.opentravel.schemacompiler.codegen.html.builders.AbstractDocumentationBuilder;
 import org.opentravel.schemacompiler.codegen.html.builders.FieldDocumentationBuilder;
-import org.opentravel.schemacompiler.codegen.html.Content;
 
 /**
  * The interface for writing field output.
  *
- * This code is not part of an API.
- * It is implementation that is subject to change.
- * Do not use it as an API
+ * <p>
+ * This code is not part of an API. It is implementation that is subject to change. Do not use it as an API
  *
  * @author Jamie Ho
  * @author Bhavesh Patel (Modified)
@@ -40,8 +40,7 @@ public interface FieldWriter {
      * @param memberDetailsTree the content tree representing member details
      * @return content tree for the field details header
      */
-    public Content getFieldDetailsTreeHeader(AbstractDocumentationBuilder<?> classDoc,
-            Content memberDetailsTree);
+    public Content getFieldDetailsTreeHeader(AbstractDocumentationBuilder<?> classDoc, Content memberDetailsTree);
 
     /**
      * Get the field documentation tree header.
@@ -50,8 +49,7 @@ public interface FieldWriter {
      * @param fieldDetailsTree the content tree representing field details
      * @return content tree for the field documentation header
      */
-    public Content getFieldTreeHeader(FieldDocumentationBuilder<?> field,
-            Content fieldDetailsTree);
+    public Content getFieldTreeHeader(FieldDocumentationBuilder<?> field, Content fieldDetailsTree);
 
 
     /**

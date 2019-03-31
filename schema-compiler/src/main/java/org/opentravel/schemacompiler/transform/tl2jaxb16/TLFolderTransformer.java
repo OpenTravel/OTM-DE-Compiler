@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.transform.tl2jaxb16;
 
 import org.opentravel.ns.ota2.librarymodel_v01_06.Folder;
@@ -21,34 +22,33 @@ import org.opentravel.schemacompiler.model.LibraryMember;
 import org.opentravel.schemacompiler.model.TLFolder;
 
 /**
- * Handles the transformation of objects from the <code>TLFolder</code> type to the
- * <code>Folder</code> type.
+ * Handles the transformation of objects from the <code>TLFolder</code> type to the <code>Folder</code> type.
  */
-public class TLFolderTransformer extends TLComplexTypeTransformer<TLFolder, Folder> {
-	
-	/**
-	 * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
-	 */
-	@Override
-	public Folder transform(TLFolder source) {
-		Folder target = new Folder();
-		
-		target.setName( source.getName() );
-		
-		// Create the member entities for this folder
-		for (LibraryMember entity : source.getEntities()) {
-			FolderItem item = new FolderItem();
-			
-			item.setValue( entity.getLocalName() );
-			target.getFolderItem().add( item );
-		}
-		
-		// Recursively create the sub-folder structure
-		for (TLFolder subFolder : source.getFolders()) {
-			target.getFolder().add( transform( subFolder ) );
-		}
-		
-		return target;
-	}
-	
+public class TLFolderTransformer extends TLComplexTypeTransformer<TLFolder,Folder> {
+
+    /**
+     * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
+     */
+    @Override
+    public Folder transform(TLFolder source) {
+        Folder target = new Folder();
+
+        target.setName( source.getName() );
+
+        // Create the member entities for this folder
+        for (LibraryMember entity : source.getEntities()) {
+            FolderItem item = new FolderItem();
+
+            item.setValue( entity.getLocalName() );
+            target.getFolderItem().add( item );
+        }
+
+        // Recursively create the sub-folder structure
+        for (TLFolder subFolder : source.getFolders()) {
+            target.getFolder().add( transform( subFolder ) );
+        }
+
+        return target;
+    }
+
 }

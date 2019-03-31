@@ -13,14 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.repository.impl;
 
-import java.net.URI;
+package org.opentravel.schemacompiler.repository.impl;
 
 import org.opentravel.schemacompiler.model.TLLibraryStatus;
 import org.opentravel.schemacompiler.repository.Repository;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
 import org.opentravel.schemacompiler.repository.RepositoryItemState;
+
+import java.net.URI;
 
 /**
  * Implementation of the <code>RepositoryItem</code> interface.
@@ -51,8 +52,7 @@ public class RepositoryItemImpl implements RepositoryItem {
     /**
      * Assigns the value of the 'repository' field.
      * 
-     * @param owningRepository
-     *            the field value to assign
+     * @param owningRepository the field value to assign
      */
     public void setRepository(Repository owningRepository) {
         this.owningRepository = owningRepository;
@@ -69,8 +69,7 @@ public class RepositoryItemImpl implements RepositoryItem {
     /**
      * Assigns the value of the 'namespace' field.
      * 
-     * @param namespace
-     *            the field value to assign
+     * @param namespace the field value to assign
      */
     public void setNamespace(String namespace) {
         this.namespace = namespace;
@@ -87,8 +86,7 @@ public class RepositoryItemImpl implements RepositoryItem {
     /**
      * Assigns the value of the 'baseNamespace' field.
      * 
-     * @param baseNamespace
-     *            the field value to assign
+     * @param baseNamespace the field value to assign
      */
     public void setBaseNamespace(String baseNamespace) {
         this.baseNamespace = baseNamespace;
@@ -105,8 +103,7 @@ public class RepositoryItemImpl implements RepositoryItem {
     /**
      * Assigns the value of the 'filename' field.
      * 
-     * @param filename
-     *            the field value to assign
+     * @param filename the field value to assign
      */
     public void setFilename(String filename) {
         this.filename = filename;
@@ -122,8 +119,7 @@ public class RepositoryItemImpl implements RepositoryItem {
     /**
      * Assigns the value of the 'libraryName' field.
      * 
-     * @param libraryName
-     *            the field value to assign
+     * @param libraryName the field value to assign
      */
     public void setLibraryName(String libraryName) {
         this.libraryName = libraryName;
@@ -140,8 +136,7 @@ public class RepositoryItemImpl implements RepositoryItem {
     /**
      * Assigns the value of the 'version' field.
      * 
-     * @param version
-     *            the field value to assign
+     * @param version the field value to assign
      */
     public void setVersion(String version) {
         this.version = version;
@@ -157,8 +152,7 @@ public class RepositoryItemImpl implements RepositoryItem {
     /**
      * Assigns the value of the 'versionScheme' field.
      * 
-     * @param versionScheme
-     *            the field value to assign
+     * @param versionScheme the field value to assign
      */
     public void setVersionScheme(String versionScheme) {
         this.versionScheme = versionScheme;
@@ -175,8 +169,7 @@ public class RepositoryItemImpl implements RepositoryItem {
     /**
      * Assigns the value of the 'status' field.
      * 
-     * @param status
-     *            the field value to assign
+     * @param status the field value to assign
      */
     public void setStatus(TLLibraryStatus status) {
         this.status = status;
@@ -193,8 +186,7 @@ public class RepositoryItemImpl implements RepositoryItem {
     /**
      * Assigns the value of the 'state' field.
      * 
-     * @param state
-     *            the field value to assign
+     * @param state the field value to assign
      */
     public void setState(RepositoryItemState state) {
         this.state = state;
@@ -211,8 +203,7 @@ public class RepositoryItemImpl implements RepositoryItem {
     /**
      * Assigns the value of the 'lockedByUser' field.
      * 
-     * @param lockedByUser
-     *            the field value to assign
+     * @param lockedByUser the field value to assign
      */
     public void setLockedByUser(String lockedByUser) {
         this.lockedByUser = lockedByUser;
@@ -223,7 +214,7 @@ public class RepositoryItemImpl implements RepositoryItem {
      */
     @Override
     public URI toURI() {
-        return toURI(false);
+        return toURI( false );
     }
 
     /**
@@ -231,7 +222,7 @@ public class RepositoryItemImpl implements RepositoryItem {
      */
     @Override
     public URI toURI(boolean fullyQualified) {
-        return RepositoryUtils.newURI(this, fullyQualified);
+        return RepositoryUtils.newURI( this, fullyQualified );
     }
 
 }

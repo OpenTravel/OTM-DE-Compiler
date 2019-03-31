@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.model;
 
 import org.w3._2001.xmlschema.TopLevelElement;
@@ -21,8 +22,8 @@ import org.w3._2001.xmlschema.TopLevelElement;
  * Library member that represents a top-level element declaration from a legacy XML schema.
  * 
  * <p>
- * If this element is considered to be an alias of an <code>XSDComplexType</code> instance, the
- * 'aliasedType' field will reference the aliased entity.
+ * If this element is considered to be an alias of an <code>XSDComplexType</code> instance, the 'aliasedType' field will
+ * reference the aliased entity.
  * 
  * @author S. Livezey
  */
@@ -33,13 +34,11 @@ public class XSDElement extends TLLibraryMember implements TLPropertyType {
     private XSDComplexType aliasedType;
 
     /**
-     * Constructor that specifies the name of this model element and the underlying JAXB element
-     * from which it was created.
+     * Constructor that specifies the name of this model element and the underlying JAXB element from which it was
+     * created.
      * 
-     * @param name
-     *            the name of the model element
-     * @param jaxbElement
-     *            the JAXB element that was used to create this element
+     * @param name the name of the model element
+     * @param jaxbElement the JAXB element that was used to create this element
      */
     public XSDElement(String name, TopLevelElement jaxbElement) {
         this.name = name;
@@ -55,12 +54,12 @@ public class XSDElement extends TLLibraryMember implements TLPropertyType {
         StringBuilder identity = new StringBuilder();
 
         if (owningLibrary != null) {
-            identity.append(owningLibrary.getValidationIdentity()).append(" : ");
+            identity.append( owningLibrary.getValidationIdentity() ).append( " : " );
         }
         if (name == null) {
-            identity.append("[Unnamed XSD Element]");
+            identity.append( "[Unnamed XSD Element]" );
         } else {
-            identity.append(name);
+            identity.append( name );
         }
         return identity.toString();
     }
@@ -103,8 +102,7 @@ public class XSDElement extends TLLibraryMember implements TLPropertyType {
     /**
      * Assigns the complex type that is aliased by this element (may be null).
      * 
-     * @param aliasedType
-     *            the complex type instance to assign
+     * @param aliasedType the complex type instance to assign
      */
     public void setAliasedType(XSDComplexType aliasedType) {
         this.aliasedType = aliasedType;

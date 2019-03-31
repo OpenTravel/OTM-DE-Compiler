@@ -13,15 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.task;
 
-import java.io.File;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+package org.opentravel.schemacompiler.task;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerationContext;
 import org.opentravel.schemacompiler.codegen.CodeGenerationFilter;
@@ -39,24 +32,30 @@ import org.opentravel.schemacompiler.model.XSDLibrary;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
 import org.opentravel.schemacompiler.util.SchemaCompilerException;
 
+import java.io.File;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 /**
- * Compiler task used to generate WSDL documents for the services defined in a project, as well as
- * the trimmed schema (XSD) files that contain the entities upon which those services depend. If
- * multiple services are defined in the project's libraries, WSDL's will be generated for all of
- * those services in the same output directory, and the trimmed schemas will be a union of the
- * dependencies from all of the compiled services.
+ * Compiler task used to generate WSDL documents for the services defined in a project, as well as the trimmed schema
+ * (XSD) files that contain the entities upon which those services depend. If multiple services are defined in the
+ * project's libraries, WSDL's will be generated for all of those services in the same output directory, and the trimmed
+ * schemas will be a union of the dependencies from all of the compiled services.
  * 
  * @author S. Livezey
  */
-public class ServiceProjectCompilerTask extends AbstractSchemaCompilerTask implements
-        ServiceCompilerTaskOptions {
+public class ServiceProjectCompilerTask extends AbstractSchemaCompilerTask implements ServiceCompilerTaskOptions {
 
     private String serviceEndpointUrl;
 
     /**
      * Constructor that specifies the filename of the project for which schemas are being compiled.
      * 
-     * @param projectFilename  the name of the project (.otp) file
+     * @param projectFilename the name of the project (.otp) file
      */
     public ServiceProjectCompilerTask(String projectFilename) {
         this.projectFilename = projectFilename;
@@ -65,11 +64,11 @@ public class ServiceProjectCompilerTask extends AbstractSchemaCompilerTask imple
     /**
      * Constructor that specifies the filename of the project for which schemas are being compiled.
      * 
-     * @param projectFilename  the name of the project (.otp) file
-     * @param repositoryManager  the repository manager to use when retrieving managed content
+     * @param projectFilename the name of the project (.otp) file
+     * @param repositoryManager the repository manager to use when retrieving managed content
      */
     public ServiceProjectCompilerTask(String projectFilename, RepositoryManager repositoryManager) {
-    	super( repositoryManager );
+        super( repositoryManager );
         this.projectFilename = projectFilename;
     }
 
@@ -78,8 +77,8 @@ public class ServiceProjectCompilerTask extends AbstractSchemaCompilerTask imple
      *      java.util.Collection)
      */
     @Override
-    protected void generateOutput(Collection<TLLibrary> userDefinedLibraries,
-            Collection<XSDLibrary> legacySchemas) throws SchemaCompilerException {
+    protected void generateOutput(Collection<TLLibrary> userDefinedLibraries, Collection<XSDLibrary> legacySchemas)
+        throws SchemaCompilerException {
         Map<String,Boolean> duplicateServiceNameIndicators = new HashMap<>();
         DependencyFilterBuilder filterBuilder = new DependencyFilterBuilder().setIncludeExtendedLegacySchemas( true );
         List<TLService> serviceList = new ArrayList<>();
@@ -92,14 +91,14 @@ public class ServiceProjectCompilerTask extends AbstractSchemaCompilerTask imple
             if (service != null) {
                 String serviceName = service.getName();
 
-                if (duplicateServiceNameIndicators.containsKey(serviceName)) {
-                    duplicateServiceNameIndicators.put(serviceName, Boolean.TRUE);
+                if (duplicateServiceNameIndicators.containsKey( serviceName )) {
+                    duplicateServiceNameIndicators.put( serviceName, Boolean.TRUE );
 
                 } else {
-                    duplicateServiceNameIndicators.put(serviceName, Boolean.FALSE);
+                    duplicateServiceNameIndicators.put( serviceName, Boolean.FALSE );
                 }
-                filterBuilder.addLibraryMember(service);
-                serviceList.add(service);
+                filterBuilder.addLibraryMember( service );
+                serviceList.add( service );
             }
         }
 
@@ -107,29 +106,27 @@ public class ServiceProjectCompilerTask extends AbstractSchemaCompilerTask imple
         CodeGenerationContext context = createContext();
 
         for (TLService service : serviceList) {
-            boolean duplicateName = duplicateServiceNameIndicators.get(service.getName());
+            boolean duplicateName = duplicateServiceNameIndicators.get( service.getName() );
 
             CodeGenerator<TLService> serviceWsdlGenerator = CodeGeneratorFactory.getInstance()
-                    .newCodeGenerator(CodeGeneratorFactory.WSDL_TARGET_FORMAT, TLService.class);
+                .newCodeGenerator( CodeGeneratorFactory.WSDL_TARGET_FORMAT, TLService.class );
 
             serviceWsdlGenerator
-                    .setFilenameBuilder(new LibraryMemberTrimmedFilenameBuilder<TLService>(service,
-                            duplicateName));
-            addGeneratedFiles(serviceWsdlGenerator.generateOutput(service, context));
+                .setFilenameBuilder( new LibraryMemberTrimmedFilenameBuilder<TLService>( service, duplicateName ) );
+            addGeneratedFiles( serviceWsdlGenerator.generateOutput( service, context ) );
 
             // Generate EXAMPLE files if required; examples are only created for the operation
             // messages (not the contents of the trimmed schemas)
             if (isGenerateExamples()) {
-                generateExampleArtifacts(userDefinedLibraries, context,
-                        new LibraryTrimmedFilenameBuilder(null), createExampleFilter(service),
-                        CodeGeneratorFactory.XML_TARGET_FORMAT);
+                generateExampleArtifacts( userDefinedLibraries, context, new LibraryTrimmedFilenameBuilder( null ),
+                    createExampleFilter( service ), CodeGeneratorFactory.XML_TARGET_FORMAT );
             }
         }
 
         // Generate the trimmed schemas for all of the services as a union of their dependencies
         if (!serviceList.isEmpty()) {
-            compileXmlSchemas(userDefinedLibraries, legacySchemas, context,
-                    new LibraryTrimmedFilenameBuilder(null), filterBuilder.buildFilter());
+            compileXmlSchemas( userDefinedLibraries, legacySchemas, context, new LibraryTrimmedFilenameBuilder( null ),
+                filterBuilder.buildFilter() );
         }
     }
 
@@ -138,14 +135,13 @@ public class ServiceProjectCompilerTask extends AbstractSchemaCompilerTask imple
      *      org.opentravel.schemacompiler.codegen.CodeGenerationContext)
      */
     @Override
-    protected String getExampleOutputFolder(LibraryMember libraryMember,
-            CodeGenerationContext context) {
-        String rootOutputFolder = context.getValue(CodeGenerationContext.CK_OUTPUT_FOLDER);
+    protected String getExampleOutputFolder(LibraryMember libraryMember, CodeGenerationContext context) {
+        String rootOutputFolder = context.getValue( CodeGenerationContext.CK_OUTPUT_FOLDER );
 
         if (rootOutputFolder == null) {
-            rootOutputFolder = System.getProperty("user.dir");
+            rootOutputFolder = System.getProperty( "user.dir" );
         }
-        return new File(rootOutputFolder, "examples").getAbsolutePath();
+        return new File( rootOutputFolder, "examples" ).getAbsolutePath();
     }
 
     /**
@@ -153,18 +149,15 @@ public class ServiceProjectCompilerTask extends AbstractSchemaCompilerTask imple
      *      org.opentravel.schemacompiler.codegen.CodeGenerationContext)
      */
     @Override
-    protected String getSchemaRelativeFolderPath(LibraryMember libraryMember,
-            CodeGenerationContext context) {
+    protected String getSchemaRelativeFolderPath(LibraryMember libraryMember, CodeGenerationContext context) {
         return "../";
     }
 
     /**
-     * Returns a <code>CodeGenerationFilter</code> that only includes the service, its operations,
-     * and their facets. None of the other dependent elements from the supporting library schemas
-     * are included.
+     * Returns a <code>CodeGenerationFilter</code> that only includes the service, its operations, and their facets.
+     * None of the other dependent elements from the supporting library schemas are included.
      * 
-     * @param service
-     *            the service for which to create a filter
+     * @param service the service for which to create a filter
      * @return CodeGenerationFilter
      */
     protected CodeGenerationFilter createExampleFilter(TLService service) {
@@ -172,18 +165,18 @@ public class ServiceProjectCompilerTask extends AbstractSchemaCompilerTask imple
 
         for (TLOperation operation : service.getOperations()) {
             if (operation.getRequest().declaresContent()) {
-                filter.addProcessedElement(operation.getRequest());
+                filter.addProcessedElement( operation.getRequest() );
             }
             if (operation.getResponse().declaresContent()) {
-                filter.addProcessedElement(operation.getResponse());
+                filter.addProcessedElement( operation.getResponse() );
             }
             if (operation.getNotification().declaresContent()) {
-                filter.addProcessedElement(operation.getNotification());
+                filter.addProcessedElement( operation.getNotification() );
             }
-            filter.addProcessedElement(operation);
+            filter.addProcessedElement( operation );
         }
-        filter.addProcessedElement(service);
-        filter.addProcessedLibrary(service.getOwningLibrary());
+        filter.addProcessedElement( service );
+        filter.addProcessedLibrary( service.getOwningLibrary() );
         return filter;
     }
 
@@ -195,7 +188,7 @@ public class ServiceProjectCompilerTask extends AbstractSchemaCompilerTask imple
         CodeGenerationContext context = super.createContext();
 
         if (serviceEndpointUrl != null) {
-            context.setValue(CodeGenerationContext.CK_SERVICE_ENDPOINT_URL, serviceEndpointUrl);
+            context.setValue( CodeGenerationContext.CK_SERVICE_ENDPOINT_URL, serviceEndpointUrl );
         }
         return context;
     }
@@ -208,9 +201,9 @@ public class ServiceProjectCompilerTask extends AbstractSchemaCompilerTask imple
         if (taskOptions instanceof ServiceCompilerTaskOptions) {
             ServiceCompilerTaskOptions serviceOptions = (ServiceCompilerTaskOptions) taskOptions;
 
-            setServiceEndpointUrl(serviceOptions.getServiceEndpointUrl());
+            setServiceEndpointUrl( serviceOptions.getServiceEndpointUrl() );
         }
-        super.applyTaskOptions(taskOptions);
+        super.applyTaskOptions( taskOptions );
     }
 
     /**
@@ -232,8 +225,7 @@ public class ServiceProjectCompilerTask extends AbstractSchemaCompilerTask imple
     /**
      * Assigns the base URL for all service endpoints generated in WSDL documents.
      * 
-     * @param serviceEndpointUrl
-     *            the service endpoint URL to assign
+     * @param serviceEndpointUrl the service endpoint URL to assign
      */
     public void setServiceEndpointUrl(String serviceEndpointUrl) {
         this.serviceEndpointUrl = serviceEndpointUrl;

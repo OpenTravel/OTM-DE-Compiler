@@ -13,11 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.model;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+package org.opentravel.schemacompiler.model;
 
 import org.opentravel.schemacompiler.event.ModelEvent;
 import org.opentravel.schemacompiler.event.ModelEventBuilder;
@@ -25,35 +22,40 @@ import org.opentravel.schemacompiler.event.ModelEventType;
 import org.opentravel.schemacompiler.model.TLEquivalent.EquivalentListManager;
 import org.opentravel.schemacompiler.version.Versioned;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+
 /**
  * Operation element defined within a service definition.
  * 
  * @author S. Livezey
  */
-public class TLOperation extends TLModelElement implements NamedEntity, TLFacetOwner, TLVersionedExtensionOwner,
-		TLDocumentationOwner, TLEquivalentOwner {
+public class TLOperation extends TLModelElement
+    implements NamedEntity, TLFacetOwner, TLVersionedExtensionOwner, TLDocumentationOwner, TLEquivalentOwner {
 
-	private static final String FACETS_CANNOT_BE_MODIFIED = "Facets cannot be modified once their owner has been assigned to a model.";
-	
-	private TLService owningService;
+    private static final String FACETS_CANNOT_BE_MODIFIED =
+        "Facets cannot be modified once their owner has been assigned to a model.";
+
+    private TLService owningService;
     private String name;
     private TLDocumentation documentation;
-    private EquivalentListManager equivalentManager = new EquivalentListManager(this);
+    private EquivalentListManager equivalentManager = new EquivalentListManager( this );
     private TLFacet request;
     private TLFacet response;
     private TLFacet notification;
     private boolean notExtendable;
     private TLExtension extension;
 
-	/**
-	 * Default constructor.
-	 */
-	public TLOperation() {
-		setRequest( new TLFacet() );
-		setResponse( new TLFacet() );
-		setNotification( new TLFacet() );
-	}
-	
+    /**
+     * Default constructor.
+     */
+    public TLOperation() {
+        setRequest( new TLFacet() );
+        setResponse( new TLFacet() );
+        setNotification( new TLFacet() );
+    }
+
     /**
      * @see org.opentravel.schemacompiler.model.ModelElement#getOwningModel()
      */
@@ -78,12 +80,12 @@ public class TLOperation extends TLModelElement implements NamedEntity, TLFacetO
         StringBuilder identity = new StringBuilder();
 
         if (owningService != null) {
-            identity.append(owningService.getValidationIdentity()).append(".");
+            identity.append( owningService.getValidationIdentity() ).append( "." );
         }
         if (name == null) {
-            identity.append("[Unnamed Operation]");
+            identity.append( "[Unnamed Operation]" );
         } else {
-            identity.append(name);
+            identity.append( name );
         }
         return identity.toString();
     }
@@ -139,11 +141,10 @@ public class TLOperation extends TLModelElement implements NamedEntity, TLFacetO
     public boolean isLaterVersion(Versioned otherVersionedItem) {
         boolean result = false;
 
-        if ((otherVersionedItem != null) && otherVersionedItem.getClass().equals(this.getClass())
-                && (this.getOwningLibrary() != null)
-                && (otherVersionedItem.getOwningLibrary() != null) && (this.getLocalName() != null)
-                && this.getLocalName().equals(otherVersionedItem.getLocalName())) {
-            result = this.getOwningLibrary().isLaterVersion(otherVersionedItem.getOwningLibrary());
+        if ((otherVersionedItem != null) && otherVersionedItem.getClass().equals( this.getClass() )
+            && (this.getOwningLibrary() != null) && (otherVersionedItem.getOwningLibrary() != null)
+            && (this.getLocalName() != null) && this.getLocalName().equals( otherVersionedItem.getLocalName() )) {
+            result = this.getOwningLibrary().isLaterVersion( otherVersionedItem.getOwningLibrary() );
         }
         return result;
     }
@@ -160,33 +161,10 @@ public class TLOperation extends TLModelElement implements NamedEntity, TLFacetO
     /**
      * Assigns the value of the 'owningService' field.
      * 
-     * @param owningService
-     *            the field value to assign
+     * @param owningService the field value to assign
      */
     public void setOwningService(TLService owningService) {
         this.owningService = owningService;
-    }
-
-    /**
-     * Moves this operation up by one position in the list of operations maintained by its owner. If
-     * the owner is null, or this operation is already at the front of the list, this method has no
-     * effect.
-     */
-    public void moveUp() {
-        if (owningService != null) {
-            owningService.moveUp(this);
-        }
-    }
-
-    /**
-     * Moves this operation down by one position in the list of operations maintained by its owner.
-     * If the owner is null, or this operation is already at the end of the list, this method has no
-     * effect.
-     */
-    public void moveDown() {
-        if (owningService != null) {
-            owningService.moveDown(this);
-        }
     }
 
     /**
@@ -209,15 +187,14 @@ public class TLOperation extends TLModelElement implements NamedEntity, TLFacetO
     /**
      * Assigns the value of the 'name' field.
      * 
-     * @param name
-     *            the field value to assign
+     * @param name the field value to assign
      */
     public void setName(String name) {
-        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.NAME_MODIFIED, this)
-                .setOldValue(this.name).setNewValue(name).buildEvent();
+        ModelEvent<?> event = new ModelEventBuilder( ModelEventType.NAME_MODIFIED, this ).setOldValue( this.name )
+            .setNewValue( name ).buildEvent();
 
         this.name = name;
-        publishEvent(event);
+        publishEvent( event );
     }
 
     /**
@@ -225,8 +202,7 @@ public class TLOperation extends TLModelElement implements NamedEntity, TLFacetO
      */
     @Override
     public String getLocalName() {
-        String serviceName = (owningService == null) ? "UnknownService" : owningService
-                .getLocalName();
+        String serviceName = (owningService == null) ? "UnknownService" : owningService.getLocalName();
         return serviceName + "_" + name;
     }
 
@@ -242,17 +218,17 @@ public class TLOperation extends TLModelElement implements NamedEntity, TLFacetO
      */
     public void setDocumentation(TLDocumentation documentation) {
         if (documentation != this.documentation) {
-            ModelEvent<?> event = new ModelEventBuilder(ModelEventType.DOCUMENTATION_MODIFIED, this)
-                    .setOldValue(this.documentation).setNewValue(documentation).buildEvent();
+            ModelEvent<?> event = new ModelEventBuilder( ModelEventType.DOCUMENTATION_MODIFIED, this )
+                .setOldValue( this.documentation ).setNewValue( documentation ).buildEvent();
 
             if (documentation != null) {
-                documentation.setOwner(this);
+                documentation.setOwner( this );
             }
             if (this.documentation != null) {
-                this.documentation.setOwner(null);
+                this.documentation.setOwner( null );
             }
             this.documentation = documentation;
-            publishEvent(event);
+            publishEvent( event );
         }
     }
 
@@ -269,7 +245,7 @@ public class TLOperation extends TLModelElement implements NamedEntity, TLFacetO
      */
     @Override
     public TLEquivalent getEquivalent(String context) {
-        return equivalentManager.getChild(context);
+        return equivalentManager.getChild( context );
     }
 
     /**
@@ -277,7 +253,7 @@ public class TLOperation extends TLModelElement implements NamedEntity, TLFacetO
      */
     @Override
     public void addEquivalent(TLEquivalent equivalent) {
-        equivalentManager.addChild(equivalent);
+        equivalentManager.addChild( equivalent );
     }
 
     /**
@@ -286,7 +262,7 @@ public class TLOperation extends TLModelElement implements NamedEntity, TLFacetO
      */
     @Override
     public void addEquivalent(int index, TLEquivalent equivalent) {
-        equivalentManager.addChild(index, equivalent);
+        equivalentManager.addChild( index, equivalent );
     }
 
     /**
@@ -294,23 +270,7 @@ public class TLOperation extends TLModelElement implements NamedEntity, TLFacetO
      */
     @Override
     public void removeEquivalent(TLEquivalent equivalent) {
-        equivalentManager.removeChild(equivalent);
-    }
-
-    /**
-     * @see org.opentravel.schemacompiler.model.TLEquivalentOwner#moveUp(org.opentravel.schemacompiler.model.TLEquivalent)
-     */
-    @Override
-    public void moveUp(TLEquivalent equivalent) {
-        equivalentManager.moveUp(equivalent);
-    }
-
-    /**
-     * @see org.opentravel.schemacompiler.model.TLEquivalentOwner#moveDown(org.opentravel.schemacompiler.model.TLEquivalent)
-     */
-    @Override
-    public void moveDown(TLEquivalent equivalent) {
-        equivalentManager.moveDown(equivalent);
+        equivalentManager.removeChild( equivalent );
     }
 
     /**
@@ -318,21 +278,57 @@ public class TLOperation extends TLModelElement implements NamedEntity, TLFacetO
      */
     @Override
     public void sortEquivalents(Comparator<TLEquivalent> comparator) {
-        equivalentManager.sortChildren(comparator);
+        equivalentManager.sortChildren( comparator );
     }
 
     /**
-	 * @see org.opentravel.schemacompiler.model.TLFacetOwner#getAllFacets()
-	 */
-	@Override
-	public List<TLFacet> getAllFacets() {
-		List<TLFacet> facetList = new ArrayList<>();
-		
-		facetList.add( getRequest() );
-		facetList.add( getResponse() );
-		facetList.add( getNotification() );
-		return facetList;
-	}
+     * Moves this operation up by one position in the list of operations maintained by its owner. If the owner is null,
+     * or this operation is already at the front of the list, this method has no effect.
+     */
+    public void moveUp() {
+        if (owningService != null) {
+            owningService.moveUp( this );
+        }
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.model.TLEquivalentOwner#moveUp(org.opentravel.schemacompiler.model.TLEquivalent)
+     */
+    @Override
+    public void moveUp(TLEquivalent equivalent) {
+        equivalentManager.moveUp( equivalent );
+    }
+
+    /**
+     * Moves this operation down by one position in the list of operations maintained by its owner. If the owner is
+     * null, or this operation is already at the end of the list, this method has no effect.
+     */
+    public void moveDown() {
+        if (owningService != null) {
+            owningService.moveDown( this );
+        }
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.model.TLEquivalentOwner#moveDown(org.opentravel.schemacompiler.model.TLEquivalent)
+     */
+    @Override
+    public void moveDown(TLEquivalent equivalent) {
+        equivalentManager.moveDown( equivalent );
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.model.TLFacetOwner#getAllFacets()
+     */
+    @Override
+    public List<TLFacet> getAllFacets() {
+        List<TLFacet> facetList = new ArrayList<>();
+
+        facetList.add( getRequest() );
+        facetList.add( getResponse() );
+        facetList.add( getNotification() );
+        return facetList;
+    }
 
     /**
      * Returns the value of the 'request' field.
@@ -346,21 +342,20 @@ public class TLOperation extends TLModelElement implements NamedEntity, TLFacetO
     /**
      * Assigns the value of the 'request' field.
      * 
-     * @param request
-     *            the field value to assign
+     * @param request the field value to assign
      */
     public void setRequest(TLFacet request) {
         if (request != this.request) {
             if (getOwningModel() != null) {
-                throw new IllegalStateException(FACETS_CANNOT_BE_MODIFIED);
+                throw new IllegalStateException( FACETS_CANNOT_BE_MODIFIED );
             }
             if (request != null) {
-                request.setFacetType(TLFacetType.REQUEST);
-                request.setOwningEntity(this);
+                request.setFacetType( TLFacetType.REQUEST );
+                request.setOwningEntity( this );
             }
             if (this.request != null) {
-                this.request.setFacetType(null);
-                this.request.setOwningEntity(null);
+                this.request.setFacetType( null );
+                this.request.setOwningEntity( null );
             }
             this.request = request;
         }
@@ -378,22 +373,20 @@ public class TLOperation extends TLModelElement implements NamedEntity, TLFacetO
     /**
      * Assigns the value of the 'response' field.
      * 
-     * @param response
-     *            the field value to assign
+     * @param response the field value to assign
      */
     public void setResponse(TLFacet response) {
         if (response != this.response) {
             if (getOwningModel() != null) {
-                throw new IllegalStateException(
-                        FACETS_CANNOT_BE_MODIFIED);
+                throw new IllegalStateException( FACETS_CANNOT_BE_MODIFIED );
             }
             if (response != null) {
-                response.setFacetType(TLFacetType.RESPONSE);
-                response.setOwningEntity(this);
+                response.setFacetType( TLFacetType.RESPONSE );
+                response.setOwningEntity( this );
             }
             if (this.response != null) {
-                this.response.setFacetType(null);
-                this.response.setOwningEntity(null);
+                this.response.setFacetType( null );
+                this.response.setOwningEntity( null );
             }
             this.response = response;
         }
@@ -411,22 +404,20 @@ public class TLOperation extends TLModelElement implements NamedEntity, TLFacetO
     /**
      * Assigns the value of the 'notification' field.
      * 
-     * @param notification
-     *            the field value to assign
+     * @param notification the field value to assign
      */
     public void setNotification(TLFacet notification) {
         if (notification != this.notification) {
             if (getOwningModel() != null) {
-                throw new IllegalStateException(
-                        FACETS_CANNOT_BE_MODIFIED);
+                throw new IllegalStateException( FACETS_CANNOT_BE_MODIFIED );
             }
             if (notification != null) {
-                notification.setFacetType(TLFacetType.NOTIFICATION);
-                notification.setOwningEntity(this);
+                notification.setFacetType( TLFacetType.NOTIFICATION );
+                notification.setOwningEntity( this );
             }
             if (this.notification != null) {
-                this.notification.setFacetType(null);
-                this.notification.setOwningEntity(null);
+                this.notification.setFacetType( null );
+                this.notification.setOwningEntity( null );
             }
             this.notification = notification;
         }
@@ -444,15 +435,14 @@ public class TLOperation extends TLModelElement implements NamedEntity, TLFacetO
     /**
      * Assigns the value of the 'notExtendable' field.
      * 
-     * @param notExtendable
-     *            the field value to assign
+     * @param notExtendable the field value to assign
      */
     public void setNotExtendable(boolean notExtendable) {
-        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.NOT_EXTENDABLE_FLAG_MODIFIED,
-                this).setOldValue(this.notExtendable).setNewValue(notExtendable).buildEvent();
+        ModelEvent<?> event = new ModelEventBuilder( ModelEventType.NOT_EXTENDABLE_FLAG_MODIFIED, this )
+            .setOldValue( this.notExtendable ).setNewValue( notExtendable ).buildEvent();
 
         this.notExtendable = notExtendable;
-        publishEvent(event);
+        publishEvent( event );
     }
 
     /**
@@ -473,40 +463,38 @@ public class TLOperation extends TLModelElement implements NamedEntity, TLFacetO
             // behave
             // the same (as if there is a list of multiple extensions).
             if (this.extension != null) {
-                ModelEvent<?> event = new ModelEventBuilder(ModelEventType.EXTENDS_REMOVED, this)
-                        .setAffectedItem(this.extension).buildEvent();
+                ModelEvent<?> event = new ModelEventBuilder( ModelEventType.EXTENDS_REMOVED, this )
+                    .setAffectedItem( this.extension ).buildEvent();
 
-                this.extension.setOwner(null);
+                this.extension.setOwner( null );
                 this.extension = null;
-                publishEvent(event);
+                publishEvent( event );
             }
             if (extension != null) {
-                ModelEvent<?> event = new ModelEventBuilder(ModelEventType.EXTENDS_ADDED, this)
-                        .setAffectedItem(extension).buildEvent();
+                ModelEvent<?> event = new ModelEventBuilder( ModelEventType.EXTENDS_ADDED, this )
+                    .setAffectedItem( extension ).buildEvent();
 
-                extension.setOwner(this);
+                extension.setOwner( this );
                 this.extension = extension;
-                publishEvent(event);
+                publishEvent( event );
             }
         }
     }
 
-	/**
+    /**
      * Manages lists of <code>TLOperation</code> entities.
      * 
      * @author S. Livezey
      */
-    protected static class OperationListManager extends
-            ChildEntityListManager<TLOperation, TLService> {
+    protected static class OperationListManager extends ChildEntityListManager<TLOperation,TLService> {
 
         /**
          * Constructor that specifies the owner of the unerlying list.
          * 
-         * @param owner
-         *            the owner of the underlying list of children
+         * @param owner the owner of the underlying list of children
          */
         public OperationListManager(TLService owner) {
-            super(owner, ModelEventType.OPERATION_ADDED, ModelEventType.OPERATION_REMOVED);
+            super( owner, ModelEventType.OPERATION_ADDED, ModelEventType.OPERATION_REMOVED );
         }
 
         /**
@@ -523,7 +511,7 @@ public class TLOperation extends TLModelElement implements NamedEntity, TLFacetO
          */
         @Override
         protected void assignOwner(TLOperation child, TLService owner) {
-            child.setOwningService(owner);
+            child.setOwningService( owner );
         }
 
         /**
@@ -535,7 +523,7 @@ public class TLOperation extends TLModelElement implements NamedEntity, TLFacetO
             TLModel owningModel = owner.getOwningModel();
 
             if (owningModel != null) {
-                owningModel.publishEvent(event);
+                owningModel.publishEvent( event );
             }
         }
 

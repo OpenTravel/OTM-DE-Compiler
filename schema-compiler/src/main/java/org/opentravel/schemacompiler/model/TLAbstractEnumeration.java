@@ -13,10 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.model;
 
-import java.util.Comparator;
-import java.util.List;
+package org.opentravel.schemacompiler.model;
 
 import org.opentravel.schemacompiler.event.ModelEvent;
 import org.opentravel.schemacompiler.event.ModelEventBuilder;
@@ -24,17 +22,21 @@ import org.opentravel.schemacompiler.event.ModelEventType;
 import org.opentravel.schemacompiler.model.TLEnumValue.EnumValueListManager;
 import org.opentravel.schemacompiler.version.Versioned;
 
+import java.util.Comparator;
+import java.util.List;
+
 /**
  * Abstract base class for the open and closed enumeration types.
  * 
  * @author S. Livezey
  */
-public abstract class TLAbstractEnumeration extends TLLibraryMember implements TLVersionedExtensionOwner, TLDocumentationOwner {
+public abstract class TLAbstractEnumeration extends TLLibraryMember
+    implements TLVersionedExtensionOwner, TLDocumentationOwner {
 
     private String name;
     private TLExtension extension;
     private TLDocumentation documentation;
-    private EnumValueListManager enumValueManager = new EnumValueListManager(this);
+    private EnumValueListManager enumValueManager = new EnumValueListManager( this );
 
     /**
      * Returns the value of the 'name' field.
@@ -48,15 +50,14 @@ public abstract class TLAbstractEnumeration extends TLLibraryMember implements T
     /**
      * Assigns the value of the 'name' field.
      * 
-     * @param name
-     *            the field value to assign
+     * @param name the field value to assign
      */
     public void setName(String name) {
-        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.NAME_MODIFIED, this)
-                .setOldValue(this.name).setNewValue(name).buildEvent();
+        ModelEvent<?> event = new ModelEventBuilder( ModelEventType.NAME_MODIFIED, this ).setOldValue( this.name )
+            .setNewValue( name ).buildEvent();
 
         this.name = name;
-        publishEvent(event);
+        publishEvent( event );
     }
 
     /**
@@ -118,11 +119,10 @@ public abstract class TLAbstractEnumeration extends TLLibraryMember implements T
     public boolean isLaterVersion(Versioned otherVersionedItem) {
         boolean result = false;
 
-        if ((otherVersionedItem != null) && otherVersionedItem.getClass().equals(this.getClass())
-                && (this.getOwningLibrary() != null)
-                && (otherVersionedItem.getOwningLibrary() != null) && (this.getLocalName() != null)
-                && this.getLocalName().equals(otherVersionedItem.getLocalName())) {
-            result = this.getOwningLibrary().isLaterVersion(otherVersionedItem.getOwningLibrary());
+        if ((otherVersionedItem != null) && otherVersionedItem.getClass().equals( this.getClass() )
+            && (this.getOwningLibrary() != null) && (otherVersionedItem.getOwningLibrary() != null)
+            && (this.getLocalName() != null) && this.getLocalName().equals( otherVersionedItem.getLocalName() )) {
+            result = this.getOwningLibrary().isLaterVersion( otherVersionedItem.getOwningLibrary() );
         }
         return result;
     }
@@ -144,20 +144,20 @@ public abstract class TLAbstractEnumeration extends TLLibraryMember implements T
             // Even though there is only one extension, send to events so that all extension owners
             // behave the same (as if there is a list of multiple extensions).
             if (this.extension != null) {
-                ModelEvent<?> event = new ModelEventBuilder(ModelEventType.EXTENDS_REMOVED, this)
-                        .setAffectedItem(this.extension).buildEvent();
+                ModelEvent<?> event = new ModelEventBuilder( ModelEventType.EXTENDS_REMOVED, this )
+                    .setAffectedItem( this.extension ).buildEvent();
 
-                this.extension.setOwner(null);
+                this.extension.setOwner( null );
                 this.extension = null;
-                publishEvent(event);
+                publishEvent( event );
             }
             if (extension != null) {
-                ModelEvent<?> event = new ModelEventBuilder(ModelEventType.EXTENDS_ADDED, this)
-                        .setAffectedItem(extension).buildEvent();
+                ModelEvent<?> event = new ModelEventBuilder( ModelEventType.EXTENDS_ADDED, this )
+                    .setAffectedItem( extension ).buildEvent();
 
-                extension.setOwner(this);
+                extension.setOwner( this );
                 this.extension = extension;
-                publishEvent(event);
+                publishEvent( event );
             }
         }
     }
@@ -174,24 +174,24 @@ public abstract class TLAbstractEnumeration extends TLLibraryMember implements T
      */
     public void setDocumentation(TLDocumentation documentation) {
         if (documentation != this.documentation) {
-            ModelEvent<?> event = new ModelEventBuilder(ModelEventType.DOCUMENTATION_MODIFIED, this)
-                    .setOldValue(this.documentation).setNewValue(documentation).buildEvent();
+            ModelEvent<?> event = new ModelEventBuilder( ModelEventType.DOCUMENTATION_MODIFIED, this )
+                .setOldValue( this.documentation ).setNewValue( documentation ).buildEvent();
 
             if (documentation != null) {
-                documentation.setOwner(this);
+                documentation.setOwner( this );
             }
             if (this.documentation != null) {
-                this.documentation.setOwner(null);
+                this.documentation.setOwner( null );
             }
             this.documentation = documentation;
-            publishEvent(event);
+            publishEvent( event );
         }
     }
 
     /**
      * Returns the value of the 'values' field.
      * 
-     * @return List<TLEnumValue>
+     * @return List&lt;TLEnumValue&gt;
      */
     public List<TLEnumValue> getValues() {
         return enumValueManager.getChildren();
@@ -200,67 +200,59 @@ public abstract class TLAbstractEnumeration extends TLLibraryMember implements T
     /**
      * Adds a <code>TLEnumValue</code> to the current list.
      * 
-     * @param value
-     *            the enumeration value to add
+     * @param value the enumeration value to add
      */
     public void addValue(TLEnumValue value) {
-        enumValueManager.addChild(value);
+        enumValueManager.addChild( value );
     }
 
     /**
      * Adds a <code>TLEnumValue</code> element to the current list.
      * 
-     * @param index
-     *            the index at which the given indicator should be added
-     * @param enumeration
-     *            the enumeration value to add
-     * @throws IndexOutOfBoundsException
-     *             thrown if the index is out of range (index < 0 || index > size())
+     * @param index the index at which the given indicator should be added
+     * @param value the enumeration value to add
+     * @throws IndexOutOfBoundsException thrown if the index is out of range (index &lt; 0 || index &gt; size())
      */
     public void addValue(int index, TLEnumValue value) {
-        enumValueManager.addChild(index, value);
+        enumValueManager.addChild( index, value );
     }
 
     /**
      * Removes a <code>TLEnumValue</code> from the current list.
      * 
-     * @param value
-     *            the enumeration value to remove
+     * @param value the enumeration value to remove
      */
     public void removeValue(TLEnumValue value) {
-        enumValueManager.removeChild(value);
+        enumValueManager.removeChild( value );
     }
 
     /**
-     * Moves this value up by one position in the list. If the value is not owned by this object or
-     * it is already at the front of the list, this method has no effect.
+     * Moves this value up by one position in the list. If the value is not owned by this object or it is already at the
+     * front of the list, this method has no effect.
      * 
-     * @param value
-     *            the value to move
+     * @param value the value to move
      */
     public void moveUp(TLEnumValue value) {
-        enumValueManager.moveUp(value);
+        enumValueManager.moveUp( value );
     }
 
     /**
-     * Moves this value down by one position in the list. If the value is not owned by this object
-     * or it is already at the end of the list, this method has no effect.
+     * Moves this value down by one position in the list. If the value is not owned by this object or it is already at
+     * the end of the list, this method has no effect.
      * 
-     * @param value
-     *            the value to move
+     * @param value the value to move
      */
     public void moveDown(TLEnumValue value) {
-        enumValueManager.moveDown(value);
+        enumValueManager.moveDown( value );
     }
 
     /**
      * Sorts the list of values using the comparator provided.
      * 
-     * @param comparator
-     *            the comparator to use when sorting the list
+     * @param comparator the comparator to use when sorting the list
      */
     public void sortValues(Comparator<TLEnumValue> comparator) {
-        enumValueManager.sortChildren(comparator);
+        enumValueManager.sortChildren( comparator );
     }
 
 }

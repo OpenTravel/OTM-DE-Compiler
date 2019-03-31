@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.codegen.html.writers.info;
 
 import org.opentravel.schemacompiler.codegen.html.builders.DocumentationBuilder;
@@ -25,22 +26,21 @@ import org.opentravel.schemacompiler.codegen.html.writers.SubWriterHolderWriter;
  */
 public class VWAIndicatorInfoWriter extends AbstractIndicatorInfoWriter<VWADocumentationBuilder> {
 
-	/**
-	 * @param writer
-	 * @param owner
-	 */
-	public VWAIndicatorInfoWriter(SubWriterHolderWriter writer,
-			VWADocumentationBuilder owner) {
-		super(writer, owner);
-	}
+    /**
+     * @param writer the writer for which to create an info-writer
+     * @param owner the owner of the new info-writer
+     */
+    public VWAIndicatorInfoWriter(SubWriterHolderWriter writer, VWADocumentationBuilder owner) {
+        super( writer, owner );
+    }
 
-	@Override
-	protected VWADocumentationBuilder getParent(VWADocumentationBuilder classDoc) {
-		DocumentationBuilder parent = classDoc.getSuperType();
-		if(parent instanceof VWADocumentationBuilder){
-			return (VWADocumentationBuilder) parent;
-		}
-		return null;
-	}
+    @Override
+    protected VWADocumentationBuilder getParent(VWADocumentationBuilder classDoc) {
+        DocumentationBuilder parent = classDoc.getSuperType();
+        if (parent instanceof VWADocumentationBuilder) {
+            return (VWADocumentationBuilder) parent;
+        }
+        return null;
+    }
 
 }

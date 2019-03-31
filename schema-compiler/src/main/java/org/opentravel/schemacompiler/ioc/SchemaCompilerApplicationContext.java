@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.ioc;
 
 import org.opentravel.schemacompiler.ota2.OTA2CompilerExtensionProvider;
@@ -50,8 +51,7 @@ public final class SchemaCompilerApplicationContext implements ApplicationContex
      */
     public static ApplicationContext getContext() {
         if (context == null) {
-            CompilerExtensionRegistry
-                    .setActiveExtension(OTA2CompilerExtensionProvider.OTA2_COMPILER_EXTENSION_ID);
+            CompilerExtensionRegistry.setActiveExtension( OTA2CompilerExtensionProvider.OTA2_COMPILER_EXTENSION_ID );
         }
         return context;
     }
@@ -59,8 +59,7 @@ public final class SchemaCompilerApplicationContext implements ApplicationContex
     /**
      * Assigns the active application context for the schema compiler.
      * 
-     * @param context
-     *            the application context to assign
+     * @param context the application context to assign
      */
     static void setActiveContext(ApplicationContext context) {
         SchemaCompilerApplicationContext.context = context;

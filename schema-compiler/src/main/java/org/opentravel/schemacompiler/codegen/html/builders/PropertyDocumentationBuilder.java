@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.codegen.html.builders;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerationException;
@@ -30,50 +31,47 @@ import org.opentravel.schemacompiler.model.TLSimple;
  * @author Eric.Bronson
  *
  */
-public class PropertyDocumentationBuilder extends
-		FieldDocumentationBuilder<TLProperty> {
+public class PropertyDocumentationBuilder extends FieldDocumentationBuilder<TLProperty> {
 
-	/**
-	 * @param manager
-	 */
-	public PropertyDocumentationBuilder(TLProperty t) {
-		super(t);
-		name = t.getName();
-		isRequired = t.isMandatory();
+    /**
+     * @param t the property for which to create a builder
+     */
+    public PropertyDocumentationBuilder(TLProperty t) {
+        super( t );
+        name = t.getName();
+        isRequired = t.isMandatory();
 
-		TLPropertyType propertyType = t.getType();
+        TLPropertyType propertyType = t.getType();
 
-		type = DocumentationBuilderFactory.getInstance().getDocumentationBuilder(propertyType);
-		typeName = propertyType.getNamespace() + ":"
-				+ propertyType.getLocalName();
-		if(propertyType instanceof TLListFacet){
-			TLListFacet listFacet = (TLListFacet) propertyType;
-			// only core objects have list facets
-			TLCoreObject owner = (TLCoreObject) listFacet.getItemFacet().getOwningEntity();
-			maxOcurrences = owner.getRoleEnumeration().getRoles().size();
-		}else{
-			maxOcurrences = t.getRepeat() == 0 ? 1 : t.getRepeat();
-		}
-		
-		TLPropertyOwner propertyOwner = t.getOwner();
+        type = DocumentationBuilderFactory.getInstance().getDocumentationBuilder( propertyType );
+        typeName = propertyType.getNamespace() + ":" + propertyType.getLocalName();
+        if (propertyType instanceof TLListFacet) {
+            TLListFacet listFacet = (TLListFacet) propertyType;
+            // only core objects have list facets
+            TLCoreObject owner = (TLCoreObject) listFacet.getItemFacet().getOwningEntity();
+            maxOcurrences = owner.getRoleEnumeration().getRoles().size();
+        } else {
+            maxOcurrences = t.getRepeat() == 0 ? 1 : t.getRepeat();
+        }
 
-		exampleValue = ExampleValueGenerator.getInstance(null).getExampleValue(
-				t, propertyOwner);
+        TLPropertyOwner propertyOwner = t.getOwner();
 
-		if (propertyType instanceof TLSimple) {
-			pattern = ((TLSimple) propertyType).getPattern();
-		}
-	}
+        exampleValue = ExampleValueGenerator.getInstance( null ).getExampleValue( t, propertyOwner );
 
-	@Override
-	public DocumentationBuilderType getDocType() {
-		return DocumentationBuilderType.PROPERTY;
-	}
+        if (propertyType instanceof TLSimple) {
+            pattern = ((TLSimple) propertyType).getPattern();
+        }
+    }
+
+    @Override
+    public DocumentationBuilderType getDocType() {
+        return DocumentationBuilderType.PROPERTY;
+    }
 
 
-	@Override
-	public void build() throws CodeGenerationException {
-		// No action required
-	}
+    @Override
+    public void build() throws CodeGenerationException {
+        // No action required
+    }
 
 }

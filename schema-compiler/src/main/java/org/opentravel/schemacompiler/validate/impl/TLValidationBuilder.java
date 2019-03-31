@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.validate.impl;
 
-import java.util.Locale;
+package org.opentravel.schemacompiler.validate.impl;
 
 import org.opentravel.schemacompiler.codegen.impl.DocumentationFinder;
 import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
@@ -33,9 +32,11 @@ import org.opentravel.schemacompiler.version.VersionScheme;
 import org.opentravel.schemacompiler.version.VersionSchemeException;
 import org.opentravel.schemacompiler.version.VersionSchemeFactory;
 
+import java.util.Locale;
+
 /**
- * Extension of the <code>ValidationBuilder</code> base class that adds assertions for
- * <code>NamedEntity</code> references within a <code>TLModel</code>.
+ * Extension of the <code>ValidationBuilder</code> base class that adds assertions for <code>NamedEntity</code>
+ * references within a <code>TLModel</code>.
  * 
  * @author S. Livezey
  */
@@ -60,13 +61,11 @@ public final class TLValidationBuilder extends ValidationBuilder<TLValidationBui
     /**
      * Constructor that assigns the validation context to use for name resolution.
      * 
-     * @param prefix
-     *            the prefix string to pre-pend for all error/warning messages
-     * @param validationContext
-     *            the validation context for the owning model
+     * @param prefix the prefix string to pre-pend for all error/warning messages
+     * @param validationContext the validation context for the owning model
      */
     public TLValidationBuilder(String prefix, TLModelValidationContext validationContext) {
-        super(prefix);
+        super( prefix );
         this.validationContext = validationContext;
     }
 
@@ -79,48 +78,42 @@ public final class TLValidationBuilder extends ValidationBuilder<TLValidationBui
     }
 
     /**
-     * @see org.opentravel.schemacompiler.validate.ValidationBuilder#setProperty(java.lang.String,
-     *      java.lang.Object)
+     * @see org.opentravel.schemacompiler.validate.ValidationBuilder#setProperty(java.lang.String, java.lang.Object)
      */
     @Override
     public TLValidationBuilder setProperty(String propertyName, Object propertyValue) {
         this.plainTextEntityName = null;
         this.isNamedEntityProperty = false;
-        return super.setProperty(propertyName, propertyValue);
+        return super.setProperty( propertyName, propertyValue );
     }
 
     /**
-     * Assigns the property value (presumed to be from the target object) to be validated as a
-     * reference to another named model entity.
+     * Assigns the property value (presumed to be from the target object) to be validated as a reference to another
+     * named model entity.
      * 
-     * @param propertyName
-     *            the name of the entity reference property
-     * @param propertyValue
-     *            the value of the entity reference
-     * @param expectedEntityType
-     *            the expected entity
+     * @param propertyName the name of the entity reference property
+     * @param propertyValue the value of the entity reference
+     * @param plainTextEntityName the plain-text name of the entity
      * @return TLValidationBuilder
      */
-    public TLValidationBuilder setEntityReferenceProperty(String propertyName,
-            NamedEntity propertyValue, String plainTextEntityName) {
-        super.setProperty(propertyName, propertyValue);
+    public TLValidationBuilder setEntityReferenceProperty(String propertyName, NamedEntity propertyValue,
+        String plainTextEntityName) {
+        super.setProperty( propertyName, propertyValue );
         this.plainTextEntityName = plainTextEntityName;
         this.isNamedEntityProperty = true;
         return getThis();
     }
 
     /**
-     * Assigns the version scheme to be used during validation checks. If the given identifier is
-     * not valid, this method will assign a null value for the version scheme implementation.
+     * Assigns the version scheme to be used during validation checks. If the given identifier is not valid, this method
+     * will assign a null value for the version scheme implementation.
      * 
-     * @param versionSchemeIdentifier
-     *            the identifier of the version scheme implementation
+     * @param versionSchemeIdentifier the identifier of the version scheme implementation
      * @return TLValidationBuilder
      */
     public TLValidationBuilder setVersionScheme(String versionSchemeIdentifier) {
         try {
-            this.versionScheme = VersionSchemeFactory.getInstance().getVersionScheme(
-                    versionSchemeIdentifier);
+            this.versionScheme = VersionSchemeFactory.getInstance().getVersionScheme( versionSchemeIdentifier );
             this.versionSchemeIdentifier = versionSchemeIdentifier;
 
         } catch (VersionSchemeException e) {
@@ -139,10 +132,10 @@ public final class TLValidationBuilder extends ValidationBuilder<TLValidationBui
             NamedEntity value = propertyValueAsNamedEntity();
 
             if (value == null) {
-                if ((plainTextEntityName == null) || plainTextEntityName.equals("")) {
-                    addFinding(MISSING_NAMED_ENTITY_REFERENCE);
+                if ((plainTextEntityName == null) || plainTextEntityName.equals( "" )) {
+                    addFinding( MISSING_NAMED_ENTITY_REFERENCE );
                 } else {
-                    addFinding(UNRESOLVED_NAMED_ENTITY_REFERENCE, plainTextEntityName);
+                    addFinding( UNRESOLVED_NAMED_ENTITY_REFERENCE, plainTextEntityName );
                 }
             }
         } else {
@@ -152,38 +145,36 @@ public final class TLValidationBuilder extends ValidationBuilder<TLValidationBui
     }
 
     /**
-     * Asserts that the current entity reference property being evaluated is a sub-class/interface
-     * of at least one of the expected types provided.
+     * Asserts that the current entity reference property being evaluated is a sub-class/interface of at least one of
+     * the expected types provided.
      * 
      * <p>
      * Null values checked by this method <i>will not</i> produce an error.
      * 
-     * @param expectedEntityTypes
-     *            the valid entity types for the property reference
+     * @param expectedEntityTypes the valid entity types for the property reference
      * @return TLValidationBuilder
      */
     public TLValidationBuilder assertValidEntityReference(Class<?>... expectedEntityTypes) {
         NamedEntity value = propertyValueAsNamedEntity();
 
         if (value != null) {
-            String entityName = validationContext.getSymbolResolver()
-                    .buildEntityName(value.getNamespace(), value.getLocalName());
+            String entityName =
+                validationContext.getSymbolResolver().buildEntityName( value.getNamespace(), value.getLocalName() );
             boolean isValid = false;
 
             for (Class<?> entityType : expectedEntityTypes) {
-                isValid |= entityType.isAssignableFrom(value.getClass());
+                isValid |= entityType.isAssignableFrom( value.getClass() );
             }
             if (!isValid) {
-                addFinding(INVALID_NAMED_ENTITY_REFERENCE, getDisplayNames(expectedEntityTypes),
-                        entityName);
+                addFinding( INVALID_NAMED_ENTITY_REFERENCE, getDisplayNames( expectedEntityTypes ), entityName );
             }
         }
         return getThis();
     }
 
     /**
-     * Adds a validation finding if the string value does not represent a valid (recognizable)
-     * version scheme identifier.
+     * Adds a validation finding if the string value does not represent a valid (recognizable) version scheme
+     * identifier.
      * 
      * @return TLValidationBuilder
      */
@@ -191,18 +182,18 @@ public final class TLValidationBuilder extends ValidationBuilder<TLValidationBui
         String versionSchemeId = propertyValueAsString();
         try {
             if (versionSchemeId != null) {
-                VersionSchemeFactory.getInstance().getVersionScheme(versionSchemeId);
+                VersionSchemeFactory.getInstance().getVersionScheme( versionSchemeId );
             }
         } catch (VersionSchemeException e) {
-            addFinding(UNRECOGNIZED_VERSION_SCHEME, versionSchemeId);
+            addFinding( UNRECOGNIZED_VERSION_SCHEME, versionSchemeId );
         }
         return getThis();
     }
 
     /**
-     * Adds a validation finding if the string value does not represent a valid (recognizable)
-     * version scheme identifier. If a valid version scheme has not been specified prior to this
-     * call, the validation WILL NOT be performed.
+     * Adds a validation finding if the string value does not represent a valid (recognizable) version scheme
+     * identifier. If a valid version scheme has not been specified prior to this call, the validation WILL NOT be
+     * performed.
      * 
      * @return TLValidationBuilder
      */
@@ -210,16 +201,16 @@ public final class TLValidationBuilder extends ValidationBuilder<TLValidationBui
         if (versionScheme != null) {
             String namespace = propertyValueAsString();
 
-            if (!versionScheme.isValidNamespace(namespace)) {
-                addFinding(INVALID_NAMESPACE_FOR_VERSION_SCHEME, namespace, versionSchemeIdentifier);
+            if (!versionScheme.isValidNamespace( namespace )) {
+                addFinding( INVALID_NAMESPACE_FOR_VERSION_SCHEME, namespace, versionSchemeIdentifier );
             }
         }
         return getThis();
     }
 
     /**
-     * Adds a validation finding if the <code>NamedEntity</code> value is deprecated. Entities are
-     * deprecated if they contain one or more <code>Deprecation</code> documentation elements.
+     * Adds a validation finding if the <code>NamedEntity</code> value is deprecated. Entities are deprecated if they
+     * contain one or more <code>Deprecation</code> documentation elements.
      * 
      * @return TLValidationBuilder
      */
@@ -228,123 +219,116 @@ public final class TLValidationBuilder extends ValidationBuilder<TLValidationBui
             NamedEntity value = propertyValueAsNamedEntity();
 
             if ((value != null) && isDeprecated( value )) {
-                addFinding(DEPRECATED_TYPE_REFERENCE, value.getLocalName());
+                addFinding( DEPRECATED_TYPE_REFERENCE, value.getLocalName() );
             }
-            
+
         } else {
             return super.assertNotNull();
         }
         return getThis();
     }
 
-	/**
-	 * Returns true if the given entity has been deprecated.
-	 * 
-	 * @param entity  the named entity to check for deprecation
-	 * @return boolean
-	 */
-	private boolean isDeprecated(NamedEntity entity) {
-		boolean isDeprecated = false;
-
-		if (ValidatorUtils.isEmptyValueType(entity)) {
-			// Special case - do not warn deprecations on ota2:Empty
-			
-		} else if (entity instanceof TLDocumentationOwner) {
-		    isDeprecated = DocumentationFinder.isDeprecated( (TLDocumentationOwner) entity );
-		    
-		} else {
-		    AbstractLibrary valueLibrary = entity.getOwningLibrary();
-
-		    // Entities defined in built-in libraries that contain the keyword "Deprecated" will
-		    // always be considered to be deprecated. YES - this is a kludge, but we have no other
-		    // (easy) way to deprecate legacy (XSD) built-in schema entities. :)
-		    if (valueLibrary instanceof BuiltInLibrary) {
-		        isDeprecated = (valueLibrary.getName() != null)
-		                && (valueLibrary.getName().indexOf("Deprecated") >= 0);
-		    }
-		}
-		return isDeprecated;
-	}
-    
     /**
-     * Adds a validation finding if the <code>NamedEntity</code> value is obsolete. Entities are
-     * obsolete if their owning library is obsolete, and the owning library of the target validation
-     * object is not.
+     * Returns true if the given entity has been deprecated.
+     * 
+     * @param entity the named entity to check for deprecation
+     * @return boolean
+     */
+    private boolean isDeprecated(NamedEntity entity) {
+        boolean isDeprecated = false;
+
+        if (ValidatorUtils.isEmptyValueType( entity )) {
+            // Special case - do not warn deprecations on ota2:Empty
+
+        } else if (entity instanceof TLDocumentationOwner) {
+            isDeprecated = DocumentationFinder.isDeprecated( (TLDocumentationOwner) entity );
+
+        } else {
+            AbstractLibrary valueLibrary = entity.getOwningLibrary();
+
+            // Entities defined in built-in libraries that contain the keyword "Deprecated" will
+            // always be considered to be deprecated. YES - this is a kludge, but we have no other
+            // (easy) way to deprecate legacy (XSD) built-in schema entities. :)
+            if (valueLibrary instanceof BuiltInLibrary) {
+                isDeprecated =
+                    (valueLibrary.getName() != null) && (valueLibrary.getName().indexOf( "Deprecated" ) >= 0);
+            }
+        }
+        return isDeprecated;
+    }
+
+    /**
+     * Adds a validation finding if the <code>NamedEntity</code> value is obsolete. Entities are obsolete if their
+     * owning library is obsolete, and the owning library of the target validation object is not.
      * 
      * @return TLValidationBuilder
      */
     public TLValidationBuilder assertNotObsolete() {
-    	TLLibrary targetLibrary = getOwningLibrary( targetObject );
-    	
-    	if ((targetLibrary != null) && (targetLibrary.getStatus() != TLLibraryStatus.OBSOLETE)) {
+        TLLibrary targetLibrary = getOwningLibrary( targetObject );
+
+        if ((targetLibrary != null) && (targetLibrary.getStatus() != TLLibraryStatus.OBSOLETE)) {
             NamedEntity value = propertyValueAsNamedEntity();
 
             if (value != null) {
-            	TLLibrary referencedLibrary = getOwningLibrary( value );
-            	
-            	if ((referencedLibrary != null)
-            			&& (referencedLibrary.getStatus() == TLLibraryStatus.OBSOLETE)) {
-                    addFinding(OBSOLETE_TYPE_REFERENCE, value.getLocalName());
-            	}
+                TLLibrary referencedLibrary = getOwningLibrary( value );
+
+                if ((referencedLibrary != null) && (referencedLibrary.getStatus() == TLLibraryStatus.OBSOLETE)) {
+                    addFinding( OBSOLETE_TYPE_REFERENCE, value.getLocalName() );
+                }
             }
-    	}
-    	return getThis();
+        }
+        return getThis();
     }
 
     /**
      * Returns the property value as a <code>NamedEntity</code>.
      * 
      * @return NamedEntity
-     * @throws IllegalArgumentException
-     *             thrown if the current property value is not a named entity reference
+     * @throws IllegalArgumentException thrown if the current property value is not a named entity reference
      */
     private NamedEntity propertyValueAsNamedEntity() {
-        if (isNamedEntityProperty
-                && ((propertyValue == null) || (propertyValue instanceof NamedEntity))) {
+        if (isNamedEntityProperty && ((propertyValue == null) || (propertyValue instanceof NamedEntity))) {
             return (NamedEntity) propertyValue;
         } else {
-            throw new IllegalArgumentException(
-                    "The requested assertion only applies to NamedEntity values");
+            throw new IllegalArgumentException( "The requested assertion only applies to NamedEntity values" );
         }
     }
-    
+
     /**
-     * Returns the owning library for the given object or null if the object does
-     * not belong to a user-defined library.
+     * Returns the owning library for the given object or null if the object does not belong to a user-defined library.
      * 
-     * @param obj  the object for which to return the owning library
+     * @param obj the object for which to return the owning library
      * @return TLLibrary
      */
     private TLLibrary getOwningLibrary(Validatable obj) {
-    	NamedEntity targetEntity = null;
-    	TLLibrary owningLibrary = null;
-    	
-    	if (obj instanceof NamedEntity) {
-    		targetEntity = (NamedEntity) obj;
-    		
-    	} else if (obj instanceof TLMemberField) {
-    		TLMemberFieldOwner fieldOwner = ((TLMemberField<?>) obj).getOwner();
-    		
-    		if (fieldOwner instanceof NamedEntity) {
-        		targetEntity = (NamedEntity) fieldOwner;
-    		}
-    	}
-    	
-    	if (targetEntity != null) {
-    		AbstractLibrary lib = targetEntity.getOwningLibrary();
-    		
-    		if (lib instanceof TLLibrary) {
-    			owningLibrary = (TLLibrary) lib;
-    		}
-    	}
-    	return owningLibrary;
+        NamedEntity targetEntity = null;
+        TLLibrary owningLibrary = null;
+
+        if (obj instanceof NamedEntity) {
+            targetEntity = (NamedEntity) obj;
+
+        } else if (obj instanceof TLMemberField) {
+            TLMemberFieldOwner fieldOwner = ((TLMemberField<?>) obj).getOwner();
+
+            if (fieldOwner instanceof NamedEntity) {
+                targetEntity = (NamedEntity) fieldOwner;
+            }
+        }
+
+        if (targetEntity != null) {
+            AbstractLibrary lib = targetEntity.getOwningLibrary();
+
+            if (lib instanceof TLLibrary) {
+                owningLibrary = (TLLibrary) lib;
+            }
+        }
+        return owningLibrary;
     }
 
     /**
      * Returns the display name(s) of the given model element type(s).
      * 
-     * @param modelElementTypes
-     *            the type(s) for which to return a display name
+     * @param modelElementTypes the type(s) for which to return a display name
      * @return String
      */
     private String getDisplayNames(Class<?>... modelElementTypes) {
@@ -352,52 +336,48 @@ public final class TLValidationBuilder extends ValidationBuilder<TLValidationBui
 
         if ((modelElementTypes == null) || (modelElementTypes.length == 0)) {
             displayName = "[UNKNOWN TYPE(S)]";
-            
+
         } else if (modelElementTypes.length == 1) {
             try {
-                displayName = SchemaCompilerApplicationContext.getContext().getMessage(
-                        modelElementTypes[0].getSimpleName() + ".displayName", null,
-                        Locale.getDefault());
+                displayName = SchemaCompilerApplicationContext.getContext()
+                    .getMessage( modelElementTypes[0].getSimpleName() + ".displayName", null, Locale.getDefault() );
 
             } catch (Exception e) {
-                displayName = (modelElementTypes[0] == null) ? "[UNKNOWN TYPE]"
-                        : modelElementTypes[0].getSimpleName();
+                displayName = (modelElementTypes[0] == null) ? "[UNKNOWN TYPE]" : modelElementTypes[0].getSimpleName();
             }
-            
+
         } else {
             displayName = buildDisplayNames( modelElementTypes );
         }
         return displayName;
     }
 
-	/**
-	 * Builds a comma-separated list of display names for the given model types.
-	 * 
-	 * @param modelElementTypes  the list of model element types
-	 * @return String
-	 */
-	private String buildDisplayNames(Class<?>... modelElementTypes) {
-		StringBuilder dnBuilder = new StringBuilder("[");
-		boolean firstType = true;
+    /**
+     * Builds a comma-separated list of display names for the given model types.
+     * 
+     * @param modelElementTypes the list of model element types
+     * @return String
+     */
+    private String buildDisplayNames(Class<?>... modelElementTypes) {
+        StringBuilder dnBuilder = new StringBuilder( "[" );
+        boolean firstType = true;
 
-		for (Class<?> elementType : modelElementTypes) {
-		    if (!firstType) {
-		        dnBuilder.append(", ");
-		    }
-		    try {
-		        String elementName = SchemaCompilerApplicationContext.getContext()
-		                .getMessage(elementType.getSimpleName() + ".displayName", null,
-		                        Locale.getDefault());
+        for (Class<?> elementType : modelElementTypes) {
+            if (!firstType) {
+                dnBuilder.append( ", " );
+            }
+            try {
+                String elementName = SchemaCompilerApplicationContext.getContext()
+                    .getMessage( elementType.getSimpleName() + ".displayName", null, Locale.getDefault() );
 
-		        dnBuilder.append(elementName);
+                dnBuilder.append( elementName );
 
-		    } catch (Exception e) {
-		        dnBuilder.append((elementType == null) ? "[UNKNOWN TYPE]" : elementType
-		                .getSimpleName());
-		    }
-		    firstType = false;
-		}
-		return dnBuilder.append(']').toString();
-	}
+            } catch (Exception e) {
+                dnBuilder.append( (elementType == null) ? "[UNKNOWN TYPE]" : elementType.getSimpleName() );
+            }
+            firstType = false;
+        }
+        return dnBuilder.append( ']' ).toString();
+    }
 
 }

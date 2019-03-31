@@ -13,22 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.model;
+
+import org.w3._2001.xmlschema.TopLevelComplexType;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import org.w3._2001.xmlschema.TopLevelComplexType;
 
 /**
  * Library member that represents a complex type declaration from a legacy XML schema.
  * 
  * <p>
- * Complex type definitions can have implicit associations with <code>XSDElement</code> entities.
- * Assuming both definitions are in the same namespace, and element that references an
- * <code>XSDComplexType</code> is assumed to be an alias of the type. If the alias has the same name
- * as the complex type, it is considered to be the identity alias. A complex type can have multiple
- * aliases, but only one identity alias (if one is defined at all).
+ * Complex type definitions can have implicit associations with <code>XSDElement</code> entities. Assuming both
+ * definitions are in the same namespace, and element that references an <code>XSDComplexType</code> is assumed to be an
+ * alias of the type. If the alias has the same name as the complex type, it is considered to be the identity alias. A
+ * complex type can have multiple aliases, but only one identity alias (if one is defined at all).
  * 
  * @author S. Livezey
  */
@@ -40,13 +40,10 @@ public class XSDComplexType extends TLLibraryMember implements TLPropertyType {
     private List<XSDElement> aliases = new ArrayList<>();
 
     /**
-     * Constructor that specifies the name of this model element and the underlying JAXB type from
-     * which it was created.
+     * Constructor that specifies the name of this model element and the underlying JAXB type from which it was created.
      * 
-     * @param name
-     *            the name of the model element
-     * @param jaxbType
-     *            the JAXB type that was used to create this element
+     * @param name the name of the model element
+     * @param jaxbType the JAXB type that was used to create this element
      */
     public XSDComplexType(String name, TopLevelComplexType jaxbType) {
         this.name = name;
@@ -62,12 +59,12 @@ public class XSDComplexType extends TLLibraryMember implements TLPropertyType {
         StringBuilder identity = new StringBuilder();
 
         if (owningLibrary != null) {
-            identity.append(owningLibrary.getValidationIdentity()).append(" : ");
+            identity.append( owningLibrary.getValidationIdentity() ).append( " : " );
         }
         if (name == null) {
-            identity.append("[Unnamed XSD Complex Type]");
+            identity.append( "[Unnamed XSD Complex Type]" );
         } else {
-            identity.append(name);
+            identity.append( name );
         }
         return identity.toString();
     }
@@ -110,15 +107,14 @@ public class XSDComplexType extends TLLibraryMember implements TLPropertyType {
     /**
      * Assigns the global element that aliases this complex type with the same name.
      * 
-     * @param identityAlias
-     *            the identity alias element to assign
+     * @param identityAlias the identity alias element to assign
      */
     public void setIdentityAlias(XSDElement identityAlias) {
         if (this.identityAlias != null) {
-            this.identityAlias.setAliasedType(null);
+            this.identityAlias.setAliasedType( null );
         }
         if (identityAlias != null) {
-            identityAlias.setAliasedType(this);
+            identityAlias.setAliasedType( this );
         }
         this.identityAlias = identityAlias;
     }
@@ -126,7 +122,7 @@ public class XSDComplexType extends TLLibraryMember implements TLPropertyType {
     /**
      * Returns the list of elements that alias this complex type with a different name.
      * 
-     * @return List<XSDElement>
+     * @return List&lt;XSDElement&gt;
      */
     public List<XSDElement> getAliases() {
         return aliases;
@@ -135,26 +131,24 @@ public class XSDComplexType extends TLLibraryMember implements TLPropertyType {
     /**
      * Adds an alias element to the current list.
      * 
-     * @param alias
-     *            the alias element to add
+     * @param alias the alias element to add
      */
     public void addAlias(XSDElement alias) {
-        if ((alias != null) && !this.aliases.contains(alias)) {
-            alias.setAliasedType(this);
-            this.aliases.add(alias);
+        if ((alias != null) && !this.aliases.contains( alias )) {
+            alias.setAliasedType( this );
+            this.aliases.add( alias );
         }
     }
 
     /**
      * Removes an alias element to the current list.
      * 
-     * @param alias
-     *            the alias element to remove
+     * @param alias the alias element to remove
      */
     public void removeAlias(XSDElement alias) {
-        if ((alias != null) && this.aliases.contains(alias)) {
-            alias.setAliasedType(null);
-            this.aliases.remove(alias);
+        if ((alias != null) && this.aliases.contains( alias )) {
+            alias.setAliasedType( null );
+            this.aliases.remove( alias );
         }
     }
 

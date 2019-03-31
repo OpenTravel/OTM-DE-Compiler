@@ -13,11 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.codegen.html.builders;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+package org.opentravel.schemacompiler.codegen.html.builders;
 
 import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLAliasOwner;
@@ -26,60 +23,65 @@ import org.opentravel.schemacompiler.model.TLDocumentationOwner;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLFacetOwner;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 /**
  * @author Eric.Bronson
  *
  */
 public abstract class ComplexTypeDocumentationBuilder<T extends TLFacetOwner & TLDocumentationOwner & TLAliasOwner>
-		extends FacetOwnerDocumentationBuilder<T> implements
-		AliasOwnerDocumentationBuilder {
+    extends FacetOwnerDocumentationBuilder<T> implements AliasOwnerDocumentationBuilder {
 
-	protected List<String> aliases;
+    protected List<String> aliases;
 
-	/**
-	 * @param element
-	 */
-	public ComplexTypeDocumentationBuilder(T element) {
-		super(element);
-		aliases = new ArrayList<>();
-		for (TLAlias alias : element.getAliases()) {
-			aliases.add(alias.getName());
-		}
-	}
+    /**
+     * Constructs a builder for the given complex entity type.
+     * 
+     * @param element the complex entity type instance
+     */
+    public ComplexTypeDocumentationBuilder(T element) {
+        super( element );
+        aliases = new ArrayList<>();
+        for (TLAlias alias : element.getAliases()) {
+            aliases.add( alias.getName() );
+        }
+    }
 
-	public List<String> getAliases() {
-		return Collections.unmodifiableList(aliases);
-	}
+    public List<String> getAliases() {
+        return Collections.unmodifiableList( aliases );
+    }
 
-	
-	protected void addFacet(TLFacet facet) {
-		FacetDocumentationBuilder facetBuilder = (FacetDocumentationBuilder) DocumentationBuilderFactory
-				.getInstance().getDocumentationBuilder(facet);
-		facets.add(facetBuilder);
-		facetBuilder.setOwner(this);
-	}
-	
-	protected void addContextualFacets(List<TLContextualFacet> facetList) {
-		for (TLContextualFacet facet : facetList) {
-			addFacet( facet );
-			addContextualFacets( facet.getChildFacets() );
-		}
-	}
-	
-	/**
-	 * @see org.opentravel.schemacompiler.codegen.html.builders.AbstractDocumentationBuilder#hashCode()
-	 */
-	@Override
-	public int hashCode() {
-		return super.hashCode();
-	}
 
-	/**
-	 * @see org.opentravel.schemacompiler.codegen.html.builders.AbstractDocumentationBuilder#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		return super.equals(obj);
-	}
+    protected void addFacet(TLFacet facet) {
+        FacetDocumentationBuilder facetBuilder =
+            (FacetDocumentationBuilder) DocumentationBuilderFactory.getInstance().getDocumentationBuilder( facet );
+        facets.add( facetBuilder );
+        facetBuilder.setOwner( this );
+    }
+
+    protected void addContextualFacets(List<TLContextualFacet> facetList) {
+        for (TLContextualFacet facet : facetList) {
+            addFacet( facet );
+            addContextualFacets( facet.getChildFacets() );
+        }
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.codegen.html.builders.AbstractDocumentationBuilder#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.codegen.html.builders.AbstractDocumentationBuilder#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+        return super.equals( obj );
+    }
 
 }

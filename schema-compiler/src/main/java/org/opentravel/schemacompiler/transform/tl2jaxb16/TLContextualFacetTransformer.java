@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.transform.tl2jaxb16;
 
 import org.opentravel.ns.ota2.librarymodel_v01_06.Documentation;
@@ -31,8 +32,7 @@ import org.opentravel.schemacompiler.transform.symbols.SymbolResolverTransformer
  * 
  * @author S. Livezey
  */
-public class TLContextualFacetTransformer extends
-        TLComplexTypeTransformer<TLContextualFacet, FacetContextual> {
+public class TLContextualFacetTransformer extends TLComplexTypeTransformer<TLContextualFacet,FacetContextual> {
 
     /**
      * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
@@ -42,62 +42,61 @@ public class TLContextualFacetTransformer extends
         FacetContextual facet = new FacetContextual();
 
         if ((source.getDocumentation() != null) && !source.getDocumentation().isEmpty()) {
-            ObjectTransformer<TLDocumentation, Documentation, SymbolResolverTransformerContext> docTransformer = getTransformerFactory()
-                    .getTransformer(TLDocumentation.class, Documentation.class);
+            ObjectTransformer<TLDocumentation,Documentation,SymbolResolverTransformerContext> docTransformer =
+                getTransformerFactory().getTransformer( TLDocumentation.class, Documentation.class );
 
-            facet.setDocumentation(docTransformer.transform(source.getDocumentation()));
+            facet.setDocumentation( docTransformer.transform( source.getDocumentation() ) );
         }
-        
+
         if (source.getOwningEntity() != null) {
             NamedEntity owningEntity = source.getOwningEntity();
 
-            facet.setFacetOwner(context.getSymbolResolver().buildEntityName(
-            		owningEntity.getNamespace(), owningEntity.getLocalName()));
+            facet.setFacetOwner( context.getSymbolResolver().buildEntityName( owningEntity.getNamespace(),
+                owningEntity.getLocalName() ) );
         }
         if (facet.getFacetOwner() == null) {
-        	facet.setFacetOwner(source.getOwningEntityName());
+            facet.setFacetOwner( source.getOwningEntityName() );
         }
 
-        facet.setName(trimString(source.getName(), false));
-        facet.setType(getTargetType(source.getFacetType()));
-        facet.setNotExtendable(source.isNotExtendable());
-        facet.setFacetNamespace(trimString(source.getFacetNamespace(), false));
-        facet.getAttribute().addAll(transformAttributes(source.getAttributes()));
-        facet.getElement().addAll(transformElements(source.getElements()));
-        facet.getIndicator().addAll(transformIndicators(source.getIndicators()));
+        facet.setName( trimString( source.getName(), false ) );
+        facet.setType( getTargetType( source.getFacetType() ) );
+        facet.setNotExtendable( source.isNotExtendable() );
+        facet.setFacetNamespace( trimString( source.getFacetNamespace(), false ) );
+        facet.getAttribute().addAll( transformAttributes( source.getAttributes() ) );
+        facet.getElement().addAll( transformElements( source.getElements() ) );
+        facet.getIndicator().addAll( transformIndicators( source.getIndicators() ) );
 
         return facet;
     }
-    
+
     /**
-     * Returns the JAXB contextual facet type that corresponds with the given 
-     * model facet type.
+     * Returns the JAXB contextual facet type that corresponds with the given model facet type.
      * 
-     * @param sourceType  the model facet type
+     * @param sourceType the model facet type
      * @return FacetContextualType
      */
     private FacetContextualType getTargetType(TLFacetType sourceType) {
-    	FacetContextualType targetType = null;
-    	
-    	if (sourceType != null) {
-    		switch (sourceType) {
-				case CHOICE:
-					targetType = FacetContextualType.CHOICE;
-					break;
-				case CUSTOM:
-					targetType = FacetContextualType.CUSTOM;
-					break;
-				case QUERY:
-					targetType = FacetContextualType.QUERY;
-					break;
-				case UPDATE:
-					targetType = FacetContextualType.UPDATE;
-					break;
-				default:
-					break;
-    		}
-    	}
-    	return targetType;
+        FacetContextualType targetType = null;
+
+        if (sourceType != null) {
+            switch (sourceType) {
+                case CHOICE:
+                    targetType = FacetContextualType.CHOICE;
+                    break;
+                case CUSTOM:
+                    targetType = FacetContextualType.CUSTOM;
+                    break;
+                case QUERY:
+                    targetType = FacetContextualType.QUERY;
+                    break;
+                case UPDATE:
+                    targetType = FacetContextualType.UPDATE;
+                    break;
+                default:
+                    break;
+            }
+        }
+        return targetType;
     }
 
 }

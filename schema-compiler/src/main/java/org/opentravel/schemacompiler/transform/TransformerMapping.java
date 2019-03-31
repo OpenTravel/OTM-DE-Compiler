@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.transform;
 
 /**
@@ -29,7 +30,7 @@ public class TransformerMapping {
     /**
      * Returns the source class of the transformation.
      * 
-     * @return Class<?>
+     * @return Class&lt;?&gt;
      */
     public Class<?> getSource() {
         return source;
@@ -38,17 +39,16 @@ public class TransformerMapping {
     /**
      * Assigns the source class of the transformation.
      * 
-     * @param source
-     *            the source object type
+     * @param source the source object type
      */
-    public void setSource(Class<?> sourceClass) {
-        this.source = sourceClass;
+    public void setSource(Class<?> source) {
+        this.source = source;
     }
 
     /**
      * Returns the target class of the transformation.
      * 
-     * @return Class<?>
+     * @return Class&lt;?&gt;
      */
     public Class<?> getTarget() {
         return target;
@@ -57,17 +57,16 @@ public class TransformerMapping {
     /**
      * Assigns the target class of the transformation.
      * 
-     * @param target
-     *            the target object
+     * @param target the target object
      */
-    public void setTarget(Class<?> targetClass) {
-        this.target = targetClass;
+    public void setTarget(Class<?> target) {
+        this.target = target;
     }
 
     /**
      * Returns class that will handle the transformation from the source type to the target type.
      * 
-     * @return Class<?>
+     * @return Class&lt;?&gt;
      */
     public Class<?> getTransformer() {
         return transformer;
@@ -76,11 +75,10 @@ public class TransformerMapping {
     /**
      * Assigns class that will handle the transformation from the source type to the target type.
      * 
-     * @param transformer
-     *            the name of the class that will perform the transformation
+     * @param transformer the name of the class that will perform the transformation
      */
-    public void setTransformer(Class<?> transformerClass) {
-        this.transformer = transformerClass;
+    public void setTransformer(Class<?> transformer) {
+        this.transformer = transformer;
     }
 
 }

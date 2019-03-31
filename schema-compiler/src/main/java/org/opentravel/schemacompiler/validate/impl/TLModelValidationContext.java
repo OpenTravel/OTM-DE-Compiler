@@ -13,14 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.validate.impl;
 
-import java.util.HashMap;
-import java.util.Map;
+package org.opentravel.schemacompiler.validate.impl;
 
 import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.transform.SymbolResolver;
 import org.opentravel.schemacompiler.validate.ValidationContext;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Validation context to be used during the validation of <code>TLModel</code> elements.
@@ -36,24 +37,24 @@ public class TLModelValidationContext implements ValidationContext {
     /**
      * Constructor that creates a validation context for the model provided.
      * 
-     * @param model
-     *            the model that owns all elements to be validated
+     * @param model the model that owns all elements to be validated
      */
     public TLModelValidationContext(TLModel model) {
-        this.symbolResolver = new TLModelSymbolResolver(model);
+        this.symbolResolver = new TLModelSymbolResolver( model );
         this.model = model;
     }
 
     /**
      * Returns the model associated with this validation context.
+     * 
+     * @return TLModel
      */
     public TLModel getModel() {
         return model;
     }
 
     /**
-     * Returns a <code>SymbolResolver</code> that can be used to resolve names for any member type
-     * in the context model.
+     * Returns a <code>SymbolResolver</code> that can be used to resolve names for any member type in the context model.
      * 
      * @return SymbolResolver
      */
@@ -62,48 +63,46 @@ public class TLModelValidationContext implements ValidationContext {
     }
 
     /**
-     * Returns an entry from the validation context cache, or null if an entry with the specified
-     * key has not been defined.
+     * Returns an entry from the validation context cache, or null if an entry with the specified key has not been
+     * defined.
      * 
-     * @param cacheKey
-     *            the key for the validation cache entry to return
+     * @param cacheKey the key for the validation cache entry to return
      * @return Object
      */
     public Object getContextCacheEntry(String cacheKey) {
-        return validationCache.get(cacheKey);
+        return validationCache.get( cacheKey );
     }
 
     /**
-     * Returns an entry from the validation context cache, or null if an entry with the specified
-     * key has not been defined.
+     * Returns an entry from the validation context cache, or null if an entry with the specified key has not been
+     * defined.
      * 
-     * @param cacheKey  the key for the validation cache entry to return
-     * @param entryType  the type of the entry to be created if it does not yet exist
+     * @param cacheKey the key for the validation cache entry to return
+     * @param entryType the type of the entry to be created if it does not yet exist
+     * @param <T> the expected type of the cache entry value
      * @return Object
      */
     @SuppressWarnings("unchecked")
-	public <T> T getContextCacheEntry(String cacheKey, Class<T> entryType) {
-    		validationCache.computeIfAbsent( cacheKey, k -> {
-			try {
-				return validationCache.put( k, entryType.newInstance() );
-				
-			} catch (InstantiationException | IllegalAccessException e) {
-				return null;
-			}
-    		} );
+    public <T> T getContextCacheEntry(String cacheKey, Class<T> entryType) {
+        validationCache.computeIfAbsent( cacheKey, k -> {
+            try {
+                return validationCache.put( k, entryType.newInstance() );
+
+            } catch (InstantiationException | IllegalAccessException e) {
+                return null;
+            }
+        } );
         return (T) validationCache.get( cacheKey );
     }
 
     /**
      * Assigns a key/value entry to the validation context cache.
      * 
-     * @param cacheKey
-     *            the key for the validation cache entry to assign
-     * @param cacheValue
-     *            the value to be associated with the specified key
+     * @param cacheKey the key for the validation cache entry to assign
+     * @param cacheValue the value to be associated with the specified key
      */
     public void setContextCacheEntry(String cacheKey, Object cacheValue) {
-        validationCache.put(cacheKey, cacheValue);
+        validationCache.put( cacheKey, cacheValue );
     }
 
 }

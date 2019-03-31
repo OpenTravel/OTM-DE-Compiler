@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.model;
 
 /**
- * Marker interface to be implemented by model elements that can be referenced as facet property
- * types.
+ * Marker interface to be implemented by model elements that can be referenced as facet property types.
  * 
  * @author S. Livezey
  */

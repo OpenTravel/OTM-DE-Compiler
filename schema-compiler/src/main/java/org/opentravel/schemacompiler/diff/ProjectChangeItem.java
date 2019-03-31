@@ -22,105 +22,108 @@ import org.opentravel.schemacompiler.model.TLLibrary;
  * Describes a single change identified during comparison of two OTM projects.
  */
 public class ProjectChangeItem extends ChangeItem<ProjectChangeType> {
-	
-	private ProjectChangeSet changeSet;
-	private TLLibrary addedLibrary;
-	private TLLibrary deletedLibrary;
-	private LibraryChangeSet modifiedLibrary;
-	
-	/**
-	 * Constructor used when a library was added or deleted from its owning project.
-	 * 
-	 * @param changeSet  the change set to which this item belongs
-	 * @param changeType  the type of project change
-	 * @param affectedLibrary  the library that was added or removed
-	 */
-	public ProjectChangeItem(ProjectChangeSet changeSet, ProjectChangeType changeType, TLLibrary affectedLibrary) {
-		this.changeSet = changeSet;
-		this.changeType = changeType;
-		
-		switch (changeType) {
-			case LIBRARY_ADDED:
-				this.addedLibrary = affectedLibrary;
-				break;
-			case LIBRARY_DELETED:
-				this.deletedLibrary = affectedLibrary;
-				break;
-			default:
-				throw new IllegalArgumentException("Illegal change type for library addition or deletion: " + changeType);
-		}
-	}
-	
-	/**
-	 * Constructor used when a project library was modified.
-	 * 
-	 * @param changeSet  the change set to which this item belongs
-	 * @param changeType  the type of project change
-	 * @param modifiedLibrary  the change set for a modified library
-	 */
-	public ProjectChangeItem(ProjectChangeSet changeSet, ProjectChangeType changeType, LibraryChangeSet modifiedLibrary) {
-		this.changeSet = changeSet;
-		
-		switch (changeType) {
-			case LIBRARY_CHANGED:
-			case LIBRARY_VERSION_CHANGED:
-				this.changeType = changeType;
-				break;
-			default:
-				throw new IllegalArgumentException("Illegal change type for library modification: " + changeType);
-		}
-		this.modifiedLibrary = modifiedLibrary;
-	}
-	
-	/**
-	 * Constructor used when a project value was changed.
-	 * 
-	 * @param changeSet  the change set to which this item belongs
-	 * @param changeType  the type of project change
-	 * @param oldValue  the affected value from the old version
-	 * @param newValue  the affected value from the new version
-	 */
-	public ProjectChangeItem(ProjectChangeSet changeSet, ProjectChangeType changeType, String oldValue, String newValue) {
-		this.changeSet = changeSet;
-		this.changeType = changeType;
-		this.oldValue = oldValue;
-		this.newValue = newValue;
-	}
 
-	/**
-	 * Returns the change set to which this item belongs.
-	 *
-	 * @return ProjectChangeSet
-	 */
-	public ProjectChangeSet getChangeSet() {
-		return changeSet;
-	}
+    private ProjectChangeSet changeSet;
+    private TLLibrary addedLibrary;
+    private TLLibrary deletedLibrary;
+    private LibraryChangeSet modifiedLibrary;
 
-	/**
-	 * Returns the library that was added.
-	 *
-	 * @return TLLibrary
-	 */
-	public TLLibrary getAddedLibrary() {
-		return addedLibrary;
-	}
+    /**
+     * Constructor used when a library was added or deleted from its owning project.
+     * 
+     * @param changeSet the change set to which this item belongs
+     * @param changeType the type of project change
+     * @param affectedLibrary the library that was added or removed
+     */
+    public ProjectChangeItem(ProjectChangeSet changeSet, ProjectChangeType changeType, TLLibrary affectedLibrary) {
+        this.changeSet = changeSet;
+        this.changeType = changeType;
 
-	/**
-	 * Returns the library that was removed.
-	 *
-	 * @return TLLibrary
-	 */
-	public TLLibrary getDeletedLibrary() {
-		return deletedLibrary;
-	}
+        switch (changeType) {
+            case LIBRARY_ADDED:
+                this.addedLibrary = affectedLibrary;
+                break;
+            case LIBRARY_DELETED:
+                this.deletedLibrary = affectedLibrary;
+                break;
+            default:
+                throw new IllegalArgumentException(
+                    "Illegal change type for library addition or deletion: " + changeType );
+        }
+    }
 
-	/**
-	 * Returns the change set for a modified library.
-	 *
-	 * @return LibraryChangeSet
-	 */
-	public LibraryChangeSet getModifiedLibrary() {
-		return modifiedLibrary;
-	}
+    /**
+     * Constructor used when a project library was modified.
+     * 
+     * @param changeSet the change set to which this item belongs
+     * @param changeType the type of project change
+     * @param modifiedLibrary the change set for a modified library
+     */
+    public ProjectChangeItem(ProjectChangeSet changeSet, ProjectChangeType changeType,
+        LibraryChangeSet modifiedLibrary) {
+        this.changeSet = changeSet;
+
+        switch (changeType) {
+            case LIBRARY_CHANGED:
+            case LIBRARY_VERSION_CHANGED:
+                this.changeType = changeType;
+                break;
+            default:
+                throw new IllegalArgumentException( "Illegal change type for library modification: " + changeType );
+        }
+        this.modifiedLibrary = modifiedLibrary;
+    }
+
+    /**
+     * Constructor used when a project value was changed.
+     * 
+     * @param changeSet the change set to which this item belongs
+     * @param changeType the type of project change
+     * @param oldValue the affected value from the old version
+     * @param newValue the affected value from the new version
+     */
+    public ProjectChangeItem(ProjectChangeSet changeSet, ProjectChangeType changeType, String oldValue,
+        String newValue) {
+        this.changeSet = changeSet;
+        this.changeType = changeType;
+        this.oldValue = oldValue;
+        this.newValue = newValue;
+    }
+
+    /**
+     * Returns the change set to which this item belongs.
+     *
+     * @return ProjectChangeSet
+     */
+    public ProjectChangeSet getChangeSet() {
+        return changeSet;
+    }
+
+    /**
+     * Returns the library that was added.
+     *
+     * @return TLLibrary
+     */
+    public TLLibrary getAddedLibrary() {
+        return addedLibrary;
+    }
+
+    /**
+     * Returns the library that was removed.
+     *
+     * @return TLLibrary
+     */
+    public TLLibrary getDeletedLibrary() {
+        return deletedLibrary;
+    }
+
+    /**
+     * Returns the change set for a modified library.
+     *
+     * @return LibraryChangeSet
+     */
+    public LibraryChangeSet getModifiedLibrary() {
+        return modifiedLibrary;
+    }
 
 }

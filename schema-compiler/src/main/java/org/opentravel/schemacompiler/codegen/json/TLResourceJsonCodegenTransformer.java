@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.codegen.json;
 
 import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerContext;
@@ -23,28 +24,27 @@ import org.opentravel.schemacompiler.model.TLResource;
 import org.opentravel.schemacompiler.transform.ObjectTransformer;
 
 /**
- * Performs the translation from <code>TLResource</code> objects to the JAXB nodes used to
- * produce the schema output.
+ * Performs the translation from <code>TLResource</code> objects to the JAXB nodes used to produce the schema output.
  */
 public class TLResourceJsonCodegenTransformer extends AbstractJsonSchemaTransformer<TLResource,CodegenArtifacts> {
-	
-	/**
-	 * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
-	 */
-	@Override
-	public CodegenArtifacts transform(TLResource source) {
-        ObjectTransformer<TLActionFacet, CodegenArtifacts, CodeGenerationTransformerContext> afTransformer = getTransformerFactory()
-                .getTransformer(TLActionFacet.class, CodegenArtifacts.class);
+
+    /**
+     * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
+     */
+    @Override
+    public CodegenArtifacts transform(TLResource source) {
+        ObjectTransformer<TLActionFacet,CodegenArtifacts,CodeGenerationTransformerContext> afTransformer =
+            getTransformerFactory().getTransformer( TLActionFacet.class, CodegenArtifacts.class );
         CodegenArtifacts artifacts = new CodegenArtifacts();
-        
+
         // The only TLResource artifacts that need to be represented in the XML schema are the
         // action facets.
-    	for (TLActionFacet actionFacet : source.getActionFacets()) {
-    		if (!ResourceCodegenUtils.isTemplateActionFacet( actionFacet )) {
-    			artifacts.addAllArtifacts( afTransformer.transform( actionFacet ) );
-    		}
-    	}
+        for (TLActionFacet actionFacet : source.getActionFacets()) {
+            if (!ResourceCodegenUtils.isTemplateActionFacet( actionFacet )) {
+                artifacts.addAllArtifacts( afTransformer.transform( actionFacet ) );
+            }
+        }
         return artifacts;
-	}
-	
+    }
+
 }

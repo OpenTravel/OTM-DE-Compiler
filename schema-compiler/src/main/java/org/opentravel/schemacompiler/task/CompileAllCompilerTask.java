@@ -13,11 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.task;
 
-import java.io.File;
-import java.net.URL;
-import java.util.Collection;
+package org.opentravel.schemacompiler.task;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerationContext;
 import org.opentravel.schemacompiler.model.TLLibrary;
@@ -25,9 +22,13 @@ import org.opentravel.schemacompiler.model.XSDLibrary;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
 import org.opentravel.schemacompiler.util.SchemaCompilerException;
 
+import java.io.File;
+import java.net.URL;
+import java.util.Collection;
+
 /**
- * Task used to orchestrate the execution of up to three separate compilation tasks: full library
- * schemas, service (WSDL) documents, and resource action service (WSDL) documents.
+ * Task used to orchestrate the execution of up to three separate compilation tasks: full library schemas, service
+ * (WSDL) documents, and resource action service (WSDL) documents.
  * 
  * @author S. Livezey
  */
@@ -53,14 +54,14 @@ public class CompileAllCompilerTask extends AbstractCompilerTask implements Comp
      * Default constructor.
      */
     public CompileAllCompilerTask() {}
-    
+
     /**
      * Constructor that assigns the repository manager for this task instance.
      * 
-     * @param repositoryManager  the repository manager to use when retrieving managed content
+     * @param repositoryManager the repository manager to use when retrieving managed content
      */
     public CompileAllCompilerTask(RepositoryManager repositoryManager) {
-    	super( repositoryManager );
+        super( repositoryManager );
     }
 
     /**
@@ -68,85 +69,84 @@ public class CompileAllCompilerTask extends AbstractCompilerTask implements Comp
      *      java.util.Collection)
      */
     @Override
-    protected void generateOutput(Collection<TLLibrary> userDefinedLibraries,
-            Collection<XSDLibrary> legacySchemas) throws SchemaCompilerException {
+    protected void generateOutput(Collection<TLLibrary> userDefinedLibraries, Collection<XSDLibrary> legacySchemas)
+        throws SchemaCompilerException {
         CodeGenerationContext compileAllContext = createContext();
 
         if (compileSchemas) {
-            XmlSchemaCompilerTask schemaTask = new XmlSchemaCompilerTask(projectFilename, repositoryManager);
+            XmlSchemaCompilerTask schemaTask = new XmlSchemaCompilerTask( projectFilename, repositoryManager );
 
-            schemaTask.applyTaskOptions(this);
+            schemaTask.applyTaskOptions( this );
             schemaTask.getPrimaryLibraries().addAll( getPrimaryLibraries() );
-            schemaTask.setOutputFolder(getSubtaskOutputFolder(compileAllContext, "schemas"));
-            schemaTask.generateOutput(userDefinedLibraries, legacySchemas);
-            addGeneratedFiles(schemaTask.getGeneratedFiles());
+            schemaTask.setOutputFolder( getSubtaskOutputFolder( compileAllContext, "schemas" ) );
+            schemaTask.generateOutput( userDefinedLibraries, legacySchemas );
+            addGeneratedFiles( schemaTask.getGeneratedFiles() );
         }
         if (compileJson) {
-            JsonSchemaCompilerTask jsonSchemaTask = new JsonSchemaCompilerTask(projectFilename, repositoryManager);
+            JsonSchemaCompilerTask jsonSchemaTask = new JsonSchemaCompilerTask( projectFilename, repositoryManager );
 
-            jsonSchemaTask.applyTaskOptions(this);
+            jsonSchemaTask.applyTaskOptions( this );
             jsonSchemaTask.getPrimaryLibraries().addAll( getPrimaryLibraries() );
-            jsonSchemaTask.setOutputFolder(getSubtaskOutputFolder(compileAllContext, "json"));
-            jsonSchemaTask.generateOutput(userDefinedLibraries, legacySchemas);
-            addGeneratedFiles(jsonSchemaTask.getGeneratedFiles());
+            jsonSchemaTask.setOutputFolder( getSubtaskOutputFolder( compileAllContext, "json" ) );
+            jsonSchemaTask.generateOutput( userDefinedLibraries, legacySchemas );
+            addGeneratedFiles( jsonSchemaTask.getGeneratedFiles() );
         }
         if (compileServices) {
             if (projectFilename != null) {
-                ServiceProjectCompilerTask serviceTask = new ServiceProjectCompilerTask(projectFilename, repositoryManager);
+                ServiceProjectCompilerTask serviceTask =
+                    new ServiceProjectCompilerTask( projectFilename, repositoryManager );
 
-                serviceTask.applyTaskOptions(this);
+                serviceTask.applyTaskOptions( this );
                 serviceTask.getPrimaryLibraries().addAll( getPrimaryLibraries() );
-                serviceTask.setOutputFolder(getSubtaskOutputFolder(compileAllContext, "services"));
-                serviceTask.generateOutput(userDefinedLibraries, legacySchemas);
-                addGeneratedFiles(serviceTask.getGeneratedFiles());
+                serviceTask.setOutputFolder( getSubtaskOutputFolder( compileAllContext, "services" ) );
+                serviceTask.generateOutput( userDefinedLibraries, legacySchemas );
+                addGeneratedFiles( serviceTask.getGeneratedFiles() );
 
             } else { // non-project service compilation
-                ServiceCompilerTask serviceTask = new ServiceCompilerTask(repositoryManager);
+                ServiceCompilerTask serviceTask = new ServiceCompilerTask( repositoryManager );
 
-                serviceTask.applyTaskOptions(this);
+                serviceTask.applyTaskOptions( this );
                 serviceTask.getPrimaryLibraries().addAll( getPrimaryLibraries() );
-                serviceTask.setOutputFolder(getSubtaskOutputFolder(compileAllContext, "services"));
-                serviceTask.generateOutput(userDefinedLibraries, legacySchemas);
-                addGeneratedFiles(serviceTask.getGeneratedFiles());
+                serviceTask.setOutputFolder( getSubtaskOutputFolder( compileAllContext, "services" ) );
+                serviceTask.generateOutput( userDefinedLibraries, legacySchemas );
+                addGeneratedFiles( serviceTask.getGeneratedFiles() );
             }
         }
         if (compileSwagger) {
-            SwaggerCompilerTask swaggerTask = new SwaggerCompilerTask(repositoryManager);
+            SwaggerCompilerTask swaggerTask = new SwaggerCompilerTask( repositoryManager );
 
-            swaggerTask.applyTaskOptions(this);
+            swaggerTask.applyTaskOptions( this );
             swaggerTask.getPrimaryLibraries().addAll( getPrimaryLibraries() );
-            swaggerTask.setOutputFolder(getSubtaskOutputFolder(compileAllContext, "swagger"));
-            swaggerTask.generateOutput(userDefinedLibraries, legacySchemas);
-            addGeneratedFiles(swaggerTask.getGeneratedFiles());
+            swaggerTask.setOutputFolder( getSubtaskOutputFolder( compileAllContext, "swagger" ) );
+            swaggerTask.generateOutput( userDefinedLibraries, legacySchemas );
+            addGeneratedFiles( swaggerTask.getGeneratedFiles() );
         }
-        
+
         if (compileHtml) {
-        	DocumentationCompileTask docTask = new DocumentationCompileTask(repositoryManager);
-        	
-        	docTask.applyTaskOptions(this);
-        	docTask.getPrimaryLibraries().addAll( getPrimaryLibraries() );
-			docTask.setOutputFolder(getOutputFolder() + "/documentation");
-			docTask.generateOutput(userDefinedLibraries, legacySchemas);
-			addGeneratedFiles(docTask.getGeneratedFiles());
+            DocumentationCompileTask docTask = new DocumentationCompileTask( repositoryManager );
+
+            docTask.applyTaskOptions( this );
+            docTask.getPrimaryLibraries().addAll( getPrimaryLibraries() );
+            docTask.setOutputFolder( getOutputFolder() + "/documentation" );
+            docTask.generateOutput( userDefinedLibraries, legacySchemas );
+            addGeneratedFiles( docTask.getGeneratedFiles() );
         }
     }
 
     /**
      * Returns the path of a sub-folder within the given context's output folder location.
      * 
-     * @param context
-     *            the code generation context
-     * @param subtaskFolder
-     *            the location where all output should be created for the sub-task
+     * @param context the code generation context
+     * @param subtaskFolder the location where all output should be created for the sub-task
      * @return String
      */
     private String getSubtaskOutputFolder(CodeGenerationContext context, String subtaskFolder) {
-        String rootOutputFolder = context.getValue(CodeGenerationContext.CK_OUTPUT_FOLDER);
+        String rootOutputFolder = context.getValue( CodeGenerationContext.CK_OUTPUT_FOLDER );
 
         if (rootOutputFolder == null) {
-            rootOutputFolder = System.getProperty("user.dir");
+            rootOutputFolder = System.getProperty( "user.dir" );
         }
-        return new File(rootOutputFolder, subtaskFolder).getAbsolutePath();
+        return new File( rootOutputFolder, subtaskFolder ).getAbsolutePath();
     }
 
     /**
@@ -157,22 +157,22 @@ public class CompileAllCompilerTask extends AbstractCompilerTask implements Comp
         CodeGenerationContext context = super.createContext();
 
         if (serviceEndpointUrl != null) {
-            context.setValue(CodeGenerationContext.CK_SERVICE_ENDPOINT_URL, serviceEndpointUrl);
+            context.setValue( CodeGenerationContext.CK_SERVICE_ENDPOINT_URL, serviceEndpointUrl );
         }
         if (!generateMaxDetailsForExamples) {
-            context.setValue(CodeGenerationContext.CK_EXAMPLE_DETAIL_LEVEL, "MINIMUM");
+            context.setValue( CodeGenerationContext.CK_EXAMPLE_DETAIL_LEVEL, "MINIMUM" );
         }
         if (exampleContext != null) {
-            context.setValue(CodeGenerationContext.CK_EXAMPLE_CONTEXT, exampleContext);
+            context.setValue( CodeGenerationContext.CK_EXAMPLE_CONTEXT, exampleContext );
         }
         if (exampleMaxRepeat != null) {
-            context.setValue(CodeGenerationContext.CK_EXAMPLE_MAX_REPEAT, exampleMaxRepeat.toString());
+            context.setValue( CodeGenerationContext.CK_EXAMPLE_MAX_REPEAT, exampleMaxRepeat.toString() );
         }
         if (exampleMaxDepth != null) {
-            context.setValue(CodeGenerationContext.CK_EXAMPLE_MAX_DEPTH, exampleMaxDepth.toString());
+            context.setValue( CodeGenerationContext.CK_EXAMPLE_MAX_DEPTH, exampleMaxDepth.toString() );
         }
-        context.setValue(CodeGenerationContext.CK_SUPRESS_OTM_EXTENSIONS, suppressOtmExtensions + "");
-        context.setValue(CodeGenerationContext.CK_SUPPRESS_OPTIONAL_FIELDS, suppressOptionalFields + "");
+        context.setValue( CodeGenerationContext.CK_SUPRESS_OTM_EXTENSIONS, suppressOtmExtensions + "" );
+        context.setValue( CodeGenerationContext.CK_SUPPRESS_OPTIONAL_FIELDS, suppressOptionalFields + "" );
         return context;
     }
 
@@ -184,35 +184,35 @@ public class CompileAllCompilerTask extends AbstractCompilerTask implements Comp
         if (taskOptions instanceof CompileAllTaskOptions) {
             CompileAllTaskOptions compileAllOptions = (CompileAllTaskOptions) taskOptions;
 
-            setCompileSchemas(compileAllOptions.isCompileSchemas());
-            setCompileServices(compileAllOptions.isCompileServices());
-            setCompileJsonSchemas(compileAllOptions.isCompileJsonSchemas());
-            setCompileSwagger(compileAllOptions.isCompileSwagger());
-            setCompileHtml(compileAllOptions.isCompileHtml());
+            setCompileSchemas( compileAllOptions.isCompileSchemas() );
+            setCompileServices( compileAllOptions.isCompileServices() );
+            setCompileJsonSchemas( compileAllOptions.isCompileJsonSchemas() );
+            setCompileSwagger( compileAllOptions.isCompileSwagger() );
+            setCompileHtml( compileAllOptions.isCompileHtml() );
         }
         if (taskOptions instanceof SchemaCompilerTaskOptions) {
-        	setSuppressOtmExtensions( ((SchemaCompilerTaskOptions) taskOptions).isSuppressOtmExtensions() );
+            setSuppressOtmExtensions( ((SchemaCompilerTaskOptions) taskOptions).isSuppressOtmExtensions() );
         }
         if (taskOptions instanceof ExampleCompilerTaskOptions) {
             ExampleCompilerTaskOptions exampleOptions = (ExampleCompilerTaskOptions) taskOptions;
 
-            setGenerateExamples(exampleOptions.isGenerateExamples());
-            setGenerateMaxDetailsForExamples(exampleOptions.isGenerateMaxDetailsForExamples());
-            setExampleContext(exampleOptions.getExampleContext());
-            setExampleMaxRepeat(exampleOptions.getExampleMaxRepeat());
-            setExampleMaxDepth(exampleOptions.getExampleMaxDepth());
-            setSuppressOptionalFields(exampleOptions.isSuppressOptionalFields());
+            setGenerateExamples( exampleOptions.isGenerateExamples() );
+            setGenerateMaxDetailsForExamples( exampleOptions.isGenerateMaxDetailsForExamples() );
+            setExampleContext( exampleOptions.getExampleContext() );
+            setExampleMaxRepeat( exampleOptions.getExampleMaxRepeat() );
+            setExampleMaxDepth( exampleOptions.getExampleMaxDepth() );
+            setSuppressOptionalFields( exampleOptions.isSuppressOptionalFields() );
         }
         if (taskOptions instanceof ServiceCompilerTaskOptions) {
             ServiceCompilerTaskOptions serviceOptions = (ServiceCompilerTaskOptions) taskOptions;
 
-            setServiceLibraryUrl(serviceOptions.getServiceLibraryUrl());
-            setServiceEndpointUrl(serviceOptions.getServiceEndpointUrl());
+            setServiceLibraryUrl( serviceOptions.getServiceLibraryUrl() );
+            setServiceEndpointUrl( serviceOptions.getServiceEndpointUrl() );
         }
         if (taskOptions instanceof ResourceCompilerTaskOptions) {
-            setResourceBaseUrl(((ResourceCompilerTaskOptions) taskOptions).getResourceBaseUrl());
+            setResourceBaseUrl( ((ResourceCompilerTaskOptions) taskOptions).getResourceBaseUrl() );
         }
-        super.applyTaskOptions(taskOptions);
+        super.applyTaskOptions( taskOptions );
     }
 
     /**
@@ -226,32 +226,31 @@ public class CompileAllCompilerTask extends AbstractCompilerTask implements Comp
     /**
      * Assigns the option flag indicating that XML schema files should be generated.
      * 
-     * @param compileSchemas
-     *            the task option value to assign
+     * @param compileSchemas the task option value to assign
      */
     public void setCompileSchemas(boolean compileSchemas) {
         this.compileSchemas = compileSchemas;
     }
 
     /**
-	 * Returns the option flag indicating that JSON schema files should be generated.
-	 *
-	 * @return boolean
-	 */
-	public boolean isCompileJsonSchemas() {
-		return compileJson;
-	}
+     * Returns the option flag indicating that JSON schema files should be generated.
+     *
+     * @return boolean
+     */
+    public boolean isCompileJsonSchemas() {
+        return compileJson;
+    }
 
-	/**
-	 * Assigns the option flag indicating that JSON schema files should be generated.
-	 *
-	 * @param compileJson  the task option value to assign
-	 */
-	public void setCompileJsonSchemas(boolean compileJson) {
-		this.compileJson = compileJson;
-	}
+    /**
+     * Assigns the option flag indicating that JSON schema files should be generated.
+     *
+     * @param compileJson the task option value to assign
+     */
+    public void setCompileJsonSchemas(boolean compileJson) {
+        this.compileJson = compileJson;
+    }
 
-	/**
+    /**
      * @see org.opentravel.schemacompiler.task.CompileAllTaskOptions#isCompileServices()
      */
     @Override
@@ -259,28 +258,27 @@ public class CompileAllCompilerTask extends AbstractCompilerTask implements Comp
         return compileServices;
     }
 
-	/**
+    /**
      * Assigns the option flag indicating that WSDL documents should be generated.
      * 
-     * @param compileServices
-     *            the task option value to assign
+     * @param compileServices the task option value to assign
      */
     public void setCompileServices(boolean compileServices) {
         this.compileServices = compileServices;
     }
 
     /**
-	 * @see org.opentravel.schemacompiler.task.CompileAllTaskOptions#isCompileSwagger()
-	 */
-	@Override
-	public boolean isCompileSwagger() {
-		return compileSwagger;
-	}
+     * @see org.opentravel.schemacompiler.task.CompileAllTaskOptions#isCompileSwagger()
+     */
+    @Override
+    public boolean isCompileSwagger() {
+        return compileSwagger;
+    }
 
-	/**
+    /**
      * Assigns the option flag indicating that Swagger documents should be generated.
      * 
-     * @param compileSwagger  the task option value to assign
+     * @param compileSwagger the task option value to assign
      */
     public void setCompileSwagger(boolean compileSwagger) {
         this.compileSwagger = compileSwagger;
@@ -295,12 +293,11 @@ public class CompileAllCompilerTask extends AbstractCompilerTask implements Comp
     }
 
     /**
-     * Assigns the URL of the OTM library that contains the single service to be generated. If
-     * present, only that service's WSDL will be generated. If not present, WSDL's will be generated
-     * for all services that exist in the OTM model being processed.
+     * Assigns the URL of the OTM library that contains the single service to be generated. If present, only that
+     * service's WSDL will be generated. If not present, WSDL's will be generated for all services that exist in the OTM
+     * model being processed.
      * 
-     * @param serviceLibraryUrl
-     *            the service endpoint URL to assign
+     * @param serviceLibraryUrl the service endpoint URL to assign
      */
     public void setServiceLibraryUrl(URL serviceLibraryUrl) {
         this.serviceLibraryUrl = serviceLibraryUrl;
@@ -317,51 +314,49 @@ public class CompileAllCompilerTask extends AbstractCompilerTask implements Comp
     /**
      * Assigns the base URL for all service endpoints generated in WSDL documents.
      * 
-     * @param serviceEndpointUrl
-     *            the service endpoint URL to assign
+     * @param serviceEndpointUrl the service endpoint URL to assign
      */
     public void setServiceEndpointUrl(String serviceEndpointUrl) {
         this.serviceEndpointUrl = serviceEndpointUrl;
     }
 
     /**
-	 * @see org.opentravel.schemacompiler.task.ResourceCompilerTaskOptions#getResourceBaseUrl()
-	 */
-	@Override
-	public String getResourceBaseUrl() {
-		return resourceBaseUrl;
-	}
-
-	/**
-	 * Assigns the base URL path for all generated REST API specifications.
-	 *
-	 * @param resourceBaseUrl  the base URL path to assign
-	 */
-	public void setResourceBaseUrl(String resourceBaseUrl) {
-		this.resourceBaseUrl = resourceBaseUrl;
-	}
-
-	/**
-	 * @see org.opentravel.schemacompiler.task.ResourceCompilerTaskOptions#isSuppressOtmExtensions()
-	 */
-	@Override
-	public boolean isSuppressOtmExtensions() {
-		return suppressOtmExtensions;
-	}
+     * @see org.opentravel.schemacompiler.task.ResourceCompilerTaskOptions#getResourceBaseUrl()
+     */
+    @Override
+    public String getResourceBaseUrl() {
+        return resourceBaseUrl;
+    }
 
     /**
-     * Assigns the option flag indicating that all 'x-otm-' extensions should be
-     * suppressed in the generated swagger document(s)
+     * Assigns the base URL path for all generated REST API specifications.
+     *
+     * @param resourceBaseUrl the base URL path to assign
+     */
+    public void setResourceBaseUrl(String resourceBaseUrl) {
+        this.resourceBaseUrl = resourceBaseUrl;
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.task.ResourceCompilerTaskOptions#isSuppressOtmExtensions()
+     */
+    @Override
+    public boolean isSuppressOtmExtensions() {
+        return suppressOtmExtensions;
+    }
+
+    /**
+     * Assigns the option flag indicating that all 'x-otm-' extensions should be suppressed in the generated swagger
+     * document(s)
      * 
-     * @param suppressOtmExtensions
-     *            the task option value to assign
+     * @param suppressOtmExtensions the task option value to assign
      */
     public void setSuppressOtmExtensions(boolean suppressOtmExtensions) {
         this.suppressOtmExtensions = suppressOtmExtensions;
     }
 
-	/**
-     * @see org.opentravel.schemacompiler.task.CommonCompilerTaskOptions#isGenerateExamples()
+    /**
+     * @see org.opentravel.schemacompiler.task.ExampleCompilerTaskOptions#isGenerateExamples()
      */
     @Override
     public boolean isGenerateExamples() {
@@ -369,17 +364,16 @@ public class CompileAllCompilerTask extends AbstractCompilerTask implements Comp
     }
 
     /**
-     * Assigns the option flag indicating that EXAMPLE XML documents should be generated.
+     * Assigns the option flag indicating that example XML documents should be generated.
      * 
-     * @param generateExamples
-     *            the task option value to assign
+     * @param generateExamples the task option value to assign
      */
     public void setGenerateExamples(boolean generateExamples) {
         this.generateExamples = generateExamples;
     }
 
     /**
-     * @see org.opentravel.schemacompiler.task.CommonCompilerTaskOptions#isGenerateMaxDetailsForExamples()
+     * @see org.opentravel.schemacompiler.task.ExampleCompilerTaskOptions#isGenerateMaxDetailsForExamples()
      */
     @Override
     public boolean isGenerateMaxDetailsForExamples() {
@@ -387,18 +381,17 @@ public class CompileAllCompilerTask extends AbstractCompilerTask implements Comp
     }
 
     /**
-     * Assigns the flag indicating whether the maximum amount of detail is to be included in
-     * generated EXAMPLE data. If false, minimum detail will be generated.
+     * Assigns the flag indicating whether the maximum amount of detail is to be included in generated example data. If
+     * false, minimum detail will be generated.
      * 
-     * @param generateMaxDetailsForExamples
-     *            the boolean flag value to assign
+     * @param generateMaxDetailsForExamples the boolean flag value to assign
      */
     public void setGenerateMaxDetailsForExamples(boolean generateMaxDetailsForExamples) {
         this.generateMaxDetailsForExamples = generateMaxDetailsForExamples;
     }
 
     /**
-     * @see org.opentravel.schemacompiler.task.CommonCompilerTaskOptions#getExampleContext()
+     * @see org.opentravel.schemacompiler.task.ExampleCompilerTaskOptions#getExampleContext()
      */
     @Override
     public String getExampleContext() {
@@ -406,17 +399,16 @@ public class CompileAllCompilerTask extends AbstractCompilerTask implements Comp
     }
 
     /**
-     * Assigns the preferred context to use when producing EXAMPLE values for simple data types.
+     * Assigns the preferred context to use when producing example values for simple data types.
      * 
-     * @param exampleContext
-     *            the context ID to assign
+     * @param exampleContext the context ID to assign
      */
     public void setExampleContext(String exampleContext) {
         this.exampleContext = exampleContext;
     }
 
     /**
-     * @see org.opentravel.schemacompiler.task.CommonCompilerTaskOptions#getExampleMaxRepeat()
+     * @see org.opentravel.schemacompiler.task.ExampleCompilerTaskOptions#getExampleMaxRepeat()
      */
     @Override
     public Integer getExampleMaxRepeat() {
@@ -424,18 +416,16 @@ public class CompileAllCompilerTask extends AbstractCompilerTask implements Comp
     }
 
     /**
-     * Assigns the maximum number of times that repeating elements should be displayed in generated
-     * EXAMPLE output.
+     * Assigns the maximum number of times that repeating elements should be displayed in generated example output.
      * 
-     * @param exampleMaxRepeat
-     *            the max repeat value to assign
+     * @param exampleMaxRepeat the max repeat value to assign
      */
     public void setExampleMaxRepeat(Integer exampleMaxRepeat) {
         this.exampleMaxRepeat = exampleMaxRepeat;
     }
 
     /**
-     * @see org.opentravel.schemacompiler.task.CommonCompilerTaskOptions#getExampleMaxDepth()
+     * @see org.opentravel.schemacompiler.task.ExampleCompilerTaskOptions#getExampleMaxDepth()
      */
     @Override
     public Integer getExampleMaxDepth() {
@@ -443,46 +433,43 @@ public class CompileAllCompilerTask extends AbstractCompilerTask implements Comp
     }
 
     /**
-     * Assigns the maximum depth that should be included for nested elements in generated EXAMPLE
-     * output.
+     * Assigns the maximum depth that should be included for nested elements in generated example output.
      * 
-     * @param exampleMaxDepth
-     *            the max depth value to assign
+     * @param exampleMaxDepth the max depth value to assign
      */
     public void setExampleMaxDepth(Integer exampleMaxDepth) {
         this.exampleMaxDepth = exampleMaxDepth;
     }
 
     /**
-	 * @see org.opentravel.schemacompiler.task.ExampleCompilerTaskOptions#isSuppressOptionalFields()
-	 */
-	@Override
-	public boolean isSuppressOptionalFields() {
-		return suppressOptionalFields;
-	}
+     * @see org.opentravel.schemacompiler.task.ExampleCompilerTaskOptions#isSuppressOptionalFields()
+     */
+    @Override
+    public boolean isSuppressOptionalFields() {
+        return suppressOptionalFields;
+    }
 
     /**
-     * Assigns the flag indicating whether optional fields should be suppressed
-	 * during EXAMPLE generation.
+     * Assigns the flag indicating whether optional fields should be suppressed during example generation.
      * 
-     * @param generateExamples  the flag value to assign
+     * @param suppressOptionalFields the flag value to assign
      */
     public void setSuppressOptionalFields(boolean suppressOptionalFields) {
         this.suppressOptionalFields = suppressOptionalFields;
     }
 
-	/**
-     * @see org.opentravel.schemacompiler.task.CommonCompilerTaskOptions#isCompileHtml()
+    /**
+     * @see org.opentravel.schemacompiler.task.CompileAllTaskOptions#isCompileHtml()
      */
-	@Override
-	public boolean isCompileHtml() {
-		return compileHtml;
-	}
-	
-	/**
+    @Override
+    public boolean isCompileHtml() {
+        return compileHtml;
+    }
+
+    /**
      * Assigns the option flag indicating that HTML documentation should be generated.
      * 
-     * @param compileHtml  the task option value to assign
+     * @param compileHtml the task option value to assign
      */
     public void setCompileHtml(boolean compileHtml) {
         this.compileHtml = compileHtml;

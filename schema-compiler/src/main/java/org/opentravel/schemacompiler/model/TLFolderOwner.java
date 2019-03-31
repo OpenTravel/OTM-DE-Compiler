@@ -13,54 +13,52 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.model;
 
 import java.util.List;
 
 /**
- * Interface to be implemented by components that can own and manage
- * <code>TLFolder</code> structures.
+ * Interface to be implemented by components that can own and manage <code>TLFolder</code> structures.
  */
 public interface TLFolderOwner {
-	
-	/**
-	 * Returns the list of sub-folders for this folder owner.  The list of folders
-	 * that is returned is unmodifiable and sorted in alphabetical order by folder
-	 * name.
-	 *
-	 * @return List<TLFolder>
-	 */
-	public List<TLFolder> getFolders();
-	
-	/**
-	 * Returns the folder with the given name for this folder owner.
-	 * 
-	 * @param folderName  the name of the folder to return
-	 * @return TLFolder
-	 */
-	public TLFolder getFolder(String folderName);
-	
-	/**
-	 * Adds a new sub-folder to the current list for this owner.
-	 * 
-	 * @param folder  the sub-folder to be added
-	 * @throws IllegalArgumentException  thrown if the addition of the folder would create
-	 *									 a circular reference or is not a member of the same
-	 *									 owning library
-	 */
-	public void addFolder(TLFolder folder);
-	
-	/**
-	 * Removes the given sub-folder from the list for this owner.  If the folder is not
-	 * currently a direct sub-folder of this folder owner, this method will take no action.
-	 * 
-	 * @param folder  the existing sub-folder to remove
-	 */
-	public void removeFolder(TLFolder folder);
-	
-	/**
-	 * Sorts the existing list of sub-folders in ascending order by name.
-	 */
-	public void sortFolders();
-	
+
+    /**
+     * Returns the list of sub-folders for this folder owner. The list of folders that is returned is unmodifiable and
+     * sorted in alphabetical order by folder name.
+     *
+     * @return List&lt;TLFolder&gt;
+     */
+    public List<TLFolder> getFolders();
+
+    /**
+     * Returns the folder with the given name for this folder owner.
+     * 
+     * @param folderName the name of the folder to return
+     * @return TLFolder
+     */
+    public TLFolder getFolder(String folderName);
+
+    /**
+     * Adds a new sub-folder to the current list for this owner.
+     * 
+     * @param folder the sub-folder to be added
+     * @throws IllegalArgumentException thrown if the addition of the folder would create a circular reference or is not
+     *         a member of the same owning library
+     */
+    public void addFolder(TLFolder folder);
+
+    /**
+     * Removes the given sub-folder from the list for this owner. If the folder is not currently a direct sub-folder of
+     * this folder owner, this method will take no action.
+     * 
+     * @param folder the existing sub-folder to remove
+     */
+    public void removeFolder(TLFolder folder);
+
+    /**
+     * Sorts the existing list of sub-folders in ascending order by name.
+     */
+    public void sortFolders();
+
 }

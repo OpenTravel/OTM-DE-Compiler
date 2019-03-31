@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.validate.compile;
 
 import org.opentravel.schemacompiler.model.TLAlias;
@@ -36,26 +37,23 @@ public class TLAliasCompileValidator extends TLValidatorBase<TLAlias> {
      */
     @Override
     protected ValidationFindings validateFields(TLAlias target) {
-        TLValidationBuilder builder = newValidationBuilder(target);
+        TLValidationBuilder builder = newValidationBuilder( target );
         TLAliasOwner owner = target.getOwningEntity();
 
-        builder.setProperty("name", target.getName()).setFindingType(FindingType.ERROR)
-                .assertNotNullOrBlank().assertPatternMatch(NAME_XML_PATTERN);
+        builder.setProperty( "name", target.getName() ).setFindingType( FindingType.ERROR ).assertNotNullOrBlank()
+            .assertPatternMatch( NAME_XML_PATTERN );
 
         if (owner != null) {
-            builder.setProperty("name", target.getOwningEntity().getAliases())
-                    .setFindingType(FindingType.ERROR)
-                    .assertNoDuplicates( e -> (e == null) ? null : ((TLAlias) e).getName() );
+            builder.setProperty( "name", target.getOwningEntity().getAliases() ).setFindingType( FindingType.ERROR )
+                .assertNoDuplicates( e -> (e == null) ? null : ((TLAlias) e).getName() );
 
             // Add an error if the alias name is the same as that of its owner
-            if ((target.getName() != null)
-                    && target.getName().equals(target.getOwningEntity().getLocalName())) {
-                builder.addFinding(FindingType.ERROR, "name", ERROR_ILLEGAL_ALIAS_NAME,
-                        target.getName());
+            if ((target.getName() != null) && target.getName().equals( target.getOwningEntity().getLocalName() )) {
+                builder.addFinding( FindingType.ERROR, "name", ERROR_ILLEGAL_ALIAS_NAME, target.getName() );
             }
         }
 
-        checkSchemaNamingConflicts(target, builder);
+        checkSchemaNamingConflicts( target, builder );
 
         return builder.getFindings();
     }

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.transform.jaxb16_2tl;
 
 import org.opentravel.ns.ota2.librarymodel_v01_06.Documentation;
@@ -29,74 +30,73 @@ import org.opentravel.schemacompiler.transform.ObjectTransformer;
 import org.opentravel.schemacompiler.transform.symbols.DefaultTransformerContext;
 
 /**
- * Handles the transformation of objects from the <code>Parameter</code> type to the
- * <code>TLParameter</code> type.
+ * Handles the transformation of objects from the <code>Parameter</code> type to the <code>TLParameter</code> type.
  *
  * @author S. Livezey
  */
 public class ParameterTransformer extends ComplexTypeTransformer<Parameter,TLParameter> {
-	
-	/**
-	 * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
-	 */
-	@Override
-	public TLParameter transform(Parameter source) {
-        ObjectTransformer<Equivalent, TLEquivalent, DefaultTransformerContext> equivTransformer =
-        		getTransformerFactory().getTransformer(Equivalent.class, TLEquivalent.class);
-        ObjectTransformer<Example, TLExample, DefaultTransformerContext> exampleTransformer =
-        		getTransformerFactory().getTransformer(Example.class, TLExample.class);
-		TLParameter param = new TLParameter();
-		
-		param.setFieldRefName(trimString(source.getFieldName()));
-		
-		if (source.getLocation() != null) {
-			param.setLocation(transformLocation(source.getLocation()));
-		}
-		
-        if (source.getDocumentation() != null) {
-            ObjectTransformer<Documentation, TLDocumentation, DefaultTransformerContext> docTransformer = getTransformerFactory()
-                    .getTransformer(Documentation.class, TLDocumentation.class);
 
-            param.setDocumentation(docTransformer.transform(source.getDocumentation()));
+    /**
+     * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
+     */
+    @Override
+    public TLParameter transform(Parameter source) {
+        ObjectTransformer<Equivalent,TLEquivalent,DefaultTransformerContext> equivTransformer =
+            getTransformerFactory().getTransformer( Equivalent.class, TLEquivalent.class );
+        ObjectTransformer<Example,TLExample,DefaultTransformerContext> exampleTransformer =
+            getTransformerFactory().getTransformer( Example.class, TLExample.class );
+        TLParameter param = new TLParameter();
+
+        param.setFieldRefName( trimString( source.getFieldName() ) );
+
+        if (source.getLocation() != null) {
+            param.setLocation( transformLocation( source.getLocation() ) );
+        }
+
+        if (source.getDocumentation() != null) {
+            ObjectTransformer<Documentation,TLDocumentation,DefaultTransformerContext> docTransformer =
+                getTransformerFactory().getTransformer( Documentation.class, TLDocumentation.class );
+
+            param.setDocumentation( docTransformer.transform( source.getDocumentation() ) );
         }
 
         for (Equivalent sourceEquiv : source.getEquivalent()) {
-        	param.addEquivalent(equivTransformer.transform(sourceEquiv));
+            param.addEquivalent( equivTransformer.transform( sourceEquiv ) );
         }
 
         for (Example sourceExample : source.getExample()) {
-        	param.addExample(exampleTransformer.transform(sourceExample));
+            param.addExample( exampleTransformer.transform( sourceExample ) );
         }
 
-		return param;
-	}
-	
-	/**
-	 * Transforms the parameter location value.
-	 * 
-	 * @param sourceLocation  the JAXB location value
-	 * @return TLParamLocation
-	 */
-	private TLParamLocation transformLocation(ParamLocation sourceLocation) {
-		TLParamLocation location;
-		
-		if (sourceLocation != null) {
-			switch (sourceLocation) {
-				case HEADER:
-					location = TLParamLocation.HEADER;
-					break;
-				case PATH:
-					location = TLParamLocation.PATH;
-					break;
-				case QUERY:
-					location = TLParamLocation.QUERY;
-					break;
-				default:
-					location = null;
-			}
-		} else {
-			location = null;
-		}
-		return location;
-	}
+        return param;
+    }
+
+    /**
+     * Transforms the parameter location value.
+     * 
+     * @param sourceLocation the JAXB location value
+     * @return TLParamLocation
+     */
+    private TLParamLocation transformLocation(ParamLocation sourceLocation) {
+        TLParamLocation location;
+
+        if (sourceLocation != null) {
+            switch (sourceLocation) {
+                case HEADER:
+                    location = TLParamLocation.HEADER;
+                    break;
+                case PATH:
+                    location = TLParamLocation.PATH;
+                    break;
+                case QUERY:
+                    location = TLParamLocation.QUERY;
+                    break;
+                default:
+                    location = null;
+            }
+        } else {
+            location = null;
+        }
+        return location;
+    }
 }

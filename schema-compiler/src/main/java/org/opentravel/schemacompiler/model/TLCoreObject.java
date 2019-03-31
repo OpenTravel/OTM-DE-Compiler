@@ -13,14 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.model;
+
+import org.opentravel.schemacompiler.model.TLAlias.AliasListManager;
+import org.opentravel.schemacompiler.version.Versioned;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-
-import org.opentravel.schemacompiler.model.TLAlias.AliasListManager;
-import org.opentravel.schemacompiler.version.Versioned;
 
 /**
  * Core object definition for a type library.
@@ -29,8 +30,8 @@ import org.opentravel.schemacompiler.version.Versioned;
  */
 public class TLCoreObject extends TLComplexTypeBase implements TLFacetOwner, TLAliasOwner, TLAttributeType {
 
-	protected AliasListManager aliasManager = new AliasListManager(this);
-    private TLRoleEnumeration roleEnumeration = new TLRoleEnumeration(this);
+    protected AliasListManager aliasManager = new AliasListManager( this );
+    private TLRoleEnumeration roleEnumeration = new TLRoleEnumeration( this );
     private TLSimpleFacet simpleFacet;
     private TLFacet summaryFacet;
     private TLFacet detailFacet;
@@ -38,15 +39,15 @@ public class TLCoreObject extends TLComplexTypeBase implements TLFacetOwner, TLA
     private TLListFacet summaryListFacet;
     private TLListFacet detailListFacet;
 
-	/**
-	 * Default constructor.
-	 */
-	public TLCoreObject() {
-		setSimpleFacet( new TLSimpleFacet() );
-		setSummaryFacet( new TLFacet() );
-		setDetailFacet( new TLFacet() );
-	}
-	
+    /**
+     * Default constructor.
+     */
+    public TLCoreObject() {
+        setSimpleFacet( new TLSimpleFacet() );
+        setSummaryFacet( new TLFacet() );
+        setDetailFacet( new TLFacet() );
+    }
+
     /**
      * @see org.opentravel.schemacompiler.validate.Validatable#getValidationIdentity()
      */
@@ -56,12 +57,12 @@ public class TLCoreObject extends TLComplexTypeBase implements TLFacetOwner, TLA
         StringBuilder identity = new StringBuilder();
 
         if (owningLibrary != null) {
-            identity.append(owningLibrary.getValidationIdentity()).append(" : ");
+            identity.append( owningLibrary.getValidationIdentity() ).append( " : " );
         }
         if (getName() == null) {
-            identity.append("[Unnamed Core Object Type]");
+            identity.append( "[Unnamed Core Object Type]" );
         } else {
-            identity.append(getName());
+            identity.append( getName() );
         }
         return identity.toString();
     }
@@ -117,11 +118,10 @@ public class TLCoreObject extends TLComplexTypeBase implements TLFacetOwner, TLA
     public boolean isLaterVersion(Versioned otherVersionedItem) {
         boolean result = false;
 
-        if ((otherVersionedItem != null) && otherVersionedItem.getClass().equals(this.getClass())
-                && (this.getOwningLibrary() != null)
-                && (otherVersionedItem.getOwningLibrary() != null) && (this.getLocalName() != null)
-                && this.getLocalName().equals(otherVersionedItem.getLocalName())) {
-            result = this.getOwningLibrary().isLaterVersion(otherVersionedItem.getOwningLibrary());
+        if ((otherVersionedItem != null) && otherVersionedItem.getClass().equals( this.getClass() )
+            && (this.getOwningLibrary() != null) && (otherVersionedItem.getOwningLibrary() != null)
+            && (this.getLocalName() != null) && this.getLocalName().equals( otherVersionedItem.getLocalName() )) {
+            result = this.getOwningLibrary().isLaterVersion( otherVersionedItem.getOwningLibrary() );
         }
         return result;
     }
@@ -145,30 +145,29 @@ public class TLCoreObject extends TLComplexTypeBase implements TLFacetOwner, TLA
      * @see org.opentravel.schemacompiler.model.TLAliasOwner#getAlias(java.lang.String)
      */
     public TLAlias getAlias(String aliasName) {
-        return aliasManager.getChild(aliasName);
+        return aliasManager.getChild( aliasName );
     }
 
     /**
      * @see org.opentravel.schemacompiler.model.TLAliasOwner#addAlias(org.opentravel.schemacompiler.model.TLAlias)
      */
     public void addAlias(TLAlias alias) {
-        aliasManager.addChild(alias);
+        aliasManager.addChild( alias );
     }
 
     /**
-     * @see org.opentravel.schemacompiler.model.TLAliasOwner#addAlias(int,
-     *      org.opentravel.schemacompiler.model.TLAlias)
+     * @see org.opentravel.schemacompiler.model.TLAliasOwner#addAlias(int, org.opentravel.schemacompiler.model.TLAlias)
      */
     @Override
     public void addAlias(int index, TLAlias alias) {
-        aliasManager.addChild(index, alias);
+        aliasManager.addChild( index, alias );
     }
 
     /**
      * @see org.opentravel.schemacompiler.model.TLAliasOwner#removeAlias(org.opentravel.schemacompiler.model.TLAlias)
      */
     public void removeAlias(TLAlias alias) {
-        aliasManager.removeChild(alias);
+        aliasManager.removeChild( alias );
     }
 
     /**
@@ -176,7 +175,7 @@ public class TLCoreObject extends TLComplexTypeBase implements TLFacetOwner, TLA
      */
     @Override
     public void moveUp(TLAlias alias) {
-        aliasManager.moveUp(alias);
+        aliasManager.moveUp( alias );
     }
 
     /**
@@ -184,7 +183,7 @@ public class TLCoreObject extends TLComplexTypeBase implements TLFacetOwner, TLA
      */
     @Override
     public void moveDown(TLAlias alias) {
-        aliasManager.moveDown(alias);
+        aliasManager.moveDown( alias );
     }
 
     /**
@@ -192,17 +191,17 @@ public class TLCoreObject extends TLComplexTypeBase implements TLFacetOwner, TLA
      */
     @Override
     public void sortAliases(Comparator<TLAlias> comparator) {
-        aliasManager.sortChildren(comparator);
+        aliasManager.sortChildren( comparator );
     }
 
     /**
-	 * @see org.opentravel.schemacompiler.model.TLAliasOwner#getAliasListManager()
-	 */
-	@SuppressWarnings("unchecked")
-	@Override
-	public ChildEntityListManager<TLAlias,TLAliasOwner> getAliasListManager() {
-		return aliasManager;
-	}
+     * @see org.opentravel.schemacompiler.model.TLAliasOwner#getAliasListManager()
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public ChildEntityListManager<TLAlias,TLAliasOwner> getAliasListManager() {
+        return aliasManager;
+    }
 
     /**
      * Returns the role enumeration entity associated with this core object instance.
@@ -225,39 +224,38 @@ public class TLCoreObject extends TLComplexTypeBase implements TLFacetOwner, TLA
     /**
      * Assigns the value of the 'simpleFacet' field.
      * 
-     * @param simpleFacet
-     *            the field value to assign
+     * @param simpleFacet the field value to assign
      */
     public void setSimpleFacet(TLSimpleFacet simpleFacet) {
         if (simpleFacet != this.simpleFacet) {
             if (getOwningModel() != null) {
-                throw new IllegalStateException(FACETS_CANNOT_BE_MODIFIED);
+                throw new IllegalStateException( FACETS_CANNOT_BE_MODIFIED );
             }
             if (simpleFacet != null) {
-                simpleFacet.setFacetType(TLFacetType.SIMPLE);
-                simpleFacet.setOwningEntity(this);
+                simpleFacet.setFacetType( TLFacetType.SIMPLE );
+                simpleFacet.setOwningEntity( this );
             }
             if (this.simpleFacet != null) {
-                this.simpleFacet.setFacetType(null);
-                this.simpleFacet.setOwningEntity(null);
-                this.simpleListFacet.setOwningEntity(null);
+                this.simpleFacet.setFacetType( null );
+                this.simpleFacet.setOwningEntity( null );
+                this.simpleListFacet.setOwningEntity( null );
             }
             this.simpleFacet = simpleFacet;
-            this.simpleListFacet = (simpleFacet == null) ? null : new TLListFacet(simpleFacet);
+            this.simpleListFacet = (simpleFacet == null) ? null : new TLListFacet( simpleFacet );
         }
     }
 
     /**
-	 * @see org.opentravel.schemacompiler.model.TLFacetOwner#getAllFacets()
-	 */
-	@Override
-	public List<TLFacet> getAllFacets() {
-		List<TLFacet> facetList = new ArrayList<>();
-		
-		facetList.add( getSummaryFacet() );
-		facetList.add( getDetailFacet() );
-		return facetList;
-	}
+     * @see org.opentravel.schemacompiler.model.TLFacetOwner#getAllFacets()
+     */
+    @Override
+    public List<TLFacet> getAllFacets() {
+        List<TLFacet> facetList = new ArrayList<>();
+
+        facetList.add( getSummaryFacet() );
+        facetList.add( getDetailFacet() );
+        return facetList;
+    }
 
     /**
      * Returns the value of the 'summaryFacet' field.
@@ -271,26 +269,24 @@ public class TLCoreObject extends TLComplexTypeBase implements TLFacetOwner, TLA
     /**
      * Assigns the value of the 'summaryFacet' field.
      * 
-     * @param summaryFacet
-     *            the field value to assign
+     * @param summaryFacet the field value to assign
      */
     public void setSummaryFacet(TLFacet summaryFacet) {
         if (summaryFacet != this.summaryFacet) {
             if (getOwningModel() != null) {
-                throw new IllegalStateException(
-                        FACETS_CANNOT_BE_MODIFIED);
+                throw new IllegalStateException( FACETS_CANNOT_BE_MODIFIED );
             }
             if (summaryFacet != null) {
-                summaryFacet.setFacetType(TLFacetType.SUMMARY);
-                summaryFacet.setOwningEntity(this);
+                summaryFacet.setFacetType( TLFacetType.SUMMARY );
+                summaryFacet.setOwningEntity( this );
             }
             if (this.summaryFacet != null) {
-                this.summaryFacet.setFacetType(null);
-                this.summaryFacet.setOwningEntity(null);
-                this.summaryListFacet.setOwningEntity(null);
+                this.summaryFacet.setFacetType( null );
+                this.summaryFacet.setOwningEntity( null );
+                this.summaryListFacet.setOwningEntity( null );
             }
             this.summaryFacet = summaryFacet;
-            this.summaryListFacet = (summaryFacet == null) ? null : new TLListFacet(summaryFacet);
+            this.summaryListFacet = (summaryFacet == null) ? null : new TLListFacet( summaryFacet );
         }
     }
 
@@ -306,26 +302,24 @@ public class TLCoreObject extends TLComplexTypeBase implements TLFacetOwner, TLA
     /**
      * Assigns the value of the 'detailFacet' field.
      * 
-     * @param detailFacet
-     *            the field value to assign
+     * @param detailFacet the field value to assign
      */
     public void setDetailFacet(TLFacet detailFacet) {
         if (detailFacet != this.detailFacet) {
             if (getOwningModel() != null) {
-                throw new IllegalStateException(
-                        FACETS_CANNOT_BE_MODIFIED);
+                throw new IllegalStateException( FACETS_CANNOT_BE_MODIFIED );
             }
             if (detailFacet != null) {
-                detailFacet.setFacetType(TLFacetType.DETAIL);
-                detailFacet.setOwningEntity(this);
+                detailFacet.setFacetType( TLFacetType.DETAIL );
+                detailFacet.setOwningEntity( this );
             }
             if (this.detailFacet != null) {
-                this.detailFacet.setFacetType(null);
-                this.detailFacet.setOwningEntity(null);
-                this.detailListFacet.setOwningEntity(null);
+                this.detailFacet.setFacetType( null );
+                this.detailFacet.setOwningEntity( null );
+                this.detailListFacet.setOwningEntity( null );
             }
             this.detailFacet = detailFacet;
-            this.detailListFacet = (detailFacet == null) ? null : new TLListFacet(detailFacet);
+            this.detailListFacet = (detailFacet == null) ? null : new TLListFacet( detailFacet );
         }
     }
 

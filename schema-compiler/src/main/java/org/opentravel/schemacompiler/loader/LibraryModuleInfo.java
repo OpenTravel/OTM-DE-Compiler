@@ -13,16 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.loader;
 
 import java.util.List;
 
 /**
- * Encapsulates the resulting information from a <code>LibraryModuleLoader</code> call to the
- * 'loadLibrary()' method.
+ * Encapsulates the resulting information from a <code>LibraryModuleLoader</code> call to the 'loadLibrary()' method.
  * 
- * @param <J>
- *            the type of the JAXB artifact that was loaded
+ * @param <J> the type of the JAXB artifact that was loaded
  * @author S. Livezey
  */
 public final class LibraryModuleInfo<J> {
@@ -37,21 +36,15 @@ public final class LibraryModuleInfo<J> {
     /**
      * Constructor that supplies the module information required by the model loader.
      * 
-     * @param jaxbArtifact
-     *            the JAXB object that was loaded
-     * @param libraryName
-     *            the name of the JAXB library
-     * @param namespace
-     *            the target namespace of the JAXB library
-     * @param versionScheme
-     *            the version scheme of the JAXB library
-     * @param includes
-     *            the include declarations from the JAXB library
-     * @param imports
-     *            the import declarations from the JAXB library
+     * @param jaxbArtifact the JAXB object that was loaded
+     * @param libraryName the name of the JAXB library
+     * @param namespace the target namespace of the JAXB library
+     * @param versionScheme the version scheme of the JAXB library
+     * @param includes the include declarations from the JAXB library
+     * @param imports the import declarations from the JAXB library
      */
-    public LibraryModuleInfo(J jaxbArtifact, String libraryName, String namespace,
-            String versionScheme, List<String> includes, List<LibraryModuleImport> imports) {
+    public LibraryModuleInfo(J jaxbArtifact, String libraryName, String namespace, String versionScheme,
+        List<String> includes, List<LibraryModuleImport> imports) {
         this.jaxbArtifact = jaxbArtifact;
         this.libraryName = libraryName;
         this.namespace = namespace;
@@ -99,7 +92,7 @@ public final class LibraryModuleInfo<J> {
     /**
      * Returns the include declarations from the JAXB library.
      * 
-     * @return List<String>
+     * @return List&lt;String&gt;
      */
     public List<String> getIncludes() {
         return includes;
@@ -108,7 +101,7 @@ public final class LibraryModuleInfo<J> {
     /**
      * Returns the import declarations from the JAXB library.
      * 
-     * @return List<LibraryModuleImport>
+     * @return List&lt;LibraryModuleImport&gt;
      */
     public List<LibraryModuleImport> getImports() {
         return imports;

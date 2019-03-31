@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.validate.save;
 
 import org.opentravel.schemacompiler.model.TLExample;
@@ -33,10 +34,9 @@ public class TLExampleSaveValidator extends TLValidatorBase<TLExample> {
      */
     @Override
     protected ValidationFindings validateFields(TLExample target) {
-        TLValidationBuilder builder = newValidationBuilder(target);
+        TLValidationBuilder builder = newValidationBuilder( target );
 
-        builder.setProperty("context", target.getContext()).setFindingType(FindingType.WARNING)
-                .assertNotNull();
+        builder.setProperty( "context", target.getContext() ).setFindingType( FindingType.WARNING ).assertNotNull();
 
         return builder.getFindings();
     }

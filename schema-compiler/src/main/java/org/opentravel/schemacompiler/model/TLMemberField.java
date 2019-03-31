@@ -13,28 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.model;
 
 /**
  * Interface for any model component that is capable of owning and managing member fields.
  *
- * @param <O>  the type of the member field owner
+ * @param <O> the type of the member field owner
  * @author S. Livezey
  */
 public interface TLMemberField<O extends TLMemberFieldOwner> extends LibraryElement {
-	
-	/**
-	 * Returns the name of the member field.
-	 * 
-	 * @return String
-	 */
-	public String getName();
-	
-	/**
-	 * Returns the owner of the member field.
-	 * 
-	 * @return O
-	 */
-	public O getOwner();
-	
+
+    /**
+     * Returns the name of the member field.
+     * 
+     * @return String
+     */
+    public String getName();
+
+    /**
+     * Returns the owner of the member field.
+     * 
+     * @return O
+     */
+    public O getOwner();
+
 }

@@ -13,16 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.codegen.swagger;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.Writer;
-import java.net.URL;
-import java.util.Map.Entry;
+package org.opentravel.schemacompiler.codegen.swagger;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerationContext;
 import org.opentravel.schemacompiler.codegen.CodeGenerationException;
@@ -49,195 +41,204 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.Writer;
+import java.net.URL;
+import java.util.Map.Entry;
+
 /**
- * Code generator implementation used to generate Swagger documents from <code>TLResource</code>
- * meta-model components.
+ * Code generator implementation used to generate Swagger documents from <code>TLResource</code> meta-model components.
  * 
- * <p>The following context variable(s) are required when invoking this code generation module:
+ * <p>
+ * The following context variable(s) are required when invoking this code generation module:
  * <ul>
- *   <li><code>schemacompiler.OutputFolder</code> - the folder where generated Swagger files should be stored</li>
+ * <li><code>schemacompiler.OutputFolder</code> - the folder where generated Swagger files should be stored</li>
  * </ul>
  */
 public class SwaggerCodeGenerator extends AbstractCodeGenerator<TLResource> {
-	
-	private static final String DEFINITIONS = "definitions";
-	
-	public static final String SWAGGER_FILENAME_EXT     = "swagger";
-	public static final String SWAGGER_DEFS_FILENAME_EXT = "defs.swagger";
-	
+
+    private static final String DEFINITIONS = "definitions";
+
+    public static final String SWAGGER_FILENAME_EXT = "swagger";
+    public static final String SWAGGER_DEFS_FILENAME_EXT = "defs.swagger";
+
     private static Gson gson = new GsonBuilder().setPrettyPrinting().create();
-    
+
     private TransformerFactory<CodeGenerationTransformerContext> transformerFactory;
-    
+
     /**
      * Default constructor.
      */
     public SwaggerCodeGenerator() {
-        transformerFactory = TransformerFactory.getInstance(
-                SchemaCompilerApplicationContext.SWAGGER_CODEGEN_TRANSFORMER_FACTORY,
-                new CodeGenerationTransformerContext(this));
+        transformerFactory =
+            TransformerFactory.getInstance( SchemaCompilerApplicationContext.SWAGGER_CODEGEN_TRANSFORMER_FACTORY,
+                new CodeGenerationTransformerContext( this ) );
     }
-    
-	/**
-	 * @see org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator#doGenerateOutput(org.opentravel.schemacompiler.model.ModelElement, org.opentravel.schemacompiler.codegen.CodeGenerationContext)
-	 */
-	@Override
-	public void doGenerateOutput(TLResource source, CodeGenerationContext context) throws CodeGenerationException {
+
+    /**
+     * @see org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator#doGenerateOutput(org.opentravel.schemacompiler.model.ModelElement,
+     *      org.opentravel.schemacompiler.codegen.CodeGenerationContext)
+     */
+    @Override
+    public void doGenerateOutput(TLResource source, CodeGenerationContext context) throws CodeGenerationException {
         File outputFile = getOutputFile( source, context );
         try (Writer out = new FileWriter( outputFile )) {
-            SwaggerDocument swaggerDoc = transformSourceObjectToSwaggerDocument(source, context);
+            SwaggerDocument swaggerDoc = transformSourceObjectToSwaggerDocument( source, context );
             JsonObject swaggerJson = swaggerDoc.toJson();
-            
-			if (isSingleFileEnabled( context )) {
-				addBuiltInDefinitions( swaggerJson );
-			}
-            if (context.getBooleanValue( CodeGenerationContext.CK_SUPRESS_OTM_EXTENSIONS )) {
-            	JsonSchemaCodegenUtils.stripOtmExtensions( swaggerJson );
+
+            if (isSingleFileEnabled( context )) {
+                addBuiltInDefinitions( swaggerJson );
             }
-			
+            if (context.getBooleanValue( CodeGenerationContext.CK_SUPRESS_OTM_EXTENSIONS )) {
+                JsonSchemaCodegenUtils.stripOtmExtensions( swaggerJson );
+            }
+
             gson.toJson( swaggerJson, out );
-            addGeneratedFile(outputFile);
+            addGeneratedFile( outputFile );
 
         } catch (Exception e) {
-            throw new CodeGenerationException(e);
+            throw new CodeGenerationException( e );
         }
-	}
-	
+    }
+
     /**
-     * Performs the translation from meta-model element to a Swagger Document object that will
-     * be used to generate the output content.
+     * Performs the translation from meta-model element to a Swagger Document object that will be used to generate the
+     * output content.
      * 
-     * @param source  the resource instance to transform
-     * @param context  the code generation context
+     * @param source the resource instance to transform
+     * @param context the code generation context
      * @return SwaggerDocument
-     * @throws CodeGenerationException  thrown if an error occurs during object translation
+     * @throws CodeGenerationException thrown if an error occurs during object translation
      */
     protected SwaggerDocument transformSourceObjectToSwaggerDocument(TLResource source, CodeGenerationContext context)
-            throws CodeGenerationException {
-        ObjectTransformer<TLResource,SwaggerDocument, CodeGenerationTransformerContext> transformer =
-        		getTransformerFactory( context ).getTransformer( source, SwaggerDocument.class );
-        
-		if (transformer != null) {
-			if (isSingleFileEnabled( context )) {
-				// If single-file swagger generation is enabled, we need to create a JSON Type
-				// Name Builder and add it to the transform context
-				CodeGenerationFilter filter = transformerFactory.getContext().getCodeGenerator().getFilter();
-				
-				transformerFactory.getContext().setContextCacheEntry(
-						JsonTypeNameBuilder.class.getSimpleName(),
-						new JsonTypeNameBuilder( source.getOwningModel(), filter ) );
-			}
-			return transformer.transform(source);
-			
-		} else {
-			String sourceType = (source == null) ? "UNKNOWN" : source.getClass().getSimpleName();
-			throw new CodeGenerationException(
-					"No object transformer available for model element of type " + sourceType);
-		}
+        throws CodeGenerationException {
+        ObjectTransformer<TLResource,SwaggerDocument,CodeGenerationTransformerContext> transformer =
+            getTransformerFactory( context ).getTransformer( source, SwaggerDocument.class );
+
+        if (transformer != null) {
+            if (isSingleFileEnabled( context )) {
+                // If single-file swagger generation is enabled, we need to create a JSON Type
+                // Name Builder and add it to the transform context
+                CodeGenerationFilter filter = transformerFactory.getContext().getCodeGenerator().getFilter();
+
+                transformerFactory.getContext().setContextCacheEntry( JsonTypeNameBuilder.class.getSimpleName(),
+                    new JsonTypeNameBuilder( source.getOwningModel(), filter ) );
+            }
+            return transformer.transform( source );
+
+        } else {
+            String sourceType = (source == null) ? "UNKNOWN" : source.getClass().getSimpleName();
+            throw new CodeGenerationException(
+                "No object transformer available for model element of type " + sourceType );
+        }
     }
-    
+
     /**
-     * Adds all of the built-in type definitions to the given Swagger.  This should only be done
-     * when single-file Swagger generation is enabled.
+     * Adds all of the built-in type definitions to the given Swagger. This should only be done when single-file Swagger
+     * generation is enabled.
      * 
-     * @param swaggerJson  the JSON content of the Swagger document
-     * @throws CodeGenerationException  thrown if an error occurs while processing the built-in types
+     * @param swaggerJson the JSON content of the Swagger document
+     * @throws CodeGenerationException thrown if an error occurs while processing the built-in types
      */
     private void addBuiltInDefinitions(JsonObject swaggerJson) throws CodeGenerationException {
-		try (Reader reader = new InputStreamReader(
-				SchemaDeclarations.OTM_COMMON_SCHEMA.getContent(
-						CodeGeneratorFactory.JSON_SCHEMA_TARGET_FORMAT ) )) {
-			JsonObject swaggerDefs;
-			
-			if (swaggerJson.has( DEFINITIONS )) {
-				swaggerDefs = swaggerJson.get( DEFINITIONS ).getAsJsonObject();
-				
-			} else {
-				swaggerDefs = new JsonObject();
-				swaggerJson.add( DEFINITIONS, swaggerDefs );
-			}
-    		JsonObject builtInSchema = new JsonParser().parse( reader ).getAsJsonObject();
-			JsonObject builtInDefs = builtInSchema.get( DEFINITIONS ).getAsJsonObject();
-    		
-			for (Entry<String,JsonElement> builtInDef : builtInDefs.entrySet()) {
-				swaggerDefs.add( builtInDef.getKey(), builtInDef.getValue() );
-			}
-			
-		} catch (IOException e) {
-			throw new CodeGenerationException("Error loading JSON built-in definitons.", e);
-		}
+        try (Reader reader = new InputStreamReader(
+            SchemaDeclarations.OTM_COMMON_SCHEMA.getContent( CodeGeneratorFactory.JSON_SCHEMA_TARGET_FORMAT ) )) {
+            JsonObject swaggerDefs;
+
+            if (swaggerJson.has( DEFINITIONS )) {
+                swaggerDefs = swaggerJson.get( DEFINITIONS ).getAsJsonObject();
+
+            } else {
+                swaggerDefs = new JsonObject();
+                swaggerJson.add( DEFINITIONS, swaggerDefs );
+            }
+            JsonObject builtInSchema = new JsonParser().parse( reader ).getAsJsonObject();
+            JsonObject builtInDefs = builtInSchema.get( DEFINITIONS ).getAsJsonObject();
+
+            for (Entry<String,JsonElement> builtInDef : builtInDefs.entrySet()) {
+                swaggerDefs.add( builtInDef.getKey(), builtInDef.getValue() );
+            }
+
+        } catch (IOException e) {
+            throw new CodeGenerationException( "Error loading JSON built-in definitons.", e );
+        }
     }
-    
+
     /**
-     * Returns the <code>TransformerFactory</code> to be used for JAXB translations by the code
-     * generator.
+     * Returns the <code>TransformerFactory</code> to be used for JAXB translations by the code generator.
      * 
-     * @param codegenContext  the current context for the code generator
-     * @return TransformerFactory<CodeGenerationTransformerContext>
+     * @param codegenContext the current context for the code generator
+     * @return TransformerFactory&lt;CodeGenerationTransformerContext&gt;
      */
     protected TransformerFactory<CodeGenerationTransformerContext> getTransformerFactory(
-            CodeGenerationContext codegenContext) {
-        transformerFactory.getContext().setCodegenContext(codegenContext);
+        CodeGenerationContext codegenContext) {
+        transformerFactory.getContext().setCodegenContext( codegenContext );
         return transformerFactory;
     }
-    
-	/**
-	 * @see org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator#canGenerateOutput(org.opentravel.schemacompiler.model.ModelElement, org.opentravel.schemacompiler.codegen.CodeGenerationContext)
-	 */
-	@Override
-	protected boolean canGenerateOutput(TLResource source, CodeGenerationContext context) {
-		return !source.isAbstract() && !ResourceCodegenUtils.getQualifiedActions( source ).isEmpty();
-	}
-	
-	/**
-	 * @see org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator#getOutputFile(org.opentravel.schemacompiler.model.ModelElement, org.opentravel.schemacompiler.codegen.CodeGenerationContext)
-	 */
-	@Override
-	protected File getOutputFile(TLResource source, CodeGenerationContext context) {
+
+    /**
+     * @see org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator#canGenerateOutput(org.opentravel.schemacompiler.model.ModelElement,
+     *      org.opentravel.schemacompiler.codegen.CodeGenerationContext)
+     */
+    @Override
+    protected boolean canGenerateOutput(TLResource source, CodeGenerationContext context) {
+        return !source.isAbstract() && !ResourceCodegenUtils.getQualifiedActions( source ).isEmpty();
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator#getOutputFile(org.opentravel.schemacompiler.model.ModelElement,
+     *      org.opentravel.schemacompiler.codegen.CodeGenerationContext)
+     */
+    @Override
+    protected File getOutputFile(TLResource source, CodeGenerationContext context) {
         if (source == null) {
-            throw new NullPointerException("Source model element cannot be null.");
+            throw new NullPointerException( "Source model element cannot be null." );
         }
         AbstractLibrary library = getLibrary( source );
         URL libraryUrl = (library == null) ? null : library.getLibraryUrl();
         File outputFolder = getOutputFolder( context, libraryUrl );
         String filename = getFilenameBuilder().buildFilename( source,
-        		isSingleFileEnabled( context ) ? SWAGGER_DEFS_FILENAME_EXT : SWAGGER_FILENAME_EXT );
+            isSingleFileEnabled( context ) ? SWAGGER_DEFS_FILENAME_EXT : SWAGGER_FILENAME_EXT );
 
         return new File( outputFolder, filename );
-	}
-	
-	/**
-	 * Returns true if single-file Swagger document generation is enabled.
-	 * 
-	 * @param context  the code generation context
-	 * @return boolean
-	 */
-	private boolean isSingleFileEnabled(CodeGenerationContext context) {
+    }
+
+    /**
+     * Returns true if single-file Swagger document generation is enabled.
+     * 
+     * @param context the code generation context
+     * @return boolean
+     */
+    private boolean isSingleFileEnabled(CodeGenerationContext context) {
         return "true".equalsIgnoreCase( context.getValue( CodeGenerationContext.CK_ENABLE_SINGLE_FILE_SWAGGER ) );
-	}
-	
-	/**
-	 * @see org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator#getDefaultFilenameBuilder()
-	 */
-	@Override
-	protected CodeGenerationFilenameBuilder<TLResource> getDefaultFilenameBuilder() {
-		return new ResourceFilenameBuilder();
-	}
-	
-	/**
-	 * @see org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator#getLibrary(org.opentravel.schemacompiler.model.ModelElement)
-	 */
-	@Override
-	protected AbstractLibrary getLibrary(TLResource source) {
-		return source.getOwningLibrary();
-	}
-	
-	/**
-	 * @see org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator#isSupportedSourceObject(org.opentravel.schemacompiler.model.ModelElement)
-	 */
-	@Override
-	protected boolean isSupportedSourceObject(TLResource source) {
-		return true;
-	}
-	
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator#getDefaultFilenameBuilder()
+     */
+    @Override
+    protected CodeGenerationFilenameBuilder<TLResource> getDefaultFilenameBuilder() {
+        return new ResourceFilenameBuilder();
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator#getLibrary(org.opentravel.schemacompiler.model.ModelElement)
+     */
+    @Override
+    protected AbstractLibrary getLibrary(TLResource source) {
+        return source.getOwningLibrary();
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator#isSupportedSourceObject(org.opentravel.schemacompiler.model.ModelElement)
+     */
+    @Override
+    protected boolean isSupportedSourceObject(TLResource source) {
+        return true;
+    }
+
 }

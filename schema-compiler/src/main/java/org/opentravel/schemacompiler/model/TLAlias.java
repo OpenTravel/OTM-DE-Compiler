@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.model;
 
 import org.opentravel.schemacompiler.event.ModelEvent;
@@ -28,7 +29,7 @@ public class TLAlias extends TLModelElement implements TLPropertyType {
 
     private TLAliasOwner owningEntity;
     private String name;
-    
+
     /**
      * @see org.opentravel.schemacompiler.validate.Validatable#getValidationIdentity()
      */
@@ -37,12 +38,12 @@ public class TLAlias extends TLModelElement implements TLPropertyType {
         StringBuilder identity = new StringBuilder();
 
         if (owningEntity != null) {
-            identity.append(owningEntity.getValidationIdentity()).append(" : ");
+            identity.append( owningEntity.getValidationIdentity() ).append( " : " );
         }
         if (getName() == null) {
-            identity.append("[Unnamed Alias]");
+            identity.append( "[Unnamed Alias]" );
         } else {
-            identity.append(getName());
+            identity.append( getName() );
         }
         return identity.toString();
     }
@@ -92,31 +93,29 @@ public class TLAlias extends TLModelElement implements TLPropertyType {
     /**
      * Assigns the value of the 'owningEntity' field.
      * 
-     * @param owningEntity
-     *            the field value to assign
+     * @param owningEntity the field value to assign
      */
-    public void setOwningEntity(TLAliasOwner aliasedEntity) {
-        this.owningEntity = aliasedEntity;
+    public void setOwningEntity(TLAliasOwner owningEntity) {
+        this.owningEntity = owningEntity;
     }
 
     /**
-     * Moves this alias up by one position in the list of aliases maintained by its owner. If the
-     * owner is null, or this aliases is already at the front of the list, this method has no
-     * effect.
+     * Moves this alias up by one position in the list of aliases maintained by its owner. If the owner is null, or this
+     * aliases is already at the front of the list, this method has no effect.
      */
     public void moveUp() {
         if (owningEntity != null) {
-            owningEntity.moveUp(this);
+            owningEntity.moveUp( this );
         }
     }
 
     /**
-     * Moves this alias down by one position in the list of aliases maintained by its owner. If the
-     * owner is null, or this aliases is already at the end of the list, this method has no effect.
+     * Moves this alias down by one position in the list of aliases maintained by its owner. If the owner is null, or
+     * this aliases is already at the end of the list, this method has no effect.
      */
     public void moveDown() {
         if (owningEntity != null) {
-            owningEntity.moveDown(this);
+            owningEntity.moveDown( this );
         }
     }
 
@@ -132,33 +131,36 @@ public class TLAlias extends TLModelElement implements TLPropertyType {
     /**
      * Assigns the value of the 'name' field.
      * 
-     * @param name
-     *            the field value to assign
+     * @param name the field value to assign
      */
     public void setName(String name) {
-    	String oldName = this.name;
-        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.NAME_MODIFIED, this)
-                .setOldValue(oldName).setNewValue(name).buildEvent();
+        String oldName = this.name;
+        ModelEvent<?> event = new ModelEventBuilder( ModelEventType.NAME_MODIFIED, this ).setOldValue( oldName )
+            .setNewValue( name ).buildEvent();
         ChildEntityListManager<TLAlias,?> listManager =
-        		(owningEntity == null) ? null : owningEntity.getAliasListManager();
-        
+            (owningEntity == null) ? null : owningEntity.getAliasListManager();
+
         this.name = name;
-        
+
         if (listManager != null) {
-            // Disable events while we update the derived alias names.  All references
-        	// will be refreshed when the real event is broadcast at the end.
-        	TLModel model = getOwningModel();
-        	boolean eventsEnabled = (model != null) && model.isListenersEnabled();
-        	
-        	try {
-            	if (model != null) model.setListenersEnabled(false);
-            	listManager.notifyChildRenamed(this, oldName);
-            	
-        	} finally {
-            	if (model != null) model.setListenersEnabled(eventsEnabled);
-        	}
+            // Disable events while we update the derived alias names. All references
+            // will be refreshed when the real event is broadcast at the end.
+            TLModel model = getOwningModel();
+            boolean eventsEnabled = (model != null) && model.isListenersEnabled();
+
+            try {
+                if (model != null) {
+                    model.setListenersEnabled( false );
+                }
+                listManager.notifyChildRenamed( this, oldName );
+
+            } finally {
+                if (model != null) {
+                    model.setListenersEnabled( eventsEnabled );
+                }
+            }
         }
-        publishEvent(event);
+        publishEvent( event );
     }
 
     /**
@@ -171,8 +173,7 @@ public class TLAlias extends TLModelElement implements TLPropertyType {
         if (obj instanceof TLAlias) {
             TLAlias otherAlias = (TLAlias) obj;
             result = (this.owningEntity == otherAlias.owningEntity)
-                    && ((otherAlias.name == null) ? (this.name == null) : otherAlias.name
-                            .equals(this.name));
+                && ((otherAlias.name == null) ? (this.name == null) : otherAlias.name.equals( this.name ));
         }
         return result;
     }
@@ -190,16 +191,15 @@ public class TLAlias extends TLModelElement implements TLPropertyType {
      * 
      * @author S. Livezey
      */
-    protected static class AliasListManager extends ChildEntityListManager<TLAlias, TLAliasOwner> {
+    protected static class AliasListManager extends ChildEntityListManager<TLAlias,TLAliasOwner> {
 
         /**
          * Constructor that specifies the owner of the unerlying list.
          * 
-         * @param owner
-         *            the owner of the underlying list of children
+         * @param owner the owner of the underlying list of children
          */
         public AliasListManager(TLAliasOwner owner) {
-            super(owner, ModelEventType.ALIAS_ADDED, ModelEventType.ALIAS_REMOVED);
+            super( owner, ModelEventType.ALIAS_ADDED, ModelEventType.ALIAS_REMOVED );
         }
 
         /**
@@ -216,7 +216,7 @@ public class TLAlias extends TLModelElement implements TLPropertyType {
          */
         @Override
         protected void assignOwner(TLAlias child, TLAliasOwner owner) {
-            child.setOwningEntity(owner);
+            child.setOwningEntity( owner );
         }
 
         /**
@@ -228,7 +228,7 @@ public class TLAlias extends TLModelElement implements TLPropertyType {
             TLModel owningModel = owner.getOwningModel();
 
             if (owningModel != null) {
-                owningModel.publishEvent(event);
+                owningModel.publishEvent( event );
             }
         }
 

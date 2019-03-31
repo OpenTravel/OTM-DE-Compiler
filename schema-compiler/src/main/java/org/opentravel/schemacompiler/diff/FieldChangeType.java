@@ -17,24 +17,23 @@
 package org.opentravel.schemacompiler.diff;
 
 /**
- * Enumeration of the possible types of changes that can be discovered when comparing
- * two OTM fields.
+ * Enumeration of the possible types of changes that can be discovered when comparing two OTM fields.
  */
 public enum FieldChangeType {
-	
-	MEMBER_TYPE_CHANGED,
-	OWNING_FACET_CHANGED,
-	TYPE_CHANGED,
-	TYPE_VERSION_CHANGED,
-	CARDINALITY_CHANGE,
-	CHANGED_TO_MANDATORY,
-	CHANGED_TO_OPTIONAL,
-	CHANGED_TO_REFERENCE,
-	CHANGED_TO_NON_REFERENCE,
-	DOCUMENTATION_CHANGED,
-	EQUIVALENT_ADDED,
-	EQUIVALENT_DELETED,
-	EXAMPLE_ADDED,
-	EXAMPLE_DELETED,
-	
+
+    MEMBER_TYPE_CHANGED,
+    OWNING_FACET_CHANGED,
+    TYPE_CHANGED,
+    TYPE_VERSION_CHANGED,
+    CARDINALITY_CHANGE,
+    CHANGED_TO_MANDATORY,
+    CHANGED_TO_OPTIONAL,
+    CHANGED_TO_REFERENCE,
+    CHANGED_TO_NON_REFERENCE,
+    DOCUMENTATION_CHANGED,
+    EQUIVALENT_ADDED,
+    EQUIVALENT_DELETED,
+    EXAMPLE_ADDED,
+    EXAMPLE_DELETED,
+
 }

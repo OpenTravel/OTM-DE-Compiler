@@ -13,16 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.repository.impl;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthState;
@@ -40,17 +32,26 @@ import org.opentravel.schemacompiler.repository.RepositoryFileManager;
 import org.opentravel.schemacompiler.repository.RepositorySecurityException;
 import org.opentravel.schemacompiler.security.PasswordHelper;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+
 /**
  * Utility methods used for accessing remote repositories via HTTP requests.
  */
 public class RemoteRepositoryUtils {
-    
+
     public static final String SERVICE_CONTEXT = "/service";
     private static final String REPOSITORY_METADATA_ENDPOINT = SERVICE_CONTEXT + "/repository-metadata";
-    
+
     private String userId;
     private String encryptedPassword;
-    
+
     /**
      * Returns the user ID credential for the remote repository's web service.
      * 
@@ -59,7 +60,7 @@ public class RemoteRepositoryUtils {
     public String getUserId() {
         return userId;
     }
-    
+
     /**
      * Assigns the user ID credential for the remote repository's web service.
      * 
@@ -68,7 +69,7 @@ public class RemoteRepositoryUtils {
     public void setUserId(String userId) {
         this.userId = userId;
     }
-    
+
     /**
      * Returns the encryptedPassword credential for the remote repository's web service.
      * 
@@ -77,16 +78,16 @@ public class RemoteRepositoryUtils {
     public String getEncryptedPassword() {
         return encryptedPassword;
     }
-    
+
     /**
-     * Assigns the encryptedPassword credential for the remote repository's web service.
+     * Assigns the encrypted password credential for the remote repository's web service.
      * 
-     * @param encryptedPassword the encryptedPassword value to assign
+     * @param password the encrypted password value to assign
      */
     public void setEncryptedPassword(String password) {
         this.encryptedPassword = password;
     }
-    
+
     /**
      * Contacts the repository web service at the specified endpoint URL, and returns the repository meta-data
      * information.
@@ -101,19 +102,19 @@ public class RemoteRepositoryUtils {
             HttpGet getRequest = new HttpGet( endpointUrl + REPOSITORY_METADATA_ENDPOINT );
             HttpResponse response = execute( getRequest );
             Unmarshaller unmarshaller = RepositoryFileManager.getSharedJaxbContext().createUnmarshaller();
-            JAXBElement<RepositoryInfoType> jaxbElement = (JAXBElement<RepositoryInfoType>) unmarshaller
-                .unmarshal( response.getEntity().getContent() );
-            
+            JAXBElement<RepositoryInfoType> jaxbElement =
+                (JAXBElement<RepositoryInfoType>) unmarshaller.unmarshal( response.getEntity().getContent() );
+
             return jaxbElement.getValue();
-            
+
         } catch (JAXBException e) {
             throw new RepositoryException( "The format of the repository meta-data is unreadable.", e );
-            
+
         } catch (IOException e) {
             throw new RepositoryException( "The remote repository is unavailable.", e );
         }
     }
-    
+
     /**
      * Returns an HTTP client to use when accessing the remote repository.
      * 
@@ -123,14 +124,14 @@ public class RemoteRepositoryUtils {
         return HttpClientBuilder.create().useSystemProperties()
             .setDefaultCredentialsProvider( new NTLMSystemCredentialsProvider() ).build();
     }
-    
+
     /**
      * Configures the 'Authorization' header on the given HTTP request using the current user ID and encrypted password
      * that is configured for this repository.
      */
     private HttpClientContext createHttpContext() {
         HttpClientContext context = HttpClientContext.create();
-        
+
         if ((userId != null) && (encryptedPassword != null)) {
             AuthState target = new AuthState();
             target.update( new BasicScheme(), buildAuthorizationCredentials() );
@@ -138,7 +139,7 @@ public class RemoteRepositoryUtils {
         }
         return context;
     }
-    
+
     /**
      * Applies the user's credentials to the given request and sends the request to the remote repository. If the
      * response is returned from this method, the caller can assume that the remote operation did not result in an
@@ -152,18 +153,18 @@ public class RemoteRepositoryUtils {
     public HttpResponse executeWithAuthentication(HttpUriRequest request) throws RepositoryException, IOException {
         HttpResponse response = createHttpClient().execute( request, createHttpContext() );
         int statusCode = response.getStatusLine().getStatusCode();
-        
+
         if ((statusCode < 200) || (statusCode > 299)) {
             if (statusCode == 401) {
                 throw new RepositorySecurityException(
-                        "User is not authorized to perform the requested action (check for out of date credentials)." );
+                    "User is not authorized to perform the requested action (check for out of date credentials)." );
             } else {
                 throw new RepositoryException( getResponseErrorMessage( response ) );
             }
         }
         return response;
     }
-    
+
     /**
      * Sends the given request to the remote repository.
      * 
@@ -175,7 +176,7 @@ public class RemoteRepositoryUtils {
     public HttpResponse execute(HttpUriRequest request) throws RepositoryException, IOException {
         HttpResponse response = createHttpClient().execute( request );
         int statusCode = response.getStatusLine().getStatusCode();
-        
+
         if ((statusCode < 200) || (statusCode > 299)) {
             if (statusCode == 401) {
                 throw new RepositorySecurityException( "User is not authorized to perform the requested action." );
@@ -185,7 +186,7 @@ public class RemoteRepositoryUtils {
         }
         return response;
     }
-    
+
     /**
      * Returns the HTTP authorization credentials for an HTTP request.
      * 
@@ -193,13 +194,13 @@ public class RemoteRepositoryUtils {
      */
     public Credentials buildAuthorizationCredentials() {
         Credentials credentials = null;
-        
+
         if ((userId != null) && (encryptedPassword != null)) {
             credentials = new UsernamePasswordCredentials( userId, PasswordHelper.decrypt( encryptedPassword ) );
         }
         return credentials;
     }
-    
+
     /**
      * If the response status indicates an error condition and a message is provided, the text of that message is
      * returned.
@@ -210,25 +211,25 @@ public class RemoteRepositoryUtils {
     private static String getResponseErrorMessage(HttpResponse response) {
         int statusCode = response.getStatusLine().getStatusCode();
         String errorMessage = null;
-        
+
         if ((statusCode < 200) || (statusCode > 299)) {
             try {
                 InputStream responseStream = response.getEntity().getContent();
                 ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
                 byte[] buffer = new byte[256];
                 int bytesRead;
-                
+
                 while ((bytesRead = responseStream.read( buffer )) >= 0) {
                     byteStream.write( buffer, 0, bytesRead );
                 }
                 responseStream.close();
                 errorMessage = new String( byteStream.toByteArray(), StandardCharsets.UTF_8 );
-                
+
             } catch (IOException e) {
                 errorMessage = "Unknown repository error on the remote host.";
             }
         }
         return errorMessage;
     }
-    
+
 }

@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.validate;
 
 /**
- * Base interface for context that provide relevant information or resources to
- * <code>Validators</code> that extend beyond the object being validated.
+ * Base interface for context that provide relevant information or resources to <code>Validators</code> that extend
+ * beyond the object being validated.
  * 
  * @author S. Livezey
  */

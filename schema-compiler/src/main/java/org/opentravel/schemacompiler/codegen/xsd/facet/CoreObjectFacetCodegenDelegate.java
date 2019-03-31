@@ -13,11 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.codegen.xsd.facet;
-
-import java.util.List;
-
-import javax.xml.namespace.QName;
 
 import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
@@ -28,9 +25,13 @@ import org.opentravel.schemacompiler.model.TLIndicator;
 import org.w3._2001.xmlschema.Annotated;
 import org.w3._2001.xmlschema.Attribute;
 
+import java.util.List;
+
+import javax.xml.namespace.QName;
+
 /**
- * Base class for facet code generation delegates used to generate code artifacts for
- * <code>TLFacet</code model elements that are owned by <code>TLCoreObject</code> instances.
+ * Base class for facet code generation delegates used to generate code artifacts for <code>TLFacet</code> model
+ * elements that are owned by <code>TLCoreObject</code> instances.
  * 
  * @author S. Livezey
  */
@@ -39,11 +40,10 @@ public abstract class CoreObjectFacetCodegenDelegate extends TLFacetCodegenDeleg
     /**
      * Constructor that specifies the source facet for which code artifacts are being generated.
      * 
-     * @param sourceFacet
-     *            the source facet
+     * @param sourceFacet the source facet
      */
     public CoreObjectFacetCodegenDelegate(TLFacet sourceFacet) {
-        super(sourceFacet);
+        super( sourceFacet );
     }
 
     /**
@@ -61,50 +61,48 @@ public abstract class CoreObjectFacetCodegenDelegate extends TLFacetCodegenDeleg
     public QName getExtensionPointElement() {
         return null;
     }
-    
+
     /**
-     * Returns true if role attributes should be created for this facet.  Default
-     * value is true; sub-classes may override to supress the creation of role
-     * attributes.
+     * Returns true if role attributes should be created for this facet. Default value is true; sub-classes may override
+     * to supress the creation of role attributes.
      * 
      * @return boolean
      */
     protected boolean createRoleAttributes() {
-    	return true;
+        return true;
     }
 
     /**
-	 * @see org.opentravel.schemacompiler.codegen.xsd.facet.TLFacetCodegenDelegate#createJaxbAttributes(java.util.List, java.util.List)
-	 */
-	@Override
-	protected List<Annotated> createJaxbAttributes(List<TLAttribute> attributeList, List<TLIndicator> indicatorList) {
-        List<Annotated> jaxbAttributes = super.createJaxbAttributes(attributeList, indicatorList);
+     * @see org.opentravel.schemacompiler.codegen.xsd.facet.TLFacetCodegenDelegate#createJaxbAttributes(java.util.List,
+     *      java.util.List)
+     */
+    @Override
+    protected List<Annotated> createJaxbAttributes(List<TLAttribute> attributeList, List<TLIndicator> indicatorList) {
+        List<Annotated> jaxbAttributes = super.createJaxbAttributes( attributeList, indicatorList );
 
         if (createRoleAttributes() && (getLocalBaseFacet() == null)) {
             TLCoreObject owner = (TLCoreObject) getSourceFacet().getOwningEntity();
 
             while (owner != null) {
-                TLCoreObject ownerExtension = (TLCoreObject) FacetCodegenUtils
-                        .getFacetOwnerExtension(owner);
+                TLCoreObject ownerExtension = (TLCoreObject) FacetCodegenUtils.getFacetOwnerExtension( owner );
 
                 if (!owner.getRoleEnumeration().getRoles().isEmpty()) {
                     Attribute roleAttr = new Attribute();
 
                     if (ownerExtension != null) {
-                        roleAttr.setName(
-                        		XsdCodegenUtils.getRoleAttributeName( owner.getLocalName() ) );
-                        
+                        roleAttr.setName( XsdCodegenUtils.getRoleAttributeName( owner.getLocalName() ) );
+
                     } else {
-                        roleAttr.setName("role");
+                        roleAttr.setName( "role" );
                     }
-                    roleAttr.setType(new QName(owner.getNamespace(), owner.getRoleEnumeration()
-                            .getLocalName() + "_Base"));
-                    jaxbAttributes.add(roleAttr);
+                    roleAttr.setType(
+                        new QName( owner.getNamespace(), owner.getRoleEnumeration().getLocalName() + "_Base" ) );
+                    jaxbAttributes.add( roleAttr );
                 }
                 owner = ownerExtension;
             }
         }
         return jaxbAttributes;
     }
-    
+
 }

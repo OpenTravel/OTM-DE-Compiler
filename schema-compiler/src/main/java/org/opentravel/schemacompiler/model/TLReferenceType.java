@@ -13,18 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.model;
 
 /**
- * Enumeration that specifies the types of possible generic references to
- * another OTM object.
+ * Enumeration that specifies the types of possible generic references to another OTM object.
  * 
  * @author S. Livezey
  */
 public enum TLReferenceType {
-	
-	NONE,
-	OPTIONAL,
-	REQUIRED;
-	
+
+    NONE, OPTIONAL, REQUIRED;
+
 }

@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.validate;
 
 /**
- * Configuration element used to associate a target <code>Validatable</code> class with a
- * <code>Validator</code> implementation class.
+ * Configuration element used to associate a target <code>Validatable</code> class with a <code>Validator</code>
+ * implementation class.
  * 
- * @param <T>
- *            the validatable type to which this mapping applies
+ * @param <T> the validatable type to which this mapping applies
  * @author S. Livezey
  */
 public class ValidatorMapping<T extends Validatable> {
@@ -31,7 +31,7 @@ public class ValidatorMapping<T extends Validatable> {
     /**
      * Returns the target class for the validation mapping.
      * 
-     * @return Class<T>
+     * @return Class&lt;T&gt;
      */
     public Class<T> getTargetClass() {
         return targetClass;
@@ -40,8 +40,7 @@ public class ValidatorMapping<T extends Validatable> {
     /**
      * Assigns the target class for the validation mapping.
      * 
-     * @param targetClass
-     *            the target class to assign
+     * @param targetClass the target class to assign
      */
     public void setTargetClass(Class<T> targetClass) {
         this.targetClass = targetClass;
@@ -50,7 +49,7 @@ public class ValidatorMapping<T extends Validatable> {
     /**
      * Returns the validator class for the validation mapping.
      * 
-     * @return Class<Validator<T>>
+     * @return Class&lt;Validator&lt;T&gt;&gt;
      */
     public Class<Validator<T>> getValidatorClass() {
         return validatorClass;
@@ -59,8 +58,7 @@ public class ValidatorMapping<T extends Validatable> {
     /**
      * Assigns the validator class for the validation mapping.
      * 
-     * @param validatorClass
-     *            the validator class to assign
+     * @param validatorClass the validator class to assign
      */
     public void setValidatorClass(Class<Validator<T>> validatorClass) {
         this.validatorClass = validatorClass;

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.codegen.html.builders;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerationException;
@@ -27,39 +28,38 @@ import org.opentravel.schemacompiler.model.TLSimple;
  * @author Eric.Bronson
  *
  */
-public class AttributeDocumentationBuilder extends
-		FieldDocumentationBuilder<TLAttribute> {
+public class AttributeDocumentationBuilder extends FieldDocumentationBuilder<TLAttribute> {
 
-	/**
-	 * @param manager
-	 */
-	public AttributeDocumentationBuilder(TLAttribute t) {
-		super(t);
-		name = t.getName();		
-		isRequired = t.isMandatory();
-		
-		TLPropertyType  propertyType = t.getType();	
-		type = DocumentationBuilderFactory.getInstance().getDocumentationBuilder(propertyType);
-		typeName = propertyType.getNamespace() +":" + propertyType.getLocalName();
-		TLAttributeOwner attributeOwner = t.getOwner();
-				
-		exampleValue = ExampleValueGenerator.getInstance(null).getExampleValue(t, attributeOwner);
-				
-		if(propertyType instanceof TLSimple){
-			pattern = ((TLSimple) propertyType).getPattern();
-		}
-		maxOcurrences = 1;
-	}
-	
-	@Override
-	public DocumentationBuilderType getDocType() {
-		return DocumentationBuilderType.ATTRIBUTE;
-	}
+    /**
+     * @param t the attribute for which to construct a builder
+     */
+    public AttributeDocumentationBuilder(TLAttribute t) {
+        super( t );
+        name = t.getName();
+        isRequired = t.isMandatory();
 
-	@Override
-	public void build() throws CodeGenerationException {
-		// No action required
-	}
+        TLPropertyType propertyType = t.getType();
+        type = DocumentationBuilderFactory.getInstance().getDocumentationBuilder( propertyType );
+        typeName = propertyType.getNamespace() + ":" + propertyType.getLocalName();
+        TLAttributeOwner attributeOwner = t.getOwner();
+
+        exampleValue = ExampleValueGenerator.getInstance( null ).getExampleValue( t, attributeOwner );
+
+        if (propertyType instanceof TLSimple) {
+            pattern = ((TLSimple) propertyType).getPattern();
+        }
+        maxOcurrences = 1;
+    }
+
+    @Override
+    public DocumentationBuilderType getDocType() {
+        return DocumentationBuilderType.ATTRIBUTE;
+    }
+
+    @Override
+    public void build() throws CodeGenerationException {
+        // No action required
+    }
 
 
 }

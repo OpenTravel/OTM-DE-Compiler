@@ -13,15 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.validate.impl;
-
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
-import javax.xml.namespace.QName;
 
 import org.opentravel.schemacompiler.codegen.util.AliasCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
@@ -53,9 +46,17 @@ import org.opentravel.schemacompiler.model.XSDSimpleType;
 import org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter;
 import org.opentravel.schemacompiler.visitor.ModelNavigator;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import javax.xml.namespace.QName;
+
 /**
- * Registry that includes values for the global type and element names of all <code>TLModel</code>
- * elements as they will be generated in the compiler's generated XSD output.
+ * Registry that includes values for the global type and element names of all <code>TLModel</code> elements as they will
+ * be generated in the compiler's generated XSD output.
  * 
  * @author S. Livezey
  */
@@ -67,113 +68,100 @@ public class SchemaNameValidationRegistry {
     private Map<QName,Set<NamedEntity>> elementNameEntities = new HashMap<>();
 
     /**
-     * Constructor that initializes the registry using all <code>NamedEntity</code> symbols from the
-     * given model.
+     * Constructor that initializes the registry using all <code>NamedEntity</code> symbols from the given model.
      * 
-     * @param model
-     *            the model from which to initialize the registry
+     * @param model the model from which to initialize the registry
      */
     public SchemaNameValidationRegistry(TLModel model) {
-        ModelNavigator.navigate(model, new SchemaNameVisitor());
+        ModelNavigator.navigate( model, new SchemaNameVisitor() );
     }
 
     /**
-     * Returns the name of the type that will be generated in the XML schema for the given entity.
-     * If the entity does not have a corresponding type name, this method will return null.
+     * Returns the name of the type that will be generated in the XML schema for the given entity. If the entity does
+     * not have a corresponding type name, this method will return null.
      * 
-     * @param entity
-     *            the entity for which to return the schema type name
+     * @param entity the entity for which to return the schema type name
      * @return QName
      */
     public QName getSchemaTypeName(NamedEntity entity) {
-        return entityTypeNames.get(entity);
+        return entityTypeNames.get( entity );
     }
 
     /**
-     * Returns the collection of global element names that will be generated in the XML schema for
-     * the given entity. If the entity does not have a corresponding element name, this method will
-     * return an empty collection.
+     * Returns the collection of global element names that will be generated in the XML schema for the given entity. If
+     * the entity does not have a corresponding element name, this method will return an empty collection.
      * 
-     * @param entity
-     *            the entity for which to return the schema element name
-     * @return Collection<QName>
+     * @param entity the entity for which to return the schema element name
+     * @return Collection&lt;QName&gt;
      */
     public Collection<QName> getSchemaElementNames(NamedEntity entity) {
         Collection<QName> elementNames = new HashSet<>();
 
-        if (entityElementNames.containsKey(entity)) {
-            elementNames.addAll(entityElementNames.get(entity));
+        if (entityElementNames.containsKey( entity )) {
+            elementNames.addAll( entityElementNames.get( entity ) );
         }
         return elementNames;
     }
 
     /**
-     * Returns one or more entities whose type name will match the one provided in the generated
-     * schema. If no such entity matches the name provided, this method will return an empty
-     * collection.
+     * Returns one or more entities whose type name will match the one provided in the generated schema. If no such
+     * entity matches the name provided, this method will return an empty collection.
      * 
-     * @param schemaTypeName
-     *            the type name for which to return the matching entities
-     * @return Collection<NamedEntity>
+     * @param schemaTypeName the type name for which to return the matching entities
+     * @return Collection&lt;NamedEntity&gt;
      */
     public Collection<NamedEntity> findEntitiesBySchemaTypeName(QName schemaTypeName) {
         Collection<NamedEntity> entities = new HashSet<>();
 
-        if (typeNameEntities.containsKey(schemaTypeName)) {
-            entities.addAll(typeNameEntities.get(schemaTypeName));
+        if (typeNameEntities.containsKey( schemaTypeName )) {
+            entities.addAll( typeNameEntities.get( schemaTypeName ) );
         }
         return entities;
     }
 
     /**
-     * Returns one or more entities whose global element name will match the one provided in the
-     * generated schema. If no such entity matches the name provided, this method will return an
-     * empty collection.
+     * Returns one or more entities whose global element name will match the one provided in the generated schema. If no
+     * such entity matches the name provided, this method will return an empty collection.
      * 
-     * @param schemaElementName
-     *            the global element name for which to return the matching entities
-     * @return Collection<NamedEntity>
+     * @param schemaElementName the global element name for which to return the matching entities
+     * @return Collection&lt;NamedEntity&gt;
      */
     public Collection<NamedEntity> findEntitiesBySchemaElementName(QName schemaElementName) {
         Collection<NamedEntity> entities = new HashSet<>();
 
-        if (elementNameEntities.containsKey(schemaElementName)) {
-            entities.addAll(elementNameEntities.get(schemaElementName));
+        if (elementNameEntities.containsKey( schemaElementName )) {
+            entities.addAll( elementNameEntities.get( schemaElementName ) );
         }
         return entities;
     }
 
     /**
-     * Returns true if more than one entity in this registry is assigned the same type name as the
-     * entity provided.
+     * Returns true if more than one entity in this registry is assigned the same type name as the entity provided.
      * 
-     * @param entity
-     *            the entity to check for duplicate schema names
+     * @param entity the entity to check for duplicate schema names
      * @return boolean
      */
     public boolean hasTypeNameConflicts(NamedEntity entity) {
-        Collection<NamedEntity> entityTypeMatches = typeNameEntities.get(entityTypeNames.get(entity));
-        return ((entityTypeMatches != null) && (entityTypeMatches.size() > 1) && entityTypeMatches.contains(entity));
+        Collection<NamedEntity> entityTypeMatches = typeNameEntities.get( entityTypeNames.get( entity ) );
+        return ((entityTypeMatches != null) && (entityTypeMatches.size() > 1) && entityTypeMatches.contains( entity ));
     }
 
     /**
-     * If the given entity has an element name that conflicts with the name of another entity, this
-     * method will return the conflicting name. If no conflicts exist, this method will return null.
+     * If the given entity has an element name that conflicts with the name of another entity, this method will return
+     * the conflicting name. If no conflicts exist, this method will return null.
      * 
-     * @param entity
-     *            the entity to check for duplicate schema names
+     * @param entity the entity to check for duplicate schema names
      * @return boolean
      */
     public QName getElementNameConflicts(NamedEntity entity) {
-        Set<QName> elementNames = entityElementNames.get(entity);
+        Set<QName> elementNames = entityElementNames.get( entity );
         QName conflictingElement = null;
 
         if (elementNames != null) {
             for (QName elementName : elementNames) {
-                Collection<NamedEntity> entityElementMatches = elementNameEntities.get(elementName);
-                boolean hasConflict = ((entityElementMatches != null)
-                        && (entityElementMatches.size() > 1) && entityElementMatches
-                        .contains(entity));
+                Collection<NamedEntity> entityElementMatches = elementNameEntities.get( elementName );
+                boolean hasConflict = ((entityElementMatches != null) && (entityElementMatches.size() > 1)
+                    && entityElementMatches.contains( entity ));
 
                 if (hasConflict) {
                     conflictingElement = elementName;
@@ -192,169 +180,163 @@ public class SchemaNameValidationRegistry {
         /**
          * Adds a registry entry for the given entity using its schema type name.
          * 
-         * @param entity
-         *            the entity to be added to the registry
+         * @param entity the entity to be added to the registry
          */
         private void addTypeNameToRegistry(NamedEntity entity) {
             QName typeName = null;
-            
+
             if (hasGlobalType( entity )) {
                 if ((entity instanceof XSDComplexType) || (entity instanceof XSDSimpleType)) {
-                    typeName = new QName(entity.getNamespace(), entity.getLocalName());
+                    typeName = new QName( entity.getNamespace(), entity.getLocalName() );
 
                 } else {
-                	String localTypeName = XsdCodegenUtils.getGlobalTypeName(entity);
-                    typeName = (localTypeName == null) ? null : new QName(entity.getNamespace(), localTypeName);
+                    String localTypeName = XsdCodegenUtils.getGlobalTypeName( entity );
+                    typeName = (localTypeName == null) ? null : new QName( entity.getNamespace(), localTypeName );
                 }
             }
-            
+
             if (typeName != null) {
-            		typeNameEntities.computeIfAbsent( typeName, n -> typeNameEntities.put( n, new HashSet<>() ) );
-                typeNameEntities.get(typeName).add( entity );
+                typeNameEntities.computeIfAbsent( typeName, n -> typeNameEntities.put( n, new HashSet<>() ) );
+                typeNameEntities.get( typeName ).add( entity );
                 entityTypeNames.put( entity, typeName );
             }
         }
 
         /**
-         * Adds a registry entry for the given entity using all of the global element names (if any)
-         * that will be assigned during schema generation.
+         * Adds a registry entry for the given entity using all of the global element names (if any) that will be
+         * assigned during schema generation.
          * 
-         * @param entity
-         *            the entity to be added to the registry
+         * @param entity the entity to be added to the registry
          */
         private void addElementNamesToRegistry(NamedEntity entity) {
             if (entity instanceof TLFacet) {
                 TLFacet entityFacet = (TLFacet) entity;
-                boolean hasContent = new FacetCodegenDelegateFactory(null).getDelegate(entityFacet).hasContent();
+                boolean hasContent = new FacetCodegenDelegateFactory( null ).getDelegate( entityFacet ).hasContent();
 
-                if (hasContent && !XsdCodegenUtils.isSimpleCoreObject(entityFacet.getOwningEntity())) {
-                    addElementNameToRegistry(XsdCodegenUtils.getGlobalElementName(entity), entity);
+                if (hasContent && !XsdCodegenUtils.isSimpleCoreObject( entityFacet.getOwningEntity() )) {
+                    addElementNameToRegistry( XsdCodegenUtils.getGlobalElementName( entity ), entity );
                 }
 
             } else if (entity instanceof TLActionFacet) {
-            	// No additional member elements to add
-            	
+                // No additional member elements to add
+
             } else if (entity instanceof TLAlias) {
                 TLAliasOwner aliasOwner = ((TLAlias) entity).getOwningEntity();
 
                 if (aliasOwner instanceof TLFacet) {
                     TLFacet aliasedFacet = (TLFacet) aliasOwner;
-                    boolean hasContent = new FacetCodegenDelegateFactory(null)
-                            .getDelegate(aliasedFacet).hasContent();
+                    boolean hasContent =
+                        new FacetCodegenDelegateFactory( null ).getDelegate( aliasedFacet ).hasContent();
 
-                    if (hasContent
-                            && !XsdCodegenUtils.isSimpleCoreObject(aliasedFacet.getOwningEntity())) {
-                        addElementNameToRegistry(XsdCodegenUtils.getGlobalElementName(entity), entity);
+                    if (hasContent && !XsdCodegenUtils.isSimpleCoreObject( aliasedFacet.getOwningEntity() )) {
+                        addElementNameToRegistry( XsdCodegenUtils.getGlobalElementName( entity ), entity );
                     }
 
                 } else { // Must be an alias of a business object or core that has a substitution group
-                    addSubstitutableFacet(entity, aliasOwner);
+                    addSubstitutableFacet( entity, aliasOwner );
                 }
 
-            } else if (XsdCodegenUtils.isSimpleCoreObject(entity)) {
-                addElementNameToRegistry(XsdCodegenUtils.getGlobalElementName(entity), entity);
+            } else if (XsdCodegenUtils.isSimpleCoreObject( entity )) {
+                addElementNameToRegistry( XsdCodegenUtils.getGlobalElementName( entity ), entity );
 
             } else { // Must be a business, core, or choice object that has a substitution group
-                addSubstitutableFacet(entity);
+                addSubstitutableFacet( entity );
             }
         }
 
-		/**
-		 * For aliased entities that define a substitution group, this method adds the top-level
-		 * substitutable facet to the registry.
-		 * 
-		 * @param entity  the entity to be added
-		 */
-		private void addSubstitutableFacet(NamedEntity entity) {
-			TLFacet substitutableFacet = null;
+        /**
+         * For aliased entities that define a substitution group, this method adds the top-level substitutable facet to
+         * the registry.
+         * 
+         * @param entity the entity to be added
+         */
+        private void addSubstitutableFacet(NamedEntity entity) {
+            TLFacet substitutableFacet = null;
 
-			if (entity instanceof TLCoreObject) {
-			    substitutableFacet = ((TLCoreObject) entity).getSummaryFacet();
+            if (entity instanceof TLCoreObject) {
+                substitutableFacet = ((TLCoreObject) entity).getSummaryFacet();
 
-			} else if (entity instanceof TLBusinessObject) {
-			    substitutableFacet = ((TLBusinessObject) entity).getIdFacet();
-			    
-			} else if (entity instanceof TLChoiceObject) {
-			    substitutableFacet = ((TLChoiceObject) entity).getSharedFacet();
-			}
-			if (substitutableFacet != null) {
-			    addElementNameToRegistry(
-			            XsdCodegenUtils.getSubstitutableElementName(substitutableFacet), entity);
-			}
-			addElementNameToRegistry(XsdCodegenUtils.getSubstitutionGroupElementName(entity), entity);
-		}
+            } else if (entity instanceof TLBusinessObject) {
+                substitutableFacet = ((TLBusinessObject) entity).getIdFacet();
 
-		/**
-		 * For aliased entities that define a substitution group, this method adds the top-level
-		 * substitutable facet to the registry.
-		 * 
-		 * @param entity  the entity to be added
-		 * @param aliasOwner  the alias owner that defines the substitution group
-		 */
-		private void addSubstitutableFacet(NamedEntity entity, TLAliasOwner aliasOwner) {
-			TLFacet substitutableFacet = null;
+            } else if (entity instanceof TLChoiceObject) {
+                substitutableFacet = ((TLChoiceObject) entity).getSharedFacet();
+            }
+            if (substitutableFacet != null) {
+                addElementNameToRegistry( XsdCodegenUtils.getSubstitutableElementName( substitutableFacet ), entity );
+            }
+            addElementNameToRegistry( XsdCodegenUtils.getSubstitutionGroupElementName( entity ), entity );
+        }
 
-			if (aliasOwner instanceof TLCoreObject) {
-			    substitutableFacet = ((TLCoreObject) aliasOwner).getSummaryFacet();
+        /**
+         * For aliased entities that define a substitution group, this method adds the top-level substitutable facet to
+         * the registry.
+         * 
+         * @param entity the entity to be added
+         * @param aliasOwner the alias owner that defines the substitution group
+         */
+        private void addSubstitutableFacet(NamedEntity entity, TLAliasOwner aliasOwner) {
+            TLFacet substitutableFacet = null;
 
-			} else if (aliasOwner instanceof TLBusinessObject) {
-			    substitutableFacet = ((TLBusinessObject) aliasOwner).getIdFacet();
-			    
-			} else if (aliasOwner instanceof TLChoiceObject) {
-			    substitutableFacet = ((TLChoiceObject) aliasOwner).getSharedFacet();
-			}
-			if (substitutableFacet != null) {
-			    String facetName = FacetCodegenUtils.getFacetName(substitutableFacet);
-			    TLAlias substitutableAlias = AliasCodegenUtils.getFacetAlias((TLAlias) entity,
-			            substitutableFacet.getFacetType(), facetName);
+            if (aliasOwner instanceof TLCoreObject) {
+                substitutableFacet = ((TLCoreObject) aliasOwner).getSummaryFacet();
 
-			    if (substitutableAlias != null) {
-			        addElementNameToRegistry(
-			                XsdCodegenUtils.getSubstitutableElementName(substitutableAlias), entity);
-			    }
-			}
-			addElementNameToRegistry(XsdCodegenUtils.getSubstitutionGroupElementName(entity), entity);
-		}
+            } else if (aliasOwner instanceof TLBusinessObject) {
+                substitutableFacet = ((TLBusinessObject) aliasOwner).getIdFacet();
+
+            } else if (aliasOwner instanceof TLChoiceObject) {
+                substitutableFacet = ((TLChoiceObject) aliasOwner).getSharedFacet();
+            }
+            if (substitutableFacet != null) {
+                String facetName = FacetCodegenUtils.getFacetName( substitutableFacet );
+                TLAlias substitutableAlias =
+                    AliasCodegenUtils.getFacetAlias( (TLAlias) entity, substitutableFacet.getFacetType(), facetName );
+
+                if (substitutableAlias != null) {
+                    addElementNameToRegistry( XsdCodegenUtils.getSubstitutableElementName( substitutableAlias ),
+                        entity );
+                }
+            }
+            addElementNameToRegistry( XsdCodegenUtils.getSubstitutionGroupElementName( entity ), entity );
+        }
 
         /**
          * Adds the given entity to the registry using the specified XML element name.
          * 
-         * @param elementName
-         *            the name of the schema element for the entity
-         * @param entity
-         *            the entity to be added to the registry
+         * @param elementName the name of the schema element for the entity
+         * @param entity the entity to be added to the registry
          */
-		private void addElementNameToRegistry(QName elementName, NamedEntity entity) {
-			if ((elementName != null) && (entity != null) && hasGlobalType(entity)) {
-				elementNameEntities.computeIfAbsent(elementName, n -> elementNameEntities.put(n, new HashSet<>()));
-				entityElementNames.computeIfAbsent(entity, e -> entityElementNames.put(e, new HashSet<>()));
-				elementNameEntities.get(elementName).add(entity);
-				entityElementNames.get(entity).add(elementName);
-			}
-		}
-		
-	    /**
-	     * Returns true if the given entity has a global schema type definition associated with it.
-	     * 
-	     * @param entity  the entity to check
-	     * @return boolean
-	     */
-		private boolean hasGlobalType(NamedEntity entity) {
-			boolean result = true;
-			
-			if (entity instanceof TLActionFacet) {
-				NamedEntity payloadType = ResourceCodegenUtils.getPayloadType((TLActionFacet) entity);
-				result = (payloadType == entity);
-			}
-			return result;
-		}
-		
+        private void addElementNameToRegistry(QName elementName, NamedEntity entity) {
+            if ((elementName != null) && (entity != null) && hasGlobalType( entity )) {
+                elementNameEntities.computeIfAbsent( elementName, n -> elementNameEntities.put( n, new HashSet<>() ) );
+                entityElementNames.computeIfAbsent( entity, e -> entityElementNames.put( e, new HashSet<>() ) );
+                elementNameEntities.get( elementName ).add( entity );
+                entityElementNames.get( entity ).add( elementName );
+            }
+        }
+
+        /**
+         * Returns true if the given entity has a global schema type definition associated with it.
+         * 
+         * @param entity the entity to check
+         * @return boolean
+         */
+        private boolean hasGlobalType(NamedEntity entity) {
+            boolean result = true;
+
+            if (entity instanceof TLActionFacet) {
+                NamedEntity payloadType = ResourceCodegenUtils.getPayloadType( (TLActionFacet) entity );
+                result = (payloadType == entity);
+            }
+            return result;
+        }
+
         /**
          * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitSimple(org.opentravel.schemacompiler.model.TLSimple)
          */
         @Override
         public boolean visitSimple(TLSimple simple) {
-            addTypeNameToRegistry(simple);
+            addTypeNameToRegistry( simple );
             return true;
         }
 
@@ -363,7 +345,7 @@ public class SchemaNameValidationRegistry {
          */
         @Override
         public boolean visitClosedEnumeration(TLClosedEnumeration enumeration) {
-            addTypeNameToRegistry(enumeration);
+            addTypeNameToRegistry( enumeration );
             return true;
         }
 
@@ -372,7 +354,7 @@ public class SchemaNameValidationRegistry {
          */
         @Override
         public boolean visitOpenEnumeration(TLOpenEnumeration enumeration) {
-            addTypeNameToRegistry(enumeration);
+            addTypeNameToRegistry( enumeration );
             return true;
         }
 
@@ -381,7 +363,7 @@ public class SchemaNameValidationRegistry {
          */
         @Override
         public boolean visitValueWithAttributes(TLValueWithAttributes valueWithAttributes) {
-            addTypeNameToRegistry(valueWithAttributes);
+            addTypeNameToRegistry( valueWithAttributes );
             return true;
         }
 
@@ -390,7 +372,7 @@ public class SchemaNameValidationRegistry {
          */
         @Override
         public boolean visitCoreObject(TLCoreObject coreObject) {
-            addElementNamesToRegistry(coreObject);
+            addElementNamesToRegistry( coreObject );
             return true;
         }
 
@@ -399,90 +381,90 @@ public class SchemaNameValidationRegistry {
          */
         @Override
         public boolean visitBusinessObject(TLBusinessObject businessObject) {
-            addElementNamesToRegistry(businessObject);
+            addElementNamesToRegistry( businessObject );
             return true;
         }
 
         /**
-		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitChoiceObject(org.opentravel.schemacompiler.model.TLChoiceObject)
-		 */
-		@Override
-		public boolean visitChoiceObject(TLChoiceObject choiceObject) {
-            addElementNamesToRegistry(choiceObject);
+         * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitChoiceObject(org.opentravel.schemacompiler.model.TLChoiceObject)
+         */
+        @Override
+        public boolean visitChoiceObject(TLChoiceObject choiceObject) {
+            addElementNamesToRegistry( choiceObject );
             return true;
-		}
+        }
 
-		/**
-		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitResource(org.opentravel.schemacompiler.model.TLResource)
-		 */
-		@Override
-		public boolean visitResource(TLResource resource) {
-            addTypeNameToRegistry(resource);
+        /**
+         * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitResource(org.opentravel.schemacompiler.model.TLResource)
+         */
+        @Override
+        public boolean visitResource(TLResource resource) {
+            addTypeNameToRegistry( resource );
             return true;
-		}
+        }
 
-		/**
+        /**
          * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitFacet(org.opentravel.schemacompiler.model.TLFacet)
          */
         @Override
         public boolean visitFacet(TLFacet facet) {
-            boolean hasContent = new FacetCodegenDelegateFactory(null).getDelegate(facet).hasContent();
+            boolean hasContent = new FacetCodegenDelegateFactory( null ).getDelegate( facet ).hasContent();
 
             if (hasContent) {
-                addTypeNameToRegistry(facet);
+                addTypeNameToRegistry( facet );
             }
-            addElementNamesToRegistry(facet);
+            addElementNamesToRegistry( facet );
             return true;
         }
 
         /**
-		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitContextualFacet(org.opentravel.schemacompiler.model.TLContextualFacet)
-		 */
-		@Override
-		public boolean visitContextualFacet(TLContextualFacet facet) {
-			FacetCodegenDelegate<?> delegate = new FacetCodegenDelegateFactory(null).getDelegate(facet);
-			
-			if (delegate != null) { // delegate could be null if owner has not yet been resolved
-	            boolean hasContent = new FacetCodegenDelegateFactory(null).getDelegate(facet).hasContent();
+         * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitContextualFacet(org.opentravel.schemacompiler.model.TLContextualFacet)
+         */
+        @Override
+        public boolean visitContextualFacet(TLContextualFacet facet) {
+            FacetCodegenDelegate<?> delegate = new FacetCodegenDelegateFactory( null ).getDelegate( facet );
 
-	            if (hasContent) {
-	                addTypeNameToRegistry(facet);
-	            }
-	            addElementNamesToRegistry(facet);
-			}
-            return true;
-		}
+            if (delegate != null) { // delegate could be null if owner has not yet been resolved
+                boolean hasContent = new FacetCodegenDelegateFactory( null ).getDelegate( facet ).hasContent();
 
-		/**
-		 * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitActionFacet(org.opentravel.schemacompiler.model.TLActionFacet)
-		 */
-		@Override
-		public boolean visitActionFacet(TLActionFacet facet) {
-            boolean hasContent = (facet.getReferenceType() != null) ||
-            		(facet.getReferenceType() != TLReferenceType.NONE);
-
-            if (hasContent) {
-            	TLResource owner = facet.getOwningResource();
-            	
-            	// Do not add action facets to the name registry if the business object
-            	// reference of the owning resource is null.  This condition will cause
-            	// misleading validation errors to be reported for the name conflict when
-            	// the real error is the missing business object reference.
-            	if ((owner != null) && (owner.getBusinessObjectRef() != null)) {
-                    addElementNameToRegistry(XsdCodegenUtils.getGlobalElementName(facet), facet);
-                    addTypeNameToRegistry(facet);
-            	}
+                if (hasContent) {
+                    addTypeNameToRegistry( facet );
+                }
+                addElementNamesToRegistry( facet );
             }
             return true;
-		}
+        }
 
-		/**
+        /**
+         * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitActionFacet(org.opentravel.schemacompiler.model.TLActionFacet)
+         */
+        @Override
+        public boolean visitActionFacet(TLActionFacet facet) {
+            boolean hasContent =
+                (facet.getReferenceType() != null) || (facet.getReferenceType() != TLReferenceType.NONE);
+
+            if (hasContent) {
+                TLResource owner = facet.getOwningResource();
+
+                // Do not add action facets to the name registry if the business object
+                // reference of the owning resource is null. This condition will cause
+                // misleading validation errors to be reported for the name conflict when
+                // the real error is the missing business object reference.
+                if ((owner != null) && (owner.getBusinessObjectRef() != null)) {
+                    addElementNameToRegistry( XsdCodegenUtils.getGlobalElementName( facet ), facet );
+                    addTypeNameToRegistry( facet );
+                }
+            }
+            return true;
+        }
+
+        /**
          * @see org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter#visitSimpleFacet(org.opentravel.schemacompiler.model.TLSimpleFacet)
          */
         @Override
         public boolean visitSimpleFacet(TLSimpleFacet simpleFacet) {
             if (!simpleFacet.isEmptyType()) {
-                addTypeNameToRegistry(simpleFacet);
+                addTypeNameToRegistry( simpleFacet );
             }
             return true;
         }
@@ -492,13 +474,12 @@ public class SchemaNameValidationRegistry {
          */
         @Override
         public boolean visitListFacet(TLListFacet listFacet) {
-            boolean hasContent = new FacetCodegenDelegateFactory(null).getDelegate(listFacet)
-                    .hasContent();
+            boolean hasContent = new FacetCodegenDelegateFactory( null ).getDelegate( listFacet ).hasContent();
 
             if (hasContent) {
-                addTypeNameToRegistry(listFacet);
+                addTypeNameToRegistry( listFacet );
             }
-            addElementNamesToRegistry(listFacet);
+            addElementNamesToRegistry( listFacet );
             return true;
         }
 
@@ -507,7 +488,7 @@ public class SchemaNameValidationRegistry {
          */
         @Override
         public boolean visitAlias(TLAlias alias) {
-            addElementNamesToRegistry(alias);
+            addElementNamesToRegistry( alias );
             return true;
         }
 
@@ -516,7 +497,7 @@ public class SchemaNameValidationRegistry {
          */
         @Override
         public boolean visitXSDSimpleType(XSDSimpleType xsdSimple) {
-            addTypeNameToRegistry(xsdSimple);
+            addTypeNameToRegistry( xsdSimple );
             return true;
         }
 
@@ -525,7 +506,7 @@ public class SchemaNameValidationRegistry {
          */
         @Override
         public boolean visitXSDComplexType(XSDComplexType xsdComplex) {
-            addTypeNameToRegistry(xsdComplex);
+            addTypeNameToRegistry( xsdComplex );
             return true;
         }
 
@@ -534,8 +515,7 @@ public class SchemaNameValidationRegistry {
          */
         @Override
         public boolean visitXSDElement(XSDElement xsdElement) {
-            addElementNameToRegistry(
-                    new QName(xsdElement.getNamespace(), xsdElement.getLocalName()), xsdElement);
+            addElementNameToRegistry( new QName( xsdElement.getNamespace(), xsdElement.getLocalName() ), xsdElement );
             return true;
         }
 

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.transform.tl2jaxb;
 
 import org.opentravel.ns.ota2.librarymodel_v01_05.Documentation;
@@ -28,29 +29,28 @@ import org.opentravel.schemacompiler.transform.symbols.SymbolResolverTransformer
  * 
  * @author S. Livezey
  */
-public class TLContextualFacetTransformer extends
-        TLComplexTypeTransformer<TLContextualFacet, FacetContextual> {
+public class TLContextualFacetTransformer extends TLComplexTypeTransformer<TLContextualFacet,FacetContextual> {
 
     /**
      * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
      */
     @SuppressWarnings("deprecation")
-	@Override
+    @Override
     public FacetContextual transform(TLContextualFacet source) {
         FacetContextual facet = new FacetContextual();
 
         if ((source.getDocumentation() != null) && !source.getDocumentation().isEmpty()) {
-            ObjectTransformer<TLDocumentation, Documentation, SymbolResolverTransformerContext> docTransformer = getTransformerFactory()
-                    .getTransformer(TLDocumentation.class, Documentation.class);
+            ObjectTransformer<TLDocumentation,Documentation,SymbolResolverTransformerContext> docTransformer =
+                getTransformerFactory().getTransformer( TLDocumentation.class, Documentation.class );
 
-            facet.setDocumentation(docTransformer.transform(source.getDocumentation()));
+            facet.setDocumentation( docTransformer.transform( source.getDocumentation() ) );
         }
-        facet.setNotExtendable(source.isNotExtendable());
-        facet.setContext(trimString(source.getContext(), false));
-        facet.setLabel(trimString(source.getName(), false));
-        facet.getAttribute().addAll(transformAttributes(source.getAttributes()));
-        facet.getElement().addAll(transformElements(source.getElements()));
-        facet.getIndicator().addAll(transformIndicators(source.getIndicators()));
+        facet.setNotExtendable( source.isNotExtendable() );
+        facet.setContext( trimString( source.getContext(), false ) );
+        facet.setLabel( trimString( source.getName(), false ) );
+        facet.getAttribute().addAll( transformAttributes( source.getAttributes() ) );
+        facet.getElement().addAll( transformElements( source.getElements() ) );
+        facet.getIndicator().addAll( transformIndicators( source.getIndicators() ) );
 
         return facet;
     }

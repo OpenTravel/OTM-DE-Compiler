@@ -13,23 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.util;
 
 /**
- * Functional interface that allows a value to be assigned to a particular
- * target object.
+ * Functional interface that allows a value to be assigned to a particular target object.
  *
- * @param <T>  the type of the target object to which the assignment will be applied
- * @param <V>  the type of the value being assigned
+ * @param <T> the type of the target object to which the assignment will be applied
+ * @param <V> the type of the value being assigned
  */
-public interface Assignment<T,V> {
-	
-	/**
-	 * Performs the assignment of the given value to the target object provided.
-	 * 
-	 * @param targetObj  the target object to which the value will be assigned
-	 * @param value  the value to be assigned
-	 */
-	public void apply(T targetObj, V value);
-	
+public interface Assignment<T, V> {
+
+    /**
+     * Performs the assignment of the given value to the target object provided.
+     * 
+     * @param targetObj the target object to which the value will be assigned
+     * @param value the value to be assigned
+     */
+    public void apply(T targetObj, V value);
+
 }

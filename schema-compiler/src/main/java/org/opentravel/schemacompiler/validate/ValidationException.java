@@ -13,27 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.validate;
 
 import org.opentravel.schemacompiler.util.SchemaCompilerException;
 
 /**
- * Exception that encapsulates a <code>ValidationFindings</code> instance, allowing it to throw
- * multiple findings instead of a single error condition.
+ * Exception that encapsulates a <code>ValidationFindings</code> instance, allowing it to throw multiple findings
+ * instead of a single error condition.
  * 
  * @author S. Livezey
  */
 public class ValidationException extends SchemaCompilerException {
 
-	private static final long serialVersionUID = 3933016239871704438L;
-	
-	private final transient ValidationFindings findings;
+    private static final long serialVersionUID = 3933016239871704438L;
+
+    private final transient ValidationFindings findings;
 
     /**
      * Constructor that assigns the validation findings to be thrown.
      * 
-     * @param findings
-     *            the validation findings to throw
+     * @param findings the validation findings to throw
      */
     public ValidationException(ValidationFindings findings) {
         super();
@@ -43,13 +43,11 @@ public class ValidationException extends SchemaCompilerException {
     /**
      * Constructor that assigns the exception message and the validation findings to be thrown.
      * 
-     * @param message
-     *            the message string for the exception
-     * @param findings
-     *            the validation findings to throw
+     * @param message the message string for the exception
+     * @param findings the validation findings to throw
      */
     public ValidationException(String message, ValidationFindings findings) {
-        super(message);
+        super( message );
         this.findings = findings;
     }
 

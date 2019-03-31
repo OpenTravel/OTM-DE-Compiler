@@ -13,29 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.model;
 
-import java.util.Comparator;
-import java.util.List;
+package org.opentravel.schemacompiler.model;
 
 import org.opentravel.schemacompiler.event.ModelEvent;
 import org.opentravel.schemacompiler.event.ModelEventBuilder;
 import org.opentravel.schemacompiler.event.ModelEventType;
 import org.opentravel.schemacompiler.model.TLEquivalent.EquivalentListManager;
 
+import java.util.Comparator;
+import java.util.List;
+
 /**
  * Indicator definition for complex library types.
  * 
  * @author S. Livezey
  */
-public class TLIndicator extends TLModelElement implements TLMemberField<TLIndicatorOwner>,
-		TLDocumentationOwner, TLEquivalentOwner {
+public class TLIndicator extends TLModelElement
+    implements TLMemberField<TLIndicatorOwner>, TLDocumentationOwner, TLEquivalentOwner {
 
     private TLIndicatorOwner owner;
     private String name;
     private boolean publishAsElement;
     private TLDocumentation documentation;
-    private EquivalentListManager equivalentManager = new EquivalentListManager(this);
+    private EquivalentListManager equivalentManager = new EquivalentListManager( this );
 
     /**
      * @see org.opentravel.schemacompiler.validate.Validatable#getValidationIdentity()
@@ -45,12 +46,12 @@ public class TLIndicator extends TLModelElement implements TLMemberField<TLIndic
         StringBuilder identity = new StringBuilder();
 
         if (owner != null) {
-            identity.append(owner.getValidationIdentity()).append("/");
+            identity.append( owner.getValidationIdentity() ).append( "/" );
         }
         if (name == null) {
-            identity.append("[Unnamed Indicator]");
+            identity.append( "[Unnamed Indicator]" );
         } else {
-            identity.append(name);
+            identity.append( name );
         }
         return identity.toString();
     }
@@ -92,33 +93,10 @@ public class TLIndicator extends TLModelElement implements TLMemberField<TLIndic
     /**
      * Assigns the value of the 'owner' field.
      * 
-     * @param owner
-     *            the field value to assign
+     * @param owner the field value to assign
      */
     public void setOwner(TLIndicatorOwner owner) {
         this.owner = owner;
-    }
-
-    /**
-     * Moves this indicator up by one position in the list of indicators maintained by its owner. If
-     * the owner is null, or this indicator is already at the front of the list, this method has no
-     * effect.
-     */
-    public void moveUp() {
-        if (owner != null) {
-            owner.moveUp(this);
-        }
-    }
-
-    /**
-     * Moves this indicator down by one position in the list of indicators maintained by its owner.
-     * If the owner is null, or this indicator is already at the end of the list, this method has no
-     * effect.
-     */
-    public void moveDown() {
-        if (owner != null) {
-            owner.moveDown(this);
-        }
     }
 
     /**
@@ -133,15 +111,14 @@ public class TLIndicator extends TLModelElement implements TLMemberField<TLIndic
     /**
      * Assigns the value of the 'name' field.
      * 
-     * @param name
-     *            the field value to assign
+     * @param name the field value to assign
      */
     public void setName(String name) {
-        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.NAME_MODIFIED, this)
-                .setOldValue(this.name).setNewValue(name).buildEvent();
+        ModelEvent<?> event = new ModelEventBuilder( ModelEventType.NAME_MODIFIED, this ).setOldValue( this.name )
+            .setNewValue( name ).buildEvent();
 
         this.name = name;
-        publishEvent(event);
+        publishEvent( event );
     }
 
     /**
@@ -156,16 +133,14 @@ public class TLIndicator extends TLModelElement implements TLMemberField<TLIndic
     /**
      * Assigns the value of the 'publishAsElement' field.
      * 
-     * @param publishAsElement
-     *            the field value to assign
+     * @param publishAsElement the field value to assign
      */
-    public void setPublishAsElement(boolean publishAsElemenet) {
-        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.PUBLISH_AS_ELEMENT_MODIFIED,
-                this).setOldValue(this.publishAsElement).setNewValue(publishAsElemenet)
-                .buildEvent();
+    public void setPublishAsElement(boolean publishAsElement) {
+        ModelEvent<?> event = new ModelEventBuilder( ModelEventType.PUBLISH_AS_ELEMENT_MODIFIED, this )
+            .setOldValue( this.publishAsElement ).setNewValue( publishAsElement ).buildEvent();
 
-        this.publishAsElement = publishAsElemenet;
-        publishEvent(event);
+        this.publishAsElement = publishAsElement;
+        publishEvent( event );
     }
 
     /**
@@ -180,17 +155,17 @@ public class TLIndicator extends TLModelElement implements TLMemberField<TLIndic
      */
     public void setDocumentation(TLDocumentation documentation) {
         if (documentation != this.documentation) {
-            ModelEvent<?> event = new ModelEventBuilder(ModelEventType.DOCUMENTATION_MODIFIED, this)
-                    .setOldValue(this.documentation).setNewValue(documentation).buildEvent();
+            ModelEvent<?> event = new ModelEventBuilder( ModelEventType.DOCUMENTATION_MODIFIED, this )
+                .setOldValue( this.documentation ).setNewValue( documentation ).buildEvent();
 
             if (documentation != null) {
-                documentation.setOwner(this);
+                documentation.setOwner( this );
             }
             if (this.documentation != null) {
-                this.documentation.setOwner(null);
+                this.documentation.setOwner( null );
             }
             this.documentation = documentation;
-            publishEvent(event);
+            publishEvent( event );
         }
     }
 
@@ -207,7 +182,7 @@ public class TLIndicator extends TLModelElement implements TLMemberField<TLIndic
      */
     @Override
     public TLEquivalent getEquivalent(String context) {
-        return equivalentManager.getChild(context);
+        return equivalentManager.getChild( context );
     }
 
     /**
@@ -215,7 +190,7 @@ public class TLIndicator extends TLModelElement implements TLMemberField<TLIndic
      */
     @Override
     public void addEquivalent(TLEquivalent equivalent) {
-        equivalentManager.addChild(equivalent);
+        equivalentManager.addChild( equivalent );
     }
 
     /**
@@ -224,7 +199,7 @@ public class TLIndicator extends TLModelElement implements TLMemberField<TLIndic
      */
     @Override
     public void addEquivalent(int index, TLEquivalent equivalent) {
-        equivalentManager.addChild(index, equivalent);
+        equivalentManager.addChild( index, equivalent );
     }
 
     /**
@@ -232,23 +207,7 @@ public class TLIndicator extends TLModelElement implements TLMemberField<TLIndic
      */
     @Override
     public void removeEquivalent(TLEquivalent equivalent) {
-        equivalentManager.removeChild(equivalent);
-    }
-
-    /**
-     * @see org.opentravel.schemacompiler.model.TLEquivalentOwner#moveUp(org.opentravel.schemacompiler.model.TLEquivalent)
-     */
-    @Override
-    public void moveUp(TLEquivalent equivalent) {
-        equivalentManager.moveUp(equivalent);
-    }
-
-    /**
-     * @see org.opentravel.schemacompiler.model.TLEquivalentOwner#moveDown(org.opentravel.schemacompiler.model.TLEquivalent)
-     */
-    @Override
-    public void moveDown(TLEquivalent equivalent) {
-        equivalentManager.moveDown(equivalent);
+        equivalentManager.removeChild( equivalent );
     }
 
     /**
@@ -256,7 +215,43 @@ public class TLIndicator extends TLModelElement implements TLMemberField<TLIndic
      */
     @Override
     public void sortEquivalents(Comparator<TLEquivalent> comparator) {
-        equivalentManager.sortChildren(comparator);
+        equivalentManager.sortChildren( comparator );
+    }
+
+    /**
+     * Moves this indicator up by one position in the list of indicators maintained by its owner. If the owner is null,
+     * or this indicator is already at the front of the list, this method has no effect.
+     */
+    public void moveUp() {
+        if (owner != null) {
+            owner.moveUp( this );
+        }
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.model.TLEquivalentOwner#moveUp(org.opentravel.schemacompiler.model.TLEquivalent)
+     */
+    @Override
+    public void moveUp(TLEquivalent equivalent) {
+        equivalentManager.moveUp( equivalent );
+    }
+
+    /**
+     * Moves this indicator down by one position in the list of indicators maintained by its owner. If the owner is
+     * null, or this indicator is already at the end of the list, this method has no effect.
+     */
+    public void moveDown() {
+        if (owner != null) {
+            owner.moveDown( this );
+        }
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.model.TLEquivalentOwner#moveDown(org.opentravel.schemacompiler.model.TLEquivalent)
+     */
+    @Override
+    public void moveDown(TLEquivalent equivalent) {
+        equivalentManager.moveDown( equivalent );
     }
 
     /**
@@ -264,17 +259,15 @@ public class TLIndicator extends TLModelElement implements TLMemberField<TLIndic
      * 
      * @author S. Livezey
      */
-    protected static class IndicatorListManager extends
-            ChildEntityListManager<TLIndicator, TLIndicatorOwner> {
+    protected static class IndicatorListManager extends ChildEntityListManager<TLIndicator,TLIndicatorOwner> {
 
         /**
          * Constructor that specifies the owner of the unerlying list.
          * 
-         * @param owner
-         *            the owner of the underlying list of children
+         * @param owner the owner of the underlying list of children
          */
         public IndicatorListManager(TLIndicatorOwner owner) {
-            super(owner, ModelEventType.PROPERTY_ADDED, ModelEventType.PROPERTY_REMOVED);
+            super( owner, ModelEventType.PROPERTY_ADDED, ModelEventType.PROPERTY_REMOVED );
         }
 
         /**
@@ -291,7 +284,7 @@ public class TLIndicator extends TLModelElement implements TLMemberField<TLIndic
          */
         @Override
         protected void assignOwner(TLIndicator child, TLIndicatorOwner owner) {
-            child.setOwner(owner);
+            child.setOwner( owner );
         }
 
         /**
@@ -304,7 +297,7 @@ public class TLIndicator extends TLModelElement implements TLMemberField<TLIndic
                 AbstractLibrary owningLibrary = owner.getOwningLibrary();
 
                 if (owningLibrary != null) {
-                    owningLibrary.publishEvent(event);
+                    owningLibrary.publishEvent( event );
                 }
             }
         }

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.transform.jaxb15_2tl;
 
 import org.opentravel.ns.ota2.librarymodel_v01_05.ActionRequest;
@@ -25,76 +26,76 @@ import org.opentravel.schemacompiler.transform.ObjectTransformer;
 import org.opentravel.schemacompiler.transform.symbols.DefaultTransformerContext;
 
 /**
- * Handles the transformation of objects from the <code>ActionRequest</code> type to the
- * <code>TLActionRequest</code> type.
+ * Handles the transformation of objects from the <code>ActionRequest</code> type to the <code>TLActionRequest</code>
+ * type.
  *
  * @author S. Livezey
  */
 public class ActionRequestTransformer extends ComplexTypeTransformer<ActionRequest,TLActionRequest> {
-	
-	/**
-	 * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
-	 */
-	@Override
-	public TLActionRequest transform(ActionRequest source) {
-		TLActionRequest request = new TLActionRequest();
-		
-		request.setHttpMethod(transformHttpMethod(source.getHttpMethod()));
-		request.setParamGroupName(trimString(source.getParamGroup()));
-		request.setPathTemplate(trimString(source.getPathTemplate()));
-		request.setPayloadTypeName(trimString(source.getPayloadType()));
-		request.setMimeTypes(ActionTransformer.transformMimeTypes(source.getMimeTypes()));
-		
-        if (source.getDocumentation() != null) {
-            ObjectTransformer<Documentation, TLDocumentation, DefaultTransformerContext> docTransformer = getTransformerFactory()
-                    .getTransformer(Documentation.class, TLDocumentation.class);
 
-            request.setDocumentation(docTransformer.transform(source.getDocumentation()));
+    /**
+     * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
+     */
+    @Override
+    public TLActionRequest transform(ActionRequest source) {
+        TLActionRequest request = new TLActionRequest();
+
+        request.setHttpMethod( transformHttpMethod( source.getHttpMethod() ) );
+        request.setParamGroupName( trimString( source.getParamGroup() ) );
+        request.setPathTemplate( trimString( source.getPathTemplate() ) );
+        request.setPayloadTypeName( trimString( source.getPayloadType() ) );
+        request.setMimeTypes( ActionTransformer.transformMimeTypes( source.getMimeTypes() ) );
+
+        if (source.getDocumentation() != null) {
+            ObjectTransformer<Documentation,TLDocumentation,DefaultTransformerContext> docTransformer =
+                getTransformerFactory().getTransformer( Documentation.class, TLDocumentation.class );
+
+            request.setDocumentation( docTransformer.transform( source.getDocumentation() ) );
         }
-        
-		return request;
-	}
-	
-	/**
-	 * Transforms the given <code>HttpMethod</code> value.
-	 * 
-	 * @param sourceHttpMethod  the JAXB HTTP method value
-	 * @return TLHttpMethod
-	 */
-	protected static TLHttpMethod transformHttpMethod(HttpMethod sourceHttpMethod) {
-		TLHttpMethod httpMethod;
-		
-		if (sourceHttpMethod != null) {
-			switch (sourceHttpMethod) {
-				case GET:
-					httpMethod = TLHttpMethod.GET;
-					break;
-				case POST:
-					httpMethod = TLHttpMethod.POST;
-					break;
-				case PUT:
-					httpMethod = TLHttpMethod.PUT;
-					break;
-				case DELETE:
-					httpMethod = TLHttpMethod.DELETE;
-					break;
-				case HEAD:
-					httpMethod = TLHttpMethod.HEAD;
-					break;
-				case OPTIONS:
-					httpMethod = TLHttpMethod.OPTIONS;
-					break;
-				case PATCH:
-					httpMethod = TLHttpMethod.PATCH;
-					break;
-				default:
-					httpMethod = null;
-					break;
-			}
-		} else {
-			httpMethod = null;
-		}
-		return httpMethod;
-	}
-	
+
+        return request;
+    }
+
+    /**
+     * Transforms the given <code>HttpMethod</code> value.
+     * 
+     * @param sourceHttpMethod the JAXB HTTP method value
+     * @return TLHttpMethod
+     */
+    protected static TLHttpMethod transformHttpMethod(HttpMethod sourceHttpMethod) {
+        TLHttpMethod httpMethod;
+
+        if (sourceHttpMethod != null) {
+            switch (sourceHttpMethod) {
+                case GET:
+                    httpMethod = TLHttpMethod.GET;
+                    break;
+                case POST:
+                    httpMethod = TLHttpMethod.POST;
+                    break;
+                case PUT:
+                    httpMethod = TLHttpMethod.PUT;
+                    break;
+                case DELETE:
+                    httpMethod = TLHttpMethod.DELETE;
+                    break;
+                case HEAD:
+                    httpMethod = TLHttpMethod.HEAD;
+                    break;
+                case OPTIONS:
+                    httpMethod = TLHttpMethod.OPTIONS;
+                    break;
+                case PATCH:
+                    httpMethod = TLHttpMethod.PATCH;
+                    break;
+                default:
+                    httpMethod = null;
+                    break;
+            }
+        } else {
+            httpMethod = null;
+        }
+        return httpMethod;
+    }
+
 }

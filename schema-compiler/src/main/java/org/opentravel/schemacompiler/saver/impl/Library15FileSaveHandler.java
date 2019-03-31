@@ -13,7 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.saver.impl;
+
+import org.opentravel.ns.ota2.librarymodel_v01_05.Library;
+import org.opentravel.ns.ota2.librarymodel_v01_05.ObjectFactory;
+import org.opentravel.schemacompiler.codegen.CodeGeneratorFactory;
+import org.opentravel.schemacompiler.ioc.SchemaDeclarations;
 
 import java.io.InputStream;
 
@@ -24,87 +30,81 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
-import org.opentravel.ns.ota2.librarymodel_v01_05.Library;
-import org.opentravel.ns.ota2.librarymodel_v01_05.ObjectFactory;
-import org.opentravel.schemacompiler.codegen.CodeGeneratorFactory;
-import org.opentravel.schemacompiler.ioc.SchemaDeclarations;
-
 /**
  * Save handler for the OTM1.5 library format.
  */
 public class Library15FileSaveHandler extends AbstractLibraryFileSaveHandler<Library> {
-	
+
     private static final String SCHEMA_CONTEXT = ":org.w3._2001.xmlschema:org.opentravel.ns.ota2.librarymodel_v01_05";
 
-    private static final String LIBRARY_SCHEMA_LOCATION_DECL = SchemaDeclarations.OTA2_LIBRARY_SCHEMA_1_5.getNamespace() +
-    		" " + SchemaDeclarations.OTA2_LIBRARY_SCHEMA_1_5.getFilename(CodeGeneratorFactory.XSD_TARGET_FORMAT);
-    
+    private static final String LIBRARY_SCHEMA_LOCATION_DECL = SchemaDeclarations.OTA2_LIBRARY_SCHEMA_1_5.getNamespace()
+        + " " + SchemaDeclarations.OTA2_LIBRARY_SCHEMA_1_5.getFilename( CodeGeneratorFactory.XSD_TARGET_FORMAT );
+
     private static JAXBContext jaxbContext;
     private static Schema validationSchema;
 
-	/**
-	 * @see org.opentravel.schemacompiler.saver.LibrarySaveHandler#getTargetFormat()
-	 */
-	@Override
-	public Class<Library> getTargetFormat() {
-		return Library.class;
-	}
-
-	/**
-	 * @see org.opentravel.schemacompiler.saver.impl.AbstractLibraryFileSaveHandler#getLibraryTargetNamespace()
-	 */
-	@Override
-	protected String getLibraryTargetNamespace() {
-		return SchemaDeclarations.OTA2_LIBRARY_SCHEMA_1_5.getNamespace();
-	}
-    
     /**
-	 * @see org.opentravel.schemacompiler.saver.impl.AbstractLibraryFileSaveHandler#getJaxbContext()
-	 */
-	@Override
-	protected JAXBContext getJaxbContext() {
-		return jaxbContext;
-	}
+     * @see org.opentravel.schemacompiler.saver.LibrarySaveHandler#getTargetFormat()
+     */
+    @Override
+    public Class<Library> getTargetFormat() {
+        return Library.class;
+    }
 
-	/**
-	 * @see org.opentravel.schemacompiler.saver.impl.AbstractLibraryFileSaveHandler#createLibraryElement(java.lang.Object)
-	 */
-	@Override
-	protected JAXBElement<Library> createLibraryElement(Library library) {
-		return new ObjectFactory().createLibrary(library);
-	}
+    /**
+     * @see org.opentravel.schemacompiler.saver.impl.AbstractLibraryFileSaveHandler#getLibraryTargetNamespace()
+     */
+    @Override
+    protected String getLibraryTargetNamespace() {
+        return SchemaDeclarations.OTA2_LIBRARY_SCHEMA_1_5.getNamespace();
+    }
 
-	/**
-	 * @see org.opentravel.schemacompiler.saver.impl.AbstractLibraryFileSaveHandler#getValidationSchema()
-	 */
-	@Override
-	protected Schema getValidationSchema() {
-		return validationSchema;
-	}
+    /**
+     * @see org.opentravel.schemacompiler.saver.impl.AbstractLibraryFileSaveHandler#getJaxbContext()
+     */
+    @Override
+    protected JAXBContext getJaxbContext() {
+        return jaxbContext;
+    }
 
-	/**
-	 * @see org.opentravel.schemacompiler.saver.impl.AbstractLibraryFileSaveHandler#getLibrarySchemaLocation()
-	 */
-	@Override
-	protected String getLibrarySchemaLocation() {
-		return LIBRARY_SCHEMA_LOCATION_DECL;
-	}
+    /**
+     * @see org.opentravel.schemacompiler.saver.impl.AbstractLibraryFileSaveHandler#createLibraryElement(java.lang.Object)
+     */
+    @Override
+    protected JAXBElement<Library> createLibraryElement(Library library) {
+        return new ObjectFactory().createLibrary( library );
+    }
 
-	/**
+    /**
+     * @see org.opentravel.schemacompiler.saver.impl.AbstractLibraryFileSaveHandler#getValidationSchema()
+     */
+    @Override
+    protected Schema getValidationSchema() {
+        return validationSchema;
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.saver.impl.AbstractLibraryFileSaveHandler#getLibrarySchemaLocation()
+     */
+    @Override
+    protected String getLibrarySchemaLocation() {
+        return LIBRARY_SCHEMA_LOCATION_DECL;
+    }
+
+    /**
      * Initializes the validation schema and shared JAXB context.
      */
     static {
         try {
-            SchemaFactory schemaFactory = SchemaFactory
-                    .newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-            InputStream schemaStream = SchemaDeclarations.OTA2_LIBRARY_SCHEMA_1_5.getContent(
-            		CodeGeneratorFactory.XSD_TARGET_FORMAT);
+            SchemaFactory schemaFactory = SchemaFactory.newInstance( XMLConstants.W3C_XML_SCHEMA_NS_URI );
+            InputStream schemaStream =
+                SchemaDeclarations.OTA2_LIBRARY_SCHEMA_1_5.getContent( CodeGeneratorFactory.XSD_TARGET_FORMAT );
 
-            validationSchema = schemaFactory.newSchema(new StreamSource(schemaStream));
-            jaxbContext = JAXBContext.newInstance(SCHEMA_CONTEXT);
+            validationSchema = schemaFactory.newSchema( new StreamSource( schemaStream ) );
+            jaxbContext = JAXBContext.newInstance( SCHEMA_CONTEXT );
 
         } catch (Exception e) {
-            throw new ExceptionInInitializerError(e);
+            throw new ExceptionInInitializerError( e );
         }
     }
 

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.transform.jaxb15_2tl;
 
 import org.opentravel.ns.ota2.librarymodel_v01_05.Documentation;
@@ -25,62 +26,61 @@ import org.opentravel.schemacompiler.transform.ObjectTransformer;
 import org.opentravel.schemacompiler.transform.symbols.DefaultTransformerContext;
 
 /**
- * Handles the transformation of objects from the <code>FacetAction</code> type to the
- * <code>TLActionFacet</code> type.
+ * Handles the transformation of objects from the <code>FacetAction</code> type to the <code>TLActionFacet</code> type.
  *
  * @author S. Livezey
  */
 public class FacetActionTransformer extends ComplexTypeTransformer<FacetAction,TLActionFacet> {
-	
-	/**
-	 * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
-	 */
-	@Override
-	public TLActionFacet transform(FacetAction source) {
-		TLActionFacet facet = new TLActionFacet();
-		
-		facet.setName(trimString(source.getLabel()));
-		facet.setReferenceType(transformReferenceType(source.getReferenceType()));
-		facet.setReferenceFacetName(trimString(source.getReferenceFacet()));
-		facet.setReferenceRepeat(PropertyTransformer.convertRepeatValue(source.getReferenceRepeat()));
-		facet.setBasePayloadName( source.getBasePayload() );
-		
-        if (source.getDocumentation() != null) {
-            ObjectTransformer<Documentation, TLDocumentation, DefaultTransformerContext> docTransformer = getTransformerFactory()
-                    .getTransformer(Documentation.class, TLDocumentation.class);
 
-            facet.setDocumentation(docTransformer.transform(source.getDocumentation()));
+    /**
+     * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
+     */
+    @Override
+    public TLActionFacet transform(FacetAction source) {
+        TLActionFacet facet = new TLActionFacet();
+
+        facet.setName( trimString( source.getLabel() ) );
+        facet.setReferenceType( transformReferenceType( source.getReferenceType() ) );
+        facet.setReferenceFacetName( trimString( source.getReferenceFacet() ) );
+        facet.setReferenceRepeat( PropertyTransformer.convertRepeatValue( source.getReferenceRepeat() ) );
+        facet.setBasePayloadName( source.getBasePayload() );
+
+        if (source.getDocumentation() != null) {
+            ObjectTransformer<Documentation,TLDocumentation,DefaultTransformerContext> docTransformer =
+                getTransformerFactory().getTransformer( Documentation.class, TLDocumentation.class );
+
+            facet.setDocumentation( docTransformer.transform( source.getDocumentation() ) );
         }
-		return facet;
-	}
-	
-	/**
-	 * Transforms the given reference-type value.
-	 * 
-	 * @param refType  the enumeration value to transform
-	 * @return TLReferenceType
-	 */
-	private TLReferenceType transformReferenceType(ReferenceType sourceRefType) {
-		TLReferenceType refType;
-		
-		if (sourceRefType != null) {
-			switch (sourceRefType) {
-				case NONE:
-					refType = TLReferenceType.NONE;
-					break;
-				case OPTIONAL:
-					refType = TLReferenceType.OPTIONAL;
-					break;
-				case REQUIRED:
-					refType = TLReferenceType.REQUIRED;
-					break;
-				default:
-					refType = null;
-			}
-		} else {
-			refType = null;
-		}
-		return refType;
-	}
-	
+        return facet;
+    }
+
+    /**
+     * Transforms the given reference-type value.
+     * 
+     * @param refType the enumeration value to transform
+     * @return TLReferenceType
+     */
+    private TLReferenceType transformReferenceType(ReferenceType sourceRefType) {
+        TLReferenceType refType;
+
+        if (sourceRefType != null) {
+            switch (sourceRefType) {
+                case NONE:
+                    refType = TLReferenceType.NONE;
+                    break;
+                case OPTIONAL:
+                    refType = TLReferenceType.OPTIONAL;
+                    break;
+                case REQUIRED:
+                    refType = TLReferenceType.REQUIRED;
+                    break;
+                default:
+                    refType = null;
+            }
+        } else {
+            refType = null;
+        }
+        return refType;
+    }
+
 }

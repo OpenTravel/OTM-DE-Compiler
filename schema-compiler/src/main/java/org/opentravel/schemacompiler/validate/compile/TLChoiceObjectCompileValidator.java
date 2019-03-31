@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.validate.compile;
 
 import org.opentravel.schemacompiler.model.TLChoiceObject;
@@ -33,27 +34,27 @@ public class TLChoiceObjectCompileValidator extends TLChoiceObjectBaseValidator 
      */
     @Override
     protected ValidationFindings validateFields(TLChoiceObject target) {
-        TLValidationBuilder builder = newValidationBuilder(target);
+        TLValidationBuilder builder = newValidationBuilder( target );
         ValidationFindings findings;
-        
-        builder.setProperty("name", target.getName()).setFindingType(FindingType.ERROR)
-                .assertNotNullOrBlank().assertPatternMatch(NAME_XML_PATTERN);
 
-        builder.setProperty("aliases", target.getAliases()).setFindingType(FindingType.ERROR)
-                .assertNotNull().assertContainsNoNullElements();
+        builder.setProperty( "name", target.getName() ).setFindingType( FindingType.ERROR ).assertNotNullOrBlank()
+            .assertPatternMatch( NAME_XML_PATTERN );
 
-        builder.setProperty("sharedFacet", target.getSharedFacet()).setFindingType(FindingType.ERROR)
-                .assertNotNull();
+        builder.setProperty( "aliases", target.getAliases() ).setFindingType( FindingType.ERROR ).assertNotNull()
+            .assertContainsNoNullElements();
 
-        builder.setProperty("equivalents", target.getEquivalents())
-                .setFindingType(FindingType.ERROR).assertNotNull().assertContainsNoNullElements();
+        builder.setProperty( "sharedFacet", target.getSharedFacet() ).setFindingType( FindingType.ERROR )
+            .assertNotNull();
 
-        checkSchemaNamingConflicts(target, builder);
-        validateVersioningRules(target, builder);
-        
+        builder.setProperty( "equivalents", target.getEquivalents() ).setFindingType( FindingType.ERROR )
+            .assertNotNull().assertContainsNoNullElements();
+
+        checkSchemaNamingConflicts( target, builder );
+        validateVersioningRules( target, builder );
+
         findings = builder.getFindings();
         findings.addAll( validateContextualFacetLibraryOwnership( target.getChoiceFacets() ) );
-        
+
         return findings;
     }
 

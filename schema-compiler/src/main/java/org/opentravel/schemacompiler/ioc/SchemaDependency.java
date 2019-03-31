@@ -13,17 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.ioc;
+
+import org.springframework.context.ApplicationContext;
 
 import java.util.List;
 
 import javax.xml.namespace.QName;
 
-import org.springframework.context.ApplicationContext;
-
 /**
- * Defines a Spring-injected qualified XML name for schema constructs (types, elements, etc.) that
- * generated code will be dependent upon.
+ * Defines a Spring-injected qualified XML name for schema constructs (types, elements, etc.) that generated code will
+ * be dependent upon.
  * 
  * @author S. Livezey
  */
@@ -55,7 +56,7 @@ public final class SchemaDependency {
      * @return SchemaDependency
      */
     public static SchemaDependency getEmptyElement() {
-        return getDependency(EMPTY_ELEMENT);
+        return getDependency( EMPTY_ELEMENT );
     }
 
     /**
@@ -64,7 +65,7 @@ public final class SchemaDependency {
      * @return SchemaDependency
      */
     public static SchemaDependency getEnumExtension() {
-        return getDependency(ENUM_EXTENSION);
+        return getDependency( ENUM_EXTENSION );
     }
 
     /**
@@ -73,7 +74,7 @@ public final class SchemaDependency {
      * @return SchemaDependency
      */
     public static SchemaDependency getMessageHeader() {
-        return getDependency(MESSAGE_HEADER);
+        return getDependency( MESSAGE_HEADER );
     }
 
     /**
@@ -82,7 +83,7 @@ public final class SchemaDependency {
      * @return SchemaDependency
      */
     public static SchemaDependency getMessageFault() {
-        return getDependency(MESSAGE_FAULT);
+        return getDependency( MESSAGE_FAULT );
     }
 
     /**
@@ -91,7 +92,7 @@ public final class SchemaDependency {
      * @return SchemaDependency
      */
     public static SchemaDependency getRequestPayload() {
-        return getDependency(REQUEST_PAYLOAD);
+        return getDependency( REQUEST_PAYLOAD );
     }
 
     /**
@@ -100,7 +101,7 @@ public final class SchemaDependency {
      * @return SchemaDependency
      */
     public static SchemaDependency getResponsePayload() {
-        return getDependency(RESPONSE_PAYLOAD);
+        return getDependency( RESPONSE_PAYLOAD );
     }
 
     /**
@@ -109,7 +110,7 @@ public final class SchemaDependency {
      * @return SchemaDependency
      */
     public static SchemaDependency getNotifPayload() {
-        return getDependency(NOTIF_PAYLOAD);
+        return getDependency( NOTIF_PAYLOAD );
     }
 
     /**
@@ -118,7 +119,7 @@ public final class SchemaDependency {
      * @return SchemaDependency
      */
     public static SchemaDependency getExtensionPointElement() {
-        return getDependency(EXTENSION_POINT);
+        return getDependency( EXTENSION_POINT );
     }
 
     /**
@@ -127,7 +128,7 @@ public final class SchemaDependency {
      * @return SchemaDependency
      */
     public static SchemaDependency getExtensionPointSummaryElement() {
-        return getDependency(EXTENSION_POINT_SUMMARY);
+        return getDependency( EXTENSION_POINT_SUMMARY );
     }
 
     /**
@@ -136,7 +137,7 @@ public final class SchemaDependency {
      * @return SchemaDependency
      */
     public static SchemaDependency getExtensionPointDetailElement() {
-        return getDependency(EXTENSION_POINT_DETAIL);
+        return getDependency( EXTENSION_POINT_DETAIL );
     }
 
     /**
@@ -145,7 +146,7 @@ public final class SchemaDependency {
      * @return SchemaDependency
      */
     public static SchemaDependency getExtensionPointCustomElement() {
-        return getDependency(EXTENSION_POINT_CUSTOM);
+        return getDependency( EXTENSION_POINT_CUSTOM );
     }
 
     /**
@@ -154,7 +155,7 @@ public final class SchemaDependency {
      * @return SchemaDependency
      */
     public static SchemaDependency getExtensionPointQueryElement() {
-        return getDependency(EXTENSION_POINT_QUERY);
+        return getDependency( EXTENSION_POINT_QUERY );
     }
 
     /**
@@ -163,7 +164,7 @@ public final class SchemaDependency {
      * @return SchemaDependency
      */
     public static SchemaDependency getExtensionPointUpdateElement() {
-        return getDependency(EXTENSION_POINT_UPDATE);
+        return getDependency( EXTENSION_POINT_UPDATE );
     }
 
     /**
@@ -172,7 +173,7 @@ public final class SchemaDependency {
      * @return SchemaDependency
      */
     public static SchemaDependency getExtensionPointSharedElement() {
-        return getDependency(EXTENSION_POINT_SHARED);
+        return getDependency( EXTENSION_POINT_SHARED );
     }
 
     /**
@@ -181,15 +182,13 @@ public final class SchemaDependency {
      * @return SchemaDependency
      */
     public static SchemaDependency getExtensionPointChoiceElement() {
-        return getDependency(EXTENSION_POINT_CHOICE);
+        return getDependency( EXTENSION_POINT_CHOICE );
     }
 
     /**
-     * Returns the <code>SchemaDependency</code> defined in the application context with the
-     * specified ID.
+     * Returns the <code>SchemaDependency</code> defined in the application context with the specified ID.
      * 
-     * @param dependencyId
-     *            the ID of the dependency construct to return
+     * @param dependencyId the ID of the dependency construct to return
      * @return SchemaDependency
      */
     @SuppressWarnings("unchecked")
@@ -199,12 +198,12 @@ public final class SchemaDependency {
         if (dependencyId != null) {
             ApplicationContext context = SchemaCompilerApplicationContext.getContext();
 
-            if (context.containsBean(SchemaCompilerApplicationContext.SCHEMA_DEPENDENCIES)) {
-                List<SchemaDependency> schemaDependencies = (List<SchemaDependency>) context
-                        .getBean(SchemaCompilerApplicationContext.SCHEMA_DEPENDENCIES);
+            if (context.containsBean( SchemaCompilerApplicationContext.SCHEMA_DEPENDENCIES )) {
+                List<SchemaDependency> schemaDependencies =
+                    (List<SchemaDependency>) context.getBean( SchemaCompilerApplicationContext.SCHEMA_DEPENDENCIES );
 
                 for (SchemaDependency sd : schemaDependencies) {
-                    if (dependencyId.equals(sd.getId())) {
+                    if (dependencyId.equals( sd.getId() )) {
                         dependency = sd;
                         break;
                     }
@@ -212,7 +211,7 @@ public final class SchemaDependency {
             }
         }
         if (dependency == null) {
-            throw new IllegalArgumentException("Schema dependency ID not defined: " + dependencyId);
+            throw new IllegalArgumentException( "Schema dependency ID not defined: " + dependencyId );
         }
         return dependency;
     }
@@ -220,16 +219,16 @@ public final class SchemaDependency {
     /**
      * Returns the list of all schema dependencies defined in the application context.
      * 
-     * @return List<SchemaDependency>
+     * @return List&lt;SchemaDependency&gt;
      */
     @SuppressWarnings("unchecked")
     public static List<SchemaDependency> getAllDependencies() {
         ApplicationContext context = SchemaCompilerApplicationContext.getContext();
         List<SchemaDependency> schemaDependencies = null;
 
-        if (context.containsBean(SchemaCompilerApplicationContext.SCHEMA_DEPENDENCIES)) {
-            schemaDependencies = (List<SchemaDependency>) context
-                    .getBean(SchemaCompilerApplicationContext.SCHEMA_DEPENDENCIES);
+        if (context.containsBean( SchemaCompilerApplicationContext.SCHEMA_DEPENDENCIES )) {
+            schemaDependencies =
+                (List<SchemaDependency>) context.getBean( SchemaCompilerApplicationContext.SCHEMA_DEPENDENCIES );
         }
         return schemaDependencies;
     }
@@ -240,7 +239,7 @@ public final class SchemaDependency {
      * @return QName
      */
     public QName toQName() {
-        return new QName(schemaDeclaration.getNamespace(), localName);
+        return new QName( schemaDeclaration.getNamespace(), localName );
     }
 
     /**
@@ -255,8 +254,7 @@ public final class SchemaDependency {
     /**
      * Assigns the ID of this schema dependency construct.
      * 
-     * @param id
-     *            the schema construct ID to assign
+     * @param id the schema construct ID to assign
      */
     public void setId(String id) {
         this.id = id;
@@ -274,8 +272,7 @@ public final class SchemaDependency {
     /**
      * Assigns the declaration for the file that defines the schema construct.
      * 
-     * @param schemaDeclaration
-     *            the schema declaration to assign
+     * @param schemaDeclaration the schema declaration to assign
      */
     public void setSchemaDeclaration(SchemaDeclaration schemaDeclaration) {
         this.schemaDeclaration = schemaDeclaration;
@@ -293,8 +290,7 @@ public final class SchemaDependency {
     /**
      * Assigns the local XML name of the construct, as defined in the schema declaration file.
      * 
-     * @param localName
-     *            the local XML name to assign
+     * @param localName the local XML name to assign
      */
     public void setLocalName(String localName) {
         this.localName = localName;

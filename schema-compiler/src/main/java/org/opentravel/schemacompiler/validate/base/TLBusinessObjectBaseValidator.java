@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.validate.base;
 
 import org.opentravel.schemacompiler.model.TLAlias;
@@ -38,49 +39,48 @@ public class TLBusinessObjectBaseValidator extends TLValidatorBase<TLBusinessObj
      */
     @Override
     protected ValidationFindings validateChildren(TLBusinessObject target) {
-        Validator<TLAlias> aliasValidator = getValidatorFactory().getValidatorForClass(TLAlias.class);
-        Validator<TLFacet> facetValidator = getValidatorFactory().getValidatorForClass(TLFacet.class);
-        Validator<TLContextualFacet> cFacetValidator = getValidatorFactory().getValidatorForClass(TLContextualFacet.class);
+        Validator<TLAlias> aliasValidator = getValidatorFactory().getValidatorForClass( TLAlias.class );
+        Validator<TLFacet> facetValidator = getValidatorFactory().getValidatorForClass( TLFacet.class );
+        Validator<TLContextualFacet> cFacetValidator =
+            getValidatorFactory().getValidatorForClass( TLContextualFacet.class );
         ValidationFindings findings = new ValidationFindings();
 
         if (target.getExtension() != null) {
-            Validator<TLExtension> extensionValidator = getValidatorFactory().getValidatorForClass(
-                    TLExtension.class);
+            Validator<TLExtension> extensionValidator = getValidatorFactory().getValidatorForClass( TLExtension.class );
 
-            findings.addAll(extensionValidator.validate(target.getExtension()));
+            findings.addAll( extensionValidator.validate( target.getExtension() ) );
         }
         if (target.getDocumentation() != null) {
-            Validator<TLDocumentation> docValidator = getValidatorFactory().getValidatorForClass(
-                    TLDocumentation.class);
+            Validator<TLDocumentation> docValidator =
+                getValidatorFactory().getValidatorForClass( TLDocumentation.class );
 
-            findings.addAll(docValidator.validate(target.getDocumentation()));
+            findings.addAll( docValidator.validate( target.getDocumentation() ) );
         }
         if (target.getAliases() != null) {
             for (TLAlias alias : target.getAliases()) {
-                findings.addAll(aliasValidator.validate(alias));
+                findings.addAll( aliasValidator.validate( alias ) );
             }
         }
         if (target.getEquivalents() != null) {
-            Validator<TLEquivalent> equivValidator = getValidatorFactory().getValidatorForClass(
-                    TLEquivalent.class);
+            Validator<TLEquivalent> equivValidator = getValidatorFactory().getValidatorForClass( TLEquivalent.class );
 
             for (TLEquivalent equiv : target.getEquivalents()) {
-                findings.addAll(equivValidator.validate(equiv));
+                findings.addAll( equivValidator.validate( equiv ) );
             }
         }
         if (target.getIdFacet() != null) {
-            findings.addAll(facetValidator.validate(target.getIdFacet()));
+            findings.addAll( facetValidator.validate( target.getIdFacet() ) );
         }
         if (target.getSummaryFacet() != null) {
-            findings.addAll(facetValidator.validate(target.getSummaryFacet()));
+            findings.addAll( facetValidator.validate( target.getSummaryFacet() ) );
         }
         if (target.getDetailFacet() != null) {
-            findings.addAll(facetValidator.validate(target.getDetailFacet()));
+            findings.addAll( facetValidator.validate( target.getDetailFacet() ) );
         }
-        validateLocalContextualFacets(target.getCustomFacets(), cFacetValidator, findings);
-        validateLocalContextualFacets(target.getQueryFacets(), cFacetValidator, findings);
-        validateLocalContextualFacets(target.getUpdateFacets(), cFacetValidator, findings);
+        validateLocalContextualFacets( target.getCustomFacets(), cFacetValidator, findings );
+        validateLocalContextualFacets( target.getQueryFacets(), cFacetValidator, findings );
+        validateLocalContextualFacets( target.getUpdateFacets(), cFacetValidator, findings );
         return findings;
     }
-    
+
 }

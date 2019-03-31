@@ -13,46 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/*
- * Copyright (c) 1998, 2008, Oracle and/or its affiliates. All rights reserved.
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
- *
- * This code is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Oracle designates this
- * particular file as subject to the "Classpath" exception as provided
- * by Oracle in the LICENSE file that accompanied this code.
- *
- * This code is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
- * version 2 for more details (a copy is included in the LICENSE file that
- * accompanied this code).
- *
- * You should have received a copy of the GNU General Public License version
- * 2 along with this work; if not, write to the Free Software Foundation,
- * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
- *
- * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
- * or visit www.oracle.com if you need additional information or have any
- * questions.
- */
+
 package org.opentravel.schemacompiler.codegen.html;
+
+import org.opentravel.schemacompiler.util.SchemaCompilerRuntimeException;
 
 import java.text.MessageFormat;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
-
-import org.opentravel.schemacompiler.util.SchemaCompilerRuntimeException;
 
 
 
 /**
  * Retrieve and format messages stored in a resource.
  *
- * This code is not part of an API.
- * It is implementation that is subject to change.
- * Do not use it as an API
+ * <p>
+ * This code is not part of an API. It is implementation that is subject to change. Do not use it as an API
  *
  * @since 1.2
  * @author Atul M Dambalkar
@@ -72,7 +48,7 @@ public class MessageRetriever {
     /**
      * The lazily fetched resource..
      */
-    private ResourceBundle messageRB;
+    private ResourceBundle messageBundle;
 
     /**
      * Initilize the ResourceBundle with the given resource.
@@ -80,8 +56,7 @@ public class MessageRetriever {
      * @param configuration the configuration
      * @param resourcelocation Resource.
      */
-    public MessageRetriever(Configuration configuration,
-                            String resourcelocation) {
+    public MessageRetriever(Configuration configuration, String resourcelocation) {
         this.configuration = configuration;
         this.resourcelocation = resourcelocation;
     }
@@ -91,24 +66,25 @@ public class MessageRetriever {
      *
      * @param key selects message from resource
      * @param args arguments to be replaced in the message.
+     * @return String
      */
     public String getText(String key, Object... args) {
-        if (messageRB == null) {
+        if (messageBundle == null) {
             try {
-                messageRB = ResourceBundle.getBundle(resourcelocation);
+                messageBundle = ResourceBundle.getBundle( resourcelocation );
             } catch (MissingResourceException e) {
                 throw new SchemaCompilerRuntimeException(
-                		"Fatal: Resource (" + resourcelocation + ") for javadoc doclets is missing.");
+                    "Fatal: Resource (" + resourcelocation + ") for javadoc doclets is missing." );
             }
         }
         String messageText;
-        
+
         try {
-            String message = messageRB.getString(key);
-            messageText = MessageFormat.format(message, args);
-            
+            String message = messageBundle.getString( key );
+            messageText = MessageFormat.format( message, args );
+
         } catch (MissingResourceException e) {
-        	messageText = key;
+            messageText = key;
         }
         return messageText;
     }
@@ -120,7 +96,7 @@ public class MessageRetriever {
      * @param msg message to print
      */
     private void printError(SourcePosition pos, String msg) {
-        configuration.printError(pos, msg);
+        configuration.printError( pos, msg );
     }
 
     /**
@@ -129,7 +105,7 @@ public class MessageRetriever {
      * @param msg message to print
      */
     private void printError(String msg) {
-        configuration.printError(msg);
+        configuration.printError( msg );
     }
 
     /**
@@ -139,7 +115,7 @@ public class MessageRetriever {
      * @param msg message to print
      */
     private void printWarning(SourcePosition pos, String msg) {
-        configuration.printWarning(pos, msg);
+        configuration.printWarning( pos, msg );
     }
 
     /**
@@ -148,7 +124,7 @@ public class MessageRetriever {
      * @param msg message to print
      */
     private void printWarning(String msg) {
-        configuration.printWarning(msg);
+        configuration.printWarning( msg );
     }
 
     /**
@@ -158,10 +134,10 @@ public class MessageRetriever {
      * @param msg message to print
      */
     private void printNotice(SourcePosition pos, String msg) {
-        configuration.printNotice(pos, msg);
+        configuration.printNotice( pos, msg );
     }
-    
-    
+
+
 
     /**
      * Print a message.
@@ -169,7 +145,7 @@ public class MessageRetriever {
      * @param msg message to print
      */
     private void printNotice(String msg) {
-        configuration.printNotice(msg);
+        configuration.printNotice( msg );
     }
 
     /**
@@ -180,7 +156,7 @@ public class MessageRetriever {
      * @param args arguments to be replaced in the message.
      */
     public void error(SourcePosition pos, String key, Object... args) {
-        printError(pos, getText(key, args));
+        printError( pos, getText( key, args ) );
     }
 
     /**
@@ -190,7 +166,7 @@ public class MessageRetriever {
      * @param args arguments to be replaced in the message.
      */
     public void error(String key, Object... args) {
-        printError(getText(key, args));
+        printError( getText( key, args ) );
     }
 
     /**
@@ -201,7 +177,7 @@ public class MessageRetriever {
      * @param args arguments to be replaced in the message.
      */
     public void warning(SourcePosition pos, String key, Object... args) {
-        printWarning(pos, getText(key, args));
+        printWarning( pos, getText( key, args ) );
     }
 
     /**
@@ -211,7 +187,7 @@ public class MessageRetriever {
      * @param args arguments to be replaced in the message.
      */
     public void warning(String key, Object... args) {
-        printWarning(getText(key, args));
+        printWarning( getText( key, args ) );
     }
 
     /**
@@ -222,7 +198,7 @@ public class MessageRetriever {
      * @param args arguments to be replaced in the message.
      */
     public void notice(SourcePosition pos, String key, Object... args) {
-        printNotice(pos, getText(key, args));
+        printNotice( pos, getText( key, args ) );
     }
 
     /**
@@ -232,6 +208,6 @@ public class MessageRetriever {
      * @param args arguments to be replaced in the message.
      */
     public void notice(String key, Object... args) {
-        printNotice(getText(key, args));
+        printNotice( getText( key, args ) );
     }
 }

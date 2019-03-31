@@ -13,21 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.model;
 
 /**
- * Type library model component that is defined as a top-level member within a single library
- * instance.
+ * Type library model component that is defined as a top-level member within a single library instance.
  * 
  * @author S. Livezey
  */
 public interface LibraryMember extends NamedEntity {
-	
+
     /**
      * Assigns the library instance that owns this model element.
      * 
-     * @param owningLibrary  the owning library instance to assign
+     * @param owningLibrary the owning library instance to assign
      */
     public void setOwningLibrary(AbstractLibrary owningLibrary);
-    
+
 }

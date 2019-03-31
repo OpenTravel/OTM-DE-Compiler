@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.validate.base;
 
 import org.opentravel.schemacompiler.model.TLDocumentation;
@@ -37,18 +38,16 @@ public class TLEnumValueBaseValidator extends TLValidatorBase<TLEnumValue> {
      */
     @Override
     protected ValidationFindings validateFields(TLEnumValue target) {
-        Validator<TLEquivalent> equivValidator = getValidatorFactory().getValidatorForClass(
-                TLEquivalent.class);
-        Validator<TLDocumentation> docValidator = getValidatorFactory().getValidatorForClass(
-                TLDocumentation.class);
-        TLValidationBuilder builder = newValidationBuilder(target);
+        Validator<TLEquivalent> equivValidator = getValidatorFactory().getValidatorForClass( TLEquivalent.class );
+        Validator<TLDocumentation> docValidator = getValidatorFactory().getValidatorForClass( TLDocumentation.class );
+        TLValidationBuilder builder = newValidationBuilder( target );
 
         for (TLEquivalent equiv : target.getEquivalents()) {
-            builder.addFindings(equivValidator.validate(equiv));
+            builder.addFindings( equivValidator.validate( equiv ) );
         }
 
         if (target.getDocumentation() != null) {
-            builder.addFindings(docValidator.validate(target.getDocumentation()));
+            builder.addFindings( docValidator.validate( target.getDocumentation() ) );
         }
 
         return builder.getFindings();

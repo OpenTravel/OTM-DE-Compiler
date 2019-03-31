@@ -13,11 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.model;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+package org.opentravel.schemacompiler.model;
 
 import org.opentravel.schemacompiler.event.ModelEvent;
 import org.opentravel.schemacompiler.event.ModelEventBuilder;
@@ -27,6 +24,10 @@ import org.opentravel.schemacompiler.model.TLAttribute.AttributeListManager;
 import org.opentravel.schemacompiler.model.TLIndicator.IndicatorListManager;
 import org.opentravel.schemacompiler.model.TLProperty.PropertyListManager;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+
 /**
  * Facet definition for complex library types.
  * 
@@ -34,13 +35,13 @@ import org.opentravel.schemacompiler.model.TLProperty.PropertyListManager;
  */
 public class TLFacet extends TLPatchableFacet implements TLAliasOwner, TLContextReferrer {
 
-	private static final String FACET_OPERATION_NOT_SUPPORTED = "Operation not supported for facets.";
-	
-	private AliasListManager aliasManager = new AliasListManager(this);
+    private static final String FACET_OPERATION_NOT_SUPPORTED = "Operation not supported for facets.";
+
+    private AliasListManager aliasManager = new AliasListManager( this );
     private FacetAliasManager facetAliasManager = new FacetAliasManager();
-    private AttributeListManager attributeManager = new AttributeListManager(this);
-    private PropertyListManager elementManager = new PropertyListManager(this);
-    private IndicatorListManager indicatorManager = new IndicatorListManager(this);
+    private AttributeListManager attributeManager = new AttributeListManager( this );
+    private PropertyListManager elementManager = new PropertyListManager( this );
+    private IndicatorListManager indicatorManager = new IndicatorListManager( this );
     private String context;
     private boolean notExtendable;
 
@@ -49,35 +50,34 @@ public class TLFacet extends TLPatchableFacet implements TLAliasOwner, TLContext
      */
     @Override
     public void setOwningEntity(TLFacetOwner owningEntity) {
-    	TLFacetOwner oldOwningEntity = getOwningEntity();
-    	
-        super.setOwningEntity(owningEntity);
-        
+        TLFacetOwner oldOwningEntity = getOwningEntity();
+
+        super.setOwningEntity( owningEntity );
+
         if (oldOwningEntity != owningEntity) {
             // Unregister the derived entity manager for the old facet owner (if necessary)
             if (oldOwningEntity != null) {
                 AliasListManager oldOwnerAliasManager = getOwnerAliasManager( oldOwningEntity );
 
                 if (oldOwnerAliasManager != null) {
-                	oldOwnerAliasManager.removeDerivedListManager(facetAliasManager);
+                    oldOwnerAliasManager.removeDerivedListManager( facetAliasManager );
                 }
             }
-            
+
             // Register a derived entity list manager to synchronize the aliases of the owner
             // with those of this facet.
             AliasListManager newOwnerAliasManager = getOwnerAliasManager( owningEntity );
 
             if (newOwnerAliasManager != null) {
-            	newOwnerAliasManager.addDerivedListManager(facetAliasManager);
+                newOwnerAliasManager.addDerivedListManager( facetAliasManager );
             }
         }
     }
-    
+
     /**
-     * Returns the <code>AliasListManager</code> for the given facet owner, or null
-     * if one is not defined.
+     * Returns the <code>AliasListManager</code> for the given facet owner, or null if one is not defined.
      * 
-     * @param owningEntity  the facet owner for which to return the alias list manager
+     * @param owningEntity the facet owner for which to return the alias list manager
      * @return AliasListManager
      */
     private AliasListManager getOwnerAliasManager(TLFacetOwner owningEntity) {
@@ -88,24 +88,23 @@ public class TLFacet extends TLPatchableFacet implements TLAliasOwner, TLContext
 
         } else if (owningEntity instanceof TLCoreObject) {
             ownerAliasManager = ((TLCoreObject) owningEntity).aliasManager;
-            
+
         } else if (owningEntity instanceof TLChoiceObject) {
             ownerAliasManager = ((TLChoiceObject) owningEntity).aliasManager;
-            
+
         } else if (owningEntity instanceof TLContextualFacet) {
             ownerAliasManager = ((TLFacet) owningEntity).aliasManager;
         }
         return ownerAliasManager;
     }
-    
+
     /**
      * @see org.opentravel.schemacompiler.model.TLAbstractFacet#declaresContent()
      */
     @Override
     public boolean declaresContent() {
         return super.declaresContent() || !attributeManager.getChildren().isEmpty()
-                || !elementManager.getChildren().isEmpty()
-                || !indicatorManager.getChildren().isEmpty();
+            || !elementManager.getChildren().isEmpty() || !indicatorManager.getChildren().isEmpty();
     }
 
     /**
@@ -116,17 +115,16 @@ public class TLFacet extends TLPatchableFacet implements TLAliasOwner, TLContext
         attributeManager.clearChildren();
         elementManager.clearChildren();
         indicatorManager.clearChildren();
-        setDocumentation(null);
-        setNotExtendable(false);
-        setContext(null);
-        publishEvent(new ModelEventBuilder(ModelEventType.FACET_CLEARED, this)
-                .setAffectedItem(this).buildEvent());
+        setDocumentation( null );
+        setNotExtendable( false );
+        setContext( null );
+        publishEvent(
+            new ModelEventBuilder( ModelEventType.FACET_CLEARED, this ).setAffectedItem( this ).buildEvent() );
     }
 
     /**
-     * Returns the <code>AliasListManager</code> for this facet. NOTE: This method is used to
-     * coordinate the internal integrity of the model and should not be accessed by external
-     * components or services.
+     * Returns the <code>AliasListManager</code> for this facet. NOTE: This method is used to coordinate the internal
+     * integrity of the model and should not be accessed by external components or services.
      * 
      * @return AliasListManager
      */
@@ -144,12 +142,12 @@ public class TLFacet extends TLPatchableFacet implements TLAliasOwner, TLContext
         StringBuilder localName = new StringBuilder();
 
         if (owningEntity != null) {
-            localName.append(owningEntity.getLocalName()).append('_');
+            localName.append( owningEntity.getLocalName() ).append( '_' );
         }
         if (facetType != null) {
-            localName.append(facetType.getIdentityName(null));
+            localName.append( facetType.getIdentityName( null ) );
         } else {
-            localName.append("Unnamed_Facet");
+            localName.append( "Unnamed_Facet" );
         }
         return localName.toString();
     }
@@ -164,12 +162,12 @@ public class TLFacet extends TLPatchableFacet implements TLAliasOwner, TLContext
         StringBuilder identity = new StringBuilder();
 
         if (owningEntity != null) {
-            identity.append(owningEntity.getValidationIdentity()).append("/");
+            identity.append( owningEntity.getValidationIdentity() ).append( "/" );
         }
         if (facetType == null) {
-            identity.append("[Unnamed Facet]");
+            identity.append( "[Unnamed Facet]" );
         } else {
-            identity.append(facetType.getIdentityName(null));
+            identity.append( facetType.getIdentityName( null ) );
         }
         return identity.toString();
     }
@@ -185,46 +183,29 @@ public class TLFacet extends TLPatchableFacet implements TLAliasOwner, TLContext
      * @see org.opentravel.schemacompiler.model.TLAliasOwner#getAlias(java.lang.String)
      */
     public TLAlias getAlias(String aliasName) {
-        return aliasManager.getChild(aliasName);
+        return aliasManager.getChild( aliasName );
     }
 
     /**
      * @see org.opentravel.schemacompiler.model.TLAliasOwner#addAlias(org.opentravel.schemacompiler.model.TLAlias)
      */
     public void addAlias(TLAlias alias) {
-        throw new UnsupportedOperationException(FACET_OPERATION_NOT_SUPPORTED);
+        throw new UnsupportedOperationException( FACET_OPERATION_NOT_SUPPORTED );
     }
 
     /**
-     * @see org.opentravel.schemacompiler.model.TLAliasOwner#addAlias(int,
-     *      org.opentravel.schemacompiler.model.TLAlias)
+     * @see org.opentravel.schemacompiler.model.TLAliasOwner#addAlias(int, org.opentravel.schemacompiler.model.TLAlias)
      */
     @Override
     public void addAlias(int index, TLAlias alias) {
-        throw new UnsupportedOperationException(FACET_OPERATION_NOT_SUPPORTED);
+        throw new UnsupportedOperationException( FACET_OPERATION_NOT_SUPPORTED );
     }
 
     /**
      * @see org.opentravel.schemacompiler.model.TLAliasOwner#removeAlias(org.opentravel.schemacompiler.model.TLAlias)
      */
     public void removeAlias(TLAlias alias) {
-        throw new UnsupportedOperationException(FACET_OPERATION_NOT_SUPPORTED);
-    }
-
-    /**
-     * @see org.opentravel.schemacompiler.model.TLAliasOwner#moveUp(org.opentravel.schemacompiler.model.TLAlias)
-     */
-    @Override
-    public void moveUp(TLAlias alias) {
-        throw new UnsupportedOperationException(FACET_OPERATION_NOT_SUPPORTED);
-    }
-
-    /**
-     * @see org.opentravel.schemacompiler.model.TLAliasOwner#moveDown(org.opentravel.schemacompiler.model.TLAlias)
-     */
-    @Override
-    public void moveDown(TLAlias alias) {
-        throw new UnsupportedOperationException(FACET_OPERATION_NOT_SUPPORTED);
+        throw new UnsupportedOperationException( FACET_OPERATION_NOT_SUPPORTED );
     }
 
     /**
@@ -232,17 +213,17 @@ public class TLFacet extends TLPatchableFacet implements TLAliasOwner, TLContext
      */
     @Override
     public void sortAliases(Comparator<TLAlias> comparator) {
-        throw new UnsupportedOperationException(FACET_OPERATION_NOT_SUPPORTED);
+        throw new UnsupportedOperationException( FACET_OPERATION_NOT_SUPPORTED );
     }
 
     /**
-	 * @see org.opentravel.schemacompiler.model.TLAliasOwner#getAliasListManager()
-	 */
-	@SuppressWarnings("unchecked")
-	@Override
-	public ChildEntityListManager<TLAlias,TLAliasOwner> getAliasListManager() {
-		return aliasManager;
-	}
+     * @see org.opentravel.schemacompiler.model.TLAliasOwner#getAliasListManager()
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public ChildEntityListManager<TLAlias,TLAliasOwner> getAliasListManager() {
+        return aliasManager;
+    }
 
     /**
      * @see org.opentravel.schemacompiler.model.TLAttributeOwner#getAttributes()
@@ -255,14 +236,14 @@ public class TLFacet extends TLPatchableFacet implements TLAliasOwner, TLContext
      * @see org.opentravel.schemacompiler.model.TLAttributeOwner#getAttribute(java.lang.String)
      */
     public TLAttribute getAttribute(String attributeName) {
-        return attributeManager.getChild(attributeName);
+        return attributeManager.getChild( attributeName );
     }
 
     /**
      * @see org.opentravel.schemacompiler.model.TLAttributeOwner#addAttribute(org.opentravel.schemacompiler.model.TLAttribute)
      */
     public void addAttribute(TLAttribute attribute) {
-        attributeManager.addChild(attribute);
+        attributeManager.addChild( attribute );
     }
 
     /**
@@ -271,30 +252,14 @@ public class TLFacet extends TLPatchableFacet implements TLAliasOwner, TLContext
      */
     @Override
     public void addAttribute(int index, TLAttribute attribute) {
-        attributeManager.addChild(index, attribute);
+        attributeManager.addChild( index, attribute );
     }
 
     /**
      * @see org.opentravel.schemacompiler.model.TLAttributeOwner#removeAttribute(org.opentravel.schemacompiler.model.TLAttribute)
      */
     public void removeAttribute(TLAttribute attribute) {
-        attributeManager.removeChild(attribute);
-    }
-
-    /**
-     * @see org.opentravel.schemacompiler.model.TLAttributeOwner#moveUp(org.opentravel.schemacompiler.model.TLAttribute)
-     */
-    @Override
-    public void moveUp(TLAttribute attribute) {
-        attributeManager.moveUp(attribute);
-    }
-
-    /**
-     * @see org.opentravel.schemacompiler.model.TLAttributeOwner#moveDown(org.opentravel.schemacompiler.model.TLAttribute)
-     */
-    @Override
-    public void moveDown(TLAttribute attribute) {
-        attributeManager.moveDown(attribute);
+        attributeManager.removeChild( attribute );
     }
 
     /**
@@ -302,7 +267,7 @@ public class TLFacet extends TLPatchableFacet implements TLAliasOwner, TLContext
      */
     @Override
     public void sortAttributes(Comparator<TLAttribute> comparator) {
-        attributeManager.sortChildren(comparator);
+        attributeManager.sortChildren( comparator );
     }
 
     /**
@@ -318,7 +283,7 @@ public class TLFacet extends TLPatchableFacet implements TLAliasOwner, TLContext
      */
     @Override
     public TLProperty getElement(String elementName) {
-        return elementManager.getChild(elementName);
+        return elementManager.getChild( elementName );
     }
 
     /**
@@ -326,7 +291,7 @@ public class TLFacet extends TLPatchableFacet implements TLAliasOwner, TLContext
      */
     @Override
     public void addElement(TLProperty element) {
-        elementManager.addChild(element);
+        elementManager.addChild( element );
     }
 
     /**
@@ -335,7 +300,7 @@ public class TLFacet extends TLPatchableFacet implements TLAliasOwner, TLContext
      */
     @Override
     public void addElement(int index, TLProperty element) {
-        elementManager.addChild(index, element);
+        elementManager.addChild( index, element );
     }
 
     /**
@@ -343,23 +308,7 @@ public class TLFacet extends TLPatchableFacet implements TLAliasOwner, TLContext
      */
     @Override
     public void removeProperty(TLProperty element) {
-        elementManager.removeChild(element);
-    }
-
-    /**
-     * @see org.opentravel.schemacompiler.model.TLPropertyOwner#moveUp(org.opentravel.schemacompiler.model.TLProperty)
-     */
-    @Override
-    public void moveUp(TLProperty element) {
-        elementManager.moveUp(element);
-    }
-
-    /**
-     * @see org.opentravel.schemacompiler.model.TLPropertyOwner#moveDown(org.opentravel.schemacompiler.model.TLProperty)
-     */
-    @Override
-    public void moveDown(TLProperty element) {
-        elementManager.moveDown(element);
+        elementManager.removeChild( element );
     }
 
     /**
@@ -367,7 +316,7 @@ public class TLFacet extends TLPatchableFacet implements TLAliasOwner, TLContext
      */
     @Override
     public void sortElements(Comparator<TLProperty> comparator) {
-        elementManager.sortChildren(comparator);
+        elementManager.sortChildren( comparator );
     }
 
     /**
@@ -383,7 +332,7 @@ public class TLFacet extends TLPatchableFacet implements TLAliasOwner, TLContext
      */
     @Override
     public TLIndicator getIndicator(String indicatorName) {
-        return indicatorManager.getChild(indicatorName);
+        return indicatorManager.getChild( indicatorName );
     }
 
     /**
@@ -391,7 +340,7 @@ public class TLFacet extends TLPatchableFacet implements TLAliasOwner, TLContext
      */
     @Override
     public void addIndicator(TLIndicator indicator) {
-        indicatorManager.addChild(indicator);
+        indicatorManager.addChild( indicator );
     }
 
     /**
@@ -400,7 +349,7 @@ public class TLFacet extends TLPatchableFacet implements TLAliasOwner, TLContext
      */
     @Override
     public void addIndicator(int index, TLIndicator indicator) {
-        indicatorManager.addChild(index, indicator);
+        indicatorManager.addChild( index, indicator );
     }
 
     /**
@@ -408,23 +357,7 @@ public class TLFacet extends TLPatchableFacet implements TLAliasOwner, TLContext
      */
     @Override
     public void removeIndicator(TLIndicator indicator) {
-        indicatorManager.removeChild(indicator);
-    }
-
-    /**
-     * @see org.opentravel.schemacompiler.model.TLIndicatorOwner#moveUp(org.opentravel.schemacompiler.model.TLIndicator)
-     */
-    @Override
-    public void moveUp(TLIndicator indicator) {
-        indicatorManager.moveUp(indicator);
-    }
-
-    /**
-     * @see org.opentravel.schemacompiler.model.TLIndicatorOwner#moveDown(org.opentravel.schemacompiler.model.TLIndicator)
-     */
-    @Override
-    public void moveDown(TLIndicator indicator) {
-        indicatorManager.moveDown(indicator);
+        indicatorManager.removeChild( indicator );
     }
 
     /**
@@ -432,39 +365,103 @@ public class TLFacet extends TLPatchableFacet implements TLAliasOwner, TLContext
      */
     @Override
     public void sortIndicators(Comparator<TLIndicator> comparator) {
-        indicatorManager.sortChildren(comparator);
+        indicatorManager.sortChildren( comparator );
     }
 
     /**
-	 * @see org.opentravel.schemacompiler.model.TLMemberFieldOwner#getMemberFields()
-	 */
-	@SuppressWarnings("unchecked")
-	@Override
-	public <O extends TLMemberFieldOwner> List<TLMemberField<O>> getMemberFields() {
-		List<TLMemberField<O>> memberFields = new ArrayList<>();
-		
-		getAttributes().forEach( f -> memberFields.add( (TLMemberField<O>) f ) );
-		getElements().forEach( f -> memberFields.add( (TLMemberField<O>) f ) );
-		getIndicators().forEach( f -> memberFields.add( (TLMemberField<O>) f ) );
-		return memberFields;
-	}
+     * @see org.opentravel.schemacompiler.model.TLAliasOwner#moveUp(org.opentravel.schemacompiler.model.TLAlias)
+     */
+    @Override
+    public void moveUp(TLAlias alias) {
+        throw new UnsupportedOperationException( FACET_OPERATION_NOT_SUPPORTED );
+    }
 
-	/**
-	 * @see org.opentravel.schemacompiler.model.TLMemberFieldOwner#getMemberField(java.lang.String)
-	 */
-	@SuppressWarnings("unchecked")
-	@Override
-	public <O extends TLMemberFieldOwner> TLMemberField<O> getMemberField(String fieldName) {
-		TLMemberField<O> memberField = (TLMemberField<O>) getAttribute( fieldName );
-		
-		if (memberField == null) {
-			memberField = (TLMemberField<O>) getElement( fieldName );
-		}
-		if (memberField == null) {
-			memberField = (TLMemberField<O>) getIndicator( fieldName );
-		}
-		return memberField;
-	}
+    /**
+     * @see org.opentravel.schemacompiler.model.TLAttributeOwner#moveUp(org.opentravel.schemacompiler.model.TLAttribute)
+     */
+    @Override
+    public void moveUp(TLAttribute attribute) {
+        attributeManager.moveUp( attribute );
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.model.TLPropertyOwner#moveUp(org.opentravel.schemacompiler.model.TLProperty)
+     */
+    @Override
+    public void moveUp(TLProperty element) {
+        elementManager.moveUp( element );
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.model.TLIndicatorOwner#moveUp(org.opentravel.schemacompiler.model.TLIndicator)
+     */
+    @Override
+    public void moveUp(TLIndicator indicator) {
+        indicatorManager.moveUp( indicator );
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.model.TLAliasOwner#moveDown(org.opentravel.schemacompiler.model.TLAlias)
+     */
+    @Override
+    public void moveDown(TLAlias alias) {
+        throw new UnsupportedOperationException( FACET_OPERATION_NOT_SUPPORTED );
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.model.TLAttributeOwner#moveDown(org.opentravel.schemacompiler.model.TLAttribute)
+     */
+    @Override
+    public void moveDown(TLAttribute attribute) {
+        attributeManager.moveDown( attribute );
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.model.TLPropertyOwner#moveDown(org.opentravel.schemacompiler.model.TLProperty)
+     */
+    @Override
+    public void moveDown(TLProperty element) {
+        elementManager.moveDown( element );
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.model.TLIndicatorOwner#moveDown(org.opentravel.schemacompiler.model.TLIndicator)
+     */
+    @Override
+    public void moveDown(TLIndicator indicator) {
+        indicatorManager.moveDown( indicator );
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.model.TLMemberFieldOwner#getMemberFields()
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public <O extends TLMemberFieldOwner> List<TLMemberField<O>> getMemberFields() {
+        List<TLMemberField<O>> memberFields = new ArrayList<>();
+
+        getAttributes().forEach( f -> memberFields.add( (TLMemberField<O>) f ) );
+        getElements().forEach( f -> memberFields.add( (TLMemberField<O>) f ) );
+        getIndicators().forEach( f -> memberFields.add( (TLMemberField<O>) f ) );
+        return memberFields;
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.model.TLMemberFieldOwner#getMemberField(java.lang.String)
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public <O extends TLMemberFieldOwner> TLMemberField<O> getMemberField(String fieldName) {
+        TLMemberField<O> memberField = (TLMemberField<O>) getAttribute( fieldName );
+
+        if (memberField == null) {
+            memberField = (TLMemberField<O>) getElement( fieldName );
+        }
+        if (memberField == null) {
+            memberField = (TLMemberField<O>) getIndicator( fieldName );
+        }
+        return memberField;
+    }
 
     /**
      * Returns the value of the 'notExtendable' field.
@@ -478,20 +475,19 @@ public class TLFacet extends TLPatchableFacet implements TLAliasOwner, TLContext
     /**
      * Assigns the value of the 'notExtendable' field.
      * 
-     * @param notExtendable
-     *            the field value to assign
+     * @param notExtendable the field value to assign
      */
     public void setNotExtendable(boolean notExtendable) {
-        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.NOT_EXTENDABLE_FLAG_MODIFIED,
-                this).setOldValue(this.notExtendable).setNewValue(notExtendable).buildEvent();
+        ModelEvent<?> event = new ModelEventBuilder( ModelEventType.NOT_EXTENDABLE_FLAG_MODIFIED, this )
+            .setOldValue( this.notExtendable ).setNewValue( notExtendable ).buildEvent();
 
         this.notExtendable = notExtendable;
-        publishEvent(event);
+        publishEvent( event );
     }
 
     /**
      * @see org.opentravel.schemacompiler.model.TLContextReferrer#getContext()
-     * @deprecated  Use is discontinued - no new functional equivalent
+     * @deprecated Use is discontinued - no new functional equivalent
      */
     @Deprecated
     public String getContext() {
@@ -500,22 +496,22 @@ public class TLFacet extends TLPatchableFacet implements TLAliasOwner, TLContext
 
     /**
      * @see org.opentravel.schemacompiler.model.TLContextReferrer#setContext(java.lang.String)
-     * @deprecated  Use is discontinued - no new functional equivalent
+     * @deprecated Use is discontinued - no new functional equivalent
      */
     @Deprecated
     public void setContext(String context) {
-        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.CONTEXT_MODIFIED, this)
-        		.setOldValue(this.context).setNewValue(context).buildEvent();
+        ModelEvent<?> event = new ModelEventBuilder( ModelEventType.CONTEXT_MODIFIED, this ).setOldValue( this.context )
+            .setNewValue( context ).buildEvent();
 
         this.context = context;
-        publishEvent(event);
+        publishEvent( event );
     }
 
     /**
      * Returns the value of the 'label' field.
      * 
      * @return String
-     * @deprecated  Use {@link TLContextualFacet#getName()} instead
+     * @deprecated Use {@link TLContextualFacet#getName()} instead
      */
     @Deprecated
     public String getLabel() {
@@ -525,28 +521,26 @@ public class TLFacet extends TLPatchableFacet implements TLAliasOwner, TLContext
     /**
      * Assigns the value of the 'label' field.
      * 
-     * @param label
-     *            the field value to assign
-     * @deprecated  Use {@link TLContextualFacet#setName(String)} instead
+     * @param label the field value to assign
+     * @deprecated Use {@link TLContextualFacet#setName(String)} instead
      */
     @Deprecated
     public void setLabel(String label) {
-    		// No action required for deprecated operation
+        // No action required for deprecated operation
     }
 
     /**
-     * List manager that synchronizes the list of derived aliases with those of the owning business
-     * or core object.
+     * List manager that synchronizes the list of derived aliases with those of the owning business or core object.
      * 
      * @author S. Livezey
      */
-    private class FacetAliasManager extends DerivedChildEntityListManager<TLAlias, TLAlias> {
+    private class FacetAliasManager extends DerivedChildEntityListManager<TLAlias,TLAlias> {
 
         /**
          * Default constructor.
          */
         public FacetAliasManager() {
-            super(aliasManager);
+            super( aliasManager );
         }
 
         /**
@@ -562,29 +556,31 @@ public class TLFacet extends TLPatchableFacet implements TLAliasOwner, TLContext
          */
         @Override
         protected String getDerivedEntityName(String originalEntityName) {
-        	// TODO: Refactor so that the deprecated getLabel() method is not called (root cause is contextual facet refactoring)
-            return (originalEntityName == null) ? null : (originalEntityName + "_" + getFacetType()
-                    .getIdentityName(getLabel()));
+            // TODO: Refactor so that the deprecated getLabel() method is not called (root cause is contextual facet
+            // refactoring)
+            return (originalEntityName == null) ? null
+                : (originalEntityName + "_" + getFacetType().getIdentityName( getLabel() ));
         }
 
         /**
-		 * @see org.opentravel.schemacompiler.model.DerivedChildEntityListManager#setDerivedEntityName(java.lang.Object, java.lang.String)
-		 */
-		@Override
-		protected void setDerivedEntityName(TLAlias derivedEntity, String derivedEntityName) {
-			if (derivedEntity != null) {
-				derivedEntity.setName(derivedEntityName);
-			}
-		}
+         * @see org.opentravel.schemacompiler.model.DerivedChildEntityListManager#setDerivedEntityName(java.lang.Object,
+         *      java.lang.String)
+         */
+        @Override
+        protected void setDerivedEntityName(TLAlias derivedEntity, String derivedEntityName) {
+            if (derivedEntity != null) {
+                derivedEntity.setName( derivedEntityName );
+            }
+        }
 
-		/**
+        /**
          * @see org.opentravel.schemacompiler.model.DerivedChildEntityListManager#createDerivedEntity(java.lang.Object)
          */
         @Override
         protected TLAlias createDerivedEntity(TLAlias originalEntity) {
             TLAlias derivedAlias = new TLAlias();
 
-            derivedAlias.setName(getDerivedEntityName(getOriginalEntityName(originalEntity)));
+            derivedAlias.setName( getDerivedEntityName( getOriginalEntityName( originalEntity ) ) );
             return derivedAlias;
         }
 

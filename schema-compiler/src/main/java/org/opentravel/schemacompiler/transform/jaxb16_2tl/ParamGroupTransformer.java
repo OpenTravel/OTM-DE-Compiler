@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.transform.jaxb16_2tl;
 
 import org.opentravel.ns.ota2.librarymodel_v01_06.Documentation;
@@ -25,38 +26,37 @@ import org.opentravel.schemacompiler.transform.ObjectTransformer;
 import org.opentravel.schemacompiler.transform.symbols.DefaultTransformerContext;
 
 /**
- * Handles the transformation of objects from the <code>ParamGroup</code> type to the
- * <code>TLParamGroup</code> type.
+ * Handles the transformation of objects from the <code>ParamGroup</code> type to the <code>TLParamGroup</code> type.
  *
  * @author S. Livezey
  */
 public class ParamGroupTransformer extends ComplexTypeTransformer<ParamGroup,TLParamGroup> {
-	
-	/**
-	 * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
-	 */
-	@Override
-	public TLParamGroup transform(ParamGroup source) {
-        ObjectTransformer<Parameter, TLParameter, DefaultTransformerContext> paramTransformer =
-        		getTransformerFactory().getTransformer(Parameter.class, TLParameter.class);
-		TLParamGroup paramGroup = new TLParamGroup();
-		
-		paramGroup.setName(trimString(source.getName()));
-		paramGroup.setFacetRefName(trimString(source.getFacetName()));
-		paramGroup.setIdGroup(source.isIdGroup());
-		
+
+    /**
+     * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
+     */
+    @Override
+    public TLParamGroup transform(ParamGroup source) {
+        ObjectTransformer<Parameter,TLParameter,DefaultTransformerContext> paramTransformer =
+            getTransformerFactory().getTransformer( Parameter.class, TLParameter.class );
+        TLParamGroup paramGroup = new TLParamGroup();
+
+        paramGroup.setName( trimString( source.getName() ) );
+        paramGroup.setFacetRefName( trimString( source.getFacetName() ) );
+        paramGroup.setIdGroup( source.isIdGroup() );
+
         if (source.getDocumentation() != null) {
-            ObjectTransformer<Documentation, TLDocumentation, DefaultTransformerContext> docTransformer = getTransformerFactory()
-                    .getTransformer(Documentation.class, TLDocumentation.class);
+            ObjectTransformer<Documentation,TLDocumentation,DefaultTransformerContext> docTransformer =
+                getTransformerFactory().getTransformer( Documentation.class, TLDocumentation.class );
 
-            paramGroup.setDocumentation(docTransformer.transform(source.getDocumentation()));
+            paramGroup.setDocumentation( docTransformer.transform( source.getDocumentation() ) );
         }
-        
+
         for (Parameter sourceParam : source.getParameter()) {
-        	paramGroup.addParameter(paramTransformer.transform(sourceParam));
+            paramGroup.addParameter( paramTransformer.transform( sourceParam ) );
         }
 
-		return paramGroup;
-	}
-	
+        return paramGroup;
+    }
+
 }

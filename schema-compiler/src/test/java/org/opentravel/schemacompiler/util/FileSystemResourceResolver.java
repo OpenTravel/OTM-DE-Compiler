@@ -13,7 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.util;
+
+import org.w3c.dom.ls.LSInput;
+import org.w3c.dom.ls.LSResourceResolver;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -22,83 +26,74 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 
-import org.w3c.dom.ls.LSInput;
-import org.w3c.dom.ls.LSResourceResolver;
-
 /**
  * Resolves XML resources using the local classpath resources.
  * 
  * @author S. Livezey
  */
 public class FileSystemResourceResolver implements LSResourceResolver {
-	
-	private File sourceFolder;
-	private File builtInsFolder;
-	private File legacyFolder;
-	
-	/**
-	 * Constructor that provides the location of the original source schema file.
-	 * 
-	 * @param sourceSchema  the location of the original source schema file
-	 */
-	public FileSystemResourceResolver(File sourceSchema) {
-		this.sourceFolder = sourceSchema.getParentFile();
-		this.builtInsFolder = new File( this.sourceFolder, "/built-ins" );
-		this.legacyFolder = new File( this.sourceFolder, "/legacy" );
-	}
-	
+
+    private File sourceFolder;
+    private File builtInsFolder;
+    private File legacyFolder;
+
     /**
-     * @see org.w3c.dom.ls.LSResourceResolver#resolveResource(java.lang.String, java.lang.String,
-     *      java.lang.String, java.lang.String, java.lang.String)
+     * Constructor that provides the location of the original source schema file.
+     * 
+     * @param sourceSchema the location of the original source schema file
+     */
+    public FileSystemResourceResolver(File sourceSchema) {
+        this.sourceFolder = sourceSchema.getParentFile();
+        this.builtInsFolder = new File( this.sourceFolder, "/built-ins" );
+        this.legacyFolder = new File( this.sourceFolder, "/legacy" );
+    }
+
+    /**
+     * @see org.w3c.dom.ls.LSResourceResolver#resolveResource(java.lang.String, java.lang.String, java.lang.String,
+     *      java.lang.String, java.lang.String)
      */
     @Override
-    public LSInput resolveResource(final String type, final String namespaceURI,
-            final String publicID, final String systemID, final String baseURI) {
+    public LSInput resolveResource(final String type, final String namespaceURI, final String publicID,
+        final String systemID, final String baseURI) {
         LSInput input = null;
 
         if (systemID != null) {
-            final InputStream resourceStream = getResourceStream(systemID);
-            final Reader resourceReader = (resourceStream == null) ? null : new InputStreamReader(resourceStream);
+            final InputStream resourceStream = getResourceStream( systemID );
+            final Reader resourceReader = (resourceStream == null) ? null : new InputStreamReader( resourceStream );
 
             if (resourceStream != null) {
                 input = new LSInput() {
-                	
-                	private String _systemID = systemID;
-                	private String _publicID = publicID;
-                	
+
+                    private String _systemID = systemID;
+                    private String _publicID = publicID;
+
                     @Override
                     public void setSystemId(String systemID) {
-                    	this._systemID = systemID;
+                        this._systemID = systemID;
                     }
 
                     @Override
-                    public void setStringData(String stringData) {
-                    }
+                    public void setStringData(String stringData) {}
 
                     @Override
                     public void setPublicId(String publicID) {
-                    	this._publicID = publicID;
+                        this._publicID = publicID;
                     }
 
                     @Override
-                    public void setEncoding(String encoding) {
-                    }
+                    public void setEncoding(String encoding) {}
 
                     @Override
-                    public void setCharacterStream(Reader characterStream) {
-                    }
+                    public void setCharacterStream(Reader characterStream) {}
 
                     @Override
-                    public void setCertifiedText(boolean certifiedText) {
-                    }
+                    public void setCertifiedText(boolean certifiedText) {}
 
                     @Override
-                    public void setByteStream(InputStream byteStream) {
-                    }
+                    public void setByteStream(InputStream byteStream) {}
 
                     @Override
-                    public void setBaseURI(String baseURI) {
-                    }
+                    public void setBaseURI(String baseURI) {}
 
                     @Override
                     public String getSystemId() {
@@ -146,33 +141,32 @@ public class FileSystemResourceResolver implements LSResourceResolver {
     }
 
     /**
-     * Returns an input stream to the resource associated with the given systemID, or null if no
-     * such resource was defined in the application context.
+     * Returns an input stream to the resource associated with the given systemID, or null if no such resource was
+     * defined in the application context.
      * 
-     * @param systemID
-     *            the systemID for which to return an input stream
+     * @param systemID the systemID for which to return an input stream
      * @return InputStream
      */
     private InputStream getResourceStream(String systemID) {
         InputStream resourceStream = null;
         try {
-        	File schemaFile = new File( sourceFolder, "/" + systemID );
-        	
-        	if (!schemaFile.exists()) {
-        		schemaFile = new File( builtInsFolder, "/" + systemID );
-        	}
-        	if (!schemaFile.exists()) {
-        		schemaFile = new File( legacyFolder, "/" + systemID );
-        	}
-    		resourceStream = new FileInputStream( schemaFile );
-    		
+            File schemaFile = new File( sourceFolder, "/" + systemID );
+
+            if (!schemaFile.exists()) {
+                schemaFile = new File( builtInsFolder, "/" + systemID );
+            }
+            if (!schemaFile.exists()) {
+                schemaFile = new File( legacyFolder, "/" + systemID );
+            }
+            resourceStream = new FileInputStream( schemaFile );
+
         } catch (IOException e) {
             // no error - return a null input stream
         }
         if (resourceStream == null) {
-            System.out.println("WARNING: No associated schema resource defined for System-ID: " + systemID);
+            System.out.println( "WARNING: No associated schema resource defined for System-ID: " + systemID );
         }
         return resourceStream;
     }
-    
+
 }

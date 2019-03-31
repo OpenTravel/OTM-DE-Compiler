@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.codegen.impl;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerationContext;
@@ -32,8 +33,7 @@ public class CodeGenerationTransformerContext extends DefaultTransformerContext 
     /**
      * Constructor that assigns the code generator for this transformation context.
      * 
-     * @param codeGenerator
-     *            the code generator instance to associate with this context
+     * @param codeGenerator the code generator instance to associate with this context
      */
     public CodeGenerationTransformerContext(CodeGenerator<?> codeGenerator) {
         this.codeGenerator = codeGenerator;
@@ -42,10 +42,11 @@ public class CodeGenerationTransformerContext extends DefaultTransformerContext 
     /**
      * Returns the code generator instance associated with this context.
      * 
-     * @return CodeGenerator<S>
+     * @param <S> the type of item for which output is being generated
+     * @return CodeGenerator&lt;S&gt;
      */
     @SuppressWarnings("unchecked")
-	public <S> CodeGenerator<S> getCodeGenerator() {
+    public <S> CodeGenerator<S> getCodeGenerator() {
         return (CodeGenerator<S>) codeGenerator;
     }
 
@@ -61,8 +62,7 @@ public class CodeGenerationTransformerContext extends DefaultTransformerContext 
     /**
      * Assigns the current code generation context.
      * 
-     * @param codegenContext
-     *            the code generation context to assign
+     * @param codegenContext the code generation context to assign
      */
     public void setCodegenContext(CodeGenerationContext codegenContext) {
         this.codegenContext = codegenContext;

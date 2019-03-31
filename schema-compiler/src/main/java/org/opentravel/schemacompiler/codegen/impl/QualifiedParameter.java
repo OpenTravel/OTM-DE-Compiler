@@ -20,56 +20,56 @@ import org.opentravel.schemacompiler.model.TLParameter;
 import org.opentravel.schemacompiler.model.TLResourceParentRef;
 
 /**
- * Represents the pairing of zero or more <code>TLResourceParentRefs</code> and a
- * <code>TLParameter</code> for the purposes of generating an API specification.
+ * Represents the pairing of zero or more <code>TLResourceParentRefs</code> and a <code>TLParameter</code> for the
+ * purposes of generating an API specification.
  */
 public class QualifiedParameter {
-	
-	private TLResourceParentRef parentRef;
-	private TLParameter parameter;
-	
-	/**
-	 * Full constructor.
-	 * 
-	 * @param parentRef  the parent reference for the the qualified action
-	 * @param parameter  the OTM parameter for which an API parameter will be generated
-	 */
-	public QualifiedParameter(TLResourceParentRef parentRef, TLParameter parameter) {
-		this.parentRef = parentRef;
-		this.parameter = parameter;
-	}
-	
-	/**
-	 * Returns theparent reference for the the qualified action.
-	 *
-	 * @return TLResourceParentRef
-	 */
-	public TLResourceParentRef getParentRef() {
-		return parentRef;
-	}
-	
-	/**
-	 * Returns the OTM parameter for which an API parameter will be generated.
-	 *
-	 * @return TLParameter
-	 */
-	public TLParameter getParameter() {
-		return parameter;
-	}
-	
-	/**
-	 * Returns the qualified name of this parameter.
-	 * 
-	 * @return String
-	 */
-	public String getParameterName() {
-		StringBuilder nameBuilder = new StringBuilder();
-		
-		if (parentRef != null) {
-			nameBuilder.append( parentRef.getParentResource().getName() + "_" );
-		}
-		nameBuilder.append( parameter.getFieldRef().getName() );
-		return nameBuilder.toString();
-	}
-	
+
+    private TLResourceParentRef parentRef;
+    private TLParameter parameter;
+
+    /**
+     * Full constructor.
+     * 
+     * @param parentRef the parent reference for the the qualified action
+     * @param parameter the OTM parameter for which an API parameter will be generated
+     */
+    public QualifiedParameter(TLResourceParentRef parentRef, TLParameter parameter) {
+        this.parentRef = parentRef;
+        this.parameter = parameter;
+    }
+
+    /**
+     * Returns theparent reference for the the qualified action.
+     *
+     * @return TLResourceParentRef
+     */
+    public TLResourceParentRef getParentRef() {
+        return parentRef;
+    }
+
+    /**
+     * Returns the OTM parameter for which an API parameter will be generated.
+     *
+     * @return TLParameter
+     */
+    public TLParameter getParameter() {
+        return parameter;
+    }
+
+    /**
+     * Returns the qualified name of this parameter.
+     * 
+     * @return String
+     */
+    public String getParameterName() {
+        StringBuilder nameBuilder = new StringBuilder();
+
+        if (parentRef != null) {
+            nameBuilder.append( parentRef.getParentResource().getName() + "_" );
+        }
+        nameBuilder.append( parameter.getFieldRef().getName() );
+        return nameBuilder.toString();
+    }
+
 }

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.codegen.impl;
 
 import java.util.ArrayList;
@@ -32,25 +33,23 @@ public class CodegenArtifacts {
     /**
      * Adds an artifact to the current list.
      * 
-     * @param artifact
-     *            the artifact to add (null is ignored without error)
+     * @param artifact the artifact to add (null is ignored without error)
      */
     public void addArtifact(Object artifact) {
         if (artifact != null) {
-            artifactList.add(artifact);
+            artifactList.add( artifact );
         }
     }
 
     /**
      * Adds the contents of the given list of artifacts to this collection.
      * 
-     * @param otherArtifacts
-     *            the other collection of artifacts to add (may be null)
+     * @param otherArtifacts the other collection of artifacts to add (may be null)
      */
     public void addAllArtifacts(CodegenArtifacts otherArtifacts) {
         if (otherArtifacts != null) {
             for (Object artifact : otherArtifacts.artifactList) {
-                addArtifact(artifact);
+                addArtifact( artifact );
             }
         }
     }
@@ -58,13 +57,12 @@ public class CodegenArtifacts {
     /**
      * Adds the contents of the given list of artifacts to this collection.
      * 
-     * @param artifacet
-     *            the collection of artifacts to add (may be null)
+     * @param artifacts the collection of artifacts to add (may be null)
      */
     public void addAllArtifacts(Collection<?> artifacts) {
         if (artifacts != null) {
             for (Object artifact : artifacts) {
-                addArtifact(artifact);
+                addArtifact( artifact );
             }
         }
     }
@@ -72,31 +70,29 @@ public class CodegenArtifacts {
     /**
      * Returns the list of all artifacts that have been added.
      * 
-     * @return List<Object>
+     * @return List&lt;Object&gt;
      */
     public List<Object> getAllArtifacts() {
-        return Collections.unmodifiableList(artifactList);
+        return Collections.unmodifiableList( artifactList );
     }
 
     /**
      * Returns a list artifacts that match the requested type.
      * 
-     * @param <A>
-     *            the type of artifact(s) to return
-     * @param artifactType
-     *            the type of artifact(s) to return
-     * @return List<A>
+     * @param <A> the type of artifact(s) to return
+     * @param artifactType the type of artifact(s) to return
+     * @return List&lt;A&gt;
      */
     @SuppressWarnings("unchecked")
     public <A> List<A> getArtifactsOfType(Class<A> artifactType) {
         List<A> aList = new ArrayList<>();
 
         for (Object artifact : artifactList) {
-            if ((artifact != null) && artifactType.isAssignableFrom(artifact.getClass())) {
-                aList.add((A) artifact);
+            if ((artifact != null) && artifactType.isAssignableFrom( artifact.getClass() )) {
+                aList.add( (A) artifact );
             }
         }
-        return Collections.unmodifiableList(aList);
+        return Collections.unmodifiableList( aList );
     }
 
 }

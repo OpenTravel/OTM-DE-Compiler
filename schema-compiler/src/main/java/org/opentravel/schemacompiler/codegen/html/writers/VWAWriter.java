@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.codegen.html.writers;
 
-import java.io.IOException;
+package org.opentravel.schemacompiler.codegen.html.writers;
 
 import org.opentravel.schemacompiler.codegen.html.Content;
 import org.opentravel.schemacompiler.codegen.html.builders.DocumentationBuilder;
@@ -27,100 +26,80 @@ import org.opentravel.schemacompiler.codegen.html.writers.info.VWAAttributeInfoW
 import org.opentravel.schemacompiler.codegen.html.writers.info.VWAIndicatorInfoWriter;
 import org.opentravel.schemacompiler.model.TLDocumentation;
 
+import java.io.IOException;
+
 @SuppressWarnings("squid:MaximumInheritanceDepth")
-public class VWAWriter extends NamedEntityWriter<VWADocumentationBuilder> implements
-		FieldOwnerWriter {
-	
-	/**
-	 * @param configuration
-	 * @param filename
-	 * @throws IOException
-	 */
-	public VWAWriter(VWADocumentationBuilder classDoc,
-			DocumentationBuilder prev,
-			DocumentationBuilder next) throws IOException {
-		super(classDoc, prev, next);
-	}
-	
-	
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.opentravel.schemacompiler.codegen.html.writers.FieldOwnerWriter
-	 * #getAttributeTree
-	 * (org.opentravel.schemacompiler.codegen.html.Content)
-	 */
-	@Override
-	public void addAttributeInfo(Content memberTree) {
-		if (!member.getAttributes().isEmpty()) {
-			new VWAAttributeInfoWriter(this, member).addInfo(memberTree);
-		}
-	}
+public class VWAWriter extends NamedEntityWriter<VWADocumentationBuilder> implements FieldOwnerWriter {
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.opentravel.schemacompiler.codegen.html.writers.FieldOwnerWriter
-	 * #getIndicatorTree
-	 * (org.opentravel.schemacompiler.codegen.html.Content)
-	 */
-	@Override
-	public void addIndicatorInfo(Content memberTree) {
-		if (!member.getIndicators().isEmpty()) {
-			new VWAIndicatorInfoWriter(this, member).addInfo(memberTree);
-		}
-	}
+    /**
+     * @param member the documentation builder for which to create a writer
+     * @param prev the previous documentation builder
+     * @param next the previous documentation builder
+     * @throws IOException thrown if the output cannot be written
+     */
+    public VWAWriter(VWADocumentationBuilder member, DocumentationBuilder prev, DocumentationBuilder next)
+        throws IOException {
+        super( member, prev, next );
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.opentravel.schemacompiler.codegen.html.writers.FieldOwnerWriter
-	 * #getExampleTree(org.opentravel.schemacompiler.codegen.html.Content)
-	 */
-	@Override
-	public void addExampleInfo(Content memberTree) {
-		if ((member.getExampleJSON() != null && !"".equals(member.getExampleJSON()))
-				|| (member.getExampleXML() != null && !"".equals(member.getExampleXML()))) {
-			ExampleInfoWriter exampleWriter = new ExampleInfoWriter(this,
-					member);
-			exampleWriter.addInfo(memberTree);
-		}
-	}
+    /**
+     * @see org.opentravel.schemacompiler.codegen.html.writers.FieldOwnerWriter#addAttributeInfo(org.opentravel.schemacompiler.codegen.html.Content)
+     */
+    @Override
+    public void addAttributeInfo(Content memberTree) {
+        if (!member.getAttributes().isEmpty()) {
+            new VWAAttributeInfoWriter( this, member ).addInfo( memberTree );
+        }
+    }
 
-	
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.opentravel.schemacompiler.codegen.html.writers.LibraryMemberWriter
-	 * #
-	 * addMemberDescription(org.opentravel.schemacompiler.codegen.html.Content
-	 * )
-	 */
-	@Override
-	public void addDocumentationInfo(Content classInfoTree) {
-		super.addDocumentationInfo(classInfoTree);
-		addValueDocumentation(classInfoTree);
-	}
+    /**
+     * @see org.opentravel.schemacompiler.codegen.html.writers.FieldOwnerWriter#addIndicatorInfo(org.opentravel.schemacompiler.codegen.html.Content)
+     */
+    @Override
+    public void addIndicatorInfo(Content memberTree) {
+        if (!member.getIndicators().isEmpty()) {
+            new VWAIndicatorInfoWriter( this, member ).addInfo( memberTree );
+        }
+    }
 
+    /**
+     * @see org.opentravel.schemacompiler.codegen.html.writers.FieldOwnerWriter#addExampleInfo(org.opentravel.schemacompiler.codegen.html.Content)
+     */
+    @Override
+    public void addExampleInfo(Content memberTree) {
+        if ((member.getExampleJSON() != null && !"".equals( member.getExampleJSON() ))
+            || (member.getExampleXML() != null && !"".equals( member.getExampleXML() ))) {
+            ExampleInfoWriter exampleWriter = new ExampleInfoWriter( this, member );
+            exampleWriter.addInfo( memberTree );
+        }
+    }
 
-	private void addValueDocumentation(Content classInfoTree) {
-		TLDocumentation doc = member.getValueDoc();
-		if(doc != null){
-			InfoWriter docWriter = new DocumentationInfoWriter(this, doc);
-			docWriter.setTitle(getResource("doclet.Value_Documentation_Summary"));
-			docWriter.addInfo(classInfoTree);
-		}
-	}
+    /**
+     * @see org.opentravel.schemacompiler.codegen.html.writers.NamedEntityWriter#addDocumentationInfo(org.opentravel.schemacompiler.codegen.html.Content)
+     */
+    @Override
+    public void addDocumentationInfo(Content classInfoTree) {
+        super.addDocumentationInfo( classInfoTree );
+        addValueDocumentation( classInfoTree );
+    }
 
+    /**
+     * Adds documentation content for the VWA's value type.
+     * 
+     * @param classInfoTree the content for the VWA's value type
+     */
+    private void addValueDocumentation(Content classInfoTree) {
+        TLDocumentation doc = member.getValueDoc();
+        if (doc != null) {
+            InfoWriter docWriter = new DocumentationInfoWriter( this, doc );
+            docWriter.setTitle( getResource( "doclet.Value_Documentation_Summary" ) );
+            docWriter.addInfo( classInfoTree );
+        }
+    }
 
-	@Override
-	public void addPropertyInfo(Content memberTree) {
-		// No action required
-	}
-	
+    @Override
+    public void addPropertyInfo(Content memberTree) {
+        // No action required
+    }
 
 }

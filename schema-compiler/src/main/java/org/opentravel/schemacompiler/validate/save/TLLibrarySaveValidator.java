@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.validate.save;
 
 import org.opentravel.schemacompiler.model.TLLibrary;
@@ -36,28 +37,28 @@ public class TLLibrarySaveValidator extends TLLibraryBaseValidator {
      */
     @Override
     protected ValidationFindings validateFields(TLLibrary target) {
-        TLValidationBuilder builder = newValidationBuilder(target);
+        TLValidationBuilder builder = newValidationBuilder( target );
 
-        builder.setProperty("libraryUrl", target.getLibraryUrl())
-                .setFindingType(FindingType.WARNING).assertNotNull();
+        builder.setProperty( "libraryUrl", target.getLibraryUrl() ).setFindingType( FindingType.WARNING )
+            .assertNotNull();
 
-        builder.setProperty("name", target.getName()).setFindingType(FindingType.WARNING)
-                .assertPatternMatch(NAME_FILE_PATTERN);
+        builder.setProperty( "name", target.getName() ).setFindingType( FindingType.WARNING )
+            .assertPatternMatch( NAME_FILE_PATTERN );
 
-        builder.setProperty("versionScheme", target.getVersionScheme())
-                .setFindingType(FindingType.WARNING).assertNotNullOrBlank();
+        builder.setProperty( "versionScheme", target.getVersionScheme() ).setFindingType( FindingType.WARNING )
+            .assertNotNullOrBlank();
 
-        builder.setProperty("namespace", target.getNamespace()).setFindingType(FindingType.WARNING)
-                .assertNotNullOrBlank();
+        builder.setProperty( "namespace", target.getNamespace() ).setFindingType( FindingType.WARNING )
+            .assertNotNullOrBlank();
 
-        builder.setProperty("prefix", target.getPrefix()).setFindingType(FindingType.WARNING)
-                .assertNotNullOrBlank();
+        builder.setProperty( "prefix", target.getPrefix() ).setFindingType( FindingType.WARNING )
+            .assertNotNullOrBlank();
 
-        builder.setProperty("includes", target.getIncludes()).setFindingType(FindingType.WARNING)
-                .assertContainsNoNullElements();
+        builder.setProperty( "includes", target.getIncludes() ).setFindingType( FindingType.WARNING )
+            .assertContainsNoNullElements();
 
-        builder.setProperty("namedMembers", target.getNamedMembers())
-                .setFindingType(FindingType.WARNING).assertContainsNoNullElements();
+        builder.setProperty( "namedMembers", target.getNamedMembers() ).setFindingType( FindingType.WARNING )
+            .assertContainsNoNullElements();
 
         return builder.getFindings();
     }

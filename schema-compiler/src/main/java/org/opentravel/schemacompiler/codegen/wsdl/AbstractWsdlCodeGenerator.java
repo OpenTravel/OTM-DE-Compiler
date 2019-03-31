@@ -13,24 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.codegen.wsdl;
-
-import java.io.File;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.xml.XMLConstants;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.transform.stream.StreamSource;
-import javax.xml.validation.Schema;
-import javax.xml.validation.SchemaFactory;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerationContext;
 import org.opentravel.schemacompiler.codegen.CodeGenerationException;
@@ -52,18 +36,33 @@ import org.opentravel.schemacompiler.xml.PrettyPrintLineBreakProcessor;
 import org.opentravel.schemacompiler.xml.WSDLLineBreakProcessor;
 import org.springframework.context.ApplicationContext;
 
+import java.io.File;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.xml.XMLConstants;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
+
 /**
  * Abstract base class for all code generators capable of producing WSDL output.
  * 
- * @param <S>
- *            the source type for which output content will be generated
+ * @param <S> the source type for which output content will be generated
  * @author S. Livezey
  */
-public abstract class AbstractWsdlCodeGenerator<S extends LibraryMember> extends
-        AbstractJaxbCodeGenerator<S> {
+public abstract class AbstractWsdlCodeGenerator<S extends LibraryMember> extends AbstractJaxbCodeGenerator<S> {
 
-    private static final String DEFAULT_JAXB_PACKAGES = ":org.xmlsoap.schemas.wsdl"
-            + ":org.w3._2001.xmlschema" + ":org.opentravel.ns.ota2.appinfo_v01_00";
+    private static final String DEFAULT_JAXB_PACKAGES =
+        ":org.xmlsoap.schemas.wsdl" + ":org.w3._2001.xmlschema" + ":org.opentravel.ns.ota2.appinfo_v01_00";
 
     private static Map<String,JAXBContext> contextCache = new HashMap<>();
     protected static Schema validationSchema;
@@ -75,9 +74,9 @@ public abstract class AbstractWsdlCodeGenerator<S extends LibraryMember> extends
      * Default constructor.
      */
     public AbstractWsdlCodeGenerator() {
-        transformerFactory = TransformerFactory.getInstance(
-                SchemaCompilerApplicationContext.WSDL_CODEGEN_TRANSFORMER_FACTORY,
-                new CodeGenerationTransformerContext(this));
+        transformerFactory =
+            TransformerFactory.getInstance( SchemaCompilerApplicationContext.WSDL_CODEGEN_TRANSFORMER_FACTORY,
+                new CodeGenerationTransformerContext( this ) );
     }
 
     /**
@@ -85,13 +84,13 @@ public abstract class AbstractWsdlCodeGenerator<S extends LibraryMember> extends
      */
     @Override
     protected TransformerFactory<CodeGenerationTransformerContext> getTransformerFactory(
-            CodeGenerationContext codegenContext) {
-        transformerFactory.getContext().setCodegenContext(codegenContext);
+        CodeGenerationContext codegenContext) {
+        transformerFactory.getContext().setCodegenContext( codegenContext );
         return transformerFactory;
     }
 
     /**
-     * @see org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator#isSupportedSourceObject(java.lang.Object)
+     * @see org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator#isSupportedSourceObject(org.opentravel.schemacompiler.model.ModelElement)
      */
     @Override
     protected boolean isSupportedSourceObject(S source) {
@@ -99,68 +98,66 @@ public abstract class AbstractWsdlCodeGenerator<S extends LibraryMember> extends
     }
 
     /**
-     * @see org.opentravel.schemacompiler.codegen.impl.AbstractJaxbCodeGenerator#transformSourceObjectToJaxb(java.lang.Object,
+     * @see org.opentravel.schemacompiler.codegen.impl.AbstractJaxbCodeGenerator#transformSourceObjectToJaxb(org.opentravel.schemacompiler.model.ModelElement,
      *      org.opentravel.schemacompiler.codegen.CodeGenerationContext)
      */
     @Override
     protected Object transformSourceObjectToJaxb(S source, CodeGenerationContext context)
-            throws CodeGenerationException {
-        ObjectTransformer<S, ?, CodeGenerationTransformerContext> transformer = getTransformerFactory(
-                context).getTransformer(source, JAXBElement.class);
-        AbstractLibrary library = getLibrary(source);
+        throws CodeGenerationException {
+        ObjectTransformer<S,?,CodeGenerationTransformerContext> transformer =
+            getTransformerFactory( context ).getTransformer( source, JAXBElement.class );
+        AbstractLibrary library = getLibrary( source );
 
         if ((transformer != null) && (library != null)) {
-            return transformer.transform(source);
+            return transformer.transform( source );
 
         } else {
             String sourceType = (source == null) ? "UNKNOWN" : source.getClass().getSimpleName();
             throw new CodeGenerationException(
-                    "No object transformer available for model element of type " + sourceType);
+                "No object transformer available for model element of type " + sourceType );
         }
     }
 
     /**
-     * @see org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator#getOutputFile(org.opentravel.schemacompiler.model.TLModelElement,
+     * @see org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator#getOutputFile(org.opentravel.schemacompiler.model.ModelElement,
      *      org.opentravel.schemacompiler.codegen.CodeGenerationContext)
      */
     @Override
     protected File getOutputFile(S source, CodeGenerationContext context) {
         if (source == null) {
-            throw new NullPointerException("Source model element cannot be null.");
+            throw new NullPointerException( "Source model element cannot be null." );
         }
-        AbstractLibrary library = getLibrary(source);
+        AbstractLibrary library = getLibrary( source );
         URL libraryUrl = (library == null) ? null : library.getLibraryUrl();
-        File outputFolder = getOutputFolder(context, libraryUrl);
-        String filename = getFilenameBuilder().buildFilename(source, "wsdl");
+        File outputFolder = getOutputFolder( context, libraryUrl );
+        String filename = getFilenameBuilder().buildFilename( source, "wsdl" );
 
-        return new File(outputFolder, filename);
+        return new File( outputFolder, filename );
     }
 
     /**
-     * @see org.opentravel.schemacompiler.codegen.impl.AbstractJaxbCodeGenerator#getMarshaller(org.opentravel.schemacompiler.model.TLModelElement,
+     * @see org.opentravel.schemacompiler.codegen.impl.AbstractJaxbCodeGenerator#getMarshaller(org.opentravel.schemacompiler.model.ModelElement,
      *      org.w3._2001.xmlschema.Schema)
      */
     @Override
-    protected Marshaller getMarshaller(S source, org.w3._2001.xmlschema.Schema schema)
-            throws JAXBException {
+    protected Marshaller getMarshaller(S source, org.w3._2001.xmlschema.Schema schema) throws JAXBException {
         Marshaller m = getJaxbContext().createMarshaller();
 
-        m.setSchema(validationSchema);
-        m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-        m.setProperty("com.sun.xml.bind.namespacePrefixMapper", new CodegenNamespacePrefixMapper(
-                getLibrary(source), true, this, schema));
+        m.setSchema( validationSchema );
+        m.setProperty( Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE );
+        m.setProperty( "com.sun.xml.bind.namespacePrefixMapper",
+            new CodegenNamespacePrefixMapper( getLibrary( source ), true, this, schema ) );
         return m;
     }
 
     /**
      * Adds the given library to the list of dependencies for the WSDL document.
      * 
-     * @param wsdlDependency
-     *            the dependency to add
+     * @param wsdlDependency the dependency to add
      */
     protected void addWsdlDependency(AbstractLibrary wsdlDependency) {
         if (wsdlDependency != null) {
-            wsdlDependencies.add(wsdlDependency);
+            wsdlDependencies.add( wsdlDependency );
         }
     }
 
@@ -178,8 +175,8 @@ public abstract class AbstractWsdlCodeGenerator<S extends LibraryMember> extends
              */
             @Override
             public boolean processLibrary(AbstractLibrary library) {
-                return wsdlDependencies.contains(library)
-                        || ((delegateFilter != null) && delegateFilter.processLibrary(library));
+                return wsdlDependencies.contains( library )
+                    || ((delegateFilter != null) && delegateFilter.processLibrary( library ));
             }
 
             /**
@@ -187,8 +184,7 @@ public abstract class AbstractWsdlCodeGenerator<S extends LibraryMember> extends
              */
             @Override
             public boolean processExtendedLibrary(XSDLibrary legacySchema) {
-                return (delegateFilter != null)
-                        && delegateFilter.processExtendedLibrary(legacySchema);
+                return (delegateFilter != null) && delegateFilter.processExtendedLibrary( legacySchema );
             }
 
             /**
@@ -196,7 +192,7 @@ public abstract class AbstractWsdlCodeGenerator<S extends LibraryMember> extends
              */
             @Override
             public boolean processEntity(LibraryElement entity) {
-                return (delegateFilter != null) && delegateFilter.processEntity(entity);
+                return (delegateFilter != null) && delegateFilter.processEntity( entity );
             }
 
             /**
@@ -205,7 +201,7 @@ public abstract class AbstractWsdlCodeGenerator<S extends LibraryMember> extends
             @Override
             public void addBuiltInLibrary(BuiltInLibrary library) {
                 if (delegateFilter != null) {
-                    delegateFilter.addBuiltInLibrary(library);
+                    delegateFilter.addBuiltInLibrary( library );
                 }
             }
 
@@ -227,52 +223,51 @@ public abstract class AbstractWsdlCodeGenerator<S extends LibraryMember> extends
      */
     private static JAXBContext getJaxbContext() {
         ApplicationContext appContext = SchemaCompilerApplicationContext.getContext();
-        StringBuilder jaxbPackages = new StringBuilder(DEFAULT_JAXB_PACKAGES);
+        StringBuilder jaxbPackages = new StringBuilder( DEFAULT_JAXB_PACKAGES );
 
-        if (appContext.containsBean(SchemaCompilerApplicationContext.CODE_GENERATION_WSDL_BINDINGS)) {
+        if (appContext.containsBean( SchemaCompilerApplicationContext.CODE_GENERATION_WSDL_BINDINGS )) {
             CodeGenerationWsdlBindings wsdlBindings = (CodeGenerationWsdlBindings) appContext
-                    .getBean(SchemaCompilerApplicationContext.CODE_GENERATION_WSDL_BINDINGS);
+                .getBean( SchemaCompilerApplicationContext.CODE_GENERATION_WSDL_BINDINGS );
 
             for (String jaxbPackage : wsdlBindings.getJaxbContextPackages()) {
-                jaxbPackages.append(":").append(jaxbPackage);
+                jaxbPackages.append( ":" ).append( jaxbPackage );
             }
         }
         String contextPath = jaxbPackages.toString();
-        
+
         contextCache.computeIfAbsent( contextPath, p -> contextCache.put( p, newContext( p ) ) );
-        return contextCache.get(contextPath);
+        return contextCache.get( contextPath );
     }
-    
+
     /**
-     * Constructs a new JAXB context for the given context path.  If the context cannot
-     * be constructed, an runtime exception will be thrown.
+     * Constructs a new JAXB context for the given context path. If the context cannot be constructed, an runtime
+     * exception will be thrown.
      * 
-     * @param contextPath  the path for which to create the context
+     * @param contextPath the path for which to create the context
      * @return JAXBContext
      */
-	private static JAXBContext newContext(String contextPath) {
-		try {
-			return JAXBContext.newInstance(contextPath);
-			
-		} catch (JAXBException e) {
-			throw new IllegalArgumentException("Error creating JAXB context for path: " + contextPath, e);
-		}
-	}
-	
+    private static JAXBContext newContext(String contextPath) {
+        try {
+            return JAXBContext.newInstance( contextPath );
+
+        } catch (JAXBException e) {
+            throw new IllegalArgumentException( "Error creating JAXB context for path: " + contextPath, e );
+        }
+    }
+
     /**
      * Initializes the validation schema and shared JAXB context.
      */
     static {
         try {
-            SchemaFactory schemaFactory = SchemaFactory
-                    .newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-            InputStream schemaStream = SchemaDeclarations.WSDL_SCHEMA.getContent(
-            		CodeGeneratorFactory.XSD_TARGET_FORMAT);
+            SchemaFactory schemaFactory = SchemaFactory.newInstance( XMLConstants.W3C_XML_SCHEMA_NS_URI );
+            InputStream schemaStream =
+                SchemaDeclarations.WSDL_SCHEMA.getContent( CodeGeneratorFactory.XSD_TARGET_FORMAT );
 
-            validationSchema = schemaFactory.newSchema(new StreamSource(schemaStream));
+            validationSchema = schemaFactory.newSchema( new StreamSource( schemaStream ) );
 
         } catch (Exception e) {
-            throw new ExceptionInInitializerError(e);
+            throw new ExceptionInInitializerError( e );
         }
     }
 

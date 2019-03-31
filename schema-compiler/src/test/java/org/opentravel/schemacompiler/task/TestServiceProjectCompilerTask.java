@@ -13,20 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.task;
 
 import static org.junit.Assert.assertEquals;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -40,11 +30,20 @@ import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.model.XSDLibrary;
-import org.opentravel.schemacompiler.task.ServiceCompilerTask;
-import org.opentravel.schemacompiler.task.ServiceProjectCompilerTask;
 import org.opentravel.schemacompiler.util.SchemaCompilerTestUtils;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 public class TestServiceProjectCompilerTask {
 
@@ -57,55 +56,52 @@ public class TestServiceProjectCompilerTask {
     public void compileOutputShouldUseTrimmedServiceSchemaInXMLExamples() throws Exception {
         // given
         LibraryModelLoader<InputStream> modelLoader = new LibraryModelLoader<InputStream>();
-        modelLoader.setNamespaceResolver(new DefaultLibraryNamespaceResolver());
-        modelLoader.loadLibraryModel(new LibraryStreamInputSource(new File(SchemaCompilerTestUtils
-                .getBaseLibraryLocation(), "test-package-service/SimpleService.xml")));
-        TLLibrary lib = getLibrary(modelLoader.getLibraryModel(), PACKAGE_SERVICE, "SimpleService");
-        ServiceProjectCompilerTask serviceTask = new ServiceProjectCompilerTask("Test");
+        modelLoader.setNamespaceResolver( new DefaultLibraryNamespaceResolver() );
+        modelLoader.loadLibraryModel( new LibraryStreamInputSource(
+            new File( SchemaCompilerTestUtils.getBaseLibraryLocation(), "test-package-service/SimpleService.xml" ) ) );
+        TLLibrary lib = getLibrary( modelLoader.getLibraryModel(), PACKAGE_SERVICE, "SimpleService" );
+        ServiceProjectCompilerTask serviceTask = new ServiceProjectCompilerTask( "Test" );
         ServiceCompilerTask options = new ServiceCompilerTask();
-        options.setGenerateExamples(true);
-        options.setOutputFolder(tmp.getRoot().getAbsolutePath());
-        serviceTask.applyTaskOptions(options);
+        options.setGenerateExamples( true );
+        options.setOutputFolder( tmp.getRoot().getAbsolutePath() );
+        serviceTask.applyTaskOptions( options );
 
         // when
-        serviceTask.compileOutput(Collections.singletonList(lib), new ArrayList<XSDLibrary>());
+        serviceTask.compileOutput( Collections.singletonList( lib ), new ArrayList<XSDLibrary>() );
 
         // then
-        File example = findFileWithString("RQ", serviceTask.getGeneratedFiles());
-        Document exampleDom = loadXMLFileAsDom(example);
-        String schemaDef = exampleDom.getFirstChild().getAttributes()
-                .getNamedItem("xsi:schemaLocation").getNodeValue();
-        String schemaLocation = schemaDef.split(" ")[1];
-        String expectedSchemaLocation = "../"
-                + new LibraryTrimmedFilenameBuilder(null).buildFilename(lib, "xsd");
+        File example = findFileWithString( "RQ", serviceTask.getGeneratedFiles() );
+        Document exampleDom = loadXMLFileAsDom( example );
+        String schemaDef =
+            exampleDom.getFirstChild().getAttributes().getNamedItem( "xsi:schemaLocation" ).getNodeValue();
+        String schemaLocation = schemaDef.split( " " )[1];
+        String expectedSchemaLocation = "../" + new LibraryTrimmedFilenameBuilder( null ).buildFilename( lib, "xsd" );
 
-        assertEquals(expectedSchemaLocation, schemaLocation);
+        assertEquals( expectedSchemaLocation, schemaLocation );
     }
 
     private File findFileWithString(String pathSeg, Collection<File> files) {
         for (File f : files) {
-        	String path = f.getAbsolutePath();
-            if (path.contains(pathSeg) && path.endsWith(XMLExampleCodeGenerator.XML_FILE_EXTENSION))
+            String path = f.getAbsolutePath();
+            if (path.contains( pathSeg ) && path.endsWith( XMLExampleCodeGenerator.XML_FILE_EXTENSION ))
                 return f;
         }
         return null;
     }
 
-    private Document loadXMLFileAsDom(File xmlFile) throws ParserConfigurationException,
-            SAXException, IOException {
+    private Document loadXMLFileAsDom(File xmlFile) throws ParserConfigurationException, SAXException, IOException {
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-        Document doc = dBuilder.parse(xmlFile);
+        Document doc = dBuilder.parse( xmlFile );
         doc.getDocumentElement().normalize();
         return doc;
     }
 
-    protected TLLibrary getLibrary(TLModel m, String namespace, String libraryName)
-            throws Exception {
+    protected TLLibrary getLibrary(TLModel m, String namespace, String libraryName) throws Exception {
         TLLibrary library = null;
 
-        for (AbstractLibrary lib : m.getLibrariesForNamespace(namespace)) {
-            if (lib.getName().equals(libraryName)) {
+        for (AbstractLibrary lib : m.getLibrariesForNamespace( namespace )) {
+            if (lib.getName().equals( libraryName )) {
                 library = (TLLibrary) lib;
                 break;
             }

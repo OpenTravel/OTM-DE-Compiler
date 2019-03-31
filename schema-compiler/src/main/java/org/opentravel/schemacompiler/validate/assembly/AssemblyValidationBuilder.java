@@ -19,26 +19,25 @@ package org.opentravel.schemacompiler.validate.assembly;
 import org.opentravel.schemacompiler.validate.ValidationBuilder;
 
 /**
- * Simple extension of <code>ValidationBuilder</code> that is compatible with service
- * assemblies.
+ * Simple extension of <code>ValidationBuilder</code> that is compatible with service assemblies.
  */
 public class AssemblyValidationBuilder extends ValidationBuilder<AssemblyValidationBuilder> {
 
-	/**
-	 * Constructor that supplies the message prefix for all error/warning message keys.
-	 * 
-	 * @param context  the context for the current validation operation
-	 */
-	public AssemblyValidationBuilder(String messagePrefix) {
-		super( messagePrefix );
-	}
+    /**
+     * Constructor that supplies the message prefix for all error/warning message keys.
+     * 
+     * @param messagePrefix the prefix to be pre-pended for all message lookups
+     */
+    public AssemblyValidationBuilder(String messagePrefix) {
+        super( messagePrefix );
+    }
 
-	/**
-	 * @see org.opentravel.schemacompiler.validate.ValidationBuilder#getThis()
-	 */
-	@Override
-	protected AssemblyValidationBuilder getThis() {
-		return this;
-	}
-	
+    /**
+     * @see org.opentravel.schemacompiler.validate.ValidationBuilder#getThis()
+     */
+    @Override
+    protected AssemblyValidationBuilder getThis() {
+        return this;
+    }
+
 }

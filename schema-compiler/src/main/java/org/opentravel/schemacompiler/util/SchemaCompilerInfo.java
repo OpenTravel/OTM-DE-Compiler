@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.util;
+
+import org.opentravel.schemacompiler.ioc.CompilerExtensionRegistry;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
-
-import org.opentravel.schemacompiler.ioc.CompilerExtensionRegistry;
 
 /**
  * Provides meta-data information about the compiler.
@@ -38,14 +39,14 @@ public class SchemaCompilerInfo {
      * Default constructor.
      */
     private SchemaCompilerInfo() {
-        try (InputStream is = CompilerExtensionRegistry.loadResource(COMPILER_INFO_FILE)) {
+        try (InputStream is = CompilerExtensionRegistry.loadResource( COMPILER_INFO_FILE )) {
             if (is != null) {
                 Properties props = new Properties();
 
-                props.load(is);
-                compilerVersion = props.getProperty("compiler.version", compilerVersion);
+                props.load( is );
+                compilerVersion = props.getProperty( "compiler.version", compilerVersion );
             }
-            
+
         } catch (IOException e) {
             // No error - just use default values (should never happen)
         }

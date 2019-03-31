@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.transform.tl2jaxb16;
 
 import org.opentravel.ns.ota2.librarymodel_v01_06.Documentation;
@@ -31,40 +32,40 @@ import org.opentravel.schemacompiler.transform.symbols.SymbolResolverTransformer
  * @author S. Livezey
  */
 public class TLResourceParentRefTransformer extends TLComplexTypeTransformer<TLResourceParentRef,ResourceParentRef> {
-	
-	/**
-	 * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
-	 */
-	@Override
-	public ResourceParentRef transform(TLResourceParentRef source) {
-		TLResource sourceParentResource = source.getParentResource();
-		TLParamGroup sourceParentParamGroup = source.getParentParamGroup();
-		ResourceParentRef parentRef = new ResourceParentRef();
-		
-		parentRef.setPathTemplate(trimString(source.getPathTemplate(), false));
-		
+
+    /**
+     * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
+     */
+    @Override
+    public ResourceParentRef transform(TLResourceParentRef source) {
+        TLResource sourceParentResource = source.getParentResource();
+        TLParamGroup sourceParentParamGroup = source.getParentParamGroup();
+        ResourceParentRef parentRef = new ResourceParentRef();
+
+        parentRef.setPathTemplate( trimString( source.getPathTemplate(), false ) );
+
         if (sourceParentResource != null) {
-        	parentRef.setParent(context.getSymbolResolver().buildEntityName(
-        			sourceParentResource.getNamespace(), sourceParentResource.getLocalName()));
+            parentRef.setParent( context.getSymbolResolver().buildEntityName( sourceParentResource.getNamespace(),
+                sourceParentResource.getLocalName() ) );
         }
         if (parentRef.getParent() == null) {
-        	parentRef.setParent(trimString(source.getParentResourceName(), false));
+            parentRef.setParent( trimString( source.getParentResourceName(), false ) );
         }
-		
-        if (sourceParentParamGroup != null) {
-        	parentRef.setParentParamGroup(sourceParentParamGroup.getName());
-        } else {
-        	parentRef.setParentParamGroup(trimString(source.getParentParamGroupName(), false));
-        }
-		
-        if ((source.getDocumentation() != null) && !source.getDocumentation().isEmpty()) {
-            ObjectTransformer<TLDocumentation, Documentation, SymbolResolverTransformerContext> docTransformer = getTransformerFactory()
-                    .getTransformer(TLDocumentation.class, Documentation.class);
 
-            parentRef.setDocumentation(docTransformer.transform(source.getDocumentation()));
+        if (sourceParentParamGroup != null) {
+            parentRef.setParentParamGroup( sourceParentParamGroup.getName() );
+        } else {
+            parentRef.setParentParamGroup( trimString( source.getParentParamGroupName(), false ) );
         }
-        
-		return parentRef;
-	}
-	
+
+        if ((source.getDocumentation() != null) && !source.getDocumentation().isEmpty()) {
+            ObjectTransformer<TLDocumentation,Documentation,SymbolResolverTransformerContext> docTransformer =
+                getTransformerFactory().getTransformer( TLDocumentation.class, Documentation.class );
+
+            parentRef.setDocumentation( docTransformer.transform( source.getDocumentation() ) );
+        }
+
+        return parentRef;
+    }
+
 }

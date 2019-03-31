@@ -13,7 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.saver.impl;
+
+import org.opentravel.schemacompiler.ioc.SchemaDeclarations;
+import org.opentravel.schemacompiler.loader.impl.LibraryValidationSource;
+import org.opentravel.schemacompiler.saver.LibrarySaveException;
+import org.opentravel.schemacompiler.saver.LibrarySaveHandler;
+import org.opentravel.schemacompiler.util.FileUtils;
+import org.opentravel.schemacompiler.util.URLUtils;
+import org.opentravel.schemacompiler.validate.FindingType;
+import org.opentravel.schemacompiler.validate.ValidationFindings;
+import org.opentravel.schemacompiler.xml.LibraryLineBreakProcessor;
+import org.opentravel.schemacompiler.xml.NamespacePrefixMapper;
+import org.opentravel.schemacompiler.xml.XMLPrettyPrinter;
+import org.w3c.dom.Document;
+import org.xml.sax.helpers.DefaultHandler;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -34,34 +49,20 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.validation.Schema;
 
-import org.opentravel.schemacompiler.ioc.SchemaDeclarations;
-import org.opentravel.schemacompiler.loader.impl.LibraryValidationSource;
-import org.opentravel.schemacompiler.saver.LibrarySaveException;
-import org.opentravel.schemacompiler.saver.LibrarySaveHandler;
-import org.opentravel.schemacompiler.util.FileUtils;
-import org.opentravel.schemacompiler.util.URLUtils;
-import org.opentravel.schemacompiler.validate.FindingType;
-import org.opentravel.schemacompiler.validate.ValidationFindings;
-import org.opentravel.schemacompiler.xml.LibraryLineBreakProcessor;
-import org.opentravel.schemacompiler.xml.NamespacePrefixMapper;
-import org.opentravel.schemacompiler.xml.XMLPrettyPrinter;
-import org.w3c.dom.Document;
-import org.xml.sax.helpers.DefaultHandler;
-
 /**
  * Default implementation that saves JAXB library content as a file on the local file system.
  * 
- * @param <T>  the target type for the library format to be processed by this save handler
+ * @param <T> the target type for the library format to be processed by this save handler
  * @author S. Livezey
  */
 public abstract class AbstractLibraryFileSaveHandler<T> implements LibrarySaveHandler<T> {
 
-    private static final String VALIDATION_MESSAGE_KEY = "org.opentravel.schemacompiler.TLLibrary.jaxbValidationWarning";
+    private static final String VALIDATION_MESSAGE_KEY =
+        "org.opentravel.schemacompiler.TLLibrary.jaxbValidationWarning";
 
-    private static final Map<String, String> preferredPrefixMappings;
-    private static final String[] schemaDeclarations = new String[] {
-        XMLConstants.W3C_XML_SCHEMA_NS_URI, XMLConstants.W3C_XML_SCHEMA_INSTANCE_NS_URI
-    };
+    private static final Map<String,String> preferredPrefixMappings;
+    private static final String[] schemaDeclarations =
+        new String[] {XMLConstants.W3C_XML_SCHEMA_NS_URI, XMLConstants.W3C_XML_SCHEMA_INSTANCE_NS_URI};
 
     private boolean createBackupFile = true;
 
@@ -70,7 +71,7 @@ public abstract class AbstractLibraryFileSaveHandler<T> implements LibrarySaveHa
      */
     @Override
     public boolean canSave(URL libraryUrl) {
-        return URLUtils.isFileURL(libraryUrl);
+        return URLUtils.isFileURL( libraryUrl );
     }
 
     /**
@@ -80,16 +81,15 @@ public abstract class AbstractLibraryFileSaveHandler<T> implements LibrarySaveHa
     public ValidationFindings validateLibraryContent(T library) {
         ValidationFindings findings = new ValidationFindings();
         try {
-            JAXBElement<T> documentElement = createLibraryElement(library);
+            JAXBElement<T> documentElement = createLibraryElement( library );
             Marshaller marshaller = getJaxbContext().createMarshaller();
 
-            marshaller.setSchema(getValidationSchema());
-            marshaller.marshal(documentElement, new DefaultHandler()); // effectively marshalls to
-                                                                       // dev/null output
+            marshaller.setSchema( getValidationSchema() );
+            marshaller.marshal( documentElement, new DefaultHandler() ); // effectively marshalls to dev/null output
 
         } catch (JAXBException e) {
-            findings.addFinding(FindingType.WARNING, new LibraryValidationSource(library),
-                    VALIDATION_MESSAGE_KEY, getExceptionMessage(e));
+            findings.addFinding( FindingType.WARNING, new LibraryValidationSource( library ), VALIDATION_MESSAGE_KEY,
+                getExceptionMessage( e ) );
         }
         return findings;
     }
@@ -99,32 +99,31 @@ public abstract class AbstractLibraryFileSaveHandler<T> implements LibrarySaveHa
      */
     @Override
     public void saveLibraryContent(URL libraryUrl, T library) throws LibrarySaveException {
-        File libraryFile = getFileForURL(libraryUrl);
-        File backupFile = createBackupFile ? createBackupFile(libraryFile) : null;
+        File libraryFile = getFileForURL( libraryUrl );
+        File backupFile = createBackupFile ? createBackupFile( libraryFile ) : null;
         boolean success = false;
 
-        try (OutputStream out = new FileOutputStream(libraryFile)){
-            JAXBElement<T> documentElement = createLibraryElement(library);
+        try (OutputStream out = new FileOutputStream( libraryFile )) {
+            JAXBElement<T> documentElement = createLibraryElement( library );
             Marshaller marshaller = getJaxbContext().createMarshaller();
             Document domDocument = XMLPrettyPrinter.newDocument();
 
             // Marshall the JAXB content
-            marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-            marshaller.setProperty("com.sun.xml.bind.namespacePrefixMapper",
-                    new LibrarySaveNamespacePrefixMapper());
-            marshaller.setProperty("jaxb.schemaLocation", getLibrarySchemaLocation());
-            marshaller.marshal(documentElement, domDocument); // no schema validation during file-save marshalling
+            marshaller.setProperty( Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE );
+            marshaller.setProperty( "com.sun.xml.bind.namespacePrefixMapper", new LibrarySaveNamespacePrefixMapper() );
+            marshaller.setProperty( "jaxb.schemaLocation", getLibrarySchemaLocation() );
+            marshaller.marshal( documentElement, domDocument ); // no schema validation during file-save marshalling
 
             // Format the XML before saving it to a file
-            new XMLPrettyPrinter(new LibraryLineBreakProcessor()).formatDocument(domDocument, out);
+            new XMLPrettyPrinter( new LibraryLineBreakProcessor() ).formatDocument( domDocument, out );
             success = true;
 
         } catch (IllegalArgumentException | JAXBException | IOException e) {
-            throw new LibrarySaveException(e);
+            throw new LibrarySaveException( e );
 
         } finally {
             if (!success && (backupFile != null)) {
-                restoreBackupFile(backupFile, libraryFile);
+                restoreBackupFile( backupFile, libraryFile );
             }
         }
     }
@@ -144,51 +143,49 @@ public abstract class AbstractLibraryFileSaveHandler<T> implements LibrarySaveHa
     public void setCreateBackupFile(boolean createBackupFile) {
         this.createBackupFile = createBackupFile;
     }
-    
+
     /**
      * Returns the target namespace of the library file.
      * 
      * @return String
      */
     protected abstract String getLibraryTargetNamespace();
-    
+
     /**
      * Returns the <code>JAXBContext</code> to use when saving library files.
      * 
      * @return JAXBContext
      */
     protected abstract JAXBContext getJaxbContext();
-    
+
     /**
      * Returns a <code>JAXBElement</code> wrapper for the given JAXB library instance.
      * 
-     * @param library  the JAXB library for which to return an element wrapper
-     * @return JAXBElement<T>
+     * @param library the JAXB library for which to return an element wrapper
+     * @return JAXBElement&lt;T&gt;
      */
     protected abstract JAXBElement<T> createLibraryElement(T library);
-    
+
     /**
      * Returns the validation schema for the target library file format.
      * 
      * @return Schema
      */
     protected abstract Schema getValidationSchema();
-    
+
     /**
      * Returns the XSI schema location declaration for the target library format.
      * 
      * @return String
      */
     protected abstract String getLibrarySchemaLocation();
-    
+
     /**
-     * If the indicated 'libraryFile' already exists, the existing file will be renamed with a
-     * ".bak" extension. If a backup file already exists, it will be deleted. If a backup file is
-     * created by this method, it will be returned to the caller. If no backup is required, null
-     * will be returned.
+     * If the indicated 'libraryFile' already exists, the existing file will be renamed with a ".bak" extension. If a
+     * backup file already exists, it will be deleted. If a backup file is created by this method, it will be returned
+     * to the caller. If no backup is required, null will be returned.
      * 
-     * @param libraryFile
-     *            the handle for the library file to backup
+     * @param libraryFile the handle for the library file to backup
      * @return File
      */
     protected File createBackupFile(File libraryFile) {
@@ -196,12 +193,12 @@ public abstract class AbstractLibraryFileSaveHandler<T> implements LibrarySaveHa
 
         if (libraryFile.exists()) {
             String filename = libraryFile.getName();
-            int dotIdx = filename.lastIndexOf('.');
+            int dotIdx = filename.lastIndexOf( '.' );
 
             if (dotIdx >= 0) {
-                filename = filename.substring(0, dotIdx);
+                filename = filename.substring( 0, dotIdx );
             }
-            backupFile = new File(libraryFile.getParentFile(), filename + ".bak");
+            backupFile = new File( libraryFile.getParentFile(), filename + ".bak" );
             FileUtils.delete( backupFile );
             FileUtils.renameTo( libraryFile, backupFile );
 
@@ -214,42 +211,35 @@ public abstract class AbstractLibraryFileSaveHandler<T> implements LibrarySaveHa
     }
 
     /**
-     * Restores the indicated backup file by renaming the backup to match the name of the specified
-     * library file. If the 'backupFile' is null, this method will return without action.
+     * Restores the indicated backup file by renaming the backup to match the name of the specified library file. If the
+     * 'backupFile' is null, this method will return without action.
      * 
-     * @param backupFile
-     *            the backup file to restore
-     * @param libraryFile
-     *            the library file that was previously backed up
+     * @param backupFile the backup file to restore
+     * @param libraryFile the library file that was previously backed up
      */
     protected void restoreBackupFile(File backupFile, File libraryFile) {
         if ((backupFile != null) && backupFile.exists() && (libraryFile != null)) {
-        		FileUtils.delete( libraryFile );
-        		FileUtils.renameTo( backupFile, libraryFile );
+            FileUtils.delete( libraryFile );
+            FileUtils.renameTo( backupFile, libraryFile );
         }
     }
 
     /**
-     * Returns a file handle for the URL provided. If the URL does not represent a location on the
-     * local host's file system, an <code>IllegalArgumentException</code> will be thrown by this
-     * method.
+     * Returns a file handle for the URL provided. If the URL does not represent a location on the local host's file
+     * system, an <code>IllegalArgumentException</code> will be thrown by this method.
      * 
-     * @param libraryUrl
-     *            the URL to convert
+     * @param libraryUrl the URL to convert
      * @return File
-     * @throws IllegalArgumentException
-     *             thrown if the URL is not a location on the local file system
+     * @throws IllegalArgumentException thrown if the URL is not a location on the local file system
      */
     protected File getFileForURL(URL libraryUrl) {
-        return URLUtils.toFile(libraryUrl);
+        return URLUtils.toFile( libraryUrl );
     }
 
     /**
-     * Returns the first non-null message from the given exception or one of its nested caused-by
-     * exceptions.
+     * Returns the first non-null message from the given exception or one of its nested caused-by exceptions.
      * 
-     * @param e
-     *            the exception for which to return a user-displayable message
+     * @param e the exception for which to return a user-displayable message
      * @return String
      */
     private String getExceptionMessage(JAXBException e) {
@@ -269,24 +259,24 @@ public abstract class AbstractLibraryFileSaveHandler<T> implements LibrarySaveHa
      * @author S. Livezey
      */
     private class LibrarySaveNamespacePrefixMapper extends NamespacePrefixMapper {
-    	
-    	private String[] schemaDecls;
-    	
-    	public LibrarySaveNamespacePrefixMapper() {
-    		List<String> decls = new ArrayList<>();
-    		
-    		decls.addAll( Arrays.asList( schemaDeclarations ) );
-    		decls.add( getLibraryTargetNamespace() );
-    		schemaDecls = decls.toArray( new String[ decls.size() ] );
-    	}
+
+        private String[] schemaDecls;
+
+        public LibrarySaveNamespacePrefixMapper() {
+            List<String> decls = new ArrayList<>();
+
+            decls.addAll( Arrays.asList( schemaDeclarations ) );
+            decls.add( getLibraryTargetNamespace() );
+            schemaDecls = decls.toArray( new String[decls.size()] );
+        }
+
         /**
-         * @see com.sun.xml.bind.marshaller.NamespacePrefixMapper#getPreferredPrefix(java.lang.String,
-         *      java.lang.String, boolean)
+         * @see com.sun.xml.bind.marshaller.NamespacePrefixMapper#getPreferredPrefix(java.lang.String, java.lang.String,
+         *      boolean)
          */
         @Override
-        public String getPreferredPrefix(String namespaceUri, String suggestion,
-                boolean requirePrefix) {
-            String prefix = preferredPrefixMappings.get(namespaceUri);
+        public String getPreferredPrefix(String namespaceUri, String suggestion, boolean requirePrefix) {
+            String prefix = preferredPrefixMappings.get( namespaceUri );
             return (prefix == null) ? suggestion : prefix;
         }
 
@@ -307,13 +297,13 @@ public abstract class AbstractLibraryFileSaveHandler<T> implements LibrarySaveHa
         try {
             Map<String,String> prefixMappings = new HashMap<>();
 
-            prefixMappings.put(SchemaDeclarations.OTA2_LIBRARY_SCHEMA_1_5.getNamespace(), "");
-            prefixMappings.put(XMLConstants.W3C_XML_SCHEMA_NS_URI, "xsd");
-            prefixMappings.put(XMLConstants.W3C_XML_SCHEMA_INSTANCE_NS_URI, "xsi");
-            preferredPrefixMappings = Collections.unmodifiableMap(prefixMappings);
+            prefixMappings.put( SchemaDeclarations.OTA2_LIBRARY_SCHEMA_1_5.getNamespace(), "" );
+            prefixMappings.put( XMLConstants.W3C_XML_SCHEMA_NS_URI, "xsd" );
+            prefixMappings.put( XMLConstants.W3C_XML_SCHEMA_INSTANCE_NS_URI, "xsi" );
+            preferredPrefixMappings = Collections.unmodifiableMap( prefixMappings );
 
         } catch (Exception e) {
-            throw new ExceptionInInitializerError(e);
+            throw new ExceptionInInitializerError( e );
         }
     }
 

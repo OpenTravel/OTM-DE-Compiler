@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.util;
 
-import java.io.File;
+package org.opentravel.schemacompiler.util;
 
 import org.opentravel.schemacompiler.validate.FindingMessageFormat;
 import org.opentravel.schemacompiler.validate.FindingType;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
+
+import java.io.File;
 
 /**
  * Static utility methods shared by numerous tests.
@@ -32,42 +33,40 @@ public class SchemaCompilerTestUtils {
     public static FindingType PRINT_FINDINGS = FindingType.ERROR;
 
     /**
-     * Returns the base folder location for test library data to be utilized by the schema compiler
-     * test frameork.
+     * Returns the base folder location for test library data to be utilized by the schema compiler test frameork.
      * 
      * @return String
      */
     public static String getBaseLibraryLocation() {
-    	if (OTM16Upgrade.otm16Enabled) {
-            return System.getProperty("user.dir") + "/src/test/resources/libraries_1_6";
-    	} else {
-            return System.getProperty("user.dir") + "/src/test/resources/libraries_1_5";
-    	}
+        if (OTM16Upgrade.otm16Enabled) {
+            return System.getProperty( "user.dir" ) + "/src/test/resources/libraries_1_6";
+        } else {
+            return System.getProperty( "user.dir" ) + "/src/test/resources/libraries_1_5";
+        }
     }
 
     /**
-     * Returns the base folder location for test project files to be utilized by the schema compiler
-     * test frameork.
+     * Returns the base folder location for test project files to be utilized by the schema compiler test frameork.
      * 
      * @return String
      */
     public static String getBaseProjectLocation() {
-    	if (OTM16Upgrade.otm16Enabled) {
-            return System.getProperty("user.dir") + "/src/test/resources/projects_1_6";
-    	} else {
-            return System.getProperty("user.dir") + "/src/test/resources/projects";
-    	}
+        if (OTM16Upgrade.otm16Enabled) {
+            return System.getProperty( "user.dir" ) + "/src/test/resources/projects_1_6";
+        } else {
+            return System.getProperty( "user.dir" ) + "/src/test/resources/projects";
+        }
     }
 
     /**
-     * Returns the test folder location for test project files to be utilized by the schema compiler
-     * test frameork when persistent changes to the project will be saved.
+     * Returns the test folder location for test project files to be utilized by the schema compiler test frameork when
+     * persistent changes to the project will be saved.
      * 
      * @return String
      */
     public static String getTestProjectLocation() {
-        File projectTestFolder = new File(System.getProperty("user.dir") + "/target/codegen-output/projects");
-        
+        File projectTestFolder = new File( System.getProperty( "user.dir" ) + "/target/codegen-output/projects" );
+
         if (!projectTestFolder.exists()) {
             projectTestFolder.mkdirs();
         }
@@ -77,41 +76,38 @@ public class SchemaCompilerTestUtils {
     /**
      * Displays the validation findings if debugging is enabled.
      * 
-     * @param findings
-     *            the validation findings to display
+     * @param findings the validation findings to display
      */
     public static void printFindings(ValidationFindings findings) {
-        printFindings(findings, null);
+        printFindings( findings, null );
     }
 
     /**
-     * Displays the validation findings if one or more findings of the specified type are present
-     * (and debugging is enabled).
+     * Displays the validation findings if one or more findings of the specified type are present (and debugging is
+     * enabled).
      * 
-     * @param findings
-     *            the validation findings to display
-     * @param findingType
-     *            the finding type to search for
+     * @param findings the validation findings to display
+     * @param findingType the finding type to search for
      */
     public static void printFindings(ValidationFindings findings, FindingType findingType) {
         if (DEBUG) {
             boolean hasFindings = ((findingType == null) && findings.hasFinding())
-                    || ((findingType != null) && findings.hasFinding(findingType));
+                || ((findingType != null) && findings.hasFinding( findingType ));
 
             if (hasFindings) {
-            	String[] findingMessages;
-                
+                String[] findingMessages;
+
                 if (PRINT_FINDINGS == FindingType.ERROR) {
-                	findingMessages = findings.getValidationMessages(PRINT_FINDINGS, FindingMessageFormat.DEFAULT);
+                    findingMessages = findings.getValidationMessages( PRINT_FINDINGS, FindingMessageFormat.DEFAULT );
                 } else {
-                	findingMessages = findings.getAllValidationMessages(FindingMessageFormat.DEFAULT);
+                    findingMessages = findings.getAllValidationMessages( FindingMessageFormat.DEFAULT );
                 }
-                
+
                 if (findingMessages.length > 0) {
-                    System.out.println("Validation Findings:");
-                	
+                    System.out.println( "Validation Findings:" );
+
                     for (String message : findingMessages) {
-                        System.out.println("  " + message);
+                        System.out.println( "  " + message );
                     }
                 }
             }

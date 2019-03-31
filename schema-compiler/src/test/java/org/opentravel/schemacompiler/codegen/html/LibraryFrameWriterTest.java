@@ -13,21 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.codegen.html;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.opentravel.schemacompiler.codegen.html.builders.AbstractDocumentationBuilder;
+import org.opentravel.schemacompiler.codegen.html.writers.AbstractWriterTest;
+import org.opentravel.schemacompiler.model.LibraryMember;
+import org.opentravel.schemacompiler.model.TLLibrary;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
-
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.opentravel.schemacompiler.model.LibraryMember;
-import org.opentravel.schemacompiler.model.TLLibrary;
-import org.opentravel.schemacompiler.codegen.html.DirectoryManager;
-import org.opentravel.schemacompiler.codegen.html.builders.AbstractDocumentationBuilder;
-import org.opentravel.schemacompiler.codegen.html.writers.AbstractWriterTest;
 
 /**
  * @author Eric.Bronson
@@ -35,26 +35,28 @@ import org.opentravel.schemacompiler.codegen.html.writers.AbstractWriterTest;
  */
 public class LibraryFrameWriterTest extends AbstractWriterTest {
 
-	private static TLLibrary library;
+    private static TLLibrary library;
 
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
-		AbstractWriterTest.setUpBeforeClass();
-		library = (TLLibrary) config.getModel().getUserDefinedLibraries().get(0);
-		LibraryFrameWriter.generate(config, library);
-		String filePath = config.getDestDirName() + DirectoryManager.getDirectoryPath(AbstractDocumentationBuilder.getLibraryName(library)) + LibraryFrameWriter.OUTPUT_FILE_NAME;
-		byte[] encoded = Files.readAllBytes(Paths.get(filePath));
-		new String(encoded);
-	}
+    @BeforeClass
+    public static void setUpBeforeClass() throws Exception {
+        AbstractWriterTest.setUpBeforeClass();
+        library = (TLLibrary) config.getModel().getUserDefinedLibraries().get( 0 );
+        LibraryFrameWriter.generate( config, library );
+        String filePath = config.getDestDirName()
+            + DirectoryManager.getDirectoryPath( AbstractDocumentationBuilder.getLibraryName( library ) )
+            + LibraryFrameWriter.OUTPUT_FILE_NAME;
+        byte[] encoded = Files.readAllBytes( Paths.get( filePath ) );
+        new String( encoded );
+    }
 
-	@Test
-	public void test() {
-		List<LibraryMember> members = library.getNamedMembers();
-		assertTrue(members.size() > 0);
-//		for(LibraryMember member : members){
-			//TODO uncomment when we can handle resources and extension points
-//			assertTrue(content.contains(member.getLocalName()));
-//		}
-	}
+    @Test
+    public void test() {
+        List<LibraryMember> members = library.getNamedMembers();
+        assertTrue( members.size() > 0 );
+        // for(LibraryMember member : members){
+        // TODO uncomment when we can handle resources and extension points
+        // assertTrue(content.contains(member.getLocalName()));
+        // }
+    }
 
 }

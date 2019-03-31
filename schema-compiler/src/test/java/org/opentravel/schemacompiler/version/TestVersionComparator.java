@@ -13,28 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.version;
 
 import static org.junit.Assert.assertEquals;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 
 import org.junit.Test;
 import org.opentravel.schemacompiler.event.ModelElementListener;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.LibraryElement;
 import org.opentravel.schemacompiler.model.TLModel;
-import org.opentravel.schemacompiler.version.OTA2VersionScheme;
-import org.opentravel.schemacompiler.version.VersionScheme;
-import org.opentravel.schemacompiler.version.VersionSchemeFactory;
-import org.opentravel.schemacompiler.version.Versioned;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 /**
- * Verifies the operation of the <code>VersionComparator</code> class for the OTA2 versioning
- * scheme.
+ * Verifies the operation of the <code>VersionComparator</code> class for the OTA2 versioning scheme.
  * 
  * @author S. Livezey
  */
@@ -48,46 +44,46 @@ public class TestVersionComparator {
     public void testSortAscending() throws Exception {
         List<Versioned> versionedItems = new ArrayList<Versioned>();
 
-        versionedItems.add(new VersionedItem("2.0.0"));
-        versionedItems.add(new VersionedItem("3.5.1"));
-        versionedItems.add(new VersionedItem("3.0.0"));
-        versionedItems.add(new VersionedItem("1.0.0"));
-        versionedItems.add(new VersionedItem("2.2.0"));
-        versionedItems.add(new VersionedItem("2.0.1"));
-        versionedItems.add(new VersionedItem("2.0.1"));
-        Collections.sort(versionedItems, vScheme.getComparator(true));
+        versionedItems.add( new VersionedItem( "2.0.0" ) );
+        versionedItems.add( new VersionedItem( "3.5.1" ) );
+        versionedItems.add( new VersionedItem( "3.0.0" ) );
+        versionedItems.add( new VersionedItem( "1.0.0" ) );
+        versionedItems.add( new VersionedItem( "2.2.0" ) );
+        versionedItems.add( new VersionedItem( "2.0.1" ) );
+        versionedItems.add( new VersionedItem( "2.0.1" ) );
+        Collections.sort( versionedItems, vScheme.getComparator( true ) );
 
-        assertEquals(7, versionedItems.size());
-        assertEquals("1.0.0", versionedItems.get(0).getVersion());
-        assertEquals("2.0.0", versionedItems.get(1).getVersion());
-        assertEquals("2.0.1", versionedItems.get(2).getVersion());
-        assertEquals("2.0.1", versionedItems.get(3).getVersion());
-        assertEquals("2.2.0", versionedItems.get(4).getVersion());
-        assertEquals("3.0.0", versionedItems.get(5).getVersion());
-        assertEquals("3.5.1", versionedItems.get(6).getVersion());
+        assertEquals( 7, versionedItems.size() );
+        assertEquals( "1.0.0", versionedItems.get( 0 ).getVersion() );
+        assertEquals( "2.0.0", versionedItems.get( 1 ).getVersion() );
+        assertEquals( "2.0.1", versionedItems.get( 2 ).getVersion() );
+        assertEquals( "2.0.1", versionedItems.get( 3 ).getVersion() );
+        assertEquals( "2.2.0", versionedItems.get( 4 ).getVersion() );
+        assertEquals( "3.0.0", versionedItems.get( 5 ).getVersion() );
+        assertEquals( "3.5.1", versionedItems.get( 6 ).getVersion() );
     }
 
     @Test
     public void testSortDescending() throws Exception {
         List<Versioned> versionedItems = new ArrayList<Versioned>();
 
-        versionedItems.add(new VersionedItem("2.0.0"));
-        versionedItems.add(new VersionedItem("3.5.1"));
-        versionedItems.add(new VersionedItem("3.0.0"));
-        versionedItems.add(new VersionedItem("1.0.0"));
-        versionedItems.add(new VersionedItem("2.2.0"));
-        versionedItems.add(new VersionedItem("2.0.1"));
-        versionedItems.add(new VersionedItem("2.0.1"));
-        Collections.sort(versionedItems, vScheme.getComparator(false));
+        versionedItems.add( new VersionedItem( "2.0.0" ) );
+        versionedItems.add( new VersionedItem( "3.5.1" ) );
+        versionedItems.add( new VersionedItem( "3.0.0" ) );
+        versionedItems.add( new VersionedItem( "1.0.0" ) );
+        versionedItems.add( new VersionedItem( "2.2.0" ) );
+        versionedItems.add( new VersionedItem( "2.0.1" ) );
+        versionedItems.add( new VersionedItem( "2.0.1" ) );
+        Collections.sort( versionedItems, vScheme.getComparator( false ) );
 
-        assertEquals(7, versionedItems.size());
-        assertEquals("3.5.1", versionedItems.get(0).getVersion());
-        assertEquals("3.0.0", versionedItems.get(1).getVersion());
-        assertEquals("2.2.0", versionedItems.get(2).getVersion());
-        assertEquals("2.0.1", versionedItems.get(3).getVersion());
-        assertEquals("2.0.1", versionedItems.get(4).getVersion());
-        assertEquals("2.0.0", versionedItems.get(5).getVersion());
-        assertEquals("1.0.0", versionedItems.get(6).getVersion());
+        assertEquals( 7, versionedItems.size() );
+        assertEquals( "3.5.1", versionedItems.get( 0 ).getVersion() );
+        assertEquals( "3.0.0", versionedItems.get( 1 ).getVersion() );
+        assertEquals( "2.2.0", versionedItems.get( 2 ).getVersion() );
+        assertEquals( "2.0.1", versionedItems.get( 3 ).getVersion() );
+        assertEquals( "2.0.1", versionedItems.get( 4 ).getVersion() );
+        assertEquals( "2.0.0", versionedItems.get( 5 ).getVersion() );
+        assertEquals( "1.0.0", versionedItems.get( 6 ).getVersion() );
     }
 
     private class VersionedItem implements Versioned {
@@ -95,7 +91,7 @@ public class TestVersionComparator {
         private String namespace;
 
         public VersionedItem(String version) {
-            this.namespace = vScheme.setVersionIdentifier(TEST_NAMESPACE, version);
+            this.namespace = vScheme.setVersionIdentifier( TEST_NAMESPACE, version );
         }
 
         @Override
@@ -105,12 +101,12 @@ public class TestVersionComparator {
 
         @Override
         public String getBaseNamespace() {
-            return vScheme.getBaseNamespace(namespace);
+            return vScheme.getBaseNamespace( namespace );
         }
 
         @Override
         public String getVersion() {
-            return vScheme.getVersionIdentifier(namespace);
+            return vScheme.getVersionIdentifier( namespace );
         }
 
         @Override
@@ -153,18 +149,16 @@ public class TestVersionComparator {
             return null;
         }
 
-		@Override
-		public void addListener(ModelElementListener listener) {
-		}
+        @Override
+        public void addListener(ModelElementListener listener) {}
 
-		@Override
-		public void removeListener(ModelElementListener listener) {
-		}
+        @Override
+        public void removeListener(ModelElementListener listener) {}
 
-		@Override
-		public Collection<ModelElementListener> getListeners() {
-			return Collections.emptyList();
-		}
+        @Override
+        public Collection<ModelElementListener> getListeners() {
+            return Collections.emptyList();
+        }
 
     }
 

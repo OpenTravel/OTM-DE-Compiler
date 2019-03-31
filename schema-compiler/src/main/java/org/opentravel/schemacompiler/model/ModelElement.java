@@ -13,16 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.model;
 
-import java.util.Collection;
+package org.opentravel.schemacompiler.model;
 
 import org.opentravel.schemacompiler.event.ModelElementListener;
 import org.opentravel.schemacompiler.validate.Validatable;
 
+import java.util.Collection;
+
 /**
- * Basic interface implemented by all entities that are candidate members of a <code>TLModel</code>
- * instance.
+ * Basic interface implemented by all entities that are candidate members of a <code>TLModel</code> instance.
  * 
  * @author S. Livezey
  */
@@ -38,46 +38,42 @@ public interface ModelElement extends Validatable {
     /**
      * Registers a listener for this model element.
      * 
-     * @param listener  the listener instance to register
+     * @param listener the listener instance to register
      */
     public void addListener(ModelElementListener listener);
-    
+
     /**
      * Unregisteres a listener from this model element.
      * 
-     * @param listener  the lister instance to unregister
+     * @param listener the lister instance to unregister
      */
     public void removeListener(ModelElementListener listener);
-    
+
     /**
-     * Returns an unmodifiable collections of all listeners that have been registered
-     * with this model element.
+     * Returns an unmodifiable collections of all listeners that have been registered with this model element.
      * 
-     * @return Collection<ModelElementListener>
+     * @return Collection&lt;ModelElementListener&gt;
      */
     public Collection<ModelElementListener> getListeners();
 
     /**
-     * Creates a deep-copy of this model element. The only difference between this one and the new
-     * copy is that the new copy will not yet be assigned to an owning library.
+     * Creates a deep-copy of this model element. The only difference between this one and the new copy is that the new
+     * copy will not yet be assigned to an owning library.
      * 
      * @return TLModelElement
-     * @throws IllegalArgumentException
-     *             thrown if this model element cannot be cloned
+     * @throws IllegalArgumentException thrown if this model element cannot be cloned
      */
     public LibraryElement cloneElement();
 
     /**
-     * Creates a deep-copy of this model element. The only difference between this one and the new
-     * copy is that the new copy will not yet be assigned to an owning library.
+     * Creates a deep-copy of this model element. The only difference between this one and the new copy is that the new
+     * copy will not yet be assigned to an owning library.
      * 
-     * @param namingContext
-     *            the library whose owning that should be used for reference lookups when resolving
-     *            names in the cloned entity; the library itself is used to resolve namespace prefix
-     *            references during reference lookups
+     * @param namingContext the library whose owning that should be used for reference lookups when resolving names in
+     *        the cloned entity; the library itself is used to resolve namespace prefix references during reference
+     *        lookups
      * @return LibraryElement
-     * @throws IllegalArgumentException
-     *             thrown if this model element cannot be cloned
+     * @throws IllegalArgumentException thrown if this model element cannot be cloned
      */
     public LibraryElement cloneElement(AbstractLibrary namingContext);
 

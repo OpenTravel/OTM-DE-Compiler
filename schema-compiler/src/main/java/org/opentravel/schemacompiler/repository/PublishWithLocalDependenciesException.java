@@ -13,43 +13,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.repository;
 
 import java.util.Collection;
 import java.util.Collections;
 
 /**
- * Thrown by the <code>ProjectManager</code> when the user attempts to publish a library that has
- * one or more dependencies on unmanaged (local) libraries. The 'requestedPublications' property
- * provides the list of project items that were originally requested to be published. The
- * 'requiredPublications' list provies the list of items that must be included in a follow- up
- * request in order to successfully complete the publication.
+ * Thrown by the <code>ProjectManager</code> when the user attempts to publish a library that has one or more
+ * dependencies on unmanaged (local) libraries. The 'requestedPublications' property provides the list of project items
+ * that were originally requested to be published. The 'requiredPublications' list provies the list of items that must
+ * be included in a follow- up request in order to successfully complete the publication.
  * 
  * @author S. Livezey
  */
 public class PublishWithLocalDependenciesException extends Exception {
 
-	private static final long serialVersionUID = 3165044513260100326L;
-	
-	private final transient Collection<ProjectItem> requestedPublications;
+    private static final long serialVersionUID = 3165044513260100326L;
+
+    private final transient Collection<ProjectItem> requestedPublications;
     private final transient Collection<ProjectItem> requiredPublications;
 
     /**
-     * Constructor that specifies an exception message, as well as the lists of requested and
-     * required libraries.
+     * Constructor that specifies an exception message, as well as the lists of requested and required libraries.
      * 
-     * @param message
-     *            the detail message for the exception
-     * @param requestedPublications
-     *            the list of project items that were originally requested to be published
-     * @param requiredPublications
-     *            the list of items that must be included in a follow- up request in order to
-     *            successfully complete the publication
+     * @param message the detail message for the exception
+     * @param requestedPublications the list of project items that were originally requested to be published
+     * @param requiredPublications the list of items that must be included in a follow- up request in order to
+     *        successfully complete the publication
      */
-    public PublishWithLocalDependenciesException(String message,
-            Collection<ProjectItem> requestedPublications,
-            Collection<ProjectItem> requiredPublications) {
-        super(message);
+    public PublishWithLocalDependenciesException(String message, Collection<ProjectItem> requestedPublications,
+        Collection<ProjectItem> requiredPublications) {
+        super( message );
         this.requestedPublications = requestedPublications;
         this.requiredPublications = requiredPublications;
     }
@@ -57,17 +52,17 @@ public class PublishWithLocalDependenciesException extends Exception {
     /**
      * Returns the list of project items that were originally requested to be published.
      * 
-     * @return Collection<ProjectItem>
+     * @return Collection&lt;ProjectItem&gt;
      */
     public Collection<ProjectItem> getRequestedPublications() {
         return Collections.unmodifiableCollection( requestedPublications );
     }
 
     /**
-     * Returns the list of items that must be included in a follow- up request in order to
-     * successfully complete the publication.
+     * Returns the list of items that must be included in a follow- up request in order to successfully complete the
+     * publication.
      * 
-     * @return Collection<ProjectItem>
+     * @return Collection&lt;ProjectItem&gt;
      */
     public Collection<ProjectItem> getRequiredPublications() {
         return Collections.unmodifiableCollection( requiredPublications );

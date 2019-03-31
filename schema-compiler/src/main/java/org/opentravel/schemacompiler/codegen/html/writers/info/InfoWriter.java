@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.codegen.html.writers.info;
 
 import org.opentravel.schemacompiler.codegen.html.Content;
@@ -22,22 +23,22 @@ import org.opentravel.schemacompiler.codegen.html.Content;
  *
  */
 public interface InfoWriter {
-	
-	/**
-	 * Add the info tree.
-	 * 
-	 * @param memberTree
-	 */
-	public void addInfo(Content memberTree);
-	
-	/**
-	 * @param title the title to set
-	 */
-	public void setTitle(Content title);
-	
-	/**
-	 * @param title the title to set
-	 */
-	public void setCaption(String caption);
+
+    /**
+     * Add the info tree.
+     * 
+     * @param memberTree the member content for which the info-writer is being created
+     */
+    public void addInfo(Content memberTree);
+
+    /**
+     * @param title the title to set
+     */
+    public void setTitle(Content title);
+
+    /**
+     * @param caption the caption to set
+     */
+    public void setCaption(String caption);
 
 }

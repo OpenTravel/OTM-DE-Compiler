@@ -13,34 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/*
- * Copyright (c) 1998, 2010, Oracle and/or its affiliates. All rights reserved.
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
- *
- * This code is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Oracle designates this
- * particular file as subject to the "Classpath" exception as provided
- * by Oracle in the LICENSE file that accompanied this code.
- *
- * This code is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
- * version 2 for more details (a copy is included in the LICENSE file that
- * accompanied this code).
- *
- * You should have received a copy of the GNU General Public License version
- * 2 along with this work; if not, write to the Free Software Foundation,
- * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
- *
- * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
- * or visit www.oracle.com if you need additional information or have any
- * questions.
- */
-package org.opentravel.schemacompiler.codegen.html;
 
-import java.util.List;
-import java.util.Locale;
+package org.opentravel.schemacompiler.codegen.html;
 
 import org.opentravel.schemacompiler.codegen.example.ExampleGeneratorOptions;
 import org.opentravel.schemacompiler.codegen.html.builders.DocumentationBuilder;
@@ -51,17 +25,21 @@ import org.opentravel.schemacompiler.model.LibraryMember;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLModel;
 
+import java.util.List;
+import java.util.Locale;
+
 /**
  * Configure the output based on the command line options.
+ * 
  * <p>
- * Also determine the length of the command line option. For EXAMPLE, for a
- * option "-header" there will be a string argument associated, then the the
- * length of option "-header" is two. But for option "-nohelp" no argument is
- * needed so it's length is 1.
+ * Also determine the length of the command line option. For EXAMPLE, for a option "-header" there will be a string
+ * argument associated, then the the length of option "-header" is two. But for option "-nohelp" no argument is needed
+ * so it's length is 1.
  * </p>
+ * 
  * <p>
- * Also do the error checking on the options used. For EXAMPLE it is illegal to
- * use "-helpfile" option when already "-nohelp" option is used.
+ * Also do the error checking on the options used. For EXAMPLE it is illegal to use "-helpfile" option when already
+ * "-nohelp" option is used.
  * </p>
  *
  * @author Robert Field.
@@ -70,105 +48,99 @@ import org.opentravel.schemacompiler.model.TLModel;
  * @author Bhavesh Patel (Modified)
  */
 public class Configuration {
-	
 
-	/**
-	 * Location of doclet properties file.
-	 */
-	public static final String DOCLETS_RESOURCE = "org.opentravel.schemacompiler.codegen.html.resources.doclets";
-	
-	/**
-	 * The namespace for XSD schemas.
-	 */
-	private static final String XSD_NAMESPACE = "http://www.w3.org/2001/XMLSchema";
 
-	/**
-	 * The build date. Note: For now, we will use a version number instead of a
-	 * date.
-	 */
-	public static final String BUILD_DATE = System.getProperty("java.version");
-	
-	/**
-	 * The build date. Note: For now, we will use a version number instead of a
-	 * date.
-	 */
-	public static final String VERSION = "3.0";
+    /**
+     * Location of doclet properties file.
+     */
+    public static final String DOCLETS_RESOURCE = "org.opentravel.schemacompiler.codegen.html.resources.doclets";
 
-	/**
-	 * The name of the constant values file.
-	 */
-	public static final String CONSTANTS_FILE_NAME = "constant-values.html";
+    /**
+     * The namespace for XSD schemas.
+     */
+    private static final String XSD_NAMESPACE = "http://www.w3.org/2001/XMLSchema";
 
-	private static Configuration instance = new Configuration();
+    /**
+     * The build date. Note: For now, we will use a version number instead of a date.
+     */
+    public static final String BUILD_DATE = System.getProperty( "java.version" );
 
-	/**
-	 * Argument for command line option "-doctitle".
-	 */
-	private String doctitle = "";
+    /**
+     * The build date. Note: For now, we will use a version number instead of a date.
+     */
+    public static final String VERSION = "3.0";
 
-	/**
-	 * Argument for command line option "-windowtitle".
-	 */
-	private String windowtitle = "";
+    /**
+     * The name of the constant values file.
+     */
+    public static final String CONSTANTS_FILE_NAME = "constant-values.html";
 
-	/**
-	 * Argument for command line option "-stylesheetfile".
-	 */
-	private String stylesheetfile = "";
+    private static Configuration instance = new Configuration();
 
-	/**
-	 * This is true if option "-overview" is used or option "-overview" is not
-	 * used and number of packages is more than one.
-	 */
-	private boolean createoverview = true;
+    /**
+     * Argument for command line option "-doctitle".
+     */
+    private String doctitle = "";
 
-	/**
-	 * Unique Resource Handler for this package.
-	 */
-	public final MessageRetriever message;
+    /**
+     * Argument for command line option "-windowtitle".
+     */
+    private String windowtitle = "";
 
-	/**
-	 * First file to appear in the right-hand frame in the generated
-	 * documentation.
-	 */
-	private String topFile = "";
+    /**
+     * Argument for command line option "-stylesheetfile".
+     */
+    private String stylesheetfile = "";
 
-	/**
-	 * The classdoc for the class file getting generated.
-	 */
-	private DocumentationBuilder currentMember = null;
+    /**
+     * This is true if option "-overview" is used or option "-overview" is not used and number of packages is more than
+     * one.
+     */
+    private boolean createoverview = true;
 
-	/**
-	 * The Root of the generated Program Structure from the Doclet API.
-	 */
-	private TLModel model;
+    /**
+     * Unique Resource Handler for this package.
+     */
+    public final MessageRetriever message;
 
-	/**
-	 * Destination directory name, in which doclet will generate the entire
-	 * documentation. Default is current directory.
-	 */
-	private String destDirName = "";
+    /**
+     * First file to appear in the right-hand frame in the generated documentation.
+     */
+    private String topFile = "";
 
-	/**
-	 * Encoding for this document. Default is default encoding for this
-	 * platform.
-	 */
-	private String docencoding = null;
+    /**
+     * The classdoc for the class file getting generated.
+     */
+    private DocumentationBuilder currentMember = null;
 
-	/**
-	 * True if user wants to add member names as meta keywords. Set to false
-	 * because meta keywords are ignored in general by most Internet search
-	 * engines.
-	 */
-	private boolean keywords = false;
+    /**
+     * The Root of the generated Program Structure from the Doclet API.
+     */
+    private TLModel model;
 
-	private Messager messager = new Messager("OTM Documentation");
-	
-	/**
+    /**
+     * Destination directory name, in which doclet will generate the entire documentation. Default is current directory.
+     */
+    private String destDirName = "";
+
+    /**
+     * Encoding for this document. Default is default encoding for this platform.
+     */
+    private String docencoding = null;
+
+    /**
+     * True if user wants to add member names as meta keywords. Set to false because meta keywords are ignored in
+     * general by most Internet search engines.
+     */
+    private boolean keywords = false;
+
+    private Messager messager = new Messager( "OTM Documentation" );
+
+    /**
      * True if command line option "-nohelp" is used. Default value is false.
      */
     private boolean nohelp = true;
-    
+
     /**
      * False if command line option "-noindex" is used. Default value is true.
      */
@@ -183,569 +155,583 @@ public class Configuration {
      * False if command line option "-notree" is used. Default value is true.
      */
     private boolean createtree = false;
-    
+
     /**
-     * True if command line option "-splitindex" is used. Default value is
-     * false.
+     * True if command line option "-splitindex" is used. Default value is false.
      */
     private boolean splitindex = false;
-    
+
     /**
      * Argument for command line option "-helpfile".
      */
     private String helpfile = "";
 
-	/**
-	 * Set this to true if you would like to not emit any errors, warnings and
-	 * notices.
-	 */
-	private boolean silent = false;
+    /**
+     * Set this to true if you would like to not emit any errors, warnings and notices.
+     */
+    private boolean silent = false;
 
-	private DocumentationBuilderFactory builderFactory;
+    private DocumentationBuilderFactory builderFactory;
 
-	private boolean isGenerateBuiltins = false;
-	
-	private ExampleGeneratorOptions exampleOptions;
-	
-	/**
-	 * Constructor. Initializes resource for the
-	 * {@link com.sun.tools.doclets.MessageRetriever}.
-	 */
-	private Configuration() {
-		message = new MessageRetriever(this, DOCLETS_RESOURCE);
-		setTopFile("overview-summary.html");
-	}
+    private boolean isGenerateBuiltins = false;
 
-	/**
-	 * Reset to a fresh new Configuration, to allow multiple invocations of
-	 * javadoc within a single VM. It would be better not to be using static
-	 * fields at all, but .... (sigh).
-	 */
-	public static void reset() {
-		instance = new Configuration();
-	}
+    private ExampleGeneratorOptions exampleOptions;
 
-	public static Configuration getInstance() {
-		return instance;
-	}
+    /**
+     * Constructor. Initializes resource for the {@link com.sun.tools.doclets.MessageRetriever}.
+     */
+    private Configuration() {
+        message = new MessageRetriever( this, DOCLETS_RESOURCE );
+        setTopFile( "overview-summary.html" );
+    }
 
-	/**
-	 * Return the build date for the doclet.
-	 */
-	public String getDocletSpecificBuildDate() {
-		return BUILD_DATE;
-	}
+    /**
+     * Reset to a fresh new Configuration, to allow multiple invocations of javadoc within a single VM. It would be
+     * better not to be using static fields at all, but .... (sigh).
+     */
+    public static void reset() {
+        instance = new Configuration();
+    }
 
-	/**
-	 * Return the qualified name of the <code>ClassDoc</code> if it's qualifier
-	 * is not excluded. Otherwise, return the unqualified <code>ClassDoc</code>
-	 * name.
-	 * 
-	 * @param cd
-	 *            the <code>ClassDoc</code> to check.
-	 */
-	public String getQualifiedName(DocumentationBuilder member) {
-		String namespace = member.getNamespace();
-		String localName = member.getName();
-		return null == namespace ? localName : namespace + ":" + localName;
-	}
+    public static Configuration getInstance() {
+        return instance;
+    }
 
-	/**
-	 * Return the qualified name of the <code>ClassDoc</code> if it's qualifier
-	 * is not excluded. Otherwise, return the unqualified <code>ClassDoc</code>
-	 * name.
-	 * 
-	 * @param cd
-	 *            the <code>ClassDoc</code> to check.
-	 */
-	public String getQualifiedName(LibraryMember member) {
-		String namespace = member.getNamespace();
-		String localName = member.getLocalName();
-		return null == namespace ? localName : namespace + ":" + localName;
-	}
+    /**
+     * Return the build date for the doclet.
+     * 
+     * @return String
+     */
+    public String getDocletSpecificBuildDate() {
+        return BUILD_DATE;
+    }
+
+    /**
+     * Return the qualified name of the <code>ClassDoc</code> if it's qualifier is not excluded. Otherwise, return the
+     * unqualified <code>ClassDoc</code> name.
+     * 
+     * @param member the documentation builder for the member for which to return the qualified name
+     * @return String
+     */
+    public String getQualifiedName(DocumentationBuilder member) {
+        String namespace = member.getNamespace();
+        String localName = member.getName();
+        return null == namespace ? localName : namespace + ":" + localName;
+    }
+
+    /**
+     * Return the qualified name of the <code>ClassDoc</code> if it's qualifier is not excluded. Otherwise, return the
+     * unqualified <code>ClassDoc</code> name.
+     * 
+     * @param member the OTM library member for which to return the qualified name
+     * @return String
+     */
+    public String getQualifiedName(LibraryMember member) {
+        String namespace = member.getNamespace();
+        String localName = member.getLocalName();
+        return null == namespace ? localName : namespace + ":" + localName;
+    }
+
+    /**
+     * Returns the formatted message associated with the message key provided.
+     * 
+     * @param key the message key
+     * @return String
+     */
+    public String getText(String key) {
+        try {
+            // Check the doclet specific properties file.
+            return getDocletSpecificMsg().getText( key );
+        } catch (Exception e) {
+            // Check the shared properties file.
+            return message.getText( key );
+        }
+    }
+
+    /**
+     * Returns the formatted message associated with the message key provided.
+     * 
+     * @param key the message key
+     * @param arg the argument to be included in the message
+     * @return String
+     */
+    public String getText(String key, String arg) {
+        try {
+            // Check the doclet specific properties file.
+            return getDocletSpecificMsg().getText( key, arg );
+        } catch (Exception e) {
+            // Check the shared properties file.
+            return message.getText( key, arg );
+        }
+    }
+
+    /**
+     * Returns the formatted message associated with the message key provided.
+     * 
+     * @param key the message key
+     * @param arg1 the first argument to be included in the message
+     * @param arg2 the second argument to be included in the message
+     * @return String
+     */
+    public String getText(String key, String arg1, String arg2) {
+        try {
+            // Check the doclet specific properties file.
+            return getDocletSpecificMsg().getText( key, arg1, arg2 );
+        } catch (Exception e) {
+            // Check the shared properties file.
+            return message.getText( key, arg1, arg2 );
+        }
+    }
+
+    /**
+     * Returns the locale to use during doclet generation.
+     * 
+     * @return Locale
+     */
+    public Locale getLocale() {
+        return Locale.getDefault();
+    }
 
 
-	public String getText(String key) {
-		try {
-			// Check the doclet specific properties file.
-			return getDocletSpecificMsg().getText(key);
-		} catch (Exception e) {
-			// Check the shared properties file.
-			return message.getText(key);
-		}
-	}
+    /**
+     * {@inheritDoc}
+     */
+    public MessageRetriever getDocletSpecificMsg() {
+        return message;
+    }
 
-	public String getText(String key, String a1) {
-		try {
-			// Check the doclet specific properties file.
-			return getDocletSpecificMsg().getText(key, a1);
-		} catch (Exception e) {
-			// Check the shared properties file.
-			return message.getText(key, a1);
-		}
-	}
+    /**
+     * Return true if the ClassDoc element is getting documented, depending upon -nodeprecated option and the
+     * deprecation information. Return true if -nodeprecated is not used. Return false if -nodeprecated is used and if
+     * either ClassDoc element is deprecated or the containing package is deprecated.
+     *
+     * @param builder the ClassDoc for which the page generation is checked
+     * @return boolean
+     */
+    public boolean isGeneratedDoc(DocumentationBuilder builder) {
+        boolean isGenerated = true;
+        String namespace = builder.getNamespace();
 
-	public String getText(String key, String a1, String a2) {
-		try {
-			// Check the doclet specific properties file.
-			return getDocletSpecificMsg().getText(key, a1, a2);
-		} catch (Exception e) {
-			// Check the shared properties file.
-			return message.getText(key, a1, a2);
-		}
-	}
+        if (XSD_NAMESPACE.equals( namespace )) {
+            isGenerated = false;
+        } else if (!isGenerateBuiltins) {
+            List<AbstractLibrary> libs = getModel().getLibrariesForNamespace( namespace );
+            // only need one library to determine if its a builtin
+            // is this faster than traversing getBuiltinLibraries?
+            if (!libs.isEmpty() && libs.get( 0 ) instanceof BuiltInLibrary) {
+                isGenerated = false;
+            }
+        }
 
-	public Locale getLocale() {
-		return Locale.getDefault();
-	}
+        return isGenerated;
+    }
 
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	public MessageRetriever getDocletSpecificMsg() {
-		return message;
-	}
+    /**
+     * Return true if the ClassDoc element is getting documented, depending upon -nodeprecated option and the
+     * deprecation information. Return true if -nodeprecated is not used. Return false if -nodeprecated is used and if
+     * either ClassDoc element is deprecated or the containing package is deprecated.
+     *
+     * @param member the OTM library member
+     * @return boolean
+     */
+    public boolean isGeneratedDoc(LibraryMember member) {
+        return member != null;
+    }
 
-	/**
-	 * Return true if the ClassDoc element is getting documented, depending upon
-	 * -nodeprecated option and the deprecation information. Return true if
-	 * -nodeprecated is not used. Return false if -nodeprecated is used and if
-	 * either ClassDoc element is deprecated or the containing package is
-	 * deprecated.
-	 *
-	 * @param builder
-	 *            the ClassDoc for which the page generation is checked
-	 */
-	public boolean isGeneratedDoc(DocumentationBuilder builder) {
-		boolean isGenerated = true;
-		String namespace = builder.getNamespace();
-		if(XSD_NAMESPACE.equals(namespace)){
-			isGenerated = false;
-		}else if(!isGenerateBuiltins){
-			List<AbstractLibrary> libs = getModel().getLibrariesForNamespace(namespace);
-			//only need one library to determine if its a builtin
-			// is this faster than traversing getBuiltinLibraries?
-			if(!libs.isEmpty() && libs.get(0) instanceof BuiltInLibrary){
-				isGenerated = false;
-			}
-		}
-		
-		return isGenerated;
-	}
-	
-	/**
-	 * Return true if the ClassDoc element is getting documented, depending upon
-	 * -nodeprecated option and the deprecation information. Return true if
-	 * -nodeprecated is not used. Return false if -nodeprecated is used and if
-	 * either ClassDoc element is deprecated or the containing package is
-	 * deprecated.
-	 *
-	 * @param builder
-	 *            the ClassDoc for which the page generation is checked
-	 */
-	public boolean isGeneratedDoc(LibraryMember member) {
-		return member != null;
-	}
+    public List<TLLibrary> getLibraries() {
+        return getModel().getUserDefinedLibraries();
+    }
 
-	public List<TLLibrary> getLibraries() {
-		return getModel().getUserDefinedLibraries();
-	}
+    /**
+     * Print error message, increment error count.
+     *
+     * @param msg message to print.
+     */
+    public void printError(String msg) {
+        if (!silent) {
+            getMessager().printError( msg );
+        }
+    }
 
-	/**
-	 * Print error message, increment error count.
-	 *
-	 * @param msg
-	 *            message to print.
-	 */
-	public void printError(String msg) {
-		if (silent)
-			return;
-		getMessager().printError(msg);
-	}
+    /**
+     * Print error message, increment error count.
+     *
+     * @param pos the source position for the error
+     * @param msg message to print.
+     */
+    public void printError(SourcePosition pos, String msg) {
+        if (!silent) {
+            getMessager().printError( pos, msg );
+        }
+    }
 
-	/**
-	 * Print error message, increment error count.
-	 *
-	 * @param msg
-	 *            message to print.
-	 */
-	public void printError(SourcePosition pos, String msg) {
-		if (silent)
-			return;
-		getMessager().printError(pos, msg);
-	}
+    /**
+     * Print warning message, increment warning count.
+     *
+     * @param msg message to print.
+     */
+    public void printWarning(String msg) {
+        if (!silent) {
+            getMessager().printWarning( msg );
+        }
+    }
 
-	/**
-	 * Print warning message, increment warning count.
-	 *
-	 * @param msg
-	 *            message to print.
-	 */
-	public void printWarning(String msg) {
-		if (silent)
-			return;
-		getMessager().printWarning(msg);
-	}
+    /**
+     * Print warning message, increment warning count.
+     *
+     * @param pos the source position for the warning
+     * @param msg message to print.
+     */
+    public void printWarning(SourcePosition pos, String msg) {
+        if (!silent) {
+            getMessager().printWarning( pos, msg );
+        }
+    }
 
-	/**
-	 * Print warning message, increment warning count.
-	 *
-	 * @param msg
-	 *            message to print.
-	 */
-	public void printWarning(SourcePosition pos, String msg) {
-		if (silent)
-			return;
-		getMessager().printWarning(pos, msg);
-	}
+    /**
+     * Print a message.
+     *
+     * @param msg message to print.
+     */
+    public void printNotice(String msg) {
+        if (!silent) {
+            getMessager().printNotice( msg );
+        }
+    }
 
-	/**
-	 * Print a message.
-	 *
-	 * @param msg
-	 *            message to print.
-	 */
-	public void printNotice(String msg) {
-		if (silent)
-			return;
-		getMessager().printNotice(msg);
-	}
+    /**
+     * Print a message.
+     *
+     * @param pos the source position for the notice
+     * @param msg message to print.
+     */
+    public void printNotice(SourcePosition pos, String msg) {
+        if (!silent) {
+            getMessager().printNotice( pos, msg );
+        }
+    }
 
-	/**
-	 * Print a message.
-	 *
-	 * @param msg
-	 *            message to print.
-	 */
-	public void printNotice(SourcePosition pos, String msg) {
-		if (silent)
-			return;
-		getMessager().printNotice(pos, msg);
-	}
+    /**
+     * Return the builder factory for this doclet.
+     *
+     * @return the builder factory for this doclet.
+     */
+    public DocumentationBuilderFactory getBuilderFactory() {
+        if (builderFactory == null) {
+            builderFactory = DocumentationBuilderFactory.getInstance();
+        }
+        return builderFactory;
+    }
 
-	/**
-	 * Return the builder factory for this doclet.
-	 *
-	 * @return the builder factory for this doclet.
-	 */
-	public DocumentationBuilderFactory getBuilderFactory() {
-		if (builderFactory == null) {
-			builderFactory = DocumentationBuilderFactory.getInstance();
-		}
-		return builderFactory;
-	}
+    public void setModel(TLModel model) {
+        this.model = model;
+    }
 
-	public void setModel(TLModel model) {
-		this.model = model;
-	}
+    /**
+     * @param destDirName the destDirName to set
+     */
+    public void setDestDirName(String destDirName) {
+        this.destDirName = destDirName;
+    }
 
-	/**
-	 * @param destDirName
-	 *            the destDirName to set
-	 */
-	public void setDestDirName(String destDirName) {
-		this.destDirName = destDirName;
-	}
+    /**
+     * @return the model
+     */
+    public TLModel getModel() {
+        return model;
+    }
 
-	/**
-	 * @return the model
-	 */
-	public TLModel getModel() {
-		return model;
-	}
+    /**
+     * @return the destDirName
+     */
+    public String getDestDirName() {
+        return destDirName;
+    }
 
-	/**
-	 * @return the destDirName
-	 */
-	public String getDestDirName() {
-		return destDirName;
-	}
+    /**
+     * @param windowtitle the windowtitle to set
+     */
+    public void setWindowtitle(String windowtitle) {
+        this.windowtitle = windowtitle;
+    }
 
-	/**
-	 * @param windowtitle the windowtitle to set
-	 */
-	public void setWindowtitle(String windowtitle) {
-		this.windowtitle = windowtitle;
-	}
+    /**
+     * Returns the value of the 'exampleOptions' field.
+     *
+     * @return ExampleGeneratorOptions
+     */
+    public ExampleGeneratorOptions getExampleOptions() {
+        return exampleOptions;
+    }
 
-	/**
-	 * Returns the value of the 'exampleOptions' field.
-	 *
-	 * @return ExampleGeneratorOptions
-	 */
-	public ExampleGeneratorOptions getExampleOptions() {
-		return exampleOptions;
-	}
+    /**
+     * Assigns the value of the 'exampleOptions' field.
+     *
+     * @param exampleOptions the field value to assign
+     */
+    public void setExampleOptions(ExampleGeneratorOptions exampleOptions) {
+        this.exampleOptions = exampleOptions;
+    }
 
-	/**
-	 * Assigns the value of the 'exampleOptions' field.
-	 *
-	 * @param exampleOptions  the field value to assign
-	 */
-	public void setExampleOptions(ExampleGeneratorOptions exampleOptions) {
-		this.exampleOptions = exampleOptions;
-	}
+    /**
+     * Returns the value of the 'doctitle' field.
+     *
+     * @return String
+     */
+    public String getDoctitle() {
+        return doctitle;
+    }
 
-	/**
-	 * Returns the value of the 'doctitle' field.
-	 *
-	 * @return String
-	 */
-	public String getDoctitle() {
-		return doctitle;
-	}
+    /**
+     * Assigns the value of the 'doctitle' field.
+     *
+     * @param doctitle the field value to assign
+     */
+    public void setDoctitle(String doctitle) {
+        this.doctitle = doctitle;
+    }
 
-	/**
-	 * Assigns the value of the 'doctitle' field.
-	 *
-	 * @param doctitle  the field value to assign
-	 */
-	public void setDoctitle(String doctitle) {
-		this.doctitle = doctitle;
-	}
+    /**
+     * Returns the value of the 'windowtitle' field.
+     *
+     * @return String
+     */
+    public String getWindowtitle() {
+        return windowtitle;
+    }
 
-	/**
-	 * Returns the value of the 'windowtitle' field.
-	 *
-	 * @return String
-	 */
-	public String getWindowtitle() {
-		return windowtitle;
-	}
+    /**
+     * Returns the value of the 'stylesheetfile' field.
+     *
+     * @return String
+     */
+    public String getStylesheetfile() {
+        return stylesheetfile;
+    }
 
-	/**
-	 * Returns the value of the 'stylesheetfile' field.
-	 *
-	 * @return String
-	 */
-	public String getStylesheetfile() {
-		return stylesheetfile;
-	}
+    /**
+     * Assigns the value of the 'stylesheetfile' field.
+     *
+     * @param stylesheetfile the field value to assign
+     */
+    public void setStylesheetfile(String stylesheetfile) {
+        this.stylesheetfile = stylesheetfile;
+    }
 
-	/**
-	 * Assigns the value of the 'stylesheetfile' field.
-	 *
-	 * @param stylesheetfile  the field value to assign
-	 */
-	public void setStylesheetfile(String stylesheetfile) {
-		this.stylesheetfile = stylesheetfile;
-	}
+    /**
+     * Returns the value of the 'createoverview' field.
+     *
+     * @return boolean
+     */
+    public boolean isCreateoverview() {
+        return createoverview;
+    }
 
-	/**
-	 * Returns the value of the 'createoverview' field.
-	 *
-	 * @return boolean
-	 */
-	public boolean isCreateoverview() {
-		return createoverview;
-	}
+    /**
+     * Assigns the value of the 'createoverview' field.
+     *
+     * @param createoverview the field value to assign
+     */
+    public void setCreateoverview(boolean createoverview) {
+        this.createoverview = createoverview;
+    }
 
-	/**
-	 * Assigns the value of the 'createoverview' field.
-	 *
-	 * @param createoverview  the field value to assign
-	 */
-	public void setCreateoverview(boolean createoverview) {
-		this.createoverview = createoverview;
-	}
+    /**
+     * Returns the value of the 'topFile' field.
+     *
+     * @return String
+     */
+    public String getTopFile() {
+        return topFile;
+    }
 
-	/**
-	 * Returns the value of the 'topFile' field.
-	 *
-	 * @return String
-	 */
-	public String getTopFile() {
-		return topFile;
-	}
+    /**
+     * Assigns the value of the 'topFile' field.
+     *
+     * @param topFile the field value to assign
+     */
+    public void setTopFile(String topFile) {
+        this.topFile = topFile;
+    }
 
-	/**
-	 * Assigns the value of the 'topFile' field.
-	 *
-	 * @param topFile  the field value to assign
-	 */
-	public void setTopFile(String topFile) {
-		this.topFile = topFile;
-	}
+    /**
+     * Returns the value of the 'currentMember' field.
+     *
+     * @return DocumentationBuilder
+     */
+    public DocumentationBuilder getCurrentMember() {
+        return currentMember;
+    }
 
-	/**
-	 * Returns the value of the 'currentMember' field.
-	 *
-	 * @return DocumentationBuilder
-	 */
-	public DocumentationBuilder getCurrentMember() {
-		return currentMember;
-	}
+    /**
+     * Assigns the value of the 'currentMember' field.
+     *
+     * @param currentMember the field value to assign
+     */
+    public void setCurrentMember(DocumentationBuilder currentMember) {
+        this.currentMember = currentMember;
+    }
 
-	/**
-	 * Assigns the value of the 'currentMember' field.
-	 *
-	 * @param currentMember  the field value to assign
-	 */
-	public void setCurrentMember(DocumentationBuilder currentMember) {
-		this.currentMember = currentMember;
-	}
+    /**
+     * Returns the value of the 'docencoding' field.
+     *
+     * @return String
+     */
+    public String getDocencoding() {
+        return docencoding;
+    }
 
-	/**
-	 * Returns the value of the 'docencoding' field.
-	 *
-	 * @return String
-	 */
-	public String getDocencoding() {
-		return docencoding;
-	}
+    /**
+     * Assigns the value of the 'docencoding' field.
+     *
+     * @param docencoding the field value to assign
+     */
+    public void setDocencoding(String docencoding) {
+        this.docencoding = docencoding;
+    }
 
-	/**
-	 * Assigns the value of the 'docencoding' field.
-	 *
-	 * @param docencoding  the field value to assign
-	 */
-	public void setDocencoding(String docencoding) {
-		this.docencoding = docencoding;
-	}
+    /**
+     * Returns the value of the 'keywords' field.
+     *
+     * @return boolean
+     */
+    public boolean isKeywords() {
+        return keywords;
+    }
 
-	/**
-	 * Returns the value of the 'keywords' field.
-	 *
-	 * @return boolean
-	 */
-	public boolean isKeywords() {
-		return keywords;
-	}
+    /**
+     * Assigns the value of the 'keywords' field.
+     *
+     * @param keywords the field value to assign
+     */
+    public void setKeywords(boolean keywords) {
+        this.keywords = keywords;
+    }
 
-	/**
-	 * Assigns the value of the 'keywords' field.
-	 *
-	 * @param keywords  the field value to assign
-	 */
-	public void setKeywords(boolean keywords) {
-		this.keywords = keywords;
-	}
+    /**
+     * Returns the value of the 'messager' field.
+     *
+     * @return Messager
+     */
+    public Messager getMessager() {
+        return messager;
+    }
 
-	/**
-	 * Returns the value of the 'messager' field.
-	 *
-	 * @return Messager
-	 */
-	public Messager getMessager() {
-		return messager;
-	}
+    /**
+     * Assigns the value of the 'messager' field.
+     *
+     * @param messager the field value to assign
+     */
+    public void setMessager(Messager messager) {
+        this.messager = messager;
+    }
 
-	/**
-	 * Assigns the value of the 'messager' field.
-	 *
-	 * @param messager  the field value to assign
-	 */
-	public void setMessager(Messager messager) {
-		this.messager = messager;
-	}
+    /**
+     * Returns the value of the 'nohelp' field.
+     *
+     * @return boolean
+     */
+    public boolean isNohelp() {
+        return nohelp;
+    }
 
-	/**
-	 * Returns the value of the 'nohelp' field.
-	 *
-	 * @return boolean
-	 */
-	public boolean isNohelp() {
-		return nohelp;
-	}
+    /**
+     * Assigns the value of the 'nohelp' field.
+     *
+     * @param nohelp the field value to assign
+     */
+    public void setNohelp(boolean nohelp) {
+        this.nohelp = nohelp;
+    }
 
-	/**
-	 * Assigns the value of the 'nohelp' field.
-	 *
-	 * @param nohelp  the field value to assign
-	 */
-	public void setNohelp(boolean nohelp) {
-		this.nohelp = nohelp;
-	}
+    /**
+     * Returns the value of the 'createindex' field.
+     *
+     * @return boolean
+     */
+    public boolean isCreateindex() {
+        return createindex;
+    }
 
-	/**
-	 * Returns the value of the 'createindex' field.
-	 *
-	 * @return boolean
-	 */
-	public boolean isCreateindex() {
-		return createindex;
-	}
+    /**
+     * Assigns the value of the 'createindex' field.
+     *
+     * @param createindex the field value to assign
+     */
+    public void setCreateindex(boolean createindex) {
+        this.createindex = createindex;
+    }
 
-	/**
-	 * Assigns the value of the 'createindex' field.
-	 *
-	 * @param createindex  the field value to assign
-	 */
-	public void setCreateindex(boolean createindex) {
-		this.createindex = createindex;
-	}
+    /**
+     * Returns the value of the 'classuse' field.
+     *
+     * @return boolean
+     */
+    public boolean isClassuse() {
+        return classuse;
+    }
 
-	/**
-	 * Returns the value of the 'classuse' field.
-	 *
-	 * @return boolean
-	 */
-	public boolean isClassuse() {
-		return classuse;
-	}
+    /**
+     * Assigns the value of the 'classuse' field.
+     *
+     * @param classuse the field value to assign
+     */
+    public void setClassuse(boolean classuse) {
+        this.classuse = classuse;
+    }
 
-	/**
-	 * Assigns the value of the 'classuse' field.
-	 *
-	 * @param classuse  the field value to assign
-	 */
-	public void setClassuse(boolean classuse) {
-		this.classuse = classuse;
-	}
+    /**
+     * Returns the value of the 'createtree' field.
+     *
+     * @return boolean
+     */
+    public boolean isCreatetree() {
+        return createtree;
+    }
 
-	/**
-	 * Returns the value of the 'createtree' field.
-	 *
-	 * @return boolean
-	 */
-	public boolean isCreatetree() {
-		return createtree;
-	}
+    /**
+     * Assigns the value of the 'createtree' field.
+     *
+     * @param createtree the field value to assign
+     */
+    public void setCreatetree(boolean createtree) {
+        this.createtree = createtree;
+    }
 
-	/**
-	 * Assigns the value of the 'createtree' field.
-	 *
-	 * @param createtree  the field value to assign
-	 */
-	public void setCreatetree(boolean createtree) {
-		this.createtree = createtree;
-	}
+    /**
+     * Returns the value of the 'splitindex' field.
+     *
+     * @return boolean
+     */
+    public boolean isSplitindex() {
+        return splitindex;
+    }
 
-	/**
-	 * Returns the value of the 'splitindex' field.
-	 *
-	 * @return boolean
-	 */
-	public boolean isSplitindex() {
-		return splitindex;
-	}
+    /**
+     * Assigns the value of the 'splitindex' field.
+     *
+     * @param splitindex the field value to assign
+     */
+    public void setSplitindex(boolean splitindex) {
+        this.splitindex = splitindex;
+    }
 
-	/**
-	 * Assigns the value of the 'splitindex' field.
-	 *
-	 * @param splitindex  the field value to assign
-	 */
-	public void setSplitindex(boolean splitindex) {
-		this.splitindex = splitindex;
-	}
+    /**
+     * Returns the value of the 'helpfile' field.
+     *
+     * @return String
+     */
+    public String getHelpfile() {
+        return helpfile;
+    }
 
-	/**
-	 * Returns the value of the 'helpfile' field.
-	 *
-	 * @return String
-	 */
-	public String getHelpfile() {
-		return helpfile;
-	}
-
-	/**
-	 * Assigns the value of the 'helpfile' field.
-	 *
-	 * @param helpfile  the field value to assign
-	 */
-	public void setHelpfile(String helpfile) {
-		this.helpfile = helpfile;
-	}
+    /**
+     * Assigns the value of the 'helpfile' field.
+     *
+     * @param helpfile the field value to assign
+     */
+    public void setHelpfile(String helpfile) {
+        this.helpfile = helpfile;
+    }
 
 }

@@ -13,7 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.loader.impl;
+
+import org.opentravel.ns.ota2.librarycatalog_v01_00.Catalog;
+import org.opentravel.ns.ota2.librarycatalog_v01_00.CatalogEntry;
+import org.opentravel.schemacompiler.codegen.CodeGeneratorFactory;
+import org.opentravel.schemacompiler.ioc.SchemaDeclarations;
+import org.opentravel.schemacompiler.loader.LibraryLoaderException;
+import org.opentravel.schemacompiler.util.FileUtils;
+import org.opentravel.schemacompiler.util.URLUtils;
+import org.xml.sax.SAXException;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -30,18 +40,8 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
-import org.opentravel.ns.ota2.librarycatalog_v01_00.Catalog;
-import org.opentravel.ns.ota2.librarycatalog_v01_00.CatalogEntry;
-import org.opentravel.schemacompiler.codegen.CodeGeneratorFactory;
-import org.opentravel.schemacompiler.ioc.SchemaDeclarations;
-import org.opentravel.schemacompiler.loader.LibraryLoaderException;
-import org.opentravel.schemacompiler.util.FileUtils;
-import org.opentravel.schemacompiler.util.URLUtils;
-import org.xml.sax.SAXException;
-
 /**
- * <code>LibraryNamespaceResolver</code> implementation that obtains its namespace mappings from a
- * configuration file.
+ * <code>LibraryNamespaceResolver</code> implementation that obtains its namespace mappings from a configuration file.
  * 
  * @author S. Livezey
  */
@@ -54,104 +54,95 @@ public class CatalogLibraryNamespaceResolver extends MapLibraryNamespaceResolver
     private URL catalogFolder = null;
 
     /**
-     * Default constructor that expects the catalog file to be readable from the current directory
-     * location (<code>{user.dir}/library-catalog.xml</code>).
+     * Default constructor that expects the catalog file to be readable from the current directory location
+     * (<code>{user.dir}/library-catalog.xml</code>).
      * 
-     * @throws LibraryLoaderException
-     *             thrown if the default catalog file cannot be loaded
+     * @throws LibraryLoaderException thrown if the default catalog file cannot be loaded
      */
     public CatalogLibraryNamespaceResolver() throws LibraryLoaderException {
-        this(new File(System.getProperty("user.dir"), DEFAULT_CATALOG_FILE));
+        this( new File( System.getProperty( "user.dir" ), DEFAULT_CATALOG_FILE ) );
     }
 
     /**
      * Constructor that obtains catalog mappings from the file at the specified URL.
      * 
-     * @param catalogUrl
-     *            the location of the catalog mapping file
-     * @throws LibraryLoaderException
-     *             thrown if the catalog file cannot be loaded
+     * @param catalogUrl the location of the catalog mapping file
+     * @throws LibraryLoaderException thrown if the catalog file cannot be loaded
      */
     public CatalogLibraryNamespaceResolver(URL catalogUrl) throws LibraryLoaderException {
         try (InputStream is = getInputStream( catalogUrl )) {
             String folderUrl = catalogUrl.toExternalForm();
-            int folderIdx = folderUrl.lastIndexOf('/');
+            int folderIdx = folderUrl.lastIndexOf( '/' );
 
             if (folderIdx >= 0) {
-                folderUrl = folderUrl.substring(0, folderIdx);
+                folderUrl = folderUrl.substring( 0, folderIdx );
             } else {
-                folderUrl = folderUrl.substring(0, folderUrl.length()
-                        - catalogUrl.getFile().length());
+                folderUrl = folderUrl.substring( 0, folderUrl.length() - catalogUrl.getFile().length() );
             }
-            catalogFolder = new URL(folderUrl);
-            initCatalog(is);
+            catalogFolder = new URL( folderUrl );
+            initCatalog( is );
 
         } catch (IOException e) {
-            throw new LibraryLoaderException("Error loading catalog file.", e);
+            throw new LibraryLoaderException( "Error loading catalog file.", e );
         }
     }
 
-	/**
-	 * Returns an input stream for the given catalog URL.
-	 * 
-	 * @param catalogUrl  the URL for which to return an input stream
-	 * @return InputStream
-	 * @throws IOException  thrown if the input stream cannot be opened
-	 */
-	private InputStream getInputStream(URL catalogUrl) throws IOException {
-		InputStream is = null;
-		
-		if (URLUtils.isFileURL(catalogUrl)) {
-		    try {
-		        is = new FileInputStream(URLUtils.toFile(catalogUrl));
+    /**
+     * Returns an input stream for the given catalog URL.
+     * 
+     * @param catalogUrl the URL for which to return an input stream
+     * @return InputStream
+     * @throws IOException thrown if the input stream cannot be opened
+     */
+    private InputStream getInputStream(URL catalogUrl) throws IOException {
+        InputStream is = null;
 
-		    } catch (IllegalArgumentException e) {
-		        // No error - use the openStream() method to establish a connection
-		    }
-		}
-		if (is == null) {
-		    is = catalogUrl.openStream();
-		}
-		return is;
-	}
+        if (URLUtils.isFileURL( catalogUrl )) {
+            try {
+                is = new FileInputStream( URLUtils.toFile( catalogUrl ) );
+
+            } catch (IllegalArgumentException e) {
+                // No error - use the openStream() method to establish a connection
+            }
+        }
+        if (is == null) {
+            is = catalogUrl.openStream();
+        }
+        return is;
+    }
 
     /**
      * Constructor that obtains catalog mappings from the specified file.
      * 
-     * @param catalogFile
-     *            the catalog mapping file
-     * @throws LibraryLoaderException
-     *             thrown if the catalog file cannot be loaded
+     * @param catalogFile the catalog mapping file
+     * @throws LibraryLoaderException thrown if the catalog file cannot be loaded
      */
     public CatalogLibraryNamespaceResolver(File catalogFile) throws LibraryLoaderException {
         try {
             File parentFolder = catalogFile.getAbsoluteFile().getParentFile();
 
-            catalogFolder = URLUtils.toURL(parentFolder);
-            initCatalog(new FileInputStream(catalogFile));
+            catalogFolder = URLUtils.toURL( parentFolder );
+            initCatalog( new FileInputStream( catalogFile ) );
 
         } catch (IOException e) {
-            throw new LibraryLoaderException("Error loading catalog file.", e);
+            throw new LibraryLoaderException( "Error loading catalog file.", e );
         }
     }
 
     /**
      * Initializes the content of the catalog using mappings from the input stream provided.
      * 
-     * @param is
-     *            the input stream from which to load catalog mappings
-     * @throws LibraryLoaderException
-     *             thrown if the catalog file cannot be loaded
+     * @param is the input stream from which to load catalog mappings
+     * @throws LibraryLoaderException thrown if the catalog file cannot be loaded
      */
     private void initCatalog(InputStream is) throws LibraryLoaderException {
-        try (InputStream schemaStream = SchemaDeclarations.OTA2_CATALOG_SCHEMA.getContent(
-        		CodeGeneratorFactory.XSD_TARGET_FORMAT)) {
+        try (InputStream schemaStream =
+            SchemaDeclarations.OTA2_CATALOG_SCHEMA.getContent( CodeGeneratorFactory.XSD_TARGET_FORMAT )) {
             // Load and parse the catalog content from the stream
-            SchemaFactory schemaFactory = SchemaFactory
-                    .newInstance(javax.xml.XMLConstants.W3C_XML_SCHEMA_NS_URI);
-            Schema validationSchema = schemaFactory.newSchema(new StreamSource(schemaStream));
-            Unmarshaller unmarshaller = JAXBContext.newInstance(SCHEMA_CONTEXT).createUnmarshaller();
-            unmarshaller.setSchema(validationSchema);
+            SchemaFactory schemaFactory = SchemaFactory.newInstance( javax.xml.XMLConstants.W3C_XML_SCHEMA_NS_URI );
+            Schema validationSchema = schemaFactory.newSchema( new StreamSource( schemaStream ) );
+            Unmarshaller unmarshaller = JAXBContext.newInstance( SCHEMA_CONTEXT ).createUnmarshaller();
+            unmarshaller.setSchema( validationSchema );
             JAXBElement<?> documentElement = (JAXBElement<?>) FileUtils.unmarshalStreamContent( is, unmarshaller );
 
             // Populate the namespace mappings with elements from the catalog
@@ -160,13 +151,13 @@ public class CatalogLibraryNamespaceResolver extends MapLibraryNamespaceResolver
             if (catalog != null) {
                 for (CatalogEntry catalogEntry : catalog.getCatalogEntry()) {
                     for (String location : catalogEntry.getLocation()) {
-                        addNamespaceMapping(catalogEntry.getNamespace(), location);
+                        addNamespaceMapping( catalogEntry.getNamespace(), location );
                     }
                 }
             }
-            
+
         } catch (URISyntaxException | IOException | JAXBException | SAXException e) {
-            throw new LibraryLoaderException(e);
+            throw new LibraryLoaderException( e );
         }
     }
 

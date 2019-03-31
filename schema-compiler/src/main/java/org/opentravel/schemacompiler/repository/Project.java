@@ -13,7 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.repository;
+
+import org.opentravel.ns.ota2.project_v01_00.ProjectItemType;
+import org.opentravel.schemacompiler.model.AbstractLibrary;
+import org.opentravel.schemacompiler.model.TLModel;
 
 import java.io.File;
 import java.net.URL;
@@ -22,16 +27,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import org.opentravel.ns.ota2.project_v01_00.ProjectItemType;
-import org.opentravel.schemacompiler.model.AbstractLibrary;
-import org.opentravel.schemacompiler.model.TLModel;
-
 /**
- * Container that maintains a set of local <code>RepositoryItem</code> artifacts.
- * <code>RepositoryItems</code> managed by a model project represent unmanaged files that have not
- * yet been shared via a remote repository, work-in-process (WIP) items that have been locked for
- * editing by the local user, or unlocked items from remote repositories that have been included for
- * reference only.
+ * Container that maintains a set of local <code>RepositoryItem</code> artifacts. <code>RepositoryItems</code> managed
+ * by a model project represent unmanaged files that have not yet been shared via a remote repository, work-in-process
+ * (WIP) items that have been locked for editing by the local user, or unlocked items from remote repositories that have
+ * been included for reference only.
  * 
  * @author S. Livezey
  */
@@ -51,12 +51,11 @@ public class Project {
     /**
      * Constructor that assigns the <code>ProjectManger</code> that will own the new project.
      * 
-     * @param model
-     *            the shared model instance
+     * @param projectManager the shared project manager instance
      */
     public Project(ProjectManager projectManager) {
         if (projectManager == null) {
-            throw new NullPointerException("The project manager instance cannot be null.");
+            throw new NullPointerException( "The project manager instance cannot be null." );
         }
         this.projectManager = projectManager;
     }
@@ -91,17 +90,14 @@ public class Project {
     /**
      * Assigns the ID of the project.
      * 
-     * @param projectId
-     *            the project ID to assign
-     * @throws IllegalArgumentException
-     *             thrown if the specified project ID is already in use
+     * @param projectId the project ID to assign
+     * @throws IllegalArgumentException thrown if the specified project ID is already in use
      */
     public void setProjectId(String projectId) {
-        boolean isEqual = (this.projectId == null) ? (projectId == null) : this.projectId
-                .equals(projectId);
+        boolean isEqual = (this.projectId == null) ? (projectId == null) : this.projectId.equals( projectId );
 
         if (!isEqual) {
-            projectManager.validateProjectID(projectId, this);
+            projectManager.validateProjectID( projectId, this );
             this.projectId = projectId;
             fireProjectInformationModifiedEvent();
         }
@@ -119,17 +115,14 @@ public class Project {
     /**
      * Assigns the file location where this project's configuration is stored.
      * 
-     * @param projectFile
-     *            the location of the project's data file
-     * @throws IllegalArgumentException
-     *             thrown if the specified project file is already in use
+     * @param projectFile the location of the project's data file
+     * @throws IllegalArgumentException thrown if the specified project file is already in use
      */
     public void setProjectFile(File projectFile) {
-        boolean isEqual = (this.projectFile == null) ? (projectFile == null) : this.projectFile
-                .equals(projectFile);
+        boolean isEqual = (this.projectFile == null) ? (projectFile == null) : this.projectFile.equals( projectFile );
 
         if (!isEqual) {
-            projectManager.validateProjectFile(projectFile, this);
+            projectManager.validateProjectFile( projectFile, this );
             this.projectFile = projectFile;
             fireProjectInformationModifiedEvent();
         }
@@ -147,11 +140,10 @@ public class Project {
     /**
      * Assigns the user-displayable name of the project.
      * 
-     * @param name
-     *            the project name to assign
+     * @param name the project name to assign
      */
     public void setName(String name) {
-        boolean isEqual = (this.name == null) ? (name == null) : this.name.equals(name);
+        boolean isEqual = (this.name == null) ? (name == null) : this.name.equals( name );
 
         if (!isEqual) {
             this.name = name;
@@ -171,12 +163,10 @@ public class Project {
     /**
      * Assigns the project description.
      * 
-     * @param description
-     *            the project description to assign
+     * @param description the project description to assign
      */
     public void setDescription(String description) {
-        boolean isEqual = (this.description == null) ? (description == null) : this.description
-                .equals(description);
+        boolean isEqual = (this.description == null) ? (description == null) : this.description.equals( description );
 
         if (!isEqual) {
             this.description = description;
@@ -196,12 +186,11 @@ public class Project {
     /**
      * Assigns the default context ID to use for EXAMPLE generation in this project.
      * 
-     * @param defaultContextId
-     *            the context ID value to assign
+     * @param defaultContextId the context ID value to assign
      */
     public void setDefaultContextId(String defaultContextId) {
         boolean isEqual = (this.defaultContextId == null) ? (defaultContextId == null)
-                : this.defaultContextId.equals(defaultContextId);
+            : this.defaultContextId.equals( defaultContextId );
 
         if (!isEqual) {
             this.defaultContextId = defaultContextId;
@@ -218,7 +207,7 @@ public class Project {
         ProjectItem result = defaultItem;
 
         if ((result == null) && !projectItems.isEmpty()) {
-            result = projectItems.get(0);
+            result = projectItems.get( 0 );
         }
         return result;
     }
@@ -226,16 +215,14 @@ public class Project {
     /**
      * Assigns the given project item as the default one for the project.
      * 
-     * @param item
-     *            the project item to identify as the default
+     * @param item the project item to identify as the default
      */
-    public void setDefaultItem(ProjectItem defaultItem) {
-        if (!projectItems.contains(defaultItem)) {
-            throw new IllegalArgumentException(
-                    "The new default project item is not a member of this project.");
+    public void setDefaultItem(ProjectItem item) {
+        if (!projectItems.contains( item )) {
+            throw new IllegalArgumentException( "The new default project item is not a member of this project." );
         }
-        if (this.defaultItem != defaultItem) {
-            this.defaultItem = defaultItem;
+        if (this.defaultItem != item) {
+            this.defaultItem = item;
             fireProjectInformationModifiedEvent();
         }
     }
@@ -243,47 +230,45 @@ public class Project {
     /**
      * Returns the list of repository items that are available in this model project.
      * 
-     * @return List<ProjectItem>
+     * @return List&lt;ProjectItem&gt;
      */
     public List<ProjectItem> getProjectItems() {
-        return new ArrayList<>(projectItems);
+        return new ArrayList<>( projectItems );
     }
 
     /**
      * Adds the given project-item to this project.
      * 
-     * @param item
-     *            the project item to remove
+     * @param item the project item to remove
      */
     protected void add(ProjectItem item) {
-        if (!projectItems.contains(item)) {
-            projectItems.add(item);
-            fireProjectItemAdded(item);
+        if (!projectItems.contains( item )) {
+            projectItems.add( item );
+            fireProjectItemAdded( item );
         }
     }
-    
+
     /**
      * Returns the list of project items that failed to load properly.
      * 
-     * @return List<ProjectItemType>
+     * @return List&lt;ProjectItemType&gt;
      */
     public List<ProjectItemType> getFailedProjectItems() {
-    	return failedItems;
+        return failedItems;
     }
 
     /**
      * Removes the given project-item from this project.
      * 
-     * @param item
-     *            the project item to remove
+     * @param item the project item to remove
      */
     public void remove(ProjectItem item) {
-        if ((item != null) && projectItems.contains(item)) {
+        if ((item != null) && projectItems.contains( item )) {
             if (defaultItem == item) {
                 defaultItem = null;
             }
-            projectItems.remove(item);
-            fireProjectItemRemoved(item);
+            projectItems.remove( item );
+            fireProjectItemRemoved( item );
             projectManager.purgeOrphanedProjectItems();
         }
     }
@@ -291,102 +276,94 @@ public class Project {
     /**
      * Removes the project-item associated with the given library from this project.
      * 
-     * @param library
-     *            the library whose project item is to be removed
+     * @param library the library whose project item is to be removed
      */
     public void remove(AbstractLibrary library) {
-        ProjectItem item = projectManager.getProjectItem(library);
+        ProjectItem item = projectManager.getProjectItem( library );
 
         if (item != null) {
-            remove(item);
+            remove( item );
         }
     }
 
     /**
      * Removes the project-item associated with the given library URL from this project.
      * 
-     * @param libraryUrl
-     *            the file URL of the library whose project item is to be removed
+     * @param libraryUrl the file URL of the library whose project item is to be removed
      */
     public void remove(URL libraryUrl) {
-        ProjectItem item = projectManager.getProjectItem(libraryUrl);
+        ProjectItem item = projectManager.getProjectItem( libraryUrl );
 
         if (item != null) {
-            remove(item);
+            remove( item );
         }
     }
 
     /**
      * Returns true if the given <code>ProjectItem</code> is a member of this project.
      * 
-     * @param item
-     *            the project item to check
+     * @param item the project item to check
      * @return boolean
      */
     public boolean isMemberOf(ProjectItem item) {
-        return projectItems.contains(item);
+        return projectItems.contains( item );
     }
 
     /**
      * Returns the value of the 'listeners' field.
      * 
-     * @return Collection<ProjectChangeListener>
+     * @return Collection&lt;ProjectChangeListener&gt;
      */
     public Collection<ProjectChangeListener> getProjectChangeListeners() {
-        return Collections.unmodifiableCollection(listeners);
+        return Collections.unmodifiableCollection( listeners );
     }
 
     /**
      * Adds the given listener to the list maintained by this project.
      * 
-     * @param listener
-     *            the listener instance to add
+     * @param listener the listener instance to add
      */
     public void addProjectChangeListener(ProjectChangeListener listener) {
-        if (!listeners.contains(listener)) {
-            listeners.add(listener);
+        if (!listeners.contains( listener )) {
+            listeners.add( listener );
         }
     }
 
     /**
      * Removes the given listener from the list maintained by this project.
      * 
-     * @param listener
-     *            the listener instance to remove
+     * @param listener the listener instance to remove
      */
     public void removeProjectChangeListener(ProjectChangeListener listener) {
-        if (listeners.contains(listener)) {
-            listeners.remove(listener);
+        if (listeners.contains( listener )) {
+            listeners.remove( listener );
         }
     }
 
     /**
-     * Broadcasts an event to all listeners that the project's descriptive information has been
-     * modified.
+     * Broadcasts an event to all listeners that the project's descriptive information has been modified.
      */
     private void fireProjectInformationModifiedEvent() {
         for (ProjectChangeListener listener : listeners) {
-            listener.projectInformationModified(this);
+            listener.projectInformationModified( this );
         }
     }
 
     /**
-     * Broadcasts an event to all listeners that a new <code>ProjectItem</code> has been added to
-     * this project.
+     * Broadcasts an event to all listeners that a new <code>ProjectItem</code> has been added to this project.
      */
     private void fireProjectItemAdded(ProjectItem item) {
         for (ProjectChangeListener listener : listeners) {
-            listener.projectItemAdded(this, item);
+            listener.projectItemAdded( this, item );
         }
     }
 
     /**
-     * Broadcasts an event to all listeners that a <code>ProjectItem</code> has been removed from
-     * this project.
+     * Broadcasts an event to all listeners that a <code>ProjectItem</code> has been removed from this project.
      */
     private void fireProjectItemRemoved(ProjectItem item) {
         for (ProjectChangeListener listener : listeners) {
-            listener.projectItemRemoved(this, item);
+            listener.projectItemRemoved( this, item );
         }
     }
 

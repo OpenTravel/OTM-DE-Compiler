@@ -28,47 +28,41 @@ import org.opentravel.schemacompiler.validate.Validator;
  */
 public class ServiceAssemblyValidator extends AssemblyValidatorBase<ServiceAssembly> {
 
-    public static final String ERROR_INVALID_URI        = "INVALID_URI";
+    public static final String ERROR_INVALID_URI = "INVALID_URI";
     public static final String ERROR_VERSION_IDENTIFIER = "VERSION_IDENTIFIER";
-    
-	/**
-	 * @see org.opentravel.schemacompiler.validate.Validator#validate(org.opentravel.schemacompiler.validate.Validatable)
-	 */
-	@Override
-	public ValidationFindings validate(ServiceAssembly target) {
+
+    /**
+     * @see org.opentravel.schemacompiler.validate.Validator#validate(org.opentravel.schemacompiler.validate.Validatable)
+     */
+    @Override
+    public ValidationFindings validate(ServiceAssembly target) {
         Validator<ServiceAssemblyItem> itemValidator =
-        		getValidatorFactory().getValidatorForClass( ServiceAssemblyItem.class );
+            getValidatorFactory().getValidatorForClass( ServiceAssemblyItem.class );
         AssemblyValidationBuilder builder = newValidationBuilder( target );
 
-        builder.setProperty( "assemblyUrl", target.getAssemblyUrl() )
-        		.setFindingType( FindingType.ERROR ).assertNotNull();
+        builder.setProperty( "assemblyUrl", target.getAssemblyUrl() ).setFindingType( FindingType.ERROR )
+            .assertNotNull();
 
-        builder.setProperty( "baseNamespace", target.getBaseNamespace() )
-        		.setFindingType( FindingType.ERROR )
-        		.assertNotNullOrBlank().assertContainsNoWhitespace();
-        
-        if ((target.getBaseNamespace() != null) &&
-        		!URLUtils.isValidURI( target.getBaseNamespace() )) {
-            builder.addFinding(FindingType.ERROR, "baseNamespace",
-                    ERROR_INVALID_URI, target.getBaseNamespace() );
+        builder.setProperty( "baseNamespace", target.getBaseNamespace() ).setFindingType( FindingType.ERROR )
+            .assertNotNullOrBlank().assertContainsNoWhitespace();
+
+        if ((target.getBaseNamespace() != null) && !URLUtils.isValidURI( target.getBaseNamespace() )) {
+            builder.addFinding( FindingType.ERROR, "baseNamespace", ERROR_INVALID_URI, target.getBaseNamespace() );
         }
-        
-        builder.setProperty( "name", target.getName() )
-        		.setFindingType( FindingType.ERROR ).assertNotNullOrBlank();
-		
-        builder.setProperty( "version", target.getVersion() )
-        		.setFindingType( FindingType.ERROR ).assertNotNullOrBlank();
-        
-        if ((target.getVersion() != null) &&
-        		!versionScheme.isValidVersionIdentifier( target.getVersion() )) {
-            builder.addFinding(FindingType.ERROR, "version",
-                    ERROR_VERSION_IDENTIFIER, target.getVersion() );
+
+        builder.setProperty( "name", target.getName() ).setFindingType( FindingType.ERROR ).assertNotNullOrBlank();
+
+        builder.setProperty( "version", target.getVersion() ).setFindingType( FindingType.ERROR )
+            .assertNotNullOrBlank();
+
+        if ((target.getVersion() != null) && !versionScheme.isValidVersionIdentifier( target.getVersion() )) {
+            builder.addFinding( FindingType.ERROR, "version", ERROR_VERSION_IDENTIFIER, target.getVersion() );
         }
-        
+
         for (ServiceAssemblyItem item : target.getAllApis()) {
-        	builder.addFindings( itemValidator.validate( item ) );
+            builder.addFindings( itemValidator.validate( item ) );
         }
         return builder.getFindings();
-	}
-	
+    }
+
 }

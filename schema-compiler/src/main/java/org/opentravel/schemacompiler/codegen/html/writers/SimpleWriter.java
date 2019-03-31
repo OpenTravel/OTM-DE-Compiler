@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.codegen.html.writers;
 
-import java.io.IOException;
+package org.opentravel.schemacompiler.codegen.html.writers;
 
 import org.opentravel.schemacompiler.codegen.html.builders.NamedEntityDocumentationBuilder;
 import org.opentravel.schemacompiler.codegen.html.builders.SimpleDocumentationBuilder;
+
+import java.io.IOException;
 
 /**
  * @author Eric.Bronson
@@ -27,10 +28,9 @@ import org.opentravel.schemacompiler.codegen.html.builders.SimpleDocumentationBu
 @SuppressWarnings("squid:MaximumInheritanceDepth")
 public class SimpleWriter extends NamedEntityWriter<SimpleDocumentationBuilder> {
 
-	public SimpleWriter(SimpleDocumentationBuilder member,
-			NamedEntityDocumentationBuilder<?> prev,
-			NamedEntityDocumentationBuilder<?> nextClass) throws IOException {
-		super(member, prev, nextClass);
-	}
-	
+    public SimpleWriter(SimpleDocumentationBuilder member, NamedEntityDocumentationBuilder<?> prev,
+        NamedEntityDocumentationBuilder<?> nextClass) throws IOException {
+        super( member, prev, nextClass );
+    }
+
 }

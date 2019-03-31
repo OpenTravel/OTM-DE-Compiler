@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.util;
 
 /**
@@ -22,44 +23,39 @@ package org.opentravel.schemacompiler.util;
  */
 public class SchemaCompilerException extends Exception {
 
-	private static final long serialVersionUID = 973993257708484914L;
+    private static final long serialVersionUID = 973993257708484914L;
 
-	/**
+    /**
      * Default constructor.
      */
-    public SchemaCompilerException() {
-    }
+    public SchemaCompilerException() {}
 
     /**
      * Constructs an exception with the specified message.
      * 
-     * @param message
-     *            the exception message
+     * @param message the exception message
      */
     public SchemaCompilerException(String message) {
-        super(message);
+        super( message );
     }
 
     /**
      * Constructs an exception with the specified underlying cause.
      * 
-     * @param cause
-     *            the underlying exception that caused this one
+     * @param cause the underlying exception that caused this one
      */
     public SchemaCompilerException(Throwable cause) {
-        super(cause);
+        super( cause );
     }
 
     /**
      * Constructs an exception with the specified message and underlying cause.
      * 
-     * @param message
-     *            the exception message
-     * @param cause
-     *            the underlying exception that caused this one
+     * @param message the exception message
+     * @param cause the underlying exception that caused this one
      */
     public SchemaCompilerException(String message, Throwable cause) {
-        super(message, cause);
+        super( message, cause );
     }
 
 }

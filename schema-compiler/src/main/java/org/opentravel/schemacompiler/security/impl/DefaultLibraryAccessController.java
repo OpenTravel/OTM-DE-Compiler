@@ -13,19 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.security.impl;
 
-import java.io.File;
-import java.net.URL;
+package org.opentravel.schemacompiler.security.impl;
 
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLLibraryStatus;
 import org.opentravel.schemacompiler.security.LibraryAccessController;
 import org.opentravel.schemacompiler.util.URLUtils;
 
+import java.io.File;
+import java.net.URL;
+
 /**
- * Library access controller component that utilizes the <code>ProtectedNamespaceRegistry</code> to
- * determine if a user has write access to libraries.
+ * Library access controller component that utilizes the <code>ProtectedNamespaceRegistry</code> to determine if a user
+ * has write access to libraries.
  * 
  * @author S. Livezey
  */
@@ -37,23 +38,22 @@ public class DefaultLibraryAccessController implements LibraryAccessController {
     @Override
     public boolean hasModifyPermission(TLLibrary library) {
         // Only check protected namespace credentials if the file is not read-only
-        return isWritableLibraryFile(library);
+        return isWritableLibraryFile( library );
     }
 
     /**
-     * Returns true if the library is located in a writable file on the local file system, and its
-     * status is non-Final (i.e. a draft library).
+     * Returns true if the library is located in a writable file on the local file system, and its status is non-Final
+     * (i.e. a draft library).
      * 
-     * @param library
-     *            the library to analyze
+     * @param library the library to analyze
      * @return boolean
      */
     private boolean isWritableLibraryFile(TLLibrary library) {
         URL libraryUrl = library.getLibraryUrl();
         boolean canModify = (libraryUrl == null) || (library.getStatus() == TLLibraryStatus.FINAL);
 
-        if (!canModify && URLUtils.isFileURL(libraryUrl)) {
-            File libraryFile = URLUtils.toFile(libraryUrl);
+        if (!canModify && URLUtils.isFileURL( libraryUrl )) {
+            File libraryFile = URLUtils.toFile( libraryUrl );
 
             // Allow the file to be written if it is a new file that does not yet exist on the file
             // system

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.ic;
 
 import org.opentravel.schemacompiler.event.ModelEventType;
@@ -21,20 +22,20 @@ import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLModel;
 
 /**
- * Integrity checker component that automatically manages the list of imports and includes
- * maintained by a <code>TLLibrary</code> instance. It is invoked whenever the namespace assignment
- * of a library is modified, taking action to add or remove imports/includes as required.
+ * Integrity checker component that automatically manages the list of imports and includes maintained by a
+ * <code>TLLibrary</code> instance. It is invoked whenever the namespace assignment of a library is modified, taking
+ * action to add or remove imports/includes as required.
  * 
  * @author S. Livezey
  */
-public class NamespaceChangeIntegrityChecker extends
-        ImportManagementIntegrityChecker<ValueChangeEvent<TLLibrary, String>, TLLibrary> {
+public class NamespaceChangeIntegrityChecker
+    extends ImportManagementIntegrityChecker<ValueChangeEvent<TLLibrary,String>,TLLibrary> {
 
     /**
      * @see org.opentravel.schemacompiler.event.ModelEventListener#processModelEvent(org.opentravel.schemacompiler.event.ModelEvent)
      */
     @Override
-    public void processModelEvent(ValueChangeEvent<TLLibrary, String> event) {
+    public void processModelEvent(ValueChangeEvent<TLLibrary,String> event) {
         if (event.getType() == ModelEventType.NAMESPACE_MODIFIED) {
             TLLibrary modifiedLibrary = event.getSource();
             TLModel model = modifiedLibrary.getOwningModel();
@@ -44,7 +45,7 @@ public class NamespaceChangeIntegrityChecker extends
                 // This is
                 // because a namespace change can force some includes to change into imports (and
                 // vice-versa).
-                verifyReferencedLibraries((TLLibrary) library);
+                verifyReferencedLibraries( (TLLibrary) library );
             }
         }
     }

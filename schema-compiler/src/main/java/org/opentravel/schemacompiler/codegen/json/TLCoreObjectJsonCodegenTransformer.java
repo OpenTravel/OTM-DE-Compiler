@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.codegen.json;
 
 import org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts;
@@ -30,72 +31,72 @@ import org.opentravel.schemacompiler.model.TLRoleEnumeration;
 import org.opentravel.schemacompiler.util.SimpleTypeInfo;
 
 /**
- * Performs the translation from <code>TLCoreObject</code> objects to the JSON schema elements
- * used to produce the output.
+ * Performs the translation from <code>TLCoreObject</code> objects to the JSON schema elements used to produce the
+ * output.
  */
-public class TLCoreObjectJsonCodegenTransformer extends AbstractJsonSchemaTransformer<TLCoreObject, CodegenArtifacts> {
-	
-	/**
-	 * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
-	 */
-	@Override
-	public CodegenArtifacts transform(TLCoreObject source) {
-		TLRoleEnumeration roleEnum = source.getRoleEnumeration();
+public class TLCoreObjectJsonCodegenTransformer extends AbstractJsonSchemaTransformer<TLCoreObject,CodegenArtifacts> {
+
+    /**
+     * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
+     */
+    @Override
+    public CodegenArtifacts transform(TLCoreObject source) {
+        TLRoleEnumeration roleEnum = source.getRoleEnumeration();
         FacetJsonSchemaDelegateFactory delegateFactory = new FacetJsonSchemaDelegateFactory( context );
-		CorrelatedCodegenArtifacts artifacts = new CorrelatedCodegenArtifacts();
-		
+        CorrelatedCodegenArtifacts artifacts = new CorrelatedCodegenArtifacts();
+
         generateFacetArtifacts( delegateFactory.getDelegate( source.getSummaryFacet() ), artifacts, false );
         generateFacetArtifacts( delegateFactory.getDelegate( source.getDetailFacet() ), artifacts, false );
-		
+
         if (!source.getRoleEnumeration().getRoles().isEmpty()) {
-        	artifacts.addArtifact( roleEnum, createRoleEnumerationComplexType( source ) );
-        	artifacts.addArtifact( roleEnum, createRoleEnumerationSimpleType( source, false ) );
-        	artifacts.addArtifact( roleEnum, createRoleEnumerationSimpleType( source, true ) );
+            artifacts.addArtifact( roleEnum, createRoleEnumerationComplexType( source ) );
+            artifacts.addArtifact( roleEnum, createRoleEnumerationSimpleType( source, false ) );
+            artifacts.addArtifact( roleEnum, createRoleEnumerationSimpleType( source, true ) );
         }
-		return artifacts.getConsolidatedArtifacts();
-	}
-	
+        return artifacts.getConsolidatedArtifacts();
+    }
+
     /**
      * Creates the open enumeration type for the roles of the core object.
      * 
-     * @param source  the core object being transformed
+     * @param source the core object being transformed
      * @return JsonSchemaNamedReference
      */
     private JsonSchemaNamedReference createRoleEnumerationComplexType(TLCoreObject source) {
         JsonSchemaNamedReference roleEnum = new JsonSchemaNamedReference();
         String definitionName = getDefinitionName( source.getRoleEnumeration() );
         JsonSchema schema = new JsonSchema();
-        
+
         roleEnum.setName( definitionName );
-        roleEnum.setSchema( new JsonSchemaReference( schema  ) );
-        schema.getProperties().add( new JsonSchemaNamedReference(
-        		"value", new JsonSchemaReference( "#/definitions/" + definitionName + "_Open" ) ) );
+        roleEnum.setSchema( new JsonSchemaReference( schema ) );
+        schema.getProperties().add( new JsonSchemaNamedReference( "value",
+            new JsonSchemaReference( "#/definitions/" + definitionName + "_Open" ) ) );
         schema.getProperties().add( new JsonSchemaNamedReference( "extension",
-        		new JsonSchemaReference( SimpleTypeInfo.ENUM_EXTENSION_SCHEMA ) ) );
+            new JsonSchemaReference( SimpleTypeInfo.ENUM_EXTENSION_SCHEMA ) ) );
         return roleEnum;
     }
 
     /**
      * Creates the JSON schema simple enumeration for the roles of the core object.
      * 
-     * @param source  the core object being transformed
-     * @param openEnumeration  indicates whether to generate the open or closed enumeration variant of the simple type
+     * @param source the core object being transformed
+     * @param openEnumeration indicates whether to generate the open or closed enumeration variant of the simple type
      * @return JsonSchemaNamedReference
      */
     private JsonSchemaNamedReference createRoleEnumerationSimpleType(TLCoreObject source, boolean openEnumeration) {
         String enumName = getDefinitionName( source.getRoleEnumeration() ) + (openEnumeration ? "_Open" : "_Base");
         JsonSchemaNamedReference roleEnum = new JsonSchemaNamedReference();
-    	JsonSchema schema = new JsonSchema();
-        
-    	roleEnum.setName(  enumName );
+        JsonSchema schema = new JsonSchema();
+
+        roleEnum.setName( enumName );
         roleEnum.setSchema( new JsonSchemaReference( schema ) );
-    	schema.setType( JsonType.JSON_STRING );
-        
-        for (TLRole role : PropertyCodegenUtils.getInheritedRoles(source)) {
-        	schema.getEnumValues().add( role.getName() );
+        schema.setType( JsonType.JSON_STRING );
+
+        for (TLRole role : PropertyCodegenUtils.getInheritedRoles( source )) {
+            schema.getEnumValues().add( role.getName() );
         }
         if (openEnumeration) {
-        	schema.getEnumValues().add( TLBaseEnumerationCodegenTransformer.OPEN_ENUM_VALUE );
+            schema.getEnumValues().add( TLBaseEnumerationCodegenTransformer.OPEN_ENUM_VALUE );
         }
         return roleEnum;
     }

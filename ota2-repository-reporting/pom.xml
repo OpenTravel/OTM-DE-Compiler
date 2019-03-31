@@ -17,6 +17,7 @@
 		<javax.transaction.version>1.2</javax.transaction.version>
 		<hibernate.version>5.0.6.Final</hibernate.version>
 		<mysql.version>5.1.38</mysql.version>
+		<checkstyle.config>${basedir}/../checkstyle.xml</checkstyle.config>
 	</properties>
 	
 	<dependencies>

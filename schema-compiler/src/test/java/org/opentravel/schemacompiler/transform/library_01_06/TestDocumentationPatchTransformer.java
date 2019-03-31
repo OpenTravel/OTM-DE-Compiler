@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.transform.library_01_06;
 
 import static org.junit.Assert.assertEquals;
@@ -28,8 +29,8 @@ import org.opentravel.schemacompiler.transform.TransformerFactory;
 import org.opentravel.schemacompiler.transform.symbols.SymbolResolverTransformerContext;
 
 /**
- * Verifies the operation of the transformers that handle conversions to and from
- * <code>TLExtensionPointFacet</code> objects.
+ * Verifies the operation of the transformers that handle conversions to and from <code>TLExtensionPointFacet</code>
+ * objects.
  * 
  * @author S. Livezey
  */
@@ -37,43 +38,43 @@ public class TestDocumentationPatchTransformer extends Abstract_1_6_TestTransfor
 
     @Test
     public void testDocumentationPatchTransformer() throws Exception {
-    	TLDocumentationPatch patch = getDocumentationPatch(PACKAGE_EXT_NAMESPACE,
-                "library_3_ext", "2.0.0/ExampleBusinessObject");
+        TLDocumentationPatch patch =
+            getDocumentationPatch( PACKAGE_EXT_NAMESPACE, "library_3_ext", "2.0.0/ExampleBusinessObject" );
 
-        assertNotNull(patch);
-        assertNotNull(patch.getDocumentation());
-        assertEquals("2.0.0", patch.getPatchedVersion());
-        assertEquals("ExampleBusinessObject", patch.getDocPath());
+        assertNotNull( patch );
+        assertNotNull( patch.getDocumentation() );
+        assertEquals( "2.0.0", patch.getPatchedVersion() );
+        assertEquals( "ExampleBusinessObject", patch.getDocPath() );
     }
 
     @Test
     public void testTLDocumentationPatchTransformer() throws Exception {
-    	DocumentationPatch patch = transformDocumentationPatch(PACKAGE_EXT_NAMESPACE,
-                "library_3_ext", "2.0.0/ExampleBusinessObject");
+        DocumentationPatch patch =
+            transformDocumentationPatch( PACKAGE_EXT_NAMESPACE, "library_3_ext", "2.0.0/ExampleBusinessObject" );
 
-        assertNotNull(patch);
-        assertNotNull(patch.getDocumentation());
-        assertEquals("2.0.0", patch.getPatchedVersion());
-        assertEquals("ExampleBusinessObject", patch.getDocPath());
+        assertNotNull( patch );
+        assertNotNull( patch.getDocumentation() );
+        assertEquals( "2.0.0", patch.getPatchedVersion() );
+        assertEquals( "ExampleBusinessObject", patch.getDocPath() );
     }
 
-    private TLDocumentationPatch getDocumentationPatch(String namespace, String libraryName,
-            String docPatchName) throws Exception {
-        TLLibrary library = getLibrary(namespace, libraryName);
+    private TLDocumentationPatch getDocumentationPatch(String namespace, String libraryName, String docPatchName)
+        throws Exception {
+        TLLibrary library = getLibrary( namespace, libraryName );
 
-        return (library == null) ? null : library.getDocumentationPatchType(docPatchName);
+        return (library == null) ? null : library.getDocumentationPatchType( docPatchName );
     }
 
-    private DocumentationPatch transformDocumentationPatch(String namespace, String libraryName,
-            String docPatchName) throws Exception {
-    	TLDocumentationPatch origDocPatch = getDocumentationPatch(namespace, libraryName, docPatchName);
-        TransformerFactory<SymbolResolverTransformerContext> factory = TransformerFactory
-                .getInstance(SchemaCompilerApplicationContext.SAVER_TRANSFORMER_FACTORY,
-                        getContextJAXBTransformation(origDocPatch.getOwningLibrary()));
-        ObjectTransformer<TLDocumentationPatch, DocumentationPatch, SymbolResolverTransformerContext> transformer =
-        		factory.getTransformer(origDocPatch, DocumentationPatch.class);
+    private DocumentationPatch transformDocumentationPatch(String namespace, String libraryName, String docPatchName)
+        throws Exception {
+        TLDocumentationPatch origDocPatch = getDocumentationPatch( namespace, libraryName, docPatchName );
+        TransformerFactory<SymbolResolverTransformerContext> factory =
+            TransformerFactory.getInstance( SchemaCompilerApplicationContext.SAVER_TRANSFORMER_FACTORY,
+                getContextJAXBTransformation( origDocPatch.getOwningLibrary() ) );
+        ObjectTransformer<TLDocumentationPatch,DocumentationPatch,SymbolResolverTransformerContext> transformer =
+            factory.getTransformer( origDocPatch, DocumentationPatch.class );
 
-        return transformer.transform(origDocPatch);
+        return transformer.transform( origDocPatch );
     }
 
 }

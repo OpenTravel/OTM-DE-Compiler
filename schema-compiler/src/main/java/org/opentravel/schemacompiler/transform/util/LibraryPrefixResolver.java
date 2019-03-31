@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.transform.util;
 
 import org.opentravel.schemacompiler.model.AbstractLibrary;
@@ -31,8 +32,7 @@ public class LibraryPrefixResolver implements PrefixResolver {
     /**
      * Constructor that specifies the underlying library that defines the prefix mappings.
      * 
-     * @param library
-     *            the library that defines the prefix mappings
+     * @param library the library that defines the prefix mappings
      */
     public LibraryPrefixResolver(AbstractLibrary library) {
         this.library = library;
@@ -51,10 +51,10 @@ public class LibraryPrefixResolver implements PrefixResolver {
      */
     @Override
     public String resolveNamespaceFromPrefix(String prefix) {
-        String namespace = (library == null) ? null : library.getNamespaceForPrefix(prefix);
+        String namespace = (library == null) ? null : library.getNamespaceForPrefix( prefix );
 
         if ((namespace == null) && (library != null)) {
-            namespace = findNamespaceFromPrefix(prefix, library.getOwningModel());
+            namespace = findNamespaceFromPrefix( prefix, library.getOwningModel() );
         }
         return namespace;
     }
@@ -64,18 +64,16 @@ public class LibraryPrefixResolver implements PrefixResolver {
      */
     @Override
     public String getPrefixForNamespace(String namespace) {
-        return (library == null) ? null : library.getPrefixForNamespace(namespace);
+        return (library == null) ? null : library.getPrefixForNamespace( namespace );
     }
 
     /**
-     * If the namespace could not be resolved from the library's import declarations, this method
-     * searches the <code>TLModel</code> to determine whether a single namespace can be resolved
-     * from the prefix. If so, that namespace URI is returned. If not, this method will return null.
+     * If the namespace could not be resolved from the library's import declarations, this method searches the
+     * <code>TLModel</code> to determine whether a single namespace can be resolved from the prefix. If so, that
+     * namespace URI is returned. If not, this method will return null.
      * 
-     * @param prefix
-     *            the prefix for which to attempt resolution
-     * @param model
-     *            the model to search
+     * @param prefix the prefix for which to attempt resolution
+     * @param model the model to search
      * @return String
      */
     private String findNamespaceFromPrefix(String prefix, TLModel model) {
@@ -83,7 +81,7 @@ public class LibraryPrefixResolver implements PrefixResolver {
 
         if ((prefix != null) && (model != null)) {
             for (AbstractLibrary lib : model.getAllLibraries()) {
-                if (prefix.equals(lib.getPrefix())) {
+                if (prefix.equals( lib.getPrefix() )) {
                     if (namespace == null) {
                         namespace = lib.getNamespace();
                     } else {

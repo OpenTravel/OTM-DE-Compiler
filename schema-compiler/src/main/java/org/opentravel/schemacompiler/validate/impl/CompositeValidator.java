@@ -13,11 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.validate.impl;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+package org.opentravel.schemacompiler.validate.impl;
 
 import org.opentravel.schemacompiler.validate.Validatable;
 import org.opentravel.schemacompiler.validate.ValidationContext;
@@ -25,12 +22,15 @@ import org.opentravel.schemacompiler.validate.ValidationFindings;
 import org.opentravel.schemacompiler.validate.Validator;
 import org.opentravel.schemacompiler.validate.ValidatorFactory;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 /**
- * Validator implementation that can combine and apply multiple validator implementations to a
- * single <code>Validatable</code> object.
+ * Validator implementation that can combine and apply multiple validator implementations to a single
+ * <code>Validatable</code> object.
  * 
- * @param <T>
- *            the type of the object to be validated
+ * @param <T> the type of the object to be validated
  * @author S. Livezey
  */
 public class CompositeValidator<T extends Validatable> implements Validator<T> {
@@ -42,31 +42,26 @@ public class CompositeValidator<T extends Validatable> implements Validator<T> {
     /**
      * Default constructor.
      */
-    public CompositeValidator() {
-    }
+    public CompositeValidator() {}
 
     /**
-     * Constructor that initializes this composite validator with a single nested validator
-     * instance.
+     * Constructor that initializes this composite validator with a single nested validator instance.
      * 
-     * @param validator
-     *            the validator to add to this composite
+     * @param validator the validator to add to this composite
      */
     public CompositeValidator(Validator<T> validator) {
-        addValidator(validator);
+        addValidator( validator );
     }
 
     /**
-     * Constructor that initializes this composite validator with the given collection of nested
-     * validators.
+     * Constructor that initializes this composite validator with the given collection of nested validators.
      * 
-     * @param validators
-     *            the list of validators to add to this composite
+     * @param validators the list of validators to add to this composite
      */
     public CompositeValidator(Collection<Validator<T>> validators) {
         if (validators != null) {
             for (Validator<T> validator : validators) {
-                addValidator(validator);
+                addValidator( validator );
             }
         }
     }
@@ -74,28 +69,26 @@ public class CompositeValidator<T extends Validatable> implements Validator<T> {
     /**
      * Adds the given validator to the current list maintained by this composite.
      * 
-     * @param validator
-     *            the validator to add to this composite
+     * @param validator the validator to add to this composite
      */
     public void addValidator(Validator<T> validator) {
         if (validator != null) {
-            validators.add(validator);
-            validator.setValidationContext(context);
-            validator.setValidatorFactory(factory);
+            validators.add( validator );
+            validator.setValidationContext( context );
+            validator.setValidatorFactory( factory );
         }
     }
 
     /**
      * Removes the given validator from the current list maintained by this composite.
      * 
-     * @param validator
-     *            the validator to remove from this composite
+     * @param validator the validator to remove from this composite
      */
     public void removeValidator(Validator<T> validator) {
         if (validator != null) {
-            validators.remove(validator);
-            validator.setValidationContext(null);
-            validator.setValidatorFactory(null);
+            validators.remove( validator );
+            validator.setValidationContext( null );
+            validator.setValidatorFactory( null );
         }
     }
 
@@ -107,7 +100,7 @@ public class CompositeValidator<T extends Validatable> implements Validator<T> {
         this.context = context;
 
         for (Validator<T> validator : validators) {
-            validator.setValidationContext(context);
+            validator.setValidationContext( context );
         }
     }
 
@@ -127,7 +120,7 @@ public class CompositeValidator<T extends Validatable> implements Validator<T> {
         this.factory = factory;
 
         for (Validator<T> validator : validators) {
-            validator.setValidatorFactory(factory);
+            validator.setValidatorFactory( factory );
         }
     }
 
@@ -139,7 +132,7 @@ public class CompositeValidator<T extends Validatable> implements Validator<T> {
         ValidationFindings findings = new ValidationFindings();
 
         for (Validator<T> validator : validators) {
-            findings.addAll(validator.validate(target));
+            findings.addAll( validator.validate( target ) );
         }
         return findings;
     }

@@ -17,56 +17,51 @@
 package org.opentravel.schemacompiler.codegen.swagger.model;
 
 /**
- * Enumeration that specifies the security flow for OAuth2 security in a
- * Swagger document.  The types that are defined for this enumeration are
- * the only values allowed by the Swagger specification.
+ * Enumeration that specifies the security flow for OAuth2 security in a Swagger document. The types that are defined
+ * for this enumeration are the only values allowed by the Swagger specification.
  */
 public enum SwaggerOAuth2Flow {
-	
-	IMPLICIT( "implicit" ),
-	PASSWORD( "password" ),
-	APPLICATION( "application" ),
-	ACCESS_CODE( "accessCode" );
-	
-	private String displayValue;
-	
-	/**
-	 * Constructor that specifies the display value for the enumeration.
-	 * 
-	 * @param displayValue  the display value of the enumeration
-	 */
-	private SwaggerOAuth2Flow(String displayValue) {
-		this.displayValue = displayValue;
-	}
-	
-	/**
-	 * Returns the display value of the enumeration.
-	 * 
-	 * @return String
-	 */
-	public String getDisplayValue() {
-		return displayValue;
-	}
-	
-	/**
-	 * Returns the correct enumeration for the given display value or null
-	 * if an invalid scheme is provided.
-	 * 
-	 * @param displayValue  the display value of the security flow to return
-	 * @return SwaggerOAuth2Flow
-	 */
-	public static SwaggerOAuth2Flow fromDisplayValue(String displayValue) {
-		SwaggerOAuth2Flow flow = null;
-		
-		if (displayValue != null) {
-			for (SwaggerOAuth2Flow f : values()) {
-				if (displayValue.equalsIgnoreCase( f.getDisplayValue() )) {
-					flow = f;
-					break;
-				}
-			}
-		}
-		return flow;
-	}
-	
+
+    IMPLICIT("implicit"), PASSWORD("password"), APPLICATION("application"), ACCESS_CODE("accessCode");
+
+    private String displayValue;
+
+    /**
+     * Constructor that specifies the display value for the enumeration.
+     * 
+     * @param displayValue the display value of the enumeration
+     */
+    private SwaggerOAuth2Flow(String displayValue) {
+        this.displayValue = displayValue;
+    }
+
+    /**
+     * Returns the display value of the enumeration.
+     * 
+     * @return String
+     */
+    public String getDisplayValue() {
+        return displayValue;
+    }
+
+    /**
+     * Returns the correct enumeration for the given display value or null if an invalid scheme is provided.
+     * 
+     * @param displayValue the display value of the security flow to return
+     * @return SwaggerOAuth2Flow
+     */
+    public static SwaggerOAuth2Flow fromDisplayValue(String displayValue) {
+        SwaggerOAuth2Flow flow = null;
+
+        if (displayValue != null) {
+            for (SwaggerOAuth2Flow f : values()) {
+                if (displayValue.equalsIgnoreCase( f.getDisplayValue() )) {
+                    flow = f;
+                    break;
+                }
+            }
+        }
+        return flow;
+    }
+
 }

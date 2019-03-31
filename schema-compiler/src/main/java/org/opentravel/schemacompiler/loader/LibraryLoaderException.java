@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.loader;
 
 import org.opentravel.schemacompiler.util.SchemaCompilerException;
@@ -24,44 +25,39 @@ import org.opentravel.schemacompiler.util.SchemaCompilerException;
  */
 public class LibraryLoaderException extends SchemaCompilerException {
 
-	private static final long serialVersionUID = -6738739483590367556L;
+    private static final long serialVersionUID = -6738739483590367556L;
 
-	/**
+    /**
      * Default constructor.
      */
-    public LibraryLoaderException() {
-    }
+    public LibraryLoaderException() {}
 
     /**
      * Constructs an exception with the specified message.
      * 
-     * @param message
-     *            the exception message
+     * @param message the exception message
      */
     public LibraryLoaderException(String message) {
-        super(message);
+        super( message );
     }
 
     /**
      * Constructs an exception with the specified underlying cause.
      * 
-     * @param cause
-     *            the underlying exception that caused this one
+     * @param cause the underlying exception that caused this one
      */
     public LibraryLoaderException(Throwable cause) {
-        super(cause);
+        super( cause );
     }
 
     /**
      * Constructs an exception with the specified message and underlying cause.
      * 
-     * @param message
-     *            the exception message
-     * @param cause
-     *            the underlying exception that caused this one
+     * @param message the exception message
+     * @param cause the underlying exception that caused this one
      */
     public LibraryLoaderException(String message, Throwable cause) {
-        super(message, cause);
+        super( message, cause );
     }
 
 }

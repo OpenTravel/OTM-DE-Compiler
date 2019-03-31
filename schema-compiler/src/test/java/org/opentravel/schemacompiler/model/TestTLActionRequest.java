@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.model;
 
 import static org.junit.Assert.assertEquals;
@@ -25,40 +26,40 @@ import org.junit.Test;
  * Verifies the functions of the <code>TLActionRequest</code> class.
  */
 public class TestTLActionRequest extends AbstractModelTest {
-	
-	@Test
-	public void testIdentityFunctions() throws Exception {
-		TLResource resource = addResource( "TestResource", library1 );
-		TLParamGroup paramGroup = addParamGroup( "TestParamGroup",
-				resource.getBusinessObjectRef().getIdFacet(), resource );
-		TLAction action = addAction( "Action", resource );
-		TLActionRequest request = addActionRequest( "/test", paramGroup, TLHttpMethod.GET, null, action );
-		
-		assertEquals( "TestLibrary1.otm : TestResource/Action/Request", request.getValidationIdentity() );
-	}
-	
-	@Test
-	public void testDocumentationFunctions() throws Exception {
-		testDocumentationFunctions( new TLActionRequest() );
-	}
-	
-	@Test
-	public void testMimeTypeFunctions() throws Exception {
-		TLResource resource = addResource( "TestResource", library1 );
-		TLParamGroup paramGroup = addParamGroup( "TestParamGroup",
-				resource.getBusinessObjectRef().getIdFacet(), resource );
-		TLAction action = addAction( "Action", resource );
-		TLActionRequest request = addActionRequest( "/test", paramGroup, TLHttpMethod.GET, null, action );
-		
-		assertEquals( 2, request.getMimeTypes().size() );
-		
-		request.addMimeType( TLMimeType.TEXT_XML );
-		assertEquals( 3, request.getMimeTypes().size() );
-		assertTrue( request.getMimeTypes().contains( TLMimeType.TEXT_XML ) );
-		
-		request.removeMimeType( TLMimeType.TEXT_XML );
-		assertEquals( 2, request.getMimeTypes().size() );
-		assertFalse( request.getMimeTypes().contains( TLMimeType.TEXT_XML ) );
-	}
-	
+
+    @Test
+    public void testIdentityFunctions() throws Exception {
+        TLResource resource = addResource( "TestResource", library1 );
+        TLParamGroup paramGroup =
+            addParamGroup( "TestParamGroup", resource.getBusinessObjectRef().getIdFacet(), resource );
+        TLAction action = addAction( "Action", resource );
+        TLActionRequest request = addActionRequest( "/test", paramGroup, TLHttpMethod.GET, null, action );
+
+        assertEquals( "TestLibrary1.otm : TestResource/Action/Request", request.getValidationIdentity() );
+    }
+
+    @Test
+    public void testDocumentationFunctions() throws Exception {
+        testDocumentationFunctions( new TLActionRequest() );
+    }
+
+    @Test
+    public void testMimeTypeFunctions() throws Exception {
+        TLResource resource = addResource( "TestResource", library1 );
+        TLParamGroup paramGroup =
+            addParamGroup( "TestParamGroup", resource.getBusinessObjectRef().getIdFacet(), resource );
+        TLAction action = addAction( "Action", resource );
+        TLActionRequest request = addActionRequest( "/test", paramGroup, TLHttpMethod.GET, null, action );
+
+        assertEquals( 2, request.getMimeTypes().size() );
+
+        request.addMimeType( TLMimeType.TEXT_XML );
+        assertEquals( 3, request.getMimeTypes().size() );
+        assertTrue( request.getMimeTypes().contains( TLMimeType.TEXT_XML ) );
+
+        request.removeMimeType( TLMimeType.TEXT_XML );
+        assertEquals( 2, request.getMimeTypes().size() );
+        assertFalse( request.getMimeTypes().contains( TLMimeType.TEXT_XML ) );
+    }
+
 }

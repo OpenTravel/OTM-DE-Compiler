@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.model;
 
 /**
- * Interface to be implemented by all model components that can own <code>TLDocumentation</code>
- * elements.
+ * Interface to be implemented by all model components that can own <code>TLDocumentation</code> elements.
  * 
  * @author S. Livezey
  */
@@ -33,8 +33,7 @@ public interface TLDocumentationOwner extends LibraryElement {
     /**
      * Assigns the documentation instance that is owned by this component.
      * 
-     * @param documentation
-     *            the documentation instance to assign
+     * @param documentation the documentation instance to assign
      */
     public void setDocumentation(TLDocumentation documentation);
 

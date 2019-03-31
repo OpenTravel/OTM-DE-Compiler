@@ -13,10 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.event;
 
-import java.io.File;
-import java.io.InputStream;
+package org.opentravel.schemacompiler.event;
 
 import org.junit.BeforeClass;
 import org.opentravel.schemacompiler.loader.LibraryInputSource;
@@ -28,9 +26,11 @@ import org.opentravel.schemacompiler.validate.FindingMessageFormat;
 import org.opentravel.schemacompiler.validate.FindingType;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
 
+import java.io.File;
+import java.io.InputStream;
+
 /**
- * Base class that provides common methods used for testing the event sub-system of the schema
- * compiler.
+ * Base class that provides common methods used for testing the event sub-system of the schema compiler.
  * 
  * @author S. Livezey
  */
@@ -44,23 +44,22 @@ public abstract class AbstractModelEventTests {
     @BeforeClass
     public static void loadTestModel() throws Exception {
         LibraryInputSource<InputStream> library1Input = new LibraryStreamInputSource(
-        		new File( SchemaCompilerTestUtils.getBaseLibraryLocation() + "/test-package_v2/library_1_p2.xml" ) );
+            new File( SchemaCompilerTestUtils.getBaseLibraryLocation() + "/test-package_v2/library_1_p2.xml" ) );
         LibraryInputSource<InputStream> library2Input = new LibraryStreamInputSource(
-        		new File( SchemaCompilerTestUtils.getBaseLibraryLocation() + "/test-package_v2/library_2_p2.xml" ) );
+            new File( SchemaCompilerTestUtils.getBaseLibraryLocation() + "/test-package_v2/library_2_p2.xml" ) );
         LibraryModelLoader<InputStream> modelLoader = new LibraryModelLoader<InputStream>();
         ValidationFindings findings = modelLoader.loadLibraryModel( library1Input );
-        
+
         findings.addAll( modelLoader.loadLibraryModel( library2Input ) );
 
         // Display any error messages to standard output before returning
-        if (findings.hasFinding(FindingType.ERROR)) {
-            String[] messages = findings.getValidationMessages(FindingType.ERROR,
-                    FindingMessageFormat.DEFAULT);
+        if (findings.hasFinding( FindingType.ERROR )) {
+            String[] messages = findings.getValidationMessages( FindingType.ERROR, FindingMessageFormat.DEFAULT );
 
-            System.out.println("Problems occurred while loading the test model:");
+            System.out.println( "Problems occurred while loading the test model:" );
 
             for (String message : messages) {
-                System.out.println("  " + message);
+                System.out.println( "  " + message );
             }
         }
         testModel = modelLoader.getLibraryModel();

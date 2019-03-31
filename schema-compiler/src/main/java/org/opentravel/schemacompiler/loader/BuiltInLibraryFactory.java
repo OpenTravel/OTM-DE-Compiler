@@ -13,26 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.loader;
 
-import java.util.ArrayList;
-import java.util.List;
+package org.opentravel.schemacompiler.loader;
 
 import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
 import org.opentravel.schemacompiler.model.BuiltInLibrary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- * Factory used to construct the list of built-in libraries that should be included with every model
- * instance that is processed by the loader.
+ * Factory used to construct the list of built-in libraries that should be included with every model instance that is
+ * processed by the loader.
  * 
  * @author S. Livezey
  */
 public final class BuiltInLibraryFactory {
 
-    private static final Logger log = LoggerFactory.getLogger(BuiltInLibraryFactory.class);
-    
+    private static final Logger log = LoggerFactory.getLogger( BuiltInLibraryFactory.class );
+
     private List<BuiltInLibraryLoader> loaders;
 
     /**
@@ -41,14 +42,14 @@ public final class BuiltInLibraryFactory {
      * @return BuiltInLibraryFactory
      */
     public static BuiltInLibraryFactory getInstance() {
-        return (BuiltInLibraryFactory) SchemaCompilerApplicationContext.getContext().getBean(
-                SchemaCompilerApplicationContext.BUILT_IN_LIBRARY_FACTORY);
+        return (BuiltInLibraryFactory) SchemaCompilerApplicationContext.getContext()
+            .getBean( SchemaCompilerApplicationContext.BUILT_IN_LIBRARY_FACTORY );
     }
 
     /**
      * Returns the list of built-in library loaders to be used by this factory.
      * 
-     * @return List<BuiltInLibraryLoader>
+     * @return List&lt;BuiltInLibraryLoader&gt;
      */
     public List<BuiltInLibraryLoader> getLoaders() {
         return loaders;
@@ -57,8 +58,7 @@ public final class BuiltInLibraryFactory {
     /**
      * Assigns the list of built-in library loaders to be used by this factory.
      * 
-     * @param loaders
-     *            the list of built-in laoders
+     * @param loaders the list of built-in laoders
      */
     public void setLoaders(List<BuiltInLibraryLoader> loaders) {
         this.loaders = loaders;
@@ -67,7 +67,7 @@ public final class BuiltInLibraryFactory {
     /**
      * Returns a list of built-in library instances to be included in a new model.
      * 
-     * @return List<BuiltInLibrary>
+     * @return List&lt;BuiltInLibrary&gt;
      */
     public List<BuiltInLibrary> getBuiltInLibraries() {
         List<BuiltInLibrary> builtIns = new ArrayList<>();
@@ -77,10 +77,10 @@ public final class BuiltInLibraryFactory {
                 BuiltInLibrary library = loader.loadBuiltInLibrary();
 
                 if (library != null) {
-                    builtIns.add(library);
+                    builtIns.add( library );
                 }
             } catch (LibraryLoaderException e) {
-            	log.error("Error loading built-in library", e);
+                log.error( "Error loading built-in library", e );
             }
         }
         return builtIns;

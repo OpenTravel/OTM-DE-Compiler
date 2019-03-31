@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.validate.base;
 
 import org.opentravel.schemacompiler.model.TLDocumentation;
@@ -30,35 +31,34 @@ import org.opentravel.schemacompiler.validate.impl.TLValidatorBase;
  */
 public class TLParameterBaseValidator extends TLValidatorBase<TLParameter> {
 
-	/**
-	 * @see org.opentravel.schemacompiler.validate.impl.TLValidatorBase#validateChildren(org.opentravel.schemacompiler.validate.Validatable)
-	 */
-	@Override
-	protected ValidationFindings validateChildren(TLParameter target) {
+    /**
+     * @see org.opentravel.schemacompiler.validate.impl.TLValidatorBase#validateChildren(org.opentravel.schemacompiler.validate.Validatable)
+     */
+    @Override
+    protected ValidationFindings validateChildren(TLParameter target) {
         ValidationFindings findings = new ValidationFindings();
-        
-        if (target.getDocumentation() != null) {
-            Validator<TLDocumentation> docValidator = getValidatorFactory().getValidatorForClass(TLDocumentation.class);
 
-            findings.addAll(docValidator.validate(target.getDocumentation()));
+        if (target.getDocumentation() != null) {
+            Validator<TLDocumentation> docValidator =
+                getValidatorFactory().getValidatorForClass( TLDocumentation.class );
+
+            findings.addAll( docValidator.validate( target.getDocumentation() ) );
         }
         if (target.getEquivalents() != null) {
-            Validator<TLEquivalent> equivValidator = getValidatorFactory().getValidatorForClass(
-                    TLEquivalent.class);
+            Validator<TLEquivalent> equivValidator = getValidatorFactory().getValidatorForClass( TLEquivalent.class );
 
             for (TLEquivalent equiv : target.getEquivalents()) {
-                findings.addAll(equivValidator.validate(equiv));
+                findings.addAll( equivValidator.validate( equiv ) );
             }
         }
         if (target.getExamples() != null) {
-            Validator<TLExample> exampleValidator = getValidatorFactory().getValidatorForClass(
-                    TLExample.class);
+            Validator<TLExample> exampleValidator = getValidatorFactory().getValidatorForClass( TLExample.class );
 
             for (TLExample example : target.getExamples()) {
-                findings.addAll(exampleValidator.validate(example));
+                findings.addAll( exampleValidator.validate( example ) );
             }
         }
         return findings;
-	}
+    }
 
 }

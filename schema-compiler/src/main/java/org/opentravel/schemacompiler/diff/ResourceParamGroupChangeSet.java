@@ -20,31 +20,30 @@ import org.opentravel.schemacompiler.model.TLParamGroup;
 import org.opentravel.schemacompiler.model.TLResource;
 
 /**
- * Container for all change items identified during the comparison of two resource
- * parameter groups.
+ * Container for all change items identified during the comparison of two resource parameter groups.
  */
 public class ResourceParamGroupChangeSet extends ChangeSet<TLParamGroup,ResourceChangeItem> {
-	
-	/**
-	 * Constructor that assigns the old and new version of a parameter group that was modified.
-	 * 
-	 * @param oldParamGroup  the old version of the parameter group
-	 * @param newParamGroup  the new version of the parameter group
-	 */
-	public ResourceParamGroupChangeSet(TLParamGroup oldParamGroup, TLParamGroup newParamGroup) {
-		super( oldParamGroup, newParamGroup );
-	}
-	
-	/**
-	 * @see org.opentravel.schemacompiler.diff.ChangeSet#getBookmarkId()
-	 */
-	@Override
-	public String getBookmarkId() {
-		TLParamGroup paramGroup = (getNewVersion() != null) ? getNewVersion() : getOldVersion();
-		TLResource owner = (paramGroup == null) ? null : paramGroup.getOwner();
-		String paramGroupName = (paramGroup == null) ? null : paramGroup.getFacetRefName();
-		
-		return getBookmarkId( owner ) + "$pg$" + ((paramGroupName == null) ? "UNKNOWN_PARAMGRP" : paramGroupName);
-	}
-	
+
+    /**
+     * Constructor that assigns the old and new version of a parameter group that was modified.
+     * 
+     * @param oldParamGroup the old version of the parameter group
+     * @param newParamGroup the new version of the parameter group
+     */
+    public ResourceParamGroupChangeSet(TLParamGroup oldParamGroup, TLParamGroup newParamGroup) {
+        super( oldParamGroup, newParamGroup );
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.diff.ChangeSet#getBookmarkId()
+     */
+    @Override
+    public String getBookmarkId() {
+        TLParamGroup paramGroup = (getNewVersion() != null) ? getNewVersion() : getOldVersion();
+        TLResource owner = (paramGroup == null) ? null : paramGroup.getOwner();
+        String paramGroupName = (paramGroup == null) ? null : paramGroup.getFacetRefName();
+
+        return getBookmarkId( owner ) + "$pg$" + ((paramGroupName == null) ? "UNKNOWN_PARAMGRP" : paramGroupName);
+    }
+
 }

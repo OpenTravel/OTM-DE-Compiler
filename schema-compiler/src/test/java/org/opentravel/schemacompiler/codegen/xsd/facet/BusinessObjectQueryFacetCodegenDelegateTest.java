@@ -13,11 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.codegen.xsd.facet;
 
 import static org.junit.Assert.assertNotNull;
-
-import javax.xml.namespace.QName;
 
 import org.junit.Test;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
@@ -26,56 +25,56 @@ import org.opentravel.schemacompiler.model.TLExtension;
 import org.opentravel.schemacompiler.model.TLFacetType;
 import org.opentravel.schemacompiler.model.TLProperty;
 
+import javax.xml.namespace.QName;
+
 public class BusinessObjectQueryFacetCodegenDelegateTest {
 
     @Test
     public void shouldReturnExtensionPointElementQuery() {
         // given
         TLBusinessObject base = new TLBusinessObject();
-        TLContextualFacet query = createQueryFacet("BaseQuery");
-        base.addQueryFacet(query);
+        TLContextualFacet query = createQueryFacet( "BaseQuery" );
+        base.addQueryFacet( query );
         // has to have content, empty one is ignored
         TLProperty prop = new TLProperty();
-        query.addElement(prop);
+        query.addElement( prop );
 
         // when
-        BusinessObjectQueryFacetCodegenDelegate delegate = new BusinessObjectQueryFacetCodegenDelegate(
-                query);
+        BusinessObjectQueryFacetCodegenDelegate delegate = new BusinessObjectQueryFacetCodegenDelegate( query );
         QName epe = delegate.getExtensionPointElement();
         // then
-        assertNotNull(epe);
+        assertNotNull( epe );
     }
 
     @Test
     public void shouldReturnExtensionPointElementForQueryFacetWithSubtype() {
         // given
         TLBusinessObject base = new TLBusinessObject();
-        TLContextualFacet query = createQueryFacet("BaseQuery");
-        base.addQueryFacet(query);
+        TLContextualFacet query = createQueryFacet( "BaseQuery" );
+        base.addQueryFacet( query );
         // has to have content, empty one is ignored
         TLProperty prop = new TLProperty();
-        query.addElement(prop);
+        query.addElement( prop );
 
         TLBusinessObject extBO = new TLBusinessObject();
         TLExtension ext = new TLExtension();
-        ext.setExtendsEntity(base);
-        extBO.setExtension(ext);
+        ext.setExtendsEntity( base );
+        extBO.setExtension( ext );
 
-        TLContextualFacet queryExt = createQueryFacet(query.getName());
-        extBO.addQueryFacet(queryExt);
+        TLContextualFacet queryExt = createQueryFacet( query.getName() );
+        extBO.addQueryFacet( queryExt );
 
         // when
-        BusinessObjectQueryFacetCodegenDelegate delegate = new BusinessObjectQueryFacetCodegenDelegate(
-                queryExt);
+        BusinessObjectQueryFacetCodegenDelegate delegate = new BusinessObjectQueryFacetCodegenDelegate( queryExt );
         QName epe = delegate.getExtensionPointElement();
         // then
-        assertNotNull(epe);
+        assertNotNull( epe );
     }
 
     private TLContextualFacet createQueryFacet(String name) {
-    	TLContextualFacet ret = new TLContextualFacet();
-        ret.setFacetType(TLFacetType.QUERY);
-        ret.setName(name);
+        TLContextualFacet ret = new TLContextualFacet();
+        ret.setFacetType( TLFacetType.QUERY );
+        ret.setName( name );
         return ret;
     }
 }

@@ -13,30 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/*
- * Copyright (c) 2003, 2005, Oracle and/or its affiliates. All rights reserved.
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
- *
- * This code is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Oracle designates this
- * particular file as subject to the "Classpath" exception as provided
- * by Oracle in the LICENSE file that accompanied this code.
- *
- * This code is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
- * version 2 for more details (a copy is included in the LICENSE file that
- * accompanied this code).
- *
- * You should have received a copy of the GNU General Public License version
- * 2 along with this work; if not, write to the Free Software Foundation,
- * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
- *
- * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
- * or visit www.oracle.com if you need additional information or have any
- * questions.
- */
 
 package org.opentravel.schemacompiler.codegen.html;
 
@@ -52,13 +28,12 @@ import org.opentravel.schemacompiler.model.LibraryMember;
 public abstract class LinkInfo {
 
     /**
-     * The ClassDoc we want to link to.  Null if we are not linking
-     * to a ClassDoc.
+     * The ClassDoc we want to link to. Null if we are not linking to a ClassDoc.
      */
     private DocumentationBuilder builder;
 
     /**
-     * The LibraryMember we want to link to.  Null if we are not linking to a type.
+     * The LibraryMember we want to link to. Null if we are not linking to a type.
      */
     private LibraryMember member;
 
@@ -83,12 +58,12 @@ public abstract class LinkInfo {
     private boolean isStrong = false;
 
     /**
-     * True if we should include the type in the link label.  False otherwise.
+     * True if we should include the type in the link label. False otherwise.
      */
     private boolean includeTypeInClassLinkLabel = true;
 
     /**
-     * True if we should include the type as seperate link.  False otherwise.
+     * True if we should include the type as seperate link. False otherwise.
      */
     private boolean includeTypeAsSepLink = false;
 
@@ -108,8 +83,8 @@ public abstract class LinkInfo {
     private boolean excludeTypeBoundsLinks = false;
 
     /**
-     * By default, the link can be to the page it's already on.  However,
-     * there are cases where we don't want this (e.g. heading of class page).
+     * By default, the link can be to the page it's already on. However, there are cases where we don't want this (e.g.
+     * heading of class page).
      */
     private boolean linkToSelf = true;
 
@@ -119,8 +94,8 @@ public abstract class LinkInfo {
     private int displayLength = 0;
 
     /**
-     * Return the id indicating where the link appears in the documentation.
-     * This is used for special processing of different types of links.
+     * Return the id indicating where the link appears in the documentation. This is used for special processing of
+     * different types of links.
      *
      * @return the id indicating where the link appears in the documentation.
      */
@@ -134,11 +109,9 @@ public abstract class LinkInfo {
     public abstract void setContext(int c);
 
     /**
-     * Return true if this link is linkable and false if we can't link to the
-     * desired place.
+     * Return true if this link is linkable and false if we can't link to the desired place.
      *
-     * @return true if this link is linkable and false if we can't link to the
-     * desired place.
+     * @return true if this link is linkable and false if we can't link to the desired place.
      */
     public abstract boolean isLinkable();
 
@@ -154,241 +127,241 @@ public abstract class LinkInfo {
         } else if (isLinkable()) {
             return getBuilder().getName();
         } else {
-            return configuration.getQualifiedName(getBuilder());
+            return configuration.getQualifiedName( getBuilder() );
         }
     }
 
-	/**
-	 * Returns the value of the 'builder' field.
-	 *
-	 * @return DocumentationBuilder
-	 */
-	public DocumentationBuilder getBuilder() {
-		return builder;
-	}
+    /**
+     * Returns the value of the 'builder' field.
+     *
+     * @return DocumentationBuilder
+     */
+    public DocumentationBuilder getBuilder() {
+        return builder;
+    }
 
-	/**
-	 * Assigns the value of the 'builder' field.
-	 *
-	 * @param builder  the field value to assign
-	 */
-	public void setBuilder(DocumentationBuilder builder) {
-		this.builder = builder;
-	}
+    /**
+     * Assigns the value of the 'builder' field.
+     *
+     * @param builder the field value to assign
+     */
+    public void setBuilder(DocumentationBuilder builder) {
+        this.builder = builder;
+    }
 
-	/**
-	 * Returns the value of the 'member' field.
-	 *
-	 * @return LibraryMember
-	 */
-	public LibraryMember getMember() {
-		return member;
-	}
+    /**
+     * Returns the value of the 'member' field.
+     *
+     * @return LibraryMember
+     */
+    public LibraryMember getMember() {
+        return member;
+    }
 
-	/**
-	 * Assigns the value of the 'member' field.
-	 *
-	 * @param member  the field value to assign
-	 */
-	public void setMember(LibraryMember member) {
-		this.member = member;
-	}
+    /**
+     * Assigns the value of the 'member' field.
+     *
+     * @param member the field value to assign
+     */
+    public void setMember(LibraryMember member) {
+        this.member = member;
+    }
 
-	/**
-	 * Returns the value of the 'isVarArg' field.
-	 *
-	 * @return boolean
-	 */
-	public boolean isVarArg() {
-		return isVarArg;
-	}
+    /**
+     * Returns the value of the 'isVarArg' field.
+     *
+     * @return boolean
+     */
+    public boolean isVarArg() {
+        return isVarArg;
+    }
 
-	/**
-	 * Assigns the value of the 'isVarArg' field.
-	 *
-	 * @param isVarArg  the field value to assign
-	 */
-	public void setVarArg(boolean isVarArg) {
-		this.isVarArg = isVarArg;
-	}
+    /**
+     * Assigns the value of the 'isVarArg' field.
+     *
+     * @param isVarArg the field value to assign
+     */
+    public void setVarArg(boolean isVarArg) {
+        this.isVarArg = isVarArg;
+    }
 
-	/**
-	 * Returns the value of the 'isTypeBound' field.
-	 *
-	 * @return boolean
-	 */
-	public boolean isTypeBound() {
-		return isTypeBound;
-	}
+    /**
+     * Returns the value of the 'isTypeBound' field.
+     *
+     * @return boolean
+     */
+    public boolean isTypeBound() {
+        return isTypeBound;
+    }
 
-	/**
-	 * Assigns the value of the 'isTypeBound' field.
-	 *
-	 * @param isTypeBound  the field value to assign
-	 */
-	public void setTypeBound(boolean isTypeBound) {
-		this.isTypeBound = isTypeBound;
-	}
+    /**
+     * Assigns the value of the 'isTypeBound' field.
+     *
+     * @param isTypeBound the field value to assign
+     */
+    public void setTypeBound(boolean isTypeBound) {
+        this.isTypeBound = isTypeBound;
+    }
 
-	/**
-	 * Returns the value of the 'label' field.
-	 *
-	 * @return String
-	 */
-	public String getLabel() {
-		return label;
-	}
+    /**
+     * Returns the value of the 'label' field.
+     *
+     * @return String
+     */
+    public String getLabel() {
+        return label;
+    }
 
-	/**
-	 * Assigns the value of the 'label' field.
-	 *
-	 * @param label  the field value to assign
-	 */
-	public void setLabel(String label) {
-		this.label = label;
-	}
+    /**
+     * Assigns the value of the 'label' field.
+     *
+     * @param label the field value to assign
+     */
+    public void setLabel(String label) {
+        this.label = label;
+    }
 
-	/**
-	 * Returns the value of the 'isStrong' field.
-	 *
-	 * @return boolean
-	 */
-	public boolean isStrong() {
-		return isStrong;
-	}
+    /**
+     * Returns the value of the 'isStrong' field.
+     *
+     * @return boolean
+     */
+    public boolean isStrong() {
+        return isStrong;
+    }
 
-	/**
-	 * Assigns the value of the 'isStrong' field.
-	 *
-	 * @param isStrong  the field value to assign
-	 */
-	public void setStrong(boolean isStrong) {
-		this.isStrong = isStrong;
-	}
+    /**
+     * Assigns the value of the 'isStrong' field.
+     *
+     * @param isStrong the field value to assign
+     */
+    public void setStrong(boolean isStrong) {
+        this.isStrong = isStrong;
+    }
 
-	/**
-	 * Returns the value of the 'includeTypeInClassLinkLabel' field.
-	 *
-	 * @return boolean
-	 */
-	public boolean isIncludeTypeInClassLinkLabel() {
-		return includeTypeInClassLinkLabel;
-	}
+    /**
+     * Returns the value of the 'includeTypeInClassLinkLabel' field.
+     *
+     * @return boolean
+     */
+    public boolean isIncludeTypeInClassLinkLabel() {
+        return includeTypeInClassLinkLabel;
+    }
 
-	/**
-	 * Assigns the value of the 'includeTypeInClassLinkLabel' field.
-	 *
-	 * @param includeTypeInClassLinkLabel  the field value to assign
-	 */
-	public void setIncludeTypeInClassLinkLabel(boolean includeTypeInClassLinkLabel) {
-		this.includeTypeInClassLinkLabel = includeTypeInClassLinkLabel;
-	}
+    /**
+     * Assigns the value of the 'includeTypeInClassLinkLabel' field.
+     *
+     * @param includeTypeInClassLinkLabel the field value to assign
+     */
+    public void setIncludeTypeInClassLinkLabel(boolean includeTypeInClassLinkLabel) {
+        this.includeTypeInClassLinkLabel = includeTypeInClassLinkLabel;
+    }
 
-	/**
-	 * Returns the value of the 'includeTypeAsSepLink' field.
-	 *
-	 * @return boolean
-	 */
-	public boolean isIncludeTypeAsSepLink() {
-		return includeTypeAsSepLink;
-	}
+    /**
+     * Returns the value of the 'includeTypeAsSepLink' field.
+     *
+     * @return boolean
+     */
+    public boolean isIncludeTypeAsSepLink() {
+        return includeTypeAsSepLink;
+    }
 
-	/**
-	 * Assigns the value of the 'includeTypeAsSepLink' field.
-	 *
-	 * @param includeTypeAsSepLink  the field value to assign
-	 */
-	public void setIncludeTypeAsSepLink(boolean includeTypeAsSepLink) {
-		this.includeTypeAsSepLink = includeTypeAsSepLink;
-	}
+    /**
+     * Assigns the value of the 'includeTypeAsSepLink' field.
+     *
+     * @param includeTypeAsSepLink the field value to assign
+     */
+    public void setIncludeTypeAsSepLink(boolean includeTypeAsSepLink) {
+        this.includeTypeAsSepLink = includeTypeAsSepLink;
+    }
 
-	/**
-	 * Returns the value of the 'excludeTypeBounds' field.
-	 *
-	 * @return boolean
-	 */
-	public boolean isExcludeTypeBounds() {
-		return excludeTypeBounds;
-	}
+    /**
+     * Returns the value of the 'excludeTypeBounds' field.
+     *
+     * @return boolean
+     */
+    public boolean isExcludeTypeBounds() {
+        return excludeTypeBounds;
+    }
 
-	/**
-	 * Assigns the value of the 'excludeTypeBounds' field.
-	 *
-	 * @param excludeTypeBounds  the field value to assign
-	 */
-	public void setExcludeTypeBounds(boolean excludeTypeBounds) {
-		this.excludeTypeBounds = excludeTypeBounds;
-	}
+    /**
+     * Assigns the value of the 'excludeTypeBounds' field.
+     *
+     * @param excludeTypeBounds the field value to assign
+     */
+    public void setExcludeTypeBounds(boolean excludeTypeBounds) {
+        this.excludeTypeBounds = excludeTypeBounds;
+    }
 
-	/**
-	 * Returns the value of the 'excludeTypeParameterLinks' field.
-	 *
-	 * @return boolean
-	 */
-	public boolean isExcludeTypeParameterLinks() {
-		return excludeTypeParameterLinks;
-	}
+    /**
+     * Returns the value of the 'excludeTypeParameterLinks' field.
+     *
+     * @return boolean
+     */
+    public boolean isExcludeTypeParameterLinks() {
+        return excludeTypeParameterLinks;
+    }
 
-	/**
-	 * Assigns the value of the 'excludeTypeParameterLinks' field.
-	 *
-	 * @param excludeTypeParameterLinks  the field value to assign
-	 */
-	public void setExcludeTypeParameterLinks(boolean excludeTypeParameterLinks) {
-		this.excludeTypeParameterLinks = excludeTypeParameterLinks;
-	}
+    /**
+     * Assigns the value of the 'excludeTypeParameterLinks' field.
+     *
+     * @param excludeTypeParameterLinks the field value to assign
+     */
+    public void setExcludeTypeParameterLinks(boolean excludeTypeParameterLinks) {
+        this.excludeTypeParameterLinks = excludeTypeParameterLinks;
+    }
 
-	/**
-	 * Returns the value of the 'excludeTypeBoundsLinks' field.
-	 *
-	 * @return boolean
-	 */
-	public boolean isExcludeTypeBoundsLinks() {
-		return excludeTypeBoundsLinks;
-	}
+    /**
+     * Returns the value of the 'excludeTypeBoundsLinks' field.
+     *
+     * @return boolean
+     */
+    public boolean isExcludeTypeBoundsLinks() {
+        return excludeTypeBoundsLinks;
+    }
 
-	/**
-	 * Assigns the value of the 'excludeTypeBoundsLinks' field.
-	 *
-	 * @param excludeTypeBoundsLinks  the field value to assign
-	 */
-	public void setExcludeTypeBoundsLinks(boolean excludeTypeBoundsLinks) {
-		this.excludeTypeBoundsLinks = excludeTypeBoundsLinks;
-	}
+    /**
+     * Assigns the value of the 'excludeTypeBoundsLinks' field.
+     *
+     * @param excludeTypeBoundsLinks the field value to assign
+     */
+    public void setExcludeTypeBoundsLinks(boolean excludeTypeBoundsLinks) {
+        this.excludeTypeBoundsLinks = excludeTypeBoundsLinks;
+    }
 
-	/**
-	 * Returns the value of the 'linkToSelf' field.
-	 *
-	 * @return boolean
-	 */
-	public boolean isLinkToSelf() {
-		return linkToSelf;
-	}
+    /**
+     * Returns the value of the 'linkToSelf' field.
+     *
+     * @return boolean
+     */
+    public boolean isLinkToSelf() {
+        return linkToSelf;
+    }
 
-	/**
-	 * Assigns the value of the 'linkToSelf' field.
-	 *
-	 * @param linkToSelf  the field value to assign
-	 */
-	public void setLinkToSelf(boolean linkToSelf) {
-		this.linkToSelf = linkToSelf;
-	}
+    /**
+     * Assigns the value of the 'linkToSelf' field.
+     *
+     * @param linkToSelf the field value to assign
+     */
+    public void setLinkToSelf(boolean linkToSelf) {
+        this.linkToSelf = linkToSelf;
+    }
 
-	/**
-	 * Returns the value of the 'displayLength' field.
-	 *
-	 * @return int
-	 */
-	public int getDisplayLength() {
-		return displayLength;
-	}
+    /**
+     * Returns the value of the 'displayLength' field.
+     *
+     * @return int
+     */
+    public int getDisplayLength() {
+        return displayLength;
+    }
 
-	/**
-	 * Assigns the value of the 'displayLength' field.
-	 *
-	 * @param displayLength  the field value to assign
-	 */
-	public void setDisplayLength(int displayLength) {
-		this.displayLength = displayLength;
-	}
+    /**
+     * Assigns the value of the 'displayLength' field.
+     *
+     * @param displayLength the field value to assign
+     */
+    public void setDisplayLength(int displayLength) {
+        this.displayLength = displayLength;
+    }
 }

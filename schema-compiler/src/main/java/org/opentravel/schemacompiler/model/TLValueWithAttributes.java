@@ -13,11 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.model;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+package org.opentravel.schemacompiler.model;
 
 import org.opentravel.schemacompiler.event.ModelEvent;
 import org.opentravel.schemacompiler.event.ModelEventBuilder;
@@ -28,23 +25,27 @@ import org.opentravel.schemacompiler.model.TLExample.ExampleListManager;
 import org.opentravel.schemacompiler.model.TLIndicator.IndicatorListManager;
 import org.opentravel.schemacompiler.version.Versioned;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+
 /**
  * Simple schema type with attributes.
  * 
  * @author S. Livezey
  */
-public class TLValueWithAttributes extends TLLibraryMember implements Versioned, TLAttributeType,
-        TLAttributeOwner, TLIndicatorOwner, TLDocumentationOwner, TLEquivalentOwner, TLExampleOwner {
+public class TLValueWithAttributes extends TLLibraryMember implements Versioned, TLAttributeType, TLAttributeOwner,
+    TLIndicatorOwner, TLDocumentationOwner, TLEquivalentOwner, TLExampleOwner {
 
     private String name;
     private TLDocumentation documentation;
     private TLDocumentation valueDocumentation;
     private TLAttributeType parentType;
     private String parentTypeName;
-    private AttributeListManager attributeManager = new AttributeListManager(this);
-    private IndicatorListManager indicatorManager = new IndicatorListManager(this);
-    private EquivalentListManager equivalentManager = new EquivalentListManager(this);
-    private ExampleListManager exampleManager = new ExampleListManager(this);
+    private AttributeListManager attributeManager = new AttributeListManager( this );
+    private IndicatorListManager indicatorManager = new IndicatorListManager( this );
+    private EquivalentListManager equivalentManager = new EquivalentListManager( this );
+    private ExampleListManager exampleManager = new ExampleListManager( this );
 
     /**
      * @see org.opentravel.schemacompiler.validate.Validatable#getValidationIdentity()
@@ -55,12 +56,12 @@ public class TLValueWithAttributes extends TLLibraryMember implements Versioned,
         StringBuilder identity = new StringBuilder();
 
         if (owningLibrary != null) {
-            identity.append(owningLibrary.getValidationIdentity()).append(" : ");
+            identity.append( owningLibrary.getValidationIdentity() ).append( " : " );
         }
         if (name == null) {
-            identity.append("[Unnamed ValueWithAttributes Type]");
+            identity.append( "[Unnamed ValueWithAttributes Type]" );
         } else {
-            identity.append(name);
+            identity.append( name );
         }
         return identity.toString();
     }
@@ -116,11 +117,10 @@ public class TLValueWithAttributes extends TLLibraryMember implements Versioned,
     public boolean isLaterVersion(Versioned otherVersionedItem) {
         boolean result = false;
 
-        if ((otherVersionedItem != null) && otherVersionedItem.getClass().equals(this.getClass())
-                && (this.getOwningLibrary() != null)
-                && (otherVersionedItem.getOwningLibrary() != null) && (this.getLocalName() != null)
-                && this.getLocalName().equals(otherVersionedItem.getLocalName())) {
-            result = this.getOwningLibrary().isLaterVersion(otherVersionedItem.getOwningLibrary());
+        if ((otherVersionedItem != null) && otherVersionedItem.getClass().equals( this.getClass() )
+            && (this.getOwningLibrary() != null) && (otherVersionedItem.getOwningLibrary() != null)
+            && (this.getLocalName() != null) && this.getLocalName().equals( otherVersionedItem.getLocalName() )) {
+            result = this.getOwningLibrary().isLaterVersion( otherVersionedItem.getOwningLibrary() );
         }
         return result;
     }
@@ -137,15 +137,14 @@ public class TLValueWithAttributes extends TLLibraryMember implements Versioned,
     /**
      * Assigns the value of the 'name' field.
      * 
-     * @param name
-     *            the field value to assign
+     * @param name the field value to assign
      */
     public void setName(String name) {
-        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.NAME_MODIFIED, this)
-                .setOldValue(this.name).setNewValue(name).buildEvent();
+        ModelEvent<?> event = new ModelEventBuilder( ModelEventType.NAME_MODIFIED, this ).setOldValue( this.name )
+            .setNewValue( name ).buildEvent();
 
         this.name = name;
-        publishEvent(event);
+        publishEvent( event );
     }
 
     /**
@@ -176,24 +175,21 @@ public class TLValueWithAttributes extends TLLibraryMember implements Versioned,
     /**
      * Assigns the documentation for the value assignment of this Value-With-Attributes.
      * 
-     * @param valueDocumentation
-     *            the documentation instance to assign
+     * @param valueDocumentation the documentation instance to assign
      */
     public void setValueDocumentation(TLDocumentation valueDocumentation) {
         if (valueDocumentation != this.valueDocumentation) {
-            ModelEvent<?> event = new ModelEventBuilder(
-                    ModelEventType.VALUE_DOCUMENTATION_MODIFIED, this)
-                    .setOldValue(this.valueDocumentation).setNewValue(valueDocumentation)
-                    .buildEvent();
+            ModelEvent<?> event = new ModelEventBuilder( ModelEventType.VALUE_DOCUMENTATION_MODIFIED, this )
+                .setOldValue( this.valueDocumentation ).setNewValue( valueDocumentation ).buildEvent();
 
             if (valueDocumentation != null) {
-                valueDocumentation.setOwner(this);
+                valueDocumentation.setOwner( this );
             }
             if (this.valueDocumentation != null) {
-                this.valueDocumentation.setOwner(null);
+                this.valueDocumentation.setOwner( null );
             }
             this.valueDocumentation = valueDocumentation;
-            publishEvent(event);
+            publishEvent( event );
         }
     }
 
@@ -209,17 +205,17 @@ public class TLValueWithAttributes extends TLLibraryMember implements Versioned,
      */
     public void setDocumentation(TLDocumentation documentation) {
         if (documentation != this.documentation) {
-            ModelEvent<?> event = new ModelEventBuilder(ModelEventType.DOCUMENTATION_MODIFIED, this)
-                    .setOldValue(this.documentation).setNewValue(documentation).buildEvent();
+            ModelEvent<?> event = new ModelEventBuilder( ModelEventType.DOCUMENTATION_MODIFIED, this )
+                .setOldValue( this.documentation ).setNewValue( documentation ).buildEvent();
 
             if (documentation != null) {
-                documentation.setOwner(this);
+                documentation.setOwner( this );
             }
             if (this.documentation != null) {
-                this.documentation.setOwner(null);
+                this.documentation.setOwner( null );
             }
             this.documentation = documentation;
-            publishEvent(event);
+            publishEvent( event );
         }
     }
 
@@ -235,15 +231,14 @@ public class TLValueWithAttributes extends TLLibraryMember implements Versioned,
     /**
      * Assigns the value of the 'parentType' field.
      * 
-     * @param parentType
-     *            the field value to assign
+     * @param parentType the field value to assign
      */
     public void setParentType(TLAttributeType parentType) {
-        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.TYPE_ASSIGNMENT_MODIFIED, this)
-                .setOldValue(this.parentType).setNewValue(parentType).buildEvent();
+        ModelEvent<?> event = new ModelEventBuilder( ModelEventType.TYPE_ASSIGNMENT_MODIFIED, this )
+            .setOldValue( this.parentType ).setNewValue( parentType ).buildEvent();
 
         this.parentType = parentType;
-        publishEvent(event);
+        publishEvent( event );
     }
 
     /**
@@ -258,8 +253,7 @@ public class TLValueWithAttributes extends TLLibraryMember implements Versioned,
     /**
      * Assigns the value of the 'parentTypeName' field.
      * 
-     * @param parentTypeName
-     *            the field value to assign
+     * @param parentTypeName the field value to assign
      */
     public void setParentTypeName(String parentTypeName) {
         this.parentTypeName = parentTypeName;
@@ -276,14 +270,14 @@ public class TLValueWithAttributes extends TLLibraryMember implements Versioned,
      * @see org.opentravel.schemacompiler.model.TLAttributeOwner#getAttribute(java.lang.String)
      */
     public TLAttribute getAttribute(String attributeName) {
-        return attributeManager.getChild(attributeName);
+        return attributeManager.getChild( attributeName );
     }
 
     /**
      * @see org.opentravel.schemacompiler.model.TLAttributeOwner#addAttribute(org.opentravel.schemacompiler.model.TLAttribute)
      */
     public void addAttribute(TLAttribute attribute) {
-        attributeManager.addChild(attribute);
+        attributeManager.addChild( attribute );
     }
 
     /**
@@ -292,30 +286,14 @@ public class TLValueWithAttributes extends TLLibraryMember implements Versioned,
      */
     @Override
     public void addAttribute(int index, TLAttribute attribute) {
-        attributeManager.addChild(index, attribute);
+        attributeManager.addChild( index, attribute );
     }
 
     /**
      * @see org.opentravel.schemacompiler.model.TLAttributeOwner#removeAttribute(org.opentravel.schemacompiler.model.TLAttribute)
      */
     public void removeAttribute(TLAttribute attribute) {
-        attributeManager.removeChild(attribute);
-    }
-
-    /**
-     * @see org.opentravel.schemacompiler.model.TLAttributeOwner#moveUp(org.opentravel.schemacompiler.model.TLAttribute)
-     */
-    @Override
-    public void moveUp(TLAttribute attribute) {
-        attributeManager.moveUp(attribute);
-    }
-
-    /**
-     * @see org.opentravel.schemacompiler.model.TLAttributeOwner#moveDown(org.opentravel.schemacompiler.model.TLAttribute)
-     */
-    @Override
-    public void moveDown(TLAttribute attribute) {
-        attributeManager.moveDown(attribute);
+        attributeManager.removeChild( attribute );
     }
 
     /**
@@ -323,7 +301,7 @@ public class TLValueWithAttributes extends TLLibraryMember implements Versioned,
      */
     @Override
     public void sortAttributes(Comparator<TLAttribute> comparator) {
-        attributeManager.sortChildren(comparator);
+        attributeManager.sortChildren( comparator );
     }
 
     /**
@@ -339,7 +317,7 @@ public class TLValueWithAttributes extends TLLibraryMember implements Versioned,
      */
     @Override
     public TLIndicator getIndicator(String indicatorName) {
-        return indicatorManager.getChild(indicatorName);
+        return indicatorManager.getChild( indicatorName );
     }
 
     /**
@@ -347,7 +325,7 @@ public class TLValueWithAttributes extends TLLibraryMember implements Versioned,
      */
     @Override
     public void addIndicator(TLIndicator indicator) {
-        indicatorManager.addChild(indicator);
+        indicatorManager.addChild( indicator );
     }
 
     /**
@@ -356,7 +334,7 @@ public class TLValueWithAttributes extends TLLibraryMember implements Versioned,
      */
     @Override
     public void addIndicator(int index, TLIndicator indicator) {
-        indicatorManager.addChild(index, indicator);
+        indicatorManager.addChild( index, indicator );
     }
 
     /**
@@ -364,23 +342,7 @@ public class TLValueWithAttributes extends TLLibraryMember implements Versioned,
      */
     @Override
     public void removeIndicator(TLIndicator indicator) {
-        indicatorManager.removeChild(indicator);
-    }
-
-    /**
-     * @see org.opentravel.schemacompiler.model.TLIndicatorOwner#moveUp(org.opentravel.schemacompiler.model.TLIndicator)
-     */
-    @Override
-    public void moveUp(TLIndicator indicator) {
-        indicatorManager.moveUp(indicator);
-    }
-
-    /**
-     * @see org.opentravel.schemacompiler.model.TLIndicatorOwner#moveDown(org.opentravel.schemacompiler.model.TLIndicator)
-     */
-    @Override
-    public void moveDown(TLIndicator indicator) {
-        indicatorManager.moveDown(indicator);
+        indicatorManager.removeChild( indicator );
     }
 
     /**
@@ -388,35 +350,35 @@ public class TLValueWithAttributes extends TLLibraryMember implements Versioned,
      */
     @Override
     public void sortIndicators(Comparator<TLIndicator> comparator) {
-        indicatorManager.sortChildren(comparator);
+        indicatorManager.sortChildren( comparator );
     }
 
     /**
-	 * @see org.opentravel.schemacompiler.model.TLMemberFieldOwner#getMemberFields()
-	 */
-	@SuppressWarnings("unchecked")
-	@Override
-	public <O extends TLMemberFieldOwner> List<TLMemberField<O>> getMemberFields() {
-		List<TLMemberField<O>> memberFields = new ArrayList<>();
-		
-		getAttributes().forEach( f -> memberFields.add( (TLMemberField<O>) f ) );
-		getIndicators().forEach( f -> memberFields.add( (TLMemberField<O>) f ) );
-		return memberFields;
-	}
+     * @see org.opentravel.schemacompiler.model.TLMemberFieldOwner#getMemberFields()
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public <O extends TLMemberFieldOwner> List<TLMemberField<O>> getMemberFields() {
+        List<TLMemberField<O>> memberFields = new ArrayList<>();
 
-	/**
-	 * @see org.opentravel.schemacompiler.model.TLMemberFieldOwner#getMemberField(java.lang.String)
-	 */
-	@SuppressWarnings("unchecked")
-	@Override
-	public <O extends TLMemberFieldOwner> TLMemberField<O> getMemberField(String fieldName) {
-		TLMemberField<O> memberField = (TLMemberField<O>) getAttribute( fieldName );
-		
-		if (memberField == null) {
-			memberField = (TLMemberField<O>) getIndicator( fieldName );
-		}
-		return memberField;
-	}
+        getAttributes().forEach( f -> memberFields.add( (TLMemberField<O>) f ) );
+        getIndicators().forEach( f -> memberFields.add( (TLMemberField<O>) f ) );
+        return memberFields;
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.model.TLMemberFieldOwner#getMemberField(java.lang.String)
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public <O extends TLMemberFieldOwner> TLMemberField<O> getMemberField(String fieldName) {
+        TLMemberField<O> memberField = (TLMemberField<O>) getAttribute( fieldName );
+
+        if (memberField == null) {
+            memberField = (TLMemberField<O>) getIndicator( fieldName );
+        }
+        return memberField;
+    }
 
     /**
      * @see org.opentravel.schemacompiler.model.TLEquivalentOwner#getEquivalents()
@@ -431,7 +393,7 @@ public class TLValueWithAttributes extends TLLibraryMember implements Versioned,
      */
     @Override
     public TLEquivalent getEquivalent(String context) {
-        return equivalentManager.getChild(context);
+        return equivalentManager.getChild( context );
     }
 
     /**
@@ -439,7 +401,7 @@ public class TLValueWithAttributes extends TLLibraryMember implements Versioned,
      */
     @Override
     public void addEquivalent(TLEquivalent equivalent) {
-        equivalentManager.addChild(equivalent);
+        equivalentManager.addChild( equivalent );
     }
 
     /**
@@ -448,7 +410,7 @@ public class TLValueWithAttributes extends TLLibraryMember implements Versioned,
      */
     @Override
     public void addEquivalent(int index, TLEquivalent equivalent) {
-        equivalentManager.addChild(index, equivalent);
+        equivalentManager.addChild( index, equivalent );
     }
 
     /**
@@ -456,23 +418,7 @@ public class TLValueWithAttributes extends TLLibraryMember implements Versioned,
      */
     @Override
     public void removeEquivalent(TLEquivalent equivalent) {
-        equivalentManager.removeChild(equivalent);
-    }
-
-    /**
-     * @see org.opentravel.schemacompiler.model.TLEquivalentOwner#moveUp(org.opentravel.schemacompiler.model.TLEquivalent)
-     */
-    @Override
-    public void moveUp(TLEquivalent equivalent) {
-        equivalentManager.moveUp(equivalent);
-    }
-
-    /**
-     * @see org.opentravel.schemacompiler.model.TLEquivalentOwner#moveDown(org.opentravel.schemacompiler.model.TLEquivalent)
-     */
-    @Override
-    public void moveDown(TLEquivalent equivalent) {
-        equivalentManager.moveDown(equivalent);
+        equivalentManager.removeChild( equivalent );
     }
 
     /**
@@ -480,7 +426,7 @@ public class TLValueWithAttributes extends TLLibraryMember implements Versioned,
      */
     @Override
     public void sortEquivalents(Comparator<TLEquivalent> comparator) {
-        equivalentManager.sortChildren(comparator);
+        equivalentManager.sortChildren( comparator );
     }
 
     /**
@@ -494,14 +440,14 @@ public class TLValueWithAttributes extends TLLibraryMember implements Versioned,
      * @see org.opentravel.schemacompiler.model.TLExampleOwner#getExample(java.lang.String)
      */
     public TLExample getExample(String contextId) {
-        return exampleManager.getChild(contextId);
+        return exampleManager.getChild( contextId );
     }
 
     /**
      * @see org.opentravel.schemacompiler.model.TLExampleOwner#addExample(org.opentravel.schemacompiler.model.TLExample)
      */
     public void addExample(TLExample example) {
-        exampleManager.addChild(example);
+        exampleManager.addChild( example );
     }
 
     /**
@@ -509,35 +455,83 @@ public class TLValueWithAttributes extends TLLibraryMember implements Versioned,
      *      org.opentravel.schemacompiler.model.TLExample)
      */
     public void addExample(int index, TLExample example) {
-        exampleManager.addChild(index, example);
+        exampleManager.addChild( index, example );
     }
 
     /**
      * @see org.opentravel.schemacompiler.model.TLExampleOwner#removeExample(org.opentravel.schemacompiler.model.TLExample)
      */
     public void removeExample(TLExample example) {
-        exampleManager.removeChild(example);
-    }
-
-    /**
-     * @see org.opentravel.schemacompiler.model.TLExampleOwner#moveUp(org.opentravel.schemacompiler.model.TLExample)
-     */
-    public void moveUp(TLExample example) {
-        exampleManager.moveUp(example);
-    }
-
-    /**
-     * @see org.opentravel.schemacompiler.model.TLExampleOwner#moveDown(org.opentravel.schemacompiler.model.TLExample)
-     */
-    public void moveDown(TLExample example) {
-        exampleManager.moveDown(example);
+        exampleManager.removeChild( example );
     }
 
     /**
      * @see org.opentravel.schemacompiler.model.TLExampleOwner#sortExamples(java.util.Comparator)
      */
     public void sortExamples(Comparator<TLExample> comparator) {
-        exampleManager.sortChildren(comparator);
+        exampleManager.sortChildren( comparator );
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.model.TLAttributeOwner#moveUp(org.opentravel.schemacompiler.model.TLAttribute)
+     */
+    @Override
+    public void moveUp(TLAttribute attribute) {
+        attributeManager.moveUp( attribute );
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.model.TLIndicatorOwner#moveUp(org.opentravel.schemacompiler.model.TLIndicator)
+     */
+    @Override
+    public void moveUp(TLIndicator indicator) {
+        indicatorManager.moveUp( indicator );
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.model.TLEquivalentOwner#moveUp(org.opentravel.schemacompiler.model.TLEquivalent)
+     */
+    @Override
+    public void moveUp(TLEquivalent equivalent) {
+        equivalentManager.moveUp( equivalent );
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.model.TLExampleOwner#moveUp(org.opentravel.schemacompiler.model.TLExample)
+     */
+    public void moveUp(TLExample example) {
+        exampleManager.moveUp( example );
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.model.TLAttributeOwner#moveDown(org.opentravel.schemacompiler.model.TLAttribute)
+     */
+    @Override
+    public void moveDown(TLAttribute attribute) {
+        attributeManager.moveDown( attribute );
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.model.TLIndicatorOwner#moveDown(org.opentravel.schemacompiler.model.TLIndicator)
+     */
+    @Override
+    public void moveDown(TLIndicator indicator) {
+        indicatorManager.moveDown( indicator );
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.model.TLEquivalentOwner#moveDown(org.opentravel.schemacompiler.model.TLEquivalent)
+     */
+    @Override
+    public void moveDown(TLEquivalent equivalent) {
+        equivalentManager.moveDown( equivalent );
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.model.TLExampleOwner#moveDown(org.opentravel.schemacompiler.model.TLExample)
+     */
+    public void moveDown(TLExample example) {
+        exampleManager.moveDown( example );
     }
 
 }

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.validate.save;
 
 import org.opentravel.schemacompiler.model.TLSimpleFacet;
@@ -34,10 +35,10 @@ public class TLSimpleFacetSaveValidator extends TLSimpleFacetBaseValidator {
      */
     @Override
     protected ValidationFindings validateFields(TLSimpleFacet target) {
-        TLValidationBuilder builder = newValidationBuilder(target);
+        TLValidationBuilder builder = newValidationBuilder( target );
 
-        builder.setProperty("equivalents", target.getEquivalents())
-                .setFindingType(FindingType.WARNING).assertNotNull().assertContainsNoNullElements();
+        builder.setProperty( "equivalents", target.getEquivalents() ).setFindingType( FindingType.WARNING )
+            .assertNotNull().assertContainsNoNullElements();
 
         return builder.getFindings();
     }

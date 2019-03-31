@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.codegen.html.writers.info;
 
 import org.opentravel.schemacompiler.codegen.html.builders.FacetDocumentationBuilder;
@@ -24,22 +25,20 @@ import org.opentravel.schemacompiler.codegen.html.writers.SubWriterHolderWriter;
  */
 public class FacetIndicatorInfoWriter extends AbstractIndicatorInfoWriter<FacetDocumentationBuilder> {
 
-	/**
-	 * @param writer
-	 * @param owner
-	 */
-	public FacetIndicatorInfoWriter(SubWriterHolderWriter writer,
-			FacetDocumentationBuilder owner) {
-		super(writer, owner);
-	}
+    /**
+     * @param writer the writer for which to create an info-writer
+     * @param owner the owner of the new info-writer
+     */
+    public FacetIndicatorInfoWriter(SubWriterHolderWriter writer, FacetDocumentationBuilder owner) {
+        super( writer, owner );
+    }
 
-	/* (non-Javadoc)
-	 * @see org.opentravel.schemacompiler.codegen.documentation.html.writers.AbstractFieldInfoWriter#getParent(org.opentravel.schemacompiler.codegen.documentation.DocumentationBuilder)
-	 */
-	@Override
-	protected FacetDocumentationBuilder getParent(
-			FacetDocumentationBuilder classDoc) {
-		return (FacetDocumentationBuilder) classDoc.getSuperType();
-	}
+    /**
+     * @see org.opentravel.schemacompiler.codegen.html.writers.info.AbstractInheritedInfoWriter#getParent(org.opentravel.schemacompiler.codegen.html.builders.AbstractDocumentationBuilder)
+     */
+    @Override
+    protected FacetDocumentationBuilder getParent(FacetDocumentationBuilder classDoc) {
+        return (FacetDocumentationBuilder) classDoc.getSuperType();
+    }
 
 }

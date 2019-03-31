@@ -13,10 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.model;
 
-import java.util.Comparator;
-import java.util.List;
+package org.opentravel.schemacompiler.model;
 
 import org.opentravel.schemacompiler.event.ModelEvent;
 import org.opentravel.schemacompiler.event.ModelEventBuilder;
@@ -24,13 +22,16 @@ import org.opentravel.schemacompiler.event.ModelEventType;
 import org.opentravel.schemacompiler.model.TLEquivalent.EquivalentListManager;
 import org.opentravel.schemacompiler.model.TLExample.ExampleListManager;
 
+import java.util.Comparator;
+import java.util.List;
+
 /**
  * Property definition for complex library types.
  * 
  * @author S. Livezey
  */
-public class TLProperty extends TLModelElement implements TLMemberField<TLPropertyOwner>,
-		TLDocumentationOwner, TLEquivalentOwner, TLExampleOwner {
+public class TLProperty extends TLModelElement
+    implements TLMemberField<TLPropertyOwner>, TLDocumentationOwner, TLEquivalentOwner, TLExampleOwner {
 
     private TLPropertyOwner propertyOwner;
     private String name;
@@ -40,8 +41,8 @@ public class TLProperty extends TLModelElement implements TLMemberField<TLProper
     private int repeat;
     private boolean mandatory;
     private TLDocumentation documentation;
-    private EquivalentListManager equivalentManager = new EquivalentListManager(this);
-    private ExampleListManager exampleManager = new ExampleListManager(this);
+    private EquivalentListManager equivalentManager = new EquivalentListManager( this );
+    private ExampleListManager exampleManager = new ExampleListManager( this );
 
     /**
      * @see org.opentravel.schemacompiler.validate.Validatable#getValidationIdentity()
@@ -51,12 +52,12 @@ public class TLProperty extends TLModelElement implements TLMemberField<TLProper
         StringBuilder identity = new StringBuilder();
 
         if (propertyOwner != null) {
-            identity.append(propertyOwner.getValidationIdentity()).append("/");
+            identity.append( propertyOwner.getValidationIdentity() ).append( "/" );
         }
         if (name == null) {
-            identity.append("[Unnamed Element]");
+            identity.append( "[Unnamed Element]" );
         } else {
-            identity.append(name);
+            identity.append( name );
         }
         return identity.toString();
     }
@@ -89,8 +90,7 @@ public class TLProperty extends TLModelElement implements TLMemberField<TLProper
     /**
      * Assigns the value of the 'propertyOwner' field.
      * 
-     * @param propertyOwner
-     *            the field value to assign
+     * @param propertyOwner the field value to assign
      */
     public void setOwner(TLPropertyOwner propertyOwner) {
         this.propertyOwner = propertyOwner;
@@ -100,7 +100,7 @@ public class TLProperty extends TLModelElement implements TLMemberField<TLProper
      * Returns the value of the 'propertyOwner' field.
      * 
      * @return TLPropertyOwner
-     * @deprecated  use {@link #getOwner()} instead
+     * @deprecated use {@link #getOwner()} instead
      */
     @Deprecated
     public TLPropertyOwner getPropertyOwner() {
@@ -110,35 +110,12 @@ public class TLProperty extends TLModelElement implements TLMemberField<TLProper
     /**
      * Assigns the value of the 'propertyOwner' field.
      * 
-     * @param propertyOwner
-     *            the field value to assign
-     * @deprecated  use {@link #setOwner(TLPropertyOwner)} instead
+     * @param propertyOwner the field value to assign
+     * @deprecated use {@link #setOwner(TLPropertyOwner)} instead
      */
     @Deprecated
     public void setPropertyOwner(TLPropertyOwner propertyOwner) {
         setOwner( propertyOwner );
-    }
-
-    /**
-     * Moves this element up by one position in the list of elements maintained by its owner. If the
-     * owner is null, or this element is already at the front of the list, this method has no
-     * effect.
-     */
-    public void moveUp() {
-        if (propertyOwner != null) {
-            propertyOwner.moveUp(this);
-        }
-    }
-
-    /**
-     * Moves this element down by one position in the list of elements maintained by its owner. If
-     * the owner is null, or this element is already at the end of the list, this method has no
-     * effect.
-     */
-    public void moveDown() {
-        if (propertyOwner != null) {
-            propertyOwner.moveDown(this);
-        }
     }
 
     /**
@@ -153,15 +130,14 @@ public class TLProperty extends TLModelElement implements TLMemberField<TLProper
     /**
      * Assigns the value of the 'name' field.
      * 
-     * @param name
-     *            the field value to assign
+     * @param name the field value to assign
      */
     public void setName(String name) {
-        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.NAME_MODIFIED, this)
-                .setOldValue(this.name).setNewValue(name).buildEvent();
+        ModelEvent<?> event = new ModelEventBuilder( ModelEventType.NAME_MODIFIED, this ).setOldValue( this.name )
+            .setNewValue( name ).buildEvent();
 
         this.name = name;
-        publishEvent(event);
+        publishEvent( event );
     }
 
     /**
@@ -176,15 +152,14 @@ public class TLProperty extends TLModelElement implements TLMemberField<TLProper
     /**
      * Assigns the value of the 'type' field.
      * 
-     * @param type
-     *            the field value to assign
+     * @param type the field value to assign
      */
     public void setType(TLPropertyType type) {
-        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.TYPE_ASSIGNMENT_MODIFIED, this)
-                .setOldValue(this.type).setNewValue(type).buildEvent();
+        ModelEvent<?> event = new ModelEventBuilder( ModelEventType.TYPE_ASSIGNMENT_MODIFIED, this )
+            .setOldValue( this.type ).setNewValue( type ).buildEvent();
 
         this.type = type;
-        publishEvent(event);
+        publishEvent( event );
     }
 
     /**
@@ -199,8 +174,7 @@ public class TLProperty extends TLModelElement implements TLMemberField<TLProper
     /**
      * Assigns the value of the 'typeName' field.
      * 
-     * @param typeName
-     *            the field value to assign
+     * @param typeName the field value to assign
      */
     public void setTypeName(String typeName) {
         this.typeName = typeName;
@@ -218,15 +192,14 @@ public class TLProperty extends TLModelElement implements TLMemberField<TLProper
     /**
      * Assigns the value of the 'isReference' field.
      * 
-     * @param isReference
-     *            the field value to assign
+     * @param isReference the field value to assign
      */
     public void setReference(boolean isReference) {
-        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.REFERENCE_FLAG_MODIFIED, this)
-                .setOldValue(this.isReference).setNewValue(isReference).buildEvent();
+        ModelEvent<?> event = new ModelEventBuilder( ModelEventType.REFERENCE_FLAG_MODIFIED, this )
+            .setOldValue( this.isReference ).setNewValue( isReference ).buildEvent();
 
         this.isReference = isReference;
-        publishEvent(event);
+        publishEvent( event );
     }
 
     /**
@@ -241,15 +214,14 @@ public class TLProperty extends TLModelElement implements TLMemberField<TLProper
     /**
      * Assigns the value of the 'repeat' field.
      * 
-     * @param repeat
-     *            the field value to assign
+     * @param repeat the field value to assign
      */
     public void setRepeat(int repeat) {
-        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.REPEAT_MODIFIED, this)
-                .setOldValue(this.repeat).setNewValue(repeat).buildEvent();
+        ModelEvent<?> event = new ModelEventBuilder( ModelEventType.REPEAT_MODIFIED, this ).setOldValue( this.repeat )
+            .setNewValue( repeat ).buildEvent();
 
         this.repeat = repeat;
-        publishEvent(event);
+        publishEvent( event );
     }
 
     /**
@@ -264,15 +236,14 @@ public class TLProperty extends TLModelElement implements TLMemberField<TLProper
     /**
      * Assigns the value of the 'mandatory' field.
      * 
-     * @param mandatory
-     *            the field value to assign
+     * @param mandatory the field value to assign
      */
     public void setMandatory(boolean mandatory) {
-        ModelEvent<?> event = new ModelEventBuilder(ModelEventType.MANDATORY_FLAG_MODIFIED, this)
-                .setOldValue(this.mandatory).setNewValue(mandatory).buildEvent();
+        ModelEvent<?> event = new ModelEventBuilder( ModelEventType.MANDATORY_FLAG_MODIFIED, this )
+            .setOldValue( this.mandatory ).setNewValue( mandatory ).buildEvent();
 
         this.mandatory = mandatory;
-        publishEvent(event);
+        publishEvent( event );
     }
 
     /**
@@ -287,17 +258,17 @@ public class TLProperty extends TLModelElement implements TLMemberField<TLProper
      */
     public void setDocumentation(TLDocumentation documentation) {
         if (documentation != this.documentation) {
-            ModelEvent<?> event = new ModelEventBuilder(ModelEventType.DOCUMENTATION_MODIFIED, this)
-                    .setOldValue(this.documentation).setNewValue(documentation).buildEvent();
+            ModelEvent<?> event = new ModelEventBuilder( ModelEventType.DOCUMENTATION_MODIFIED, this )
+                .setOldValue( this.documentation ).setNewValue( documentation ).buildEvent();
 
             if (documentation != null) {
-                documentation.setOwner(this);
+                documentation.setOwner( this );
             }
             if (this.documentation != null) {
-                this.documentation.setOwner(null);
+                this.documentation.setOwner( null );
             }
             this.documentation = documentation;
-            publishEvent(event);
+            publishEvent( event );
         }
     }
 
@@ -314,7 +285,7 @@ public class TLProperty extends TLModelElement implements TLMemberField<TLProper
      */
     @Override
     public TLEquivalent getEquivalent(String context) {
-        return equivalentManager.getChild(context);
+        return equivalentManager.getChild( context );
     }
 
     /**
@@ -322,7 +293,7 @@ public class TLProperty extends TLModelElement implements TLMemberField<TLProper
      */
     @Override
     public void addEquivalent(TLEquivalent equivalent) {
-        equivalentManager.addChild(equivalent);
+        equivalentManager.addChild( equivalent );
     }
 
     /**
@@ -331,7 +302,7 @@ public class TLProperty extends TLModelElement implements TLMemberField<TLProper
      */
     @Override
     public void addEquivalent(int index, TLEquivalent equivalent) {
-        equivalentManager.addChild(index, equivalent);
+        equivalentManager.addChild( index, equivalent );
     }
 
     /**
@@ -339,23 +310,7 @@ public class TLProperty extends TLModelElement implements TLMemberField<TLProper
      */
     @Override
     public void removeEquivalent(TLEquivalent equivalent) {
-        equivalentManager.removeChild(equivalent);
-    }
-
-    /**
-     * @see org.opentravel.schemacompiler.model.TLEquivalentOwner#moveUp(org.opentravel.schemacompiler.model.TLEquivalent)
-     */
-    @Override
-    public void moveUp(TLEquivalent equivalent) {
-        equivalentManager.moveUp(equivalent);
-    }
-
-    /**
-     * @see org.opentravel.schemacompiler.model.TLEquivalentOwner#moveDown(org.opentravel.schemacompiler.model.TLEquivalent)
-     */
-    @Override
-    public void moveDown(TLEquivalent equivalent) {
-        equivalentManager.moveDown(equivalent);
+        equivalentManager.removeChild( equivalent );
     }
 
     /**
@@ -363,7 +318,7 @@ public class TLProperty extends TLModelElement implements TLMemberField<TLProper
      */
     @Override
     public void sortEquivalents(Comparator<TLEquivalent> comparator) {
-        equivalentManager.sortChildren(comparator);
+        equivalentManager.sortChildren( comparator );
     }
 
     /**
@@ -377,14 +332,14 @@ public class TLProperty extends TLModelElement implements TLMemberField<TLProper
      * @see org.opentravel.schemacompiler.model.TLExampleOwner#getExample(java.lang.String)
      */
     public TLExample getExample(String contextId) {
-        return exampleManager.getChild(contextId);
+        return exampleManager.getChild( contextId );
     }
 
     /**
      * @see org.opentravel.schemacompiler.model.TLExampleOwner#addExample(org.opentravel.schemacompiler.model.TLExample)
      */
     public void addExample(TLExample example) {
-        exampleManager.addChild(example);
+        exampleManager.addChild( example );
     }
 
     /**
@@ -392,35 +347,71 @@ public class TLProperty extends TLModelElement implements TLMemberField<TLProper
      *      org.opentravel.schemacompiler.model.TLExample)
      */
     public void addExample(int index, TLExample example) {
-        exampleManager.addChild(index, example);
+        exampleManager.addChild( index, example );
     }
 
     /**
      * @see org.opentravel.schemacompiler.model.TLExampleOwner#removeExample(org.opentravel.schemacompiler.model.TLExample)
      */
     public void removeExample(TLExample example) {
-        exampleManager.removeChild(example);
-    }
-
-    /**
-     * @see org.opentravel.schemacompiler.model.TLExampleOwner#moveUp(org.opentravel.schemacompiler.model.TLExample)
-     */
-    public void moveUp(TLExample example) {
-        exampleManager.moveUp(example);
-    }
-
-    /**
-     * @see org.opentravel.schemacompiler.model.TLExampleOwner#moveDown(org.opentravel.schemacompiler.model.TLExample)
-     */
-    public void moveDown(TLExample example) {
-        exampleManager.moveDown(example);
+        exampleManager.removeChild( example );
     }
 
     /**
      * @see org.opentravel.schemacompiler.model.TLExampleOwner#sortExamples(java.util.Comparator)
      */
     public void sortExamples(Comparator<TLExample> comparator) {
-        exampleManager.sortChildren(comparator);
+        exampleManager.sortChildren( comparator );
+    }
+
+    /**
+     * Moves this element up by one position in the list of elements maintained by its owner. If the owner is null, or
+     * this element is already at the front of the list, this method has no effect.
+     */
+    public void moveUp() {
+        if (propertyOwner != null) {
+            propertyOwner.moveUp( this );
+        }
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.model.TLEquivalentOwner#moveUp(org.opentravel.schemacompiler.model.TLEquivalent)
+     */
+    @Override
+    public void moveUp(TLEquivalent equivalent) {
+        equivalentManager.moveUp( equivalent );
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.model.TLExampleOwner#moveUp(org.opentravel.schemacompiler.model.TLExample)
+     */
+    public void moveUp(TLExample example) {
+        exampleManager.moveUp( example );
+    }
+
+    /**
+     * Moves this element down by one position in the list of elements maintained by its owner. If the owner is null, or
+     * this element is already at the end of the list, this method has no effect.
+     */
+    public void moveDown() {
+        if (propertyOwner != null) {
+            propertyOwner.moveDown( this );
+        }
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.model.TLEquivalentOwner#moveDown(org.opentravel.schemacompiler.model.TLEquivalent)
+     */
+    @Override
+    public void moveDown(TLEquivalent equivalent) {
+        equivalentManager.moveDown( equivalent );
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.model.TLExampleOwner#moveDown(org.opentravel.schemacompiler.model.TLExample)
+     */
+    public void moveDown(TLExample example) {
+        exampleManager.moveDown( example );
     }
 
     /**
@@ -428,17 +419,15 @@ public class TLProperty extends TLModelElement implements TLMemberField<TLProper
      * 
      * @author S. Livezey
      */
-    protected static class PropertyListManager extends
-            ChildEntityListManager<TLProperty, TLPropertyOwner> {
+    protected static class PropertyListManager extends ChildEntityListManager<TLProperty,TLPropertyOwner> {
 
         /**
          * Constructor that specifies the owner of the unerlying list.
          * 
-         * @param owner
-         *            the owner of the underlying list of children
+         * @param owner the owner of the underlying list of children
          */
         public PropertyListManager(TLPropertyOwner owner) {
-            super(owner, ModelEventType.PROPERTY_ADDED, ModelEventType.PROPERTY_REMOVED);
+            super( owner, ModelEventType.PROPERTY_ADDED, ModelEventType.PROPERTY_REMOVED );
         }
 
         /**
@@ -455,7 +444,7 @@ public class TLProperty extends TLModelElement implements TLMemberField<TLProper
          */
         @Override
         protected void assignOwner(TLProperty child, TLPropertyOwner owner) {
-            child.setOwner(owner);
+            child.setOwner( owner );
         }
 
         /**
@@ -465,7 +454,7 @@ public class TLProperty extends TLModelElement implements TLMemberField<TLProper
         @Override
         protected void publishEvent(TLPropertyOwner owner, ModelEvent<?> event) {
             if ((owner != null) && (owner.getOwningModel() != null)) {
-                owner.getOwningModel().publishEvent(event);
+                owner.getOwningModel().publishEvent( event );
             }
         }
 

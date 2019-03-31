@@ -13,10 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opentravel.schemacompiler.transform.jaxb15_2tl;
 
-import java.util.ArrayList;
-import java.util.List;
+package org.opentravel.schemacompiler.transform.jaxb15_2tl;
 
 import org.opentravel.ns.ota2.librarymodel_v01_05.AdditionalDoc;
 import org.opentravel.ns.ota2.librarymodel_v01_05.Description;
@@ -27,14 +25,16 @@ import org.opentravel.schemacompiler.model.TLDocumentationItem;
 import org.opentravel.schemacompiler.transform.symbols.DefaultTransformerContext;
 import org.opentravel.schemacompiler.transform.util.BaseTransformer;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- * Handles the transformation of objects from the <code>Documentation</code> type to the
- * <code>TLDocumentation</code> type.
+ * Handles the transformation of objects from the <code>Documentation</code> type to the <code>TLDocumentation</code>
+ * type.
  * 
  * @author S. Livezey
  */
-public class DocumentationTransformer extends
-        BaseTransformer<Documentation, TLDocumentation, DefaultTransformerContext> {
+public class DocumentationTransformer extends BaseTransformer<Documentation,TLDocumentation,DefaultTransformerContext> {
 
     /**
      * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
@@ -44,70 +44,68 @@ public class DocumentationTransformer extends
         TLDocumentation target = new TLDocumentation();
 
         if (source.getDescription() != null) {
-            target.setDescription(trimString(source.getDescription().getValue()));
+            target.setDescription( trimString( source.getDescription().getValue() ) );
         }
-        for (String str : trimDescriptionStrings(source.getDeprecated())) {
-            target.addDeprecation(newDocumentationItem(str));
+        for (String str : trimDescriptionStrings( source.getDeprecated() )) {
+            target.addDeprecation( newDocumentationItem( str ) );
         }
-        for (String str : trimDescriptionStrings(source.getImplementer())) {
-            target.addImplementer(newDocumentationItem(str));
+        for (String str : trimDescriptionStrings( source.getImplementer() )) {
+            target.addImplementer( newDocumentationItem( str ) );
         }
-        for (String str : trimDescriptionStrings(source.getDeveloper())) { // deprecated, but still
-                                                                           // supported during loads
-            target.addImplementer(newDocumentationItem(str));
+        for (String str : trimDescriptionStrings( source.getDeveloper() )) {
+            // Deprecated, but still supported during loads
+            target.addImplementer( newDocumentationItem( str ) );
         }
         for (String str : source.getReference()) {
-            if ((str = trimString(str)) != null) {
-                target.addReference(newDocumentationItem(str));
+            if ((str = trimString( str )) != null) {
+                target.addReference( newDocumentationItem( str ) );
             }
         }
         for (String str : source.getMoreInfo()) {
-            if ((str = trimString(str)) != null) {
-                target.addMoreInfo(newDocumentationItem(str));
+            if ((str = trimString( str )) != null) {
+                target.addMoreInfo( newDocumentationItem( str ) );
             }
         }
         for (AdditionalDoc otherDoc : source.getOtherDoc()) {
             if (otherDoc != null) {
                 TLAdditionalDocumentationItem targetOtherDoc = new TLAdditionalDocumentationItem();
 
-                targetOtherDoc.setContext(otherDoc.getContext());
-                targetOtherDoc.setText(otherDoc.getValue());
-                target.addOtherDoc(targetOtherDoc);
+                targetOtherDoc.setContext( otherDoc.getContext() );
+                targetOtherDoc.setText( otherDoc.getValue() );
+                target.addOtherDoc( targetOtherDoc );
             }
         }
         return target;
     }
 
     /**
-     * Compiles a list of all description strings from the collection and returns the result after
-     * normal 'trimStrings()' processing.
+     * Compiles a list of all description strings from the collection and returns the result after normal
+     * 'trimStrings()' processing.
      * 
-     * @param descriptions
-     *            the list of descriptions to process
-     * @return List<String>
+     * @param descriptions the list of descriptions to process
+     * @return List&lt;String&gt;
      */
     private List<String> trimDescriptionStrings(List<Description> descriptions) {
         List<String> result = new ArrayList<>();
 
         if (descriptions != null) {
             for (Description desc : descriptions) {
-                result.add(desc.getValue());
+                result.add( desc.getValue() );
             }
         }
-        return trimStrings(result);
+        return trimStrings( result );
     }
 
     /**
      * Returns a new <code>TLDocumentationItem</code> that wraps the documentation text provided.
      * 
-     * @param text
-     *            the text of the documentation item
+     * @param text the text of the documentation item
      * @return TLDocumentationItem
      */
     private TLDocumentationItem newDocumentationItem(String text) {
         TLDocumentationItem docItem = new TLDocumentationItem();
 
-        docItem.setText(text);
+        docItem.setText( text );
         return docItem;
     }
 

@@ -24,34 +24,34 @@ import org.opentravel.schemacompiler.model.TLResource;
  * Container for all change items identified during the comparison of two action responses.
  */
 public class ResourceActionResponseChangeSet extends ChangeSet<TLActionResponse,ResourceChangeItem> {
-	
-	/**
-	 * Constructor that assigns the old and new version of an action response that was modified.
-	 * 
-	 * @param oldActionResponse  the old version of the action response
-	 * @param newActionResponse  the new version of the action response
-	 */
-	public ResourceActionResponseChangeSet(TLActionResponse oldActionResponse, TLActionResponse newActionResponse) {
-		super( oldActionResponse, newActionResponse );
-	}
-	
-	/**
-	 * @see org.opentravel.schemacompiler.diff.ChangeSet#getBookmarkId()
-	 */
-	@Override
-	public String getBookmarkId() {
-		TLActionResponse response = (getNewVersion() != null) ? getNewVersion() : getOldVersion();
-		TLAction action = (response.getOwner() == null) ? null : response.getOwner();
-		TLResource owner = (action == null) ? null : action.getOwner();
-		String actionId = (action == null) ? null : action.getActionId();
-		StringBuilder responseId = new StringBuilder();
-		
-		for (Integer statusCode : response.getStatusCodes()) {
-			responseId.append( statusCode );
-		}
-		
-		return getBookmarkId( owner ) + "$action$" + ((actionId == null) ? "UNKNOWN_ACTION" : actionId)
-				+ "$resp$" + responseId.toString();
-	}
-	
+
+    /**
+     * Constructor that assigns the old and new version of an action response that was modified.
+     * 
+     * @param oldActionResponse the old version of the action response
+     * @param newActionResponse the new version of the action response
+     */
+    public ResourceActionResponseChangeSet(TLActionResponse oldActionResponse, TLActionResponse newActionResponse) {
+        super( oldActionResponse, newActionResponse );
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.diff.ChangeSet#getBookmarkId()
+     */
+    @Override
+    public String getBookmarkId() {
+        TLActionResponse response = (getNewVersion() != null) ? getNewVersion() : getOldVersion();
+        TLAction action = (response.getOwner() == null) ? null : response.getOwner();
+        TLResource owner = (action == null) ? null : action.getOwner();
+        String actionId = (action == null) ? null : action.getActionId();
+        StringBuilder responseId = new StringBuilder();
+
+        for (Integer statusCode : response.getStatusCodes()) {
+            responseId.append( statusCode );
+        }
+
+        return getBookmarkId( owner ) + "$action$" + ((actionId == null) ? "UNKNOWN_ACTION" : actionId) + "$resp$"
+            + responseId.toString();
+    }
+
 }

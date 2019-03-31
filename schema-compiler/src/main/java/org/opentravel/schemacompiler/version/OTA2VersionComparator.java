@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.version;
 
 import java.util.Comparator;
@@ -33,14 +34,13 @@ public class OTA2VersionComparator implements Comparator<Versioned> {
      * Constructor that creates a comparator to be used for ascending sorts.
      */
     public OTA2VersionComparator() {
-        this(true);
+        this( true );
     }
 
     /**
      * Constructor that creates a comparator to be used for either ascending or descending sorts.
      * 
-     * @param sortAscending
-     *            indicates the sort direction for the comparator
+     * @param sortAscending indicates the sort direction for the comparator
      */
     public OTA2VersionComparator(boolean sortAscending) {
         this.sortAscending = sortAscending;
@@ -50,40 +50,39 @@ public class OTA2VersionComparator implements Comparator<Versioned> {
      * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
      */
     @Override
-	public int compare(Versioned obj1, Versioned obj2) {
-		String version1 = (obj1 == null) ? null : obj1.getVersion();
-		String version2 = (obj2 == null) ? null : obj2.getVersion();
-		int result;
-		
-		if ((version1 == null) || (version2 == null)) {
-			if (version1 == null) {
-				result = (version2 == null) ? 0 : -1;
-			} else {
-				result = 1;
-			}
-			
-		} else {
-			VersionIdentifier versionId1 = getVersionIdentifier(version1);
-			VersionIdentifier versionId2 = getVersionIdentifier(version2);
-			
-			result = versionId1.compareTo(versionId2);
-		}
-		return (sortAscending) ? result : -result;
-	}
-	
+    public int compare(Versioned obj1, Versioned obj2) {
+        String version1 = (obj1 == null) ? null : obj1.getVersion();
+        String version2 = (obj2 == null) ? null : obj2.getVersion();
+        int result;
+
+        if ((version1 == null) || (version2 == null)) {
+            if (version1 == null) {
+                result = (version2 == null) ? 0 : -1;
+            } else {
+                result = 1;
+            }
+
+        } else {
+            VersionIdentifier versionId1 = getVersionIdentifier( version1 );
+            VersionIdentifier versionId2 = getVersionIdentifier( version2 );
+
+            result = versionId1.compareTo( versionId2 );
+        }
+        return (sortAscending) ? result : -result;
+    }
+
     /**
-     * Returns a <code>VersionIdentifier</code> instance that can be used to perform comparisons of
-     * the given version ID.
+     * Returns a <code>VersionIdentifier</code> instance that can be used to perform comparisons of the given version
+     * ID.
      * 
-     * @param versionStr
-     *            the version identifier string
+     * @param versionStr the version identifier string
      * @return VersionIdentifier
      */
-	private VersionIdentifier getVersionIdentifier(String versionStr) {
-		identifierCache.computeIfAbsent( versionStr, v -> identifierCache.put( v, new VersionIdentifier( v ) ) );
-		return identifierCache.get(versionStr);
-	}
-	
+    private VersionIdentifier getVersionIdentifier(String versionStr) {
+        identifierCache.computeIfAbsent( versionStr, v -> identifierCache.put( v, new VersionIdentifier( v ) ) );
+        return identifierCache.get( versionStr );
+    }
+
     /**
      * Encapsulates a single version identifier to use for comparison purposes.
      */
@@ -92,8 +91,8 @@ public class OTA2VersionComparator implements Comparator<Versioned> {
         private int[] versionParts;
 
         public VersionIdentifier(String versionIdentifier) {
-            this.versionParts = (versionIdentifier == null) ? new int[] { 0, 0, 0 }
-                    : OTA2VersionScheme.splitVersionIdentifier(versionIdentifier);
+            this.versionParts = (versionIdentifier == null) ? new int[] {0, 0, 0}
+                : OTA2VersionScheme.splitVersionIdentifier( versionIdentifier );
         }
 
         /**
@@ -117,22 +116,21 @@ public class OTA2VersionComparator implements Comparator<Versioned> {
             return result;
         }
 
-		/**
-		 * @see java.lang.Object#hashCode()
-		 */
-		@Override
-		public int hashCode() {
-			return ((versionParts == null) || (versionParts.length == 0)) ? 0 : versionParts[0];
-		}
+        /**
+         * @see java.lang.Object#hashCode()
+         */
+        @Override
+        public int hashCode() {
+            return ((versionParts == null) || (versionParts.length == 0)) ? 0 : versionParts[0];
+        }
 
-		/**
-		 * @see java.lang.Object#equals(java.lang.Object)
-		 */
-		@Override
-		public boolean equals(Object obj) {
-			return (obj instanceof VersionIdentifier)
-					&& (compareTo( (VersionIdentifier) obj ) == 0);
-		}
+        /**
+         * @see java.lang.Object#equals(java.lang.Object)
+         */
+        @Override
+        public boolean equals(Object obj) {
+            return (obj instanceof VersionIdentifier) && (compareTo( (VersionIdentifier) obj ) == 0);
+        }
 
     }
 

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opentravel.schemacompiler.codegen.json;
 
 import org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts;
@@ -23,34 +24,35 @@ import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLFacetType;
 
 /**
- * Performs the translation from <code>TLBusinessObject</code> objects to the JSON schema elements
- * used to produce the output.
+ * Performs the translation from <code>TLBusinessObject</code> objects to the JSON schema elements used to produce the
+ * output.
  */
-public class TLBusinessObjectJsonCodegenTransformer extends AbstractJsonSchemaTransformer<TLBusinessObject, CodegenArtifacts> {
-	
-	/**
-	 * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
-	 */
-	@Override
-	public CodegenArtifacts transform(TLBusinessObject source) {
-		FacetJsonSchemaDelegateFactory delegateFactory = new FacetJsonSchemaDelegateFactory( context );
+public class TLBusinessObjectJsonCodegenTransformer
+    extends AbstractJsonSchemaTransformer<TLBusinessObject,CodegenArtifacts> {
+
+    /**
+     * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
+     */
+    @Override
+    public CodegenArtifacts transform(TLBusinessObject source) {
+        FacetJsonSchemaDelegateFactory delegateFactory = new FacetJsonSchemaDelegateFactory( context );
         CorrelatedCodegenArtifacts artifacts = new CorrelatedCodegenArtifacts();
-        
+
         generateFacetArtifacts( delegateFactory.getDelegate( source.getIdFacet() ), artifacts, false );
         generateFacetArtifacts( delegateFactory.getDelegate( source.getSummaryFacet() ), artifacts, false );
         generateFacetArtifacts( delegateFactory.getDelegate( source.getDetailFacet() ), artifacts, false );
-        
-        generateContextualFacetArtifacts(source.getCustomFacets(), delegateFactory, artifacts);
-        generateContextualFacetArtifacts(FacetCodegenUtils.findGhostFacets(source, TLFacetType.CUSTOM),
-        		delegateFactory, artifacts);
-        generateContextualFacetArtifacts(source.getQueryFacets(), delegateFactory, artifacts);
-        generateContextualFacetArtifacts(FacetCodegenUtils.findGhostFacets(source, TLFacetType.QUERY),
-        		delegateFactory, artifacts);
-        generateContextualFacetArtifacts(source.getUpdateFacets(), delegateFactory, artifacts);
-        generateContextualFacetArtifacts(FacetCodegenUtils.findGhostFacets(source, TLFacetType.UPDATE),
-        		delegateFactory, artifacts);
-        
+
+        generateContextualFacetArtifacts( source.getCustomFacets(), delegateFactory, artifacts );
+        generateContextualFacetArtifacts( FacetCodegenUtils.findGhostFacets( source, TLFacetType.CUSTOM ),
+            delegateFactory, artifacts );
+        generateContextualFacetArtifacts( source.getQueryFacets(), delegateFactory, artifacts );
+        generateContextualFacetArtifacts( FacetCodegenUtils.findGhostFacets( source, TLFacetType.QUERY ),
+            delegateFactory, artifacts );
+        generateContextualFacetArtifacts( source.getUpdateFacets(), delegateFactory, artifacts );
+        generateContextualFacetArtifacts( FacetCodegenUtils.findGhostFacets( source, TLFacetType.UPDATE ),
+            delegateFactory, artifacts );
+
         return artifacts.getConsolidatedArtifacts();
-	}
-	
+    }
+
 }
