@@ -625,7 +625,6 @@ public class SubscriptionManager {
 			}
 			
 		} catch (Exception e) {
-		    e.printStackTrace( System.out );
 			log.error("Error processing notification job.", e);
 		}
 	}

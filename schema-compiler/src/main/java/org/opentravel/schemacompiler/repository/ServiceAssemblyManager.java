@@ -238,7 +238,7 @@ public class ServiceAssemblyManager {
                 }
 
             } catch (RepositoryException e) {
-                log.warn( "Unable to load release from remote repository: " + saItem.getReleaseItem().getFilename() );
+                log.warn( String.format( "Unable to load release from remote repository: %s", saItem.getReleaseItem().getFilename() ) );
             }
         }
 

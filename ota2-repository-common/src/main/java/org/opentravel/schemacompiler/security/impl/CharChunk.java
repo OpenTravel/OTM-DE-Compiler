@@ -15,6 +15,8 @@
  */
 package org.opentravel.schemacompiler.security.impl;
 
+import java.util.Arrays;
+
 /**
  * Utilities to manipulate char chunks. While String is the easiest way to manipulate chars (
  * search, substrings, etc), it is known to not be the most efficient solution - Strings are
@@ -25,7 +27,7 @@ package org.opentravel.schemacompiler.security.impl;
  * @author Costin Manolache
  * @author Remy Maucherat
  */
-public class CharChunk implements CharSequence, Cloneable {
+public class CharChunk implements CharSequence {
 
     // --------------------
     // char[]
@@ -33,6 +35,22 @@ public class CharChunk implements CharSequence, Cloneable {
 
     private int start;
     private int end;
+    
+    /**
+     * Default constructor.
+     */
+    public CharChunk() {}
+    
+    /**
+     * Copy constructor.
+     * 
+     * @param other the other char-chunk to be cloned
+     */
+    public CharChunk(CharChunk other) {
+        this.buff = Arrays.copyOf( other.buff, other.length() );
+        this.start = other.start;
+        this.end = other.end;
+    }
 
     /**
      * Resets the message bytes to an uninitialized state.
@@ -93,19 +111,15 @@ public class CharChunk implements CharSequence, Cloneable {
     }
 
     public CharSequence subSequence(int start, int end) {
-        try {
-            CharChunk result = (CharChunk) this.clone();
-            result.setOffset(this.start + start);
-            result.setEnd(this.start + end);
-            return result;
-        } catch (CloneNotSupportedException e) {
-            // Cannot happen
-            return null;
-        }
+        CharChunk result = new CharChunk( this );
+        
+        result.setOffset(this.start + start);
+        result.setEnd(this.start + end);
+        return result;
     }
 
     public int length() {
         return end - start;
     }
-
+    
 }

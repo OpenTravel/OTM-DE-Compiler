@@ -61,6 +61,7 @@ public class SchemaDeclaration {
      * @throws IOException thrown if the schema's file location is null/empty or the file cannot be found
      * @deprecated use {@link #getContent(String)} instead
      */
+    @Deprecated
     public InputStream getContent() throws IOException {
         return getContent( CodeGeneratorFactory.XSD_TARGET_FORMAT );
     }
@@ -105,6 +106,7 @@ public class SchemaDeclaration {
      * @return String
      * @deprecated use {@link #getFilename(String)} instead
      */
+    @Deprecated
     public String getFilename() {
         return getFilename( CodeGeneratorFactory.XSD_TARGET_FORMAT );
     }
@@ -194,6 +196,7 @@ public class SchemaDeclaration {
      * @return String
      * @deprecated use {@link #getLocation(String)} instead
      */
+    @Deprecated
     public String getLocation() {
         return getLocation( CodeGeneratorFactory.XSD_TARGET_FORMAT );
     }

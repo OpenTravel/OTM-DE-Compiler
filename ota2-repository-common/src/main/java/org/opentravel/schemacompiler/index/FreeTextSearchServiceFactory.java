@@ -108,6 +108,7 @@ public class FreeTextSearchServiceFactory {
      * @throws IOException thrown if a low-level error occurs while closing the service's index reader or writer
      */
     public static synchronized void destroySingleton() throws IOException {
+        File indexLocation = RepositoryComponentFactory.getDefault().getSearchIndexLocation();
         FreeTextSearchService defaultInstance = getInstance();
         
         if ((defaultInstance != null) && serviceOwners.isEmpty()) {
@@ -115,7 +116,7 @@ public class FreeTextSearchServiceFactory {
                 defaultInstance.stopService();
                 
             } finally {
-                defaultInstance = null;
+                defaultInstanceMap.remove( indexLocation.getAbsolutePath() );
             }
         }
     }

@@ -74,10 +74,10 @@ public class TLFolder extends TLModelElement implements TLFolderOwner {
 
         while (f != null) {
             String fName = ((identity.length() == 0) ? "" : "/") + ((f.name == null) ? "???" : f.name);
-            TLFolderOwner owner = f.getOwner();
+            TLFolderOwner folderOwner = f.getOwner();
 
             identity.insert( 0, fName );
-            f = (owner instanceof TLFolder) ? (TLFolder) owner : null;
+            f = (folderOwner instanceof TLFolder) ? (TLFolder) folderOwner : null;
         }
         if (owningLibrary != null) {
             identity.insert( 0, owningLibrary.getValidationIdentity() + " : " );

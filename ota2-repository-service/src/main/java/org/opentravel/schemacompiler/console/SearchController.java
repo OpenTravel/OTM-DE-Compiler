@@ -15,14 +15,6 @@
  */
 package org.opentravel.schemacompiler.console;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.servlet.http.HttpSession;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opentravel.ns.ota2.security_v01_00.RepositoryPermission;
@@ -41,7 +33,6 @@ import org.opentravel.schemacompiler.model.TLLibraryStatus;
 import org.opentravel.schemacompiler.model.TLSimple;
 import org.opentravel.schemacompiler.model.TLValueWithAttributes;
 import org.opentravel.schemacompiler.repository.Release;
-import org.opentravel.schemacompiler.repository.RepositoryComponentFactory;
 import org.opentravel.schemacompiler.repository.RepositoryException;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
@@ -54,6 +45,14 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpSession;
 
 /**
  * Controller that handles interactions with the search page of the OTA2.0 repository console.
@@ -123,7 +122,6 @@ public class SearchController extends BaseController {
 					searchResults = prepareSearchResults( results, nsFilter, entityType, user );
 					
 				} catch (RepositoryException e) {
-				    e.printStackTrace( System.out );
 					log.error("An error occured while performing the requested search.", e);
 					setErrorMessage(
 							"An error occured while performing the requested search (see server log for details).",

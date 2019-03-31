@@ -43,7 +43,7 @@ public final class LibrarySecurityHandler {
      * @return boolean
      */
     public static boolean hasModifyPermission(TLLibrary library) {
-        return (accessController == null) || accessController.hasModifyPermission( library );
+        return accessController.hasModifyPermission( library );
     }
 
 }

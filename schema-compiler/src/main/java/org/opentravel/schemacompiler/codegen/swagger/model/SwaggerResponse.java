@@ -176,7 +176,6 @@ public class SwaggerResponse implements JsonDocumentationOwner, JsonModelObject 
             for (SwaggerHeader header : headers) {
                 addJsonProperty( headersJson, header.getName(), header );
             }
-            // addJsonProperty( headersJson, "headers", headers );
             json.add( "headers", headersJson );
         }
         return json;
