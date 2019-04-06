@@ -19,6 +19,7 @@ package org.opentravel.schemacompiler.util;
 import org.opentravel.schemacompiler.console.NamespaceItem;
 import org.opentravel.schemacompiler.index.EntitySearchResult;
 import org.opentravel.schemacompiler.model.NamedEntity;
+import org.opentravel.schemacompiler.model.TLActionResponse;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLExtension;
 import org.opentravel.schemacompiler.model.TLExtensionOwner;
@@ -136,6 +137,26 @@ public class PageUtils {
             }
         }
         return localName;
+    }
+
+    /**
+     * Returns a user-displayable string as a comma-separated list of all the status codes from the given response.
+     * 
+     * @param response the action response from which to obtain the list of response codes
+     * @return String
+     */
+    public String getDisplayStatusCodes(TLActionResponse response) {
+        StringBuilder codeList = new StringBuilder();
+        boolean firstCode = true;
+
+        for (Integer statusCode : response.getStatusCodes()) {
+            if (!firstCode) {
+                codeList.append( ", " );
+            }
+            codeList.append( statusCode );
+            firstCode = false;
+        }
+        return (codeList.length() == 0) ? "N/A" : codeList.toString();
     }
 
     /**

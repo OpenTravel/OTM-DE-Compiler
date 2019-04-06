@@ -31,6 +31,7 @@ import org.opentravel.schemacompiler.model.TLExtension;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLOperation;
 import org.opentravel.schemacompiler.model.TLProperty;
+import org.opentravel.schemacompiler.model.TLResource;
 import org.opentravel.schemacompiler.model.TLSimple;
 import org.opentravel.schemacompiler.model.TLSimpleFacet;
 import org.opentravel.schemacompiler.model.TLValueWithAttributes;
@@ -127,6 +128,9 @@ public class ReferenceFinder {
 
         } else if (entity instanceof TLOperation) {
             scanEntity( (TLOperation) entity );
+
+        } else if (entity instanceof TLResource) {
+            scanEntity( (TLResource) entity );
         }
     }
 
@@ -213,6 +217,17 @@ public class ReferenceFinder {
         scanFacet( entity.getRequest() );
         scanFacet( entity.getResponse() );
         scanFacet( entity.getNotification() );
+    }
+
+    /**
+     * Scans the given <code>TLResource</code> for type references.
+     * 
+     * @param entity the entity to scan for references
+     */
+    private void scanEntity(TLResource entity) {
+        scanExtension( entity.getExtension() );
+        addQualifiedName( entity.getBusinessObjectRefName() );
+        entity.getActionFacets().forEach( f -> addQualifiedName( f.getBasePayloadName() ) );
     }
 
     /**

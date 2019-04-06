@@ -51,3 +51,7 @@
 <c:if test="${entity.entityType.simpleName == 'TLOperation'}">
 	<%@include file="entityDetails_operation.jsp" %>
 </c:if>
+
+<c:if test="${entity.entityType.simpleName == 'TLResource'}">
+	<%@include file="entityDetails_resource.jsp" %>
+</c:if>
