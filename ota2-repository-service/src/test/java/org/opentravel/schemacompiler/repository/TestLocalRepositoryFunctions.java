@@ -23,7 +23,7 @@ import static org.junit.Assert.assertNotNull;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opentravel.schemacompiler.model.TLModel;
-import org.opentravel.schemacompiler.util.RepositoryTestUtils;
+import org.opentravel.schemacompiler.repository.testutil.RepositoryTestUtils;
 import org.opentravel.schemacompiler.validate.FindingType;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
 
@@ -39,22 +39,8 @@ import java.util.List;
 public class TestLocalRepositoryFunctions extends TestRepositoryFunctions {
 
     @BeforeClass
-    public static void setupLocalRepository() throws Exception {
-        File localRepository = new File( System.getProperty( "user.dir" ),
-            "/target/test-workspace/" + TestLocalRepositoryFunctions.class.getSimpleName() + "/local-repository" );
-        File snapshotBase = new File( System.getProperty( "user.dir" ), "/src/test/resources/repo-snapshots" );
-        File repositorySnapshot = new File( snapshotBase, "versions-repository" );
-
-        if (localRepository.exists()) {
-            RepositoryTestUtils.deleteContents( localRepository );
-        }
-        localRepository.mkdirs();
-        RepositoryTestUtils.copyContents( repositorySnapshot, localRepository );
-
-        RepositoryManager rm = new RepositoryManager( localRepository );
-
-        testRepository.set( rm );
-        repositoryManager.set( rm );
+    public static void setup() throws Exception {
+        setupLocalRepository( "versions-repository", TestLocalRepositoryFunctions.class );
         setupWorkInProcessArea( TestLocalRepositoryFunctions.class );
     }
 

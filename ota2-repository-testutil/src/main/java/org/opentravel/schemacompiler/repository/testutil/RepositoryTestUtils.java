@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
-package org.opentravel.schemacompiler.util;
+package org.opentravel.schemacompiler.repository.testutil;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.opentravel.schemacompiler.util.FileUtils;
 import org.opentravel.schemacompiler.validate.FindingMessageFormat;
 import org.opentravel.schemacompiler.validate.FindingType;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
@@ -24,6 +27,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
  * Static utility methods shared by numerous tests.
@@ -31,6 +36,13 @@ import java.io.IOException;
  * @author S. Livezey
  */
 public class RepositoryTestUtils {
+
+    private static Log log = LogFactory.getLog( RepositoryTestUtils.class );
+
+    /**
+     * Private constructor to prevent instantiation.
+     */
+    private RepositoryTestUtils() {}
 
     /**
      * Displays the validation findings if debugging is enabled.
@@ -53,10 +65,10 @@ public class RepositoryTestUtils {
             || ((findingType != null) && findings.hasFinding( findingType ));
 
         if (hasFindings) {
-            System.out.println( "Validation Findings:" );
+            log.error( "Validation Findings:" );
 
             for (String message : findings.getAllValidationMessages( FindingMessageFormat.DEFAULT )) {
-                System.out.println( "  " + message );
+                log.error( "  " + message );
             }
         }
     }
@@ -72,7 +84,7 @@ public class RepositoryTestUtils {
                 deleteContents( folderMember );
             }
         }
-        fileOrFolder.delete();
+        FileUtils.delete( fileOrFolder );
     }
 
     /**
@@ -91,12 +103,10 @@ public class RepositoryTestUtils {
         }
 
         if (src.isDirectory()) {
-            if (!dest.exists()) {
-                if (!dest.mkdirs()) {
-                    throw new IOException( "Unable to create direcotry: " + dest.getAbsolutePath() + "." );
-                }
+            if (!dest.exists() && !dest.mkdirs()) {
+                throw new IOException( "Unable to create direcotry: " + dest.getAbsolutePath() + "." );
             }
-            String list[] = src.list();
+            String[] list = src.list();
 
             for (int i = 0; i < list.length; i++) {
                 File dest1 = new File( dest, list[i] );
@@ -109,28 +119,14 @@ public class RepositoryTestUtils {
             }
 
         } else {
-            FileInputStream fin = null;
-            FileOutputStream fout = null;
             byte[] buffer = new byte[4096];
             int bytesRead;
 
-            try {
-                fin = new FileInputStream( src );
-                fout = new FileOutputStream( dest );
-
-                while ((bytesRead = fin.read( buffer )) >= 0) {
-                    fout.write( buffer, 0, bytesRead );
-                }
-            } finally {
-                try {
-                    if (fin != null)
-                        fin.close();
-                } catch (Throwable t) {
-                }
-                try {
-                    if (fout != null)
-                        fout.close();
-                } catch (Throwable t) {
+            try (InputStream fin = new FileInputStream( src )) {
+                try (OutputStream fout = new FileOutputStream( dest )) {
+                    while ((bytesRead = fin.read( buffer )) >= 0) {
+                        fout.write( buffer, 0, bytesRead );
+                    }
                 }
             }
         }

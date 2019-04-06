@@ -16,6 +16,7 @@
 		<module>schema-compiler-cli</module>
 		<module>ota2-schema-compiler</module>
 		<module>ota2-repository-common</module>
+		<module>ota2-repository-testutil</module>
 		<module>ota2-repository-service</module>
 		<module>ota2-repository-plugin</module>
 		<module>ota2-indexing-service</module>
@@ -143,6 +144,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>3.1.0</version>
 				<configuration>
 					<additionalJOptions>
 						<additionalJOption>-Xmaxerrs</additionalJOption>

@@ -21,7 +21,8 @@ import static org.junit.Assert.assertFalse;
 import org.junit.AfterClass;
 import org.opentravel.schemacompiler.index.FreeTextSearchServiceFactory;
 import org.opentravel.schemacompiler.model.TLModel;
-import org.opentravel.schemacompiler.util.RepositoryTestUtils;
+import org.opentravel.schemacompiler.repository.testutil.JettyTestServer;
+import org.opentravel.schemacompiler.repository.testutil.RepositoryTestUtils;
 import org.opentravel.schemacompiler.validate.FindingType;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
 

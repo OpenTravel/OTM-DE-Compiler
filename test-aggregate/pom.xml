@@ -44,6 +44,11 @@
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
+			<artifactId>ota2-repository-testutil</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>ota2-repository-service</artifactId>
 			<version>${project.version}</version>
 			<classifier>classes</classifier>

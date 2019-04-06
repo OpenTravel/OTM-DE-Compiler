@@ -28,7 +28,7 @@ import org.opentravel.schemacompiler.index.ReleaseSearchResult;
 import org.opentravel.schemacompiler.index.SearchResult;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLLibraryStatus;
-import org.opentravel.schemacompiler.util.RepositoryTestUtils;
+import org.opentravel.schemacompiler.repository.testutil.RepositoryTestUtils;
 
 import java.io.File;
 import java.util.ArrayList;

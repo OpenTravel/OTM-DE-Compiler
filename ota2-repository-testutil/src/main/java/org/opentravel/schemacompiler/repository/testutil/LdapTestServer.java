@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-package org.opentravel.schemacompiler.repository;
+package org.opentravel.schemacompiler.repository.testutil;
 
 import com.unboundid.ldap.listener.InMemoryDirectoryServer;
 import com.unboundid.ldap.listener.InMemoryDirectoryServerConfig;
 import com.unboundid.ldap.listener.InMemoryListenerConfig;
+import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldif.LDIFReader;
 
 import java.io.File;
+import java.io.IOException;
 
 /**
  * Provides a pre-populated embedded LDAP server used for testing the authentication protocols of the OTA2.0 repository.
@@ -36,9 +38,11 @@ public class LdapTestServer {
      * @param port the port number where the LDAP server will listen for requests
      * @param ldifFilePath the path of the LDIF file to use when populating the directory (relative to
      *        /src/test/resources)
-     * @throws Exception thrown if the directory server cannot be created or configured properly
+     * @throws LDAPException thrown if the directory server cannot be configured properly
+     * @throws IOException thrown if the directory server cannot be created
      */
-    public LdapTestServer(int port, String ldifFilePath) throws Exception {
+    @SuppressWarnings("squid:S1075")
+    public LdapTestServer(int port, String ldifFilePath) throws LDAPException, IOException {
         File testResourcesFolder = new File( System.getProperty( "user.dir" ), "/src/test/resources" );
         File ldifFile = new File( testResourcesFolder, ldifFilePath );
 
@@ -56,18 +60,18 @@ public class LdapTestServer {
     /**
      * Directs the LDAP server to start listening for requests.
      * 
-     * @throws Exception thrown if the directory server cannot be started
+     * @throws LDAPException thrown if the directory server cannot be started
      */
-    public void start() throws Exception {
+    public void start() throws LDAPException {
         directoryServer.startListening();
     }
 
     /**
      * Shuts down the listening services of the LDAP server and closes all active connections.
      * 
-     * @throws Exception thrown if the directory server cannot be shut down
+     * @throws LDAPException thrown if the directory server cannot be shut down
      */
-    public void stop() throws Exception {
+    public void stop() throws LDAPException {
         directoryServer.shutDown( true );
     }
 

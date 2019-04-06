@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-package org.opentravel.schemacompiler.repository;
+package org.opentravel.schemacompiler.repository.testutil;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.jasper.compiler.TldCache;
 import org.apache.jasper.runtime.JspFactoryImpl;
 import org.apache.jasper.servlet.JspServlet;
@@ -34,17 +36,23 @@ import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.ServerProperties;
 import org.opentravel.schemacompiler.index.FreeTextSearchService;
 import org.opentravel.schemacompiler.index.FreeTextSearchServiceFactory;
+import org.opentravel.schemacompiler.repository.RemoteRepository;
+import org.opentravel.schemacompiler.repository.RepositoryComponentFactory;
+import org.opentravel.schemacompiler.repository.RepositoryException;
+import org.opentravel.schemacompiler.repository.RepositoryManager;
 import org.opentravel.schemacompiler.repository.impl.RemoteRepositoryUtils;
-import org.opentravel.schemacompiler.util.RepositoryTestUtils;
 import org.springframework.web.servlet.DispatcherServlet;
+import org.xml.sax.SAXException;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.servlet.Servlet;
 import javax.servlet.jsp.JspFactory;
 
 /**
@@ -54,6 +62,15 @@ import javax.servlet.jsp.JspFactory;
  * @author S. Livezey
  */
 public class JettyTestServer {
+
+    @SuppressWarnings("squid:S1075")
+    private static final String CONTEXT_PATH = "/ota2-repository-service";
+    @SuppressWarnings("squid:S1075")
+    private static final String SEARCH_INDEX_PATH = "/search-index";
+    private static final String REPOSITORY_SERVLET_CLASS = "org.opentravel.schemacompiler.repository.RepositoryServlet";
+    private static final String USER_DIR = "user.dir";
+
+    private static Log log = LogFactory.getLog( JettyTestServer.class );
 
     private Server jettyServer;
     private File repositorySnapshotLocation;
@@ -71,9 +88,9 @@ public class JettyTestServer {
      */
     public JettyTestServer(int port, File snapshotLocation, Class<?> testClass, File repositoryConfigFile) {
         this.repositorySnapshotLocation = snapshotLocation;
-        this.repositoryRuntimeLocation = new File( System.getProperty( "user.dir" ),
+        this.repositoryRuntimeLocation = new File( System.getProperty( USER_DIR ),
             "/target/test-workspace/" + testClass.getSimpleName() + "/test-repository" );
-        this.repositoryIndexLocation = new File( repositoryRuntimeLocation.getParentFile(), "/search-index" );
+        this.repositoryIndexLocation = new File( repositoryRuntimeLocation.getParentFile(), SEARCH_INDEX_PATH );
         this.port = port;
 
         // disable logging becouse of invalid slf4j version
@@ -108,10 +125,13 @@ public class JettyTestServer {
      * @param enableWebConsole flag indicating whether the repository web console should be enabled
      * @throws Exception thrown if the server cannot be started
      */
+    @SuppressWarnings("unchecked")
     public synchronized void start(boolean enableWebConsole) throws Exception {
         if (jettyServer != null) {
             throw new IllegalStateException( "The Jetty server is already running." );
         }
+        Class<? extends Servlet> servletClass = (Class<? extends Servlet>) Class.forName( REPOSITORY_SERVLET_CLASS );
+        Constructor<? extends Servlet> servletConstructor = servletClass.getConstructor( ResourceConfig.class );
         ServletContextHandler context = new ServletContextHandler( ServletContextHandler.SESSIONS );
         ResourceConfig resourceConfig = new ResourceConfig();
         Map<String,Object> resourceProps = new HashMap<>();
@@ -120,9 +140,9 @@ public class JettyTestServer {
             "org.opentravel.schemacompiler.repository org.opentravel.schemacompiler.providers" );
         resourceConfig.addProperties( resourceProps );
 
-        context.setContextPath( "/ota2-repository-service" );
-        context.setResourceBase( System.getProperty( "user.dir" ) + "/src/main/webapp" );
-        context.addServlet( new ServletHolder( new RepositoryServlet( resourceConfig ) ), "/service/*" );
+        context.setContextPath( CONTEXT_PATH );
+        context.setResourceBase( System.getProperty( USER_DIR ) + "/src/main/webapp" );
+        context.addServlet( new ServletHolder( servletConstructor.newInstance( resourceConfig ) ), "/service/*" );
 
         if (enableWebConsole) {
             configureConsoleSupport( context );
@@ -143,8 +163,15 @@ public class JettyTestServer {
         indexTestRepository();
     }
 
-    private void configureConsoleSupport(ServletContextHandler context) throws Exception {
-        File targetTemp = new File( System.getProperty( "user.dir" ), "target/jsp-temp" );
+    /**
+     * Configures the given servlet context to provide JSP processing services.
+     * 
+     * @param context the servlet context to be configured
+     * @throws IOException thrown if there was a problem scanning for or loading a TLD
+     * @throws SAXException thrown if there was a problem parsing a TLD
+     */
+    private void configureConsoleSupport(ServletContextHandler context) throws IOException, SAXException {
+        File targetTemp = new File( System.getProperty( USER_DIR ), "target/jsp-temp" );
         ServletHolder holderDefault = new ServletHolder( "default", new DefaultServlet() );
         ServletHolder holderJsp = new ServletHolder( "jsp", new JspServlet() );
         TldScanner scanner = new TldScanner( context.getServletContext(), true, false, true );
@@ -183,6 +210,7 @@ public class JettyTestServer {
      * Adds this test server instance to the given repository manager.
      * 
      * @param manager the repository manager instance to configure
+     * @return RemoteRepository
      * @throws RepositoryException thrown if the configuration settings cannot be modified
      */
     public RemoteRepository configureRepositoryManager(RepositoryManager manager) throws RepositoryException {
@@ -200,7 +228,7 @@ public class JettyTestServer {
      * @return String
      */
     public String getBaseRepositoryUrl() {
-        return "http://localhost:" + port + "/ota2-repository-service";
+        return "http://localhost:" + port + CONTEXT_PATH;
     }
 
     /**
@@ -209,6 +237,7 @@ public class JettyTestServer {
      * @param urlPath the relative URL path from the base
      * @return String
      */
+    @SuppressWarnings("squid:S1075")
     public String getRepositoryUrl(String urlPath) {
         if (urlPath == null) {
             urlPath = "";
@@ -233,25 +262,31 @@ public class JettyTestServer {
 
     /**
      * Pings the Jetty service with a meta-data request that forces the initialization of the repository web service.
+     * 
+     * @throws RepositoryException thrown if the remote repository is not available
      */
-    private void initializeRepositoryServices() throws Exception {
-        new RemoteRepositoryUtils().getRepositoryMetadata( "http://localhost:" + port + "/ota2-repository-service" );
+    private void initializeRepositoryServices() throws RepositoryException {
+        new RemoteRepositoryUtils().getRepositoryMetadata( "http://localhost:" + port + CONTEXT_PATH );
     }
 
     /**
      * Indexes the contents of the server's test repository.
+     * 
+     * @throws IOException thrown if the indexing service cannot be initialized
+     * @throws RepositoryException thrown if an error occurs during repository indexing
      */
-    @SuppressWarnings("squid:S2925") // Ignore Sonar warning
-    private void indexTestRepository() throws Exception {
+    private void indexTestRepository() throws IOException, RepositoryException {
         FreeTextSearchServiceFactory
             .initializeSingleton( RepositoryComponentFactory.getDefault().getRepositoryManager() );
         FreeTextSearchService service = FreeTextSearchServiceFactory.getInstance();
 
         while (!service.isRunning()) {
             try {
-                System.out.println( "Waiting for Indexing Service startup..." );
+                log.info( "Waiting for Indexing Service startup..." );
                 Thread.sleep( 100 );
+
             } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
             }
         }
         service.indexAllRepositoryItems();
@@ -278,22 +313,34 @@ public class JettyTestServer {
         }
 
         @Override
-        public void warn(String msg, Object... args) {}
+        public void warn(String msg, Object... args) {
+            // No action
+        }
 
         @Override
-        public void warn(Throwable thrown) {}
+        public void warn(Throwable thrown) {
+            // No action
+        }
 
         @Override
-        public void warn(String msg, Throwable thrown) {}
+        public void warn(String msg, Throwable thrown) {
+            // No action
+        }
 
         @Override
-        public void info(String msg, Object... args) {}
+        public void info(String msg, Object... args) {
+            // No action
+        }
 
         @Override
-        public void info(Throwable thrown) {}
+        public void info(Throwable thrown) {
+            // No action
+        }
 
         @Override
-        public void info(String msg, Throwable thrown) {}
+        public void info(String msg, Throwable thrown) {
+            // No action
+        }
 
         @Override
         public boolean isDebugEnabled() {
@@ -301,19 +348,29 @@ public class JettyTestServer {
         }
 
         @Override
-        public void setDebugEnabled(boolean enabled) {}
+        public void setDebugEnabled(boolean enabled) {
+            // No action
+        }
 
         @Override
-        public void debug(String msg, Object... args) {}
+        public void debug(String msg, Object... args) {
+            // No action
+        }
 
         @Override
-        public void debug(String msg, long level) {}
+        public void debug(String msg, long level) {
+            // No action
+        }
 
         @Override
-        public void debug(Throwable thrown) {}
+        public void debug(Throwable thrown) {
+            // No action
+        }
 
         @Override
-        public void debug(String msg, Throwable thrown) {}
+        public void debug(String msg, Throwable thrown) {
+            // No action
+        }
 
         @Override
         public Logger getLogger(String name) {
@@ -321,7 +378,9 @@ public class JettyTestServer {
         }
 
         @Override
-        public void ignore(Throwable ignored) {}
+        public void ignore(Throwable ignored) {
+            // No action
+        }
 
     }
 
