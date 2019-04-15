@@ -200,17 +200,18 @@ public class TestRepositorySearch extends RepositoryTestBase {
     }
 
     @Test
-    public void testListNamespaceItems_allVersions_includeReleases() throws Exception {
+    public void testListNamespaceItems_allVersions_includeAllItemTypes() throws Exception {
         Repository testRepository = repositoryManager.get().getRepository( "test-repository" );
         List<RepositoryItem> items = testRepository.listItems(
             "http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test", TLLibraryStatus.DRAFT, false, null );
         List<String> itemFilenames = getFilenames( items );
 
-        assertEquals( 4, items.size() );
+        assertEquals( 5, items.size() );
         assertTrue( itemFilenames.contains( "Version_Test_1_0_0.otm" ) );
         assertTrue( itemFilenames.contains( "Version_Test_1_1_0.otm" ) );
         assertTrue( itemFilenames.contains( "Version_Test_1_1_1.otm" ) );
         assertTrue( itemFilenames.contains( "Version_Release_1_0_0.otr" ) );
+        assertTrue( itemFilenames.contains( "Version_Assembly_1_0_0.osm" ) );
     }
 
     @SuppressWarnings("deprecation")

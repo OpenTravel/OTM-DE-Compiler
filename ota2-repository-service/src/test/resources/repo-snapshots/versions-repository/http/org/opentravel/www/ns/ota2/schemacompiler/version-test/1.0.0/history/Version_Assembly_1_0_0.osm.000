@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<osm:Assembly xmlns:osm="http://www.OpenTravel.org/ns/OTA2/Assembly_v01_00">
+    <osm:AssemblyIdentity>
+        <osm:BaseNamespace>http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test</osm:BaseNamespace>
+        <osm:Name>Version_Assembly</osm:Name>
+        <osm:Filename>Version_Assembly_1_0_0.osm</osm:Filename>
+        <osm:Version>1.0.0</osm:Version>
+    </osm:AssemblyIdentity>
+    <osm:Description>Version Assembly</osm:Description>
+    <osm:Provider>
+        <osm:BaseNamespace>http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test</osm:BaseNamespace>
+        <osm:Filename>Version_Release_1_0_0.otr</osm:Filename>
+        <osm:Version>1.0.0</osm:Version>
+    </osm:Provider>
+    <osm:Consumer>
+        <osm:BaseNamespace>http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test</osm:BaseNamespace>
+        <osm:Filename>Version_Release_1_0_0.otr</osm:Filename>
+        <osm:Version>1.0.0</osm:Version>
+    </osm:Consumer>
+</osm:Assembly>

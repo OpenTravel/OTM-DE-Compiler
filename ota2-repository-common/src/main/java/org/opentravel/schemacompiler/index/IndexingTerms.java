@@ -61,6 +61,13 @@ public class IndexingTerms {
     // Fields used exclusively by OTM releases
     public static final String RELEASE_STATUS_FIELD = "releaseStatus";
 
+    // Fields used exclusively by OTM service assemblies
+    public static final String REFERENCED_RELEASE_FIELD = "referencedProvider";
+    public static final String REFERENCED_PROVIDER_FIELD = "referencedProvider";
+    public static final String REFERENCED_CONSUMER_FIELD = "referencedConsumer";
+    public static final String EXTERNAL_PROVIDER_FIELD = "externalProvider";
+    public static final String EXTERNAL_CONSUMER_FIELD = "externalConsumer";
+
     // Fields used exclusively by subscriptions
     public static final String EVENT_TYPE_FIELD = "eventType";
     public static final String LIBRARY_NAME_FIELD = "libraryName";

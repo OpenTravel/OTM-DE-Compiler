@@ -171,6 +171,7 @@ public abstract class AbstractOTA2RepositoryMojo extends AbstractMojo {
                     originalProject = projectManager.loadProject( otmProject, findings );
                     modelsBySnapshot.put( DEFAULT_SNAPSHOT_SUFFIX, projectManager.getModel() );
 
+                    // TODO: Add support for repository-managed assemblies
                 } else if (otmProject.getName().toLowerCase().endsWith( ".osm" )) { // Load from an OSR file
                     log.info( "Loading OTM service assembly: " + otmProject.getName() );
                     ServiceAssemblyManager assemblyManager = new ServiceAssemblyManager( repositoryManager );

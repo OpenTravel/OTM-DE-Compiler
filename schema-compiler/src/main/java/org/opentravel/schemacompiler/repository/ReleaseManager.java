@@ -197,7 +197,7 @@ public class ReleaseManager {
                 findings = new ValidationFindings();
             }
 
-            if (isRepositoryFile( releaseFile )) { // treat as a managed repository release file
+            if (fileUtils.isRepositoryFile( releaseFile )) { // treat as a managed repository release file
                 return loadRelease( repositoryManager.getRepositoryItem( releaseFile ), findings );
 
             } else {
@@ -402,7 +402,7 @@ public class ReleaseManager {
         File libraryFile = URLUtils.isFileURL( libraryUrl ) ? URLUtils.toFile( libraryUrl ) : null;
         RepositoryItem item = null;
 
-        if (isRepositoryFile( libraryFile )) {
+        if (fileUtils.isRepositoryFile( libraryFile )) {
             item = repositoryManager.getRepositoryItem( libraryFile );
         }
         return item;
@@ -507,7 +507,7 @@ public class ReleaseManager {
      */
     public boolean isManagedRelease() {
         File releaseFile = getReleaseFile();
-        return (releaseFile != null) && isRepositoryFile( releaseFile );
+        return (releaseFile != null) && fileUtils.isRepositoryFile( releaseFile );
     }
 
     /**
@@ -521,6 +521,7 @@ public class ReleaseManager {
     public ReleaseItem publishRelease(Repository repository) throws RepositoryException {
         URL originalUrl = release.getReleaseUrl();
         File releaseFile = getReleaseFile();
+        RepositoryItem repoItem;
         boolean success = false;
 
         // Perform validation checks
@@ -531,7 +532,7 @@ public class ReleaseManager {
             throw new IllegalStateException(
                 "The release is not a locally-managed file and therefore cannot be published." );
 
-        } else if (isRepositoryFile( releaseFile )) {
+        } else if (fileUtils.isRepositoryFile( releaseFile )) {
             throw new IllegalStateException( "The release is already managed by a remote repository." );
 
         } else if (releaseContainsLockedItems()) {
@@ -567,14 +568,11 @@ public class ReleaseManager {
 
         // Publish the release and delete the local copy of the file (backup will remain)
         try (InputStream contentStream = new FileInputStream( releaseFile )) {
-            RepositoryItem repoItem = repository.publish( contentStream, fileUtils.getReleaseFilename( release ),
-                release.getName(), release.getNamespace(), release.getVersion(),
+            repoItem = repository.publish( contentStream, fileUtils.getReleaseFilename( release ), release.getName(),
+                release.getNamespace(), release.getVersion(),
                 VersionSchemeFactory.getInstance().getDefaultVersionScheme(), TLLibraryStatus.FINAL );
-
             release.setReleaseUrl( repositoryManager.getContentLocation( repoItem ) );
-            FileUtils.delete( releaseFile );
             success = true;
-            return ReleaseItemImpl.newManagedItem( repoItem, this );
 
         } catch (IOException e) {
             throw new RepositoryException( "Unable to read from release data file: " + releaseFile.getName(), e );
@@ -585,7 +583,8 @@ public class ReleaseManager {
                 release.setStatus( ReleaseStatus.DRAFT );
             }
         }
-
+        FileUtils.delete( releaseFile );
+        return ReleaseItemImpl.newManagedItem( repoItem, this );
     }
 
     /**
@@ -673,7 +672,7 @@ public class ReleaseManager {
             throw new IllegalStateException(
                 "A release must be loaded from a repository before attempting to unpublish." );
 
-        } else if ((releaseFile == null) || !isRepositoryFile( releaseFile )) {
+        } else if ((releaseFile == null) || !fileUtils.isRepositoryFile( releaseFile )) {
             throw new IllegalStateException(
                 "The release is not managed by a remote repository and therefore cannot be unpublished." );
         }
@@ -727,7 +726,7 @@ public class ReleaseManager {
         }
         File releaseFile = getReleaseFile();
 
-        if (isRepositoryFile( releaseFile )) {
+        if (fileUtils.isRepositoryFile( releaseFile )) {
             validateLatestVersion();
         }
 
@@ -886,7 +885,7 @@ public class ReleaseManager {
         try {
             File releaseFile = getReleaseFile();
 
-            if ((releaseFile != null) && isRepositoryFile( releaseFile )) {
+            if ((releaseFile != null) && fileUtils.isRepositoryFile( releaseFile )) {
                 throw new UnsupportedOperationException(
                     "Releases published to an OTM repository cannot be modified." );
             }
@@ -992,28 +991,6 @@ public class ReleaseManager {
             result = (releaseNS != null) && (releaseFilename != null) && (releaseVersion != null)
                 && releaseNS.equals( repoItem.getBaseNamespace() ) && releaseFilename.equals( repoItem.getFilename() )
                 && releaseVersion.equals( repoItem.getVersion() );
-        }
-        return result;
-    }
-
-    /**
-     * Returns true if the given file references a location in the user's local repository -- either as a
-     * locally-managed item or a local copy of a remotely-managed library or release.
-     * 
-     * @param file the release or library file to analyze
-     * @return boolean
-     */
-    private boolean isRepositoryFile(File file) {
-        boolean result = false;
-
-        if (file != null) {
-            File repositoryLocation = repositoryManager.getRepositoryLocation();
-            File libraryFolder = file.getParentFile();
-
-            while (!result && (libraryFolder != null)) {
-                result = libraryFolder.equals( repositoryLocation );
-                libraryFolder = libraryFolder.getParentFile();
-            }
         }
         return result;
     }

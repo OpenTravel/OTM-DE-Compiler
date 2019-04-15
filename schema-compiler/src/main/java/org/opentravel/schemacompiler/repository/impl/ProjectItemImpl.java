@@ -25,12 +25,11 @@ import org.opentravel.schemacompiler.repository.ProjectManager;
 import org.opentravel.schemacompiler.repository.Repository;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
 import org.opentravel.schemacompiler.repository.RepositoryItemState;
-import org.opentravel.schemacompiler.util.SchemaCompilerRuntimeException;
+import org.opentravel.schemacompiler.util.URLUtils;
 import org.opentravel.schemacompiler.version.VersionSchemeException;
 import org.opentravel.schemacompiler.version.VersionSchemeFactory;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -216,20 +215,8 @@ public class ProjectItemImpl extends RepositoryItemImpl implements ProjectItem {
     @Override
     public String getFilename() {
         URL libraryUrl = (libraryContent == null) ? null : libraryContent.getLibraryUrl();
-        String filename = null;
 
-        if (libraryUrl != null) {
-            String urlString = libraryUrl.toExternalForm();
-
-            if (urlString.endsWith( "/" )) {
-                filename = null;
-
-            } else {
-                int idx = urlString.lastIndexOf( '/' );
-                filename = (idx < 0) ? urlString : urlString.substring( idx + 1 );
-            }
-        }
-        return filename;
+        return URLUtils.getUrlFilename( libraryUrl );
     }
 
     /**
@@ -375,13 +362,8 @@ public class ProjectItemImpl extends RepositoryItemImpl implements ProjectItem {
         URI uri;
 
         if (getState() == RepositoryItemState.UNMANAGED) {
-            try {
-                uri = libraryContent.getLibraryUrl().toURI();
+            uri = URLUtils.toURI( libraryContent.getLibraryUrl() );
 
-            } catch (URISyntaxException e) {
-                // Should never happen; throw a runtime exception just in case
-                throw new SchemaCompilerRuntimeException( e );
-            }
         } else {
             uri = super.toURI( fullyQualified );
         }

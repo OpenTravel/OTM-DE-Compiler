@@ -24,7 +24,9 @@ public enum RepositoryItemType {
 
     LIBRARY(".otm"),
 
-    RELEASE(".otr");
+    RELEASE(".otr"),
+
+    ASSEMBLY(".osm");
 
     private String fileExtension;
 
@@ -50,6 +52,25 @@ public enum RepositoryItemType {
             result = itemFilename.toLowerCase().endsWith( fileExtension );
         }
         return result;
+    }
+
+    /**
+     * Returns the repository item type associated with the given filename. If the filename does not correspond to a
+     * know item type, this method will return null.
+     * 
+     * @param itemFilename the filename for which to return a repository item type
+     * @return RepositoryItemType
+     */
+    public static RepositoryItemType fromFilename(String itemFilename) {
+        RepositoryItemType itemType = null;
+
+        for (RepositoryItemType it : values()) {
+            if (it.isItemType( itemFilename )) {
+                itemType = it;
+                break;
+            }
+        }
+        return itemType;
     }
 
 }

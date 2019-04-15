@@ -35,6 +35,7 @@ import org.opentravel.ns.ota2.repositoryinfo_v01_00.RepositoryItemIdentityType;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.RepositoryPermissionType;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.SearchResultsListType;
 import org.opentravel.ns.ota2.security_v01_00.RepositoryPermission;
+import org.opentravel.schemacompiler.index.AssemblySearchResult;
 import org.opentravel.schemacompiler.index.EntitySearchResult;
 import org.opentravel.schemacompiler.index.FreeTextSearchService;
 import org.opentravel.schemacompiler.index.FreeTextSearchServiceFactory;
@@ -376,7 +377,11 @@ public class RepositoryContentResource {
 
         // Second pass to build the search results
         for (SearchResult<?> result : searchResults) {
-            if (result instanceof ReleaseSearchResult) {
+            if (result instanceof AssemblySearchResult) {
+                addAssemblySearchResult( (AssemblySearchResult) result, resultsList, itemType, user,
+                    accessibleItemCache );
+
+            } else if (result instanceof ReleaseSearchResult) {
                 addReleaseSearchResult( (ReleaseSearchResult) result, resultsList, itemType, user,
                     accessibleItemCache );
 
@@ -391,6 +396,31 @@ public class RepositoryContentResource {
             }
         }
         return objectFactory.createSearchResultsList( resultsList );
+    }
+
+    /**
+     * Adds a service assembly search result to the results list provided if the specified user has read access to the
+     * item.
+     * 
+     * @param releaseResult the release search result to be added
+     * @param resultsList the results list to which the new result will be added
+     * @param itemType the repository item type to which the search is restricted
+     * @param user the user who initiated the search
+     * @param accessibleItemCache cache of which namespaces the user has access to
+     * @throws RepositoryException thrown if an error occurs while accessing the remote repository
+     */
+    private void addAssemblySearchResult(AssemblySearchResult assemblyResult, SearchResultsListType resultsList,
+        RepositoryItemType itemType, UserPrincipal user, Map<String,Map<TLLibraryStatus,Boolean>> accessibleItemCache)
+        throws RepositoryException {
+        if ((itemType == null) || (itemType == RepositoryItemType.RELEASE)) {
+            RepositoryItem item = repositoryManager.getRepositoryItem( assemblyResult.getBaseNamespace(),
+                assemblyResult.getFilename(), assemblyResult.getVersion() );
+
+            if (isReadable( item, user, accessibleItemCache )) {
+                resultsList.getSearchResult()
+                    .add( objectFactory.createLibrarySearchResult( RepositoryUtils.createItemMetadata( item ) ) );
+            }
+        }
     }
 
     /**
@@ -1221,7 +1251,7 @@ public class RepositoryContentResource {
                 repositoryManager.getFileManager().setCurrentUserId( user.getUserId() );
                 RepositoryItemImpl item = RepositoryUtils.createRepositoryItem( repositoryManager, itemMetadata );
 
-                if (isReleaseMember( item )) {
+                if (hasOwnerDependency( item )) {
                     throw new RepositoryException(
                         "The library cannot be deleted because it is part of a managed release." );
                 }
@@ -1457,20 +1487,33 @@ public class RepositoryContentResource {
     }
 
     /**
-     * Returns true if the given item represents an OTM library that is part of a managed release.
+     * Returns true if the given item represents an OTM library that is part of a managed release or a release that is
+     * part of a managed service assembly.
      * 
      * @param item the repository item to check
      * @return boolean
      * @throws RepositoryException thrown if the repository search service cannot be accessed
      */
-    protected boolean isReleaseMember(RepositoryItem item) throws RepositoryException {
+    protected boolean hasOwnerDependency(RepositoryItem item) throws RepositoryException {
         FreeTextSearchService service = FreeTextSearchServiceFactory.getInstance();
-        LibrarySearchResult library = service.getLibrary( item, false );
+        RepositoryItemType itemType = RepositoryItemType.fromFilename( item.getFilename() );
         boolean result = false;
 
-        if (library != null) {
-            List<ReleaseSearchResult> releaseList = service.getLibraryReleases( library, false );
-            result = !releaseList.isEmpty();
+        if (itemType == RepositoryItemType.RELEASE) {
+            ReleaseSearchResult release = service.getRelease( item, false );
+
+            if (release != null) {
+                List<AssemblySearchResult> releaseList = service.getReleaseAssemblies( release, false );
+                result = !releaseList.isEmpty();
+            }
+
+        } else if (itemType == RepositoryItemType.LIBRARY) {
+            LibrarySearchResult library = service.getLibrary( item, false );
+
+            if (library != null) {
+                List<ReleaseSearchResult> releaseList = service.getLibraryReleases( library, false );
+                result = !releaseList.isEmpty();
+            }
         }
         return result;
     }

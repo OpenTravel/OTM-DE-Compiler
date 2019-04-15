@@ -25,7 +25,7 @@ import org.opentravel.schemacompiler.repository.RepositoryItemCommit;
 import org.opentravel.schemacompiler.repository.RepositoryItemHistory;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
 import org.opentravel.schemacompiler.repository.ServiceAssembly;
-import org.opentravel.schemacompiler.repository.ServiceAssemblyItem;
+import org.opentravel.schemacompiler.repository.ServiceAssemblyMember;
 import org.opentravel.schemacompiler.validate.FindingType;
 import org.opentravel.schemacompiler.validate.ValidationContext;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
@@ -87,20 +87,20 @@ public class AssemblyValidationContext implements ValidationContext {
     /**
      * Returns the list of library repository items specified in the assembly item's release.
      * 
-     * @param assemblyItem the assembly item for which to return the list of library repository items
+     * @param assemblyMember the assembly item for which to return the list of library repository items
      * @return List&lt;RepositoryItem&gt;
      */
-    public List<RepositoryItem> getLibraryItems(ServiceAssemblyItem assemblyItem) {
-        List<RepositoryItem> itemList = new ArrayList<>();
+    public List<RepositoryItem> getLibraryItems(ServiceAssemblyMember assemblyMember) {
+        List<RepositoryItem> memberList = new ArrayList<>();
 
-        if (assemblyItem != null) {
-            String releaseId = getUniqueId( assemblyItem.getReleaseItem() );
+        if (assemblyMember != null) {
+            String releaseId = getUniqueId( assemblyMember.getReleaseItem() );
 
             if (releaseLibraries.containsKey( releaseId )) {
-                itemList.addAll( releaseLibraries.get( releaseId ) );
+                memberList.addAll( releaseLibraries.get( releaseId ) );
             }
         }
-        return itemList;
+        return memberList;
     }
 
     /**
@@ -131,12 +131,12 @@ public class AssemblyValidationContext implements ValidationContext {
      */
     private void initialize() {
         ReleaseManager releaseManager = new ReleaseManager( repositoryManager );
-        List<ServiceAssemblyItem> saItems = assembly.getAllApis();
+        List<ServiceAssemblyMember> saMembers = assembly.getAllApis();
 
-        for (ServiceAssemblyItem saItem : saItems) {
+        for (ServiceAssemblyMember saMember : saMembers) {
             try {
                 ValidationFindings findings = new ValidationFindings();
-                ReleaseItem releaseItem = releaseManager.loadRelease( saItem.getReleaseItem(), findings );
+                ReleaseItem releaseItem = releaseManager.loadRelease( saMember.getReleaseItem(), findings );
                 String releaseId = getUniqueId( releaseItem );
 
                 if (!releaseLibraries.containsKey( releaseId ) && !findings.hasFinding( FindingType.ERROR )) {

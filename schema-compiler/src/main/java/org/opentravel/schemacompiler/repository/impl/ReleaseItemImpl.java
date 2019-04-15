@@ -24,11 +24,10 @@ import org.opentravel.schemacompiler.repository.ReleaseManager;
 import org.opentravel.schemacompiler.repository.Repository;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
 import org.opentravel.schemacompiler.repository.RepositoryItemState;
-import org.opentravel.schemacompiler.util.SchemaCompilerRuntimeException;
+import org.opentravel.schemacompiler.util.URLUtils;
 import org.opentravel.schemacompiler.version.VersionSchemeFactory;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 
 /**
@@ -113,7 +112,7 @@ public class ReleaseItemImpl extends RepositoryItemImpl implements ReleaseItem {
      */
     @Override
     public void setNamespace(String namespace) {
-        throw new UnsupportedOperationException( "Method 'setNamespace()' not supported for project items." );
+        throw new UnsupportedOperationException( "Method 'setNamespace()' not supported for release items." );
     }
 
     /**
@@ -129,7 +128,7 @@ public class ReleaseItemImpl extends RepositoryItemImpl implements ReleaseItem {
      */
     @Override
     public void setBaseNamespace(String baseNamespace) {
-        throw new UnsupportedOperationException( "Method 'setBaseNamespace()' not supported for project items." );
+        throw new UnsupportedOperationException( "Method 'setBaseNamespace()' not supported for release items." );
     }
 
     /**
@@ -139,21 +138,8 @@ public class ReleaseItemImpl extends RepositoryItemImpl implements ReleaseItem {
     public String getFilename() {
         Release release = getContent();
         URL releaseUrl = (release == null) ? null : release.getReleaseUrl();
-        String filename = null;
 
-        if (releaseUrl != null) {
-            String urlString = releaseUrl.toExternalForm();
-
-            if (urlString.endsWith( "/" )) {
-                filename = null;
-
-            } else {
-                int idx = urlString.lastIndexOf( '/' );
-                filename = (idx < 0) ? urlString : urlString.substring( idx + 1 );
-            }
-
-        }
-        return filename;
+        return URLUtils.getUrlFilename( releaseUrl );
     }
 
     /**
@@ -161,7 +147,7 @@ public class ReleaseItemImpl extends RepositoryItemImpl implements ReleaseItem {
      */
     @Override
     public void setFilename(String filename) {
-        throw new UnsupportedOperationException( "Method 'setFilename()' not supported for project items." );
+        throw new UnsupportedOperationException( "Method 'setFilename()' not supported for release items." );
     }
 
     /**
@@ -177,7 +163,7 @@ public class ReleaseItemImpl extends RepositoryItemImpl implements ReleaseItem {
      */
     @Override
     public void setLibraryName(String libraryName) {
-        throw new UnsupportedOperationException( "Method 'setLibraryName()' not supported for project items." );
+        throw new UnsupportedOperationException( "Method 'setLibraryName()' not supported for release items." );
     }
 
     /**
@@ -193,7 +179,7 @@ public class ReleaseItemImpl extends RepositoryItemImpl implements ReleaseItem {
      */
     @Override
     public void setVersion(String version) {
-        throw new UnsupportedOperationException( "Method 'setVersion()' not supported for project items." );
+        throw new UnsupportedOperationException( "Method 'setVersion()' not supported for release items." );
     }
 
     /**
@@ -209,7 +195,7 @@ public class ReleaseItemImpl extends RepositoryItemImpl implements ReleaseItem {
      */
     @Override
     public void setVersionScheme(String versionScheme) {
-        throw new UnsupportedOperationException( "Method 'setVersionScheme()' not supported for project items." );
+        throw new UnsupportedOperationException( "Method 'setVersionScheme()' not supported for release items." );
     }
 
     /**
@@ -226,7 +212,7 @@ public class ReleaseItemImpl extends RepositoryItemImpl implements ReleaseItem {
      */
     @Override
     public void setStatus(TLLibraryStatus status) {
-        throw new UnsupportedOperationException( "Method 'setStatus()' not supported for project items." );
+        throw new UnsupportedOperationException( "Method 'setStatus()' not supported for release items." );
     }
 
     /**
@@ -237,13 +223,8 @@ public class ReleaseItemImpl extends RepositoryItemImpl implements ReleaseItem {
         URI uri;
 
         if (getState() == RepositoryItemState.UNMANAGED) {
-            try {
-                uri = releaseManager.getRelease().getReleaseUrl().toURI();
+            uri = URLUtils.toURI( releaseManager.getRelease().getReleaseUrl() );
 
-            } catch (URISyntaxException e) {
-                // Should never happen; throw a runtime exception just in case
-                throw new SchemaCompilerRuntimeException( e );
-            }
         } else {
             uri = super.toURI( fullyQualified );
         }

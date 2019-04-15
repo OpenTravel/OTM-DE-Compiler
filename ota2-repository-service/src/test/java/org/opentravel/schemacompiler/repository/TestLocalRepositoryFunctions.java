@@ -57,9 +57,9 @@ public class TestLocalRepositoryFunctions extends TestRepositoryFunctions {
     }
 
     @Override
-    public void test_19_ListNamespaceChildren() throws Exception {
-        super.test_19_ListNamespaceChildren();
-        assertEquals( 14, testRepository.get().listAllNamespaces().size() );
+    public void test_21_ListNamespaceChildren() throws Exception {
+        super.test_21_ListNamespaceChildren();
+        assertEquals( 16, testRepository.get().listAllNamespaces().size() );
     }
 
     @Test

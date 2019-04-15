@@ -21,17 +21,21 @@ import org.opentravel.schemacompiler.loader.LibraryLoaderException;
 import org.opentravel.schemacompiler.loader.LibraryModelLoader;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.TLLibrary;
+import org.opentravel.schemacompiler.model.TLLibraryStatus;
 import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.model.TLResource;
 import org.opentravel.schemacompiler.repository.impl.MultiReleaseModuleLoader;
 import org.opentravel.schemacompiler.repository.impl.ServiceAssemblyFileUtils;
+import org.opentravel.schemacompiler.repository.impl.ServiceAssemblyItemImpl;
 import org.opentravel.schemacompiler.transform.util.ModelReferenceResolver;
+import org.opentravel.schemacompiler.util.FileUtils;
 import org.opentravel.schemacompiler.util.SchemaCompilerException;
 import org.opentravel.schemacompiler.util.URLUtils;
 import org.opentravel.schemacompiler.validate.FindingType;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
 import org.opentravel.schemacompiler.validate.ValidatorFactory;
 import org.opentravel.schemacompiler.validate.assembly.AssemblyValidationContext;
+import org.opentravel.schemacompiler.version.VersionSchemeFactory;
 import org.opentravel.schemacompiler.visitor.DependencyNavigator;
 import org.opentravel.schemacompiler.visitor.ModelElementVisitor;
 import org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter;
@@ -39,7 +43,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -116,6 +123,27 @@ public class ServiceAssemblyManager {
      */
     public ServiceAssembly loadAssembly(File assemblyFile, ValidationFindings findings) throws LibraryLoaderException {
         return fileUtils.loadAssemblyFile( assemblyFile, findings );
+    }
+
+    /**
+     * Loads a service assembly from a remote OTM repository.
+     * 
+     * @param assemblyItem the repository item for the assembly to load
+     * @param findings the validation findings where errors and warning should be reported
+     * @return ServiceAssembly
+     * @throws RepositoryException thrown if an error occurs while accessing the remote repository
+     * @throws LibraryLoaderException thrown if an error occurs while loading the file
+     */
+    public ServiceAssembly loadAssembly(RepositoryItem assemblyItem, ValidationFindings findings)
+        throws RepositoryException, LibraryLoaderException {
+        Repository repository = assemblyItem.getRepository();
+        File assemblyFile;
+
+        if (repository instanceof RemoteRepository) {
+            ((RemoteRepository) repository).downloadContent( assemblyItem, true );
+        }
+        assemblyFile = URLUtils.toFile( repositoryManager.getContentLocation( assemblyItem ) );
+        return loadAssembly( assemblyFile, findings );
     }
 
     /**
@@ -214,6 +242,91 @@ public class ServiceAssemblyManager {
     }
 
     /**
+     * Publishes the given service assembly to a remote repository and returns the repository item that can be used to
+     * access it.
+     * 
+     * @param assembly the assembly to be published
+     * @param repository the repository to which the assembly will be published
+     * @return ServiceAssemblyItem
+     * @throws RepositoryException thrown if an error occurs while accessing the remote repository
+     */
+    public ServiceAssemblyItem publishAssembly(ServiceAssembly assembly, Repository repository)
+        throws RepositoryException {
+        URL originalUrl = assembly.getAssemblyUrl();
+        File assemblyFile = URLUtils.isFileURL( originalUrl ) ? URLUtils.toFile( originalUrl ) : null;
+
+        if (assemblyFile == null) {
+            throw new RepositoryException(
+                "Cannot publish a release that is not accessible from from the local file system." );
+
+        } else if (fileUtils.isRepositoryFile( assemblyFile )) {
+            throw new IllegalStateException( "The service assembly is already managed by a remote repository." );
+        }
+
+        // Reload the release model just to be sure it is in-sync and contains no errors
+        try {
+            ValidationFindings findings = validateAssembly( assembly );
+
+            if (findings.hasFinding( FindingType.ERROR )) {
+                throw new RepositoryException(
+                    "Unable to publish the service assembly because it contains validation errors: "
+                        + assemblyFile.getName() );
+            }
+
+        } catch (SchemaCompilerException e) {
+            throw new RepositoryException( "Error validating service assembly model: " + assemblyFile.getName(), e );
+        }
+
+        // Backup the file locally before publishing
+        try {
+            fileUtils.createBackupFile( assemblyFile );
+
+        } catch (IOException e) {
+            throw new RepositoryException( "Error creating service assembly backup file: " + assemblyFile.getName(),
+                e );
+        }
+
+        // Publish the assembly and delete the local copy of the file (backup will remain)
+        RepositoryItem repoItem;
+
+        try (InputStream contentStream = new FileInputStream( assemblyFile )) {
+            repoItem = repository.publish( contentStream, fileUtils.getAssemblyFilename( assembly ), assembly.getName(),
+                assembly.getNamespace(), assembly.getVersion(),
+                VersionSchemeFactory.getInstance().getDefaultVersionScheme(), TLLibraryStatus.FINAL );
+            assembly.setAssemblyUrl( repositoryManager.getContentLocation( repoItem ) );
+
+        } catch (IOException e) {
+            throw new RepositoryException( "Unable to read from service assembly data file: " + assemblyFile.getName(),
+                e );
+        }
+        FileUtils.delete( assemblyFile );
+        return new ServiceAssemblyItemImpl( assembly, repoItem );
+    }
+
+    /**
+     * Deletes a service assembly from a remote repository and saves its content on the local file system. If a null
+     * folder location is passed to this method, the assembly will be deleted from the repository without saving it to
+     * the local file system. If the assembly is saved, its file location will be returned by this method.
+     * 
+     * @param assemblyItem the repository item of the assembly to be unpublished
+     * @param saveFolder the folder location on the local file system where the assembly file should be saved (may be
+     *        null)
+     * @throws RepositoryException thrown if an error occurs while accessing the remote repository
+     * @throws IOException thrown if an error occurs while saving the repository to the local file system
+     */
+    public void unpublishAssembly(RepositoryItem assemblyItem, File saveFolder)
+        throws RepositoryException, IOException {
+        File managedFile = URLUtils.toFile( repositoryManager.getContentLocation( assemblyItem ) );
+        File saveFile = null;
+
+        if (saveFolder != null) {
+            saveFile = new File( saveFolder, managedFile.getName() );
+            fileUtils.copyFile( managedFile, saveFile );
+        }
+        repositoryManager.delete( assemblyItem );
+    }
+
+    /**
      * Loads a model that consists of the assembly items provided. This method assumes the assembly has been
      * pre-validated prior to calling this method.
      * 
@@ -221,13 +334,13 @@ public class ServiceAssemblyManager {
      * @return TLModel
      * @throws SchemaCompilerException thrown if an error occurs while loading the model
      */
-    private TLModel loadModel(List<ServiceAssemblyItem> assemblyItems) throws SchemaCompilerException {
+    private TLModel loadModel(List<ServiceAssemblyMember> assemblyItems) throws SchemaCompilerException {
         ReleaseManager releaseManager = new ReleaseManager( repositoryManager );
-        Map<ServiceAssemblyItem,Release> itemReleaseMap = new HashMap<>();
+        Map<ServiceAssemblyMember,Release> itemReleaseMap = new HashMap<>();
         List<Release> allReleases = new ArrayList<>();
 
         // Start by loading each of the releases associated with each assembly item
-        for (ServiceAssemblyItem saItem : assemblyItems) {
+        for (ServiceAssemblyMember saItem : assemblyItems) {
             try {
                 ValidationFindings rFindings = new ValidationFindings();
                 ReleaseItem releaseItem = releaseManager.loadRelease( saItem.getReleaseItem(), rFindings );
@@ -277,11 +390,11 @@ public class ServiceAssemblyManager {
      * @param itemReleaseMap the map of assembly items to their corresponding releases
      * @param model the model to be scanned for unwanted resources
      */
-    private void purgeUnwantedResources(List<ServiceAssemblyItem> assemblyItems,
-        Map<ServiceAssemblyItem,Release> itemReleaseMap, TLModel model) {
+    private void purgeUnwantedResources(List<ServiceAssemblyMember> assemblyItems,
+        Map<ServiceAssemblyMember,Release> itemReleaseMap, TLModel model) {
         Set<TLResource> keepResources = new HashSet<>();
 
-        for (ServiceAssemblyItem saItem : assemblyItems) {
+        for (ServiceAssemblyMember saItem : assemblyItems) {
             Release release = itemReleaseMap.get( saItem );
             List<TLLibrary> saLibraries = (release == null) ? new ArrayList<>() : getLibraries( release, model );
             QName resourceName = saItem.getResourceName();

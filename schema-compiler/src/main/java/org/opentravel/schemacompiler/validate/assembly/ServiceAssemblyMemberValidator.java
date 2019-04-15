@@ -17,7 +17,7 @@
 package org.opentravel.schemacompiler.validate.assembly;
 
 import org.opentravel.schemacompiler.repository.RepositoryItem;
-import org.opentravel.schemacompiler.repository.ServiceAssemblyItem;
+import org.opentravel.schemacompiler.repository.ServiceAssemblyMember;
 import org.opentravel.schemacompiler.validate.FindingType;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
 
@@ -29,7 +29,7 @@ import javax.xml.namespace.QName;
 /**
  * Validator for the <code>ServiceAssembly</code> class.
  */
-public class ServiceAssemblyItemValidator extends AssemblyValidatorBase<ServiceAssemblyItem> {
+public class ServiceAssemblyMemberValidator extends AssemblyValidatorBase<ServiceAssemblyMember> {
 
     public static final String ERROR_CONFLICTING_COMMIT_LEVEL = "CONFLICTING_COMMIT_LEVEL";
     public static final String ERROR_INVALID_RESOURCE_NAMESPACE = "INVALID_RESOURCE_NAMESPACE";
@@ -38,7 +38,7 @@ public class ServiceAssemblyItemValidator extends AssemblyValidatorBase<ServiceA
      * @see org.opentravel.schemacompiler.validate.Validator#validate(org.opentravel.schemacompiler.validate.Validatable)
      */
     @Override
-    public ValidationFindings validate(ServiceAssemblyItem target) {
+    public ValidationFindings validate(ServiceAssemblyMember target) {
         AssemblyValidationBuilder builder = newValidationBuilder( target );
         AssemblyValidationContext context = getValidationContext();
         List<RepositoryItem> libraryItems = context.getLibraryItems( target );

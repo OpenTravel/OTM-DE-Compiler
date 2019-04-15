@@ -75,15 +75,17 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
         test_12_PublishRelease();
         test_13_CompileRelease();
         test_14_CreateServiceAssembly();
-        test_15_NewReleaseVersion();
-        test_16_UnpublishRelease();
-        test_17_DeleteLibrary();
-        test_18_CreateNamespace();
-        test_18a_CreateNamespaceError();
-        test_19_ListNamespaceChildren();
-        test_20_DeleteNamespace();
-        test_21_CreateRootNamespace();
-        test_22_DeleteRootNamespace();
+        test_15_PublishServiceAssembly();
+        test_16_UnpublishServiceAssembly();
+        test_17_NewReleaseVersion();
+        test_18_UnpublishRelease();
+        test_19_DeleteLibrary();
+        test_20_CreateNamespace();
+        test_20a_CreateNamespaceError();
+        test_21_ListNamespaceChildren();
+        test_22_DeleteNamespace();
+        test_23_CreateRootNamespace();
+        test_24_DeleteRootNamespace();
     }
 
     public void test_01_PublishLibrary() throws Exception {
@@ -573,24 +575,24 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
     }
 
     public void test_14_CreateServiceAssembly() throws Exception {
-        logDebug( "CREATE SERVICE ASSEMBLY - Compiling a service assembly. [%s]" );
+        logDebug( "CREATE SERVICE ASSEMBLY - Creating and loading a service assembly. [%s]" );
         File assemblyFile = new File( wipFolder.get(), "/TestAssembly.osm" );
         ServiceAssemblyManager assemblyManager = new ServiceAssemblyManager( repositoryManager.get() );
         ReleaseManager releaseManager = new ReleaseManager( repositoryManager.get() );
-        ServiceAssembly assembly = assemblyManager.newAssembly( "http://www.opentravel.org/assemblies", "TestAssembly",
-            "1.0.0", assemblyFile );
-        ServiceAssemblyItem providerItem = new ServiceAssemblyItem();
-        ServiceAssemblyItem consumerItem = new ServiceAssemblyItem();
+        ServiceAssembly assembly = assemblyManager.newAssembly(
+            "http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/assemblies", "TestAssembly", "1.0.0", assemblyFile );
+        ServiceAssemblyMember providerMember = new ServiceAssemblyMember();
+        ServiceAssemblyMember consumerMember = new ServiceAssemblyMember();
         RepositoryItem releaseItem = loadManagedRelease( "TestRelease_1_0_0.otr", releaseManager );
         TLModel consumerModel, providerModel, implementationModel;
         ValidationFindings findings = new ValidationFindings();
 
-        providerItem.setReleaseItem( releaseItem );
-        providerItem.setResourceName(
+        providerMember.setReleaseItem( releaseItem );
+        providerMember.setResourceName(
             new QName( "http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/test-package_v2", "SampleResource" ) );
-        consumerItem.setReleaseItem( releaseItem );
-        assembly.addProviderApi( providerItem );
-        assembly.addConsumerApi( providerItem );
+        consumerMember.setReleaseItem( releaseItem );
+        assembly.addProviderApi( providerMember );
+        assembly.addConsumerApi( providerMember );
         assemblyManager.saveAssembly( assembly );
 
         assembly = assemblyManager.loadAssembly( assemblyFile, findings );
@@ -611,7 +613,72 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
         logDebug( "DONE - Success." );
     }
 
-    public void test_15_NewReleaseVersion() throws Exception {
+    public void test_15_PublishServiceAssembly() throws Exception {
+        logDebug( "PUBLISH SERVICE ASSEMBLY - Publishing a service assembly. [%s]" );
+        File assemblyFile = new File( wipFolder.get(), "/TestAssembly.osm" );
+        ServiceAssemblyManager assemblyManager = new ServiceAssemblyManager( repositoryManager.get() );
+        ValidationFindings findings = new ValidationFindings();
+        ServiceAssembly assembly = assemblyManager.loadAssembly( assemblyFile, findings );
+        ServiceAssemblyItem assemblyItem;
+
+        assertFalse( findings.hasFinding( FindingType.ERROR ) );
+
+        assemblyItem = assemblyManager.publishAssembly( assembly, testRepository.get() );
+        assertNotNull( assemblyItem );
+        assertEquals( assembly.getNamespace(), assemblyItem.getNamespace() );
+        assertEquals( assembly.getBaseNamespace(), assemblyItem.getBaseNamespace() );
+        assertEquals( assembly.getName(), assemblyItem.getLibraryName() );
+        assertEquals( assembly.getVersion(), assemblyItem.getVersion() );
+        assertEquals( assembly, assemblyItem.getContent() );
+
+        // Attempt to delete the release from the repository (should fail)
+        if (this.getClass().getName().contains( "Remote" )) { // only test when running non-local
+            try {
+                RepositoryItem releaseItem = assembly.getAllApis().get( 0 ).getReleaseItem();
+
+                repositoryManager.get().delete( releaseItem );
+                fail( "Expected exception not thrown." );
+
+            } catch (RepositoryException e) {
+                // Expected exception - no action required
+            }
+        }
+
+        // List the assemblies in the repository's namespace and be sure that the one we just published is returned
+        List<RepositoryItem> assemblyItemList = testRepository.get().listItems( assembly.getBaseNamespace(),
+            TLLibraryStatus.FINAL, false, RepositoryItemType.ASSEMBLY );
+
+        assertEquals( 1, assemblyItemList.size() );
+        assertEquals( "TestAssembly_1_0_0.osm", assemblyItemList.get( 0 ).getFilename() );
+
+        // Load the assembly using the repository item we just retrieved
+        ServiceAssembly reloadedAssembly =
+            assemblyManager.loadAssembly( assemblyItemList.get( 0 ), findings = new ValidationFindings() );
+
+        assertFalse( findings.hasFinding( FindingType.ERROR ) );
+        assertEquals( assembly.getNamespace(), reloadedAssembly.getNamespace() );
+        assertEquals( assembly.getBaseNamespace(), reloadedAssembly.getBaseNamespace() );
+        assertEquals( assembly.getName(), reloadedAssembly.getName() );
+        assertEquals( assembly.getVersion(), reloadedAssembly.getVersion() );
+
+        logDebug( "DONE - Success." );
+    }
+
+    public void test_16_UnpublishServiceAssembly() throws Exception {
+        logDebug( "UNPUBLISH SERVICE ASSEMBLY - Unpublishing a service assembly. [%s]" );
+        ServiceAssemblyManager assemblyManager = new ServiceAssemblyManager( repositoryManager.get() );
+        RepositoryItem assemblyItem = repositoryManager.get().getRepositoryItem(
+            "http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/assemblies", "TestAssembly_1_0_0.osm", "1.0.0" );
+        File saveFile = new File( wipFolder.get(), "TestAssembly_1_0_0.osm" );
+
+        assertNotNull( assemblyItem );
+        assemblyManager.unpublishAssembly( assemblyItem, wipFolder.get() );
+        assertTrue( saveFile.exists() );
+
+        logDebug( "DONE - Success." );
+    }
+
+    public void test_17_NewReleaseVersion() throws Exception {
         logDebug( "NEW RELEASE VERSION - Creating new version of a release. [%s]" );
         ValidationFindings findings = new ValidationFindings();
         ReleaseManager releaseManager = new ReleaseManager( repositoryManager.get() );
@@ -651,7 +718,7 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
         logDebug( "DONE - Success." );
     }
 
-    public void test_16_UnpublishRelease() throws Exception {
+    public void test_18_UnpublishRelease() throws Exception {
         logDebug( "UNPUBLISH RELEASE - Unpublishing a release from the repository. [%s]" );
         ReleaseManager releaseManager = new ReleaseManager( repositoryManager.get() );
         ReleaseManager localReleaseManager;
@@ -720,7 +787,7 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
         return releaseItem;
     }
 
-    public void test_17_DeleteLibrary() throws Exception {
+    public void test_19_DeleteLibrary() throws Exception {
         logDebug( "DELETE - Delete a managed project item. [%s]" );
         ProjectManager projectManager = new ProjectManager( new TLModel(), true, repositoryManager.get() );
         File projectFile = new File( wipFolder.get(), "/projects/project_1.xml" );
@@ -755,7 +822,7 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
         logDebug( "DONE - Success." );
     }
 
-    public void test_18_CreateNamespace() throws Exception {
+    public void test_20_CreateNamespace() throws Exception {
         logDebug( "CREATE NAMESPACE - Create a managed namespace item. [%s]" );
         String managedNS = "http://www.OpenTravel.org/ns/Test-NS";
         List<String> repositoryNamespaces = testRepository.get().listBaseNamespaces();
@@ -772,7 +839,7 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
         logDebug( "DONE - Success." );
     }
 
-    public void test_18a_CreateNamespaceError() throws Exception {
+    public void test_20a_CreateNamespaceError() throws Exception {
         logDebug( "CREATE NAMESPACE (Error Test) - Attempt to create conflicting namespace. [%s]" );
         String managedNS = "http://www.OpenTravel.org/NS/Test-NS/ns2"; // case-sensitive conflict with test_10
         List<String> repositoryNamespaces = testRepository.get().listBaseNamespaces();
@@ -795,7 +862,7 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
         logDebug( "DONE - Success." );
     }
 
-    public void test_19_ListNamespaceChildren() throws Exception {
+    public void test_21_ListNamespaceChildren() throws Exception {
         logDebug( "LIST NAMESPACE CHILDREN - Find the children of a managed namespace. [%s]" );
         List<String> nsChildren = testRepository.get().listNamespaceChildren( "http://www.OpenTravel.org/ns" );
 
@@ -806,7 +873,7 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
         logDebug( "DONE - Success." );
     }
 
-    public void test_20_DeleteNamespace() throws Exception {
+    public void test_22_DeleteNamespace() throws Exception {
         logDebug( "DELETE NAMESPACE - Delete a managed namespace item. [%s]" );
         String managedNS = "http://www.OpenTravel.org/ns/Test-NS";
         List<String> repositoryNamespaces = testRepository.get().listBaseNamespaces();
@@ -823,7 +890,7 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
         logDebug( "DONE - Success." );
     }
 
-    public void test_21_CreateRootNamespace() throws Exception {
+    public void test_23_CreateRootNamespace() throws Exception {
         logDebug( "CREATE ROOT NAMESPACE - Create a managed namespace item. [%s]" );
         String rootNS = "http://www.testnamespace.com";
         List<String> rootNamespaces = testRepository.get().listRootNamespaces();
@@ -860,7 +927,7 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
         logDebug( "DONE - Success." );
     }
 
-    public void test_22_DeleteRootNamespace() throws Exception {
+    public void test_24_DeleteRootNamespace() throws Exception {
         logDebug( "DELETE ROOT NAMESPACE - Delete a managed namespace item. [%s]" );
         String rootNS = "http://www.testnamespace.com";
         List<String> rootNamespaces = testRepository.get().listRootNamespaces();

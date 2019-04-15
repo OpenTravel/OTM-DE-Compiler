@@ -47,6 +47,7 @@ import org.opentravel.schemacompiler.repository.RepositoryException;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
 import org.opentravel.schemacompiler.repository.RepositoryItemType;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
+import org.opentravel.schemacompiler.repository.ServiceAssembly;
 
 import java.io.File;
 import java.io.IOException;
@@ -398,6 +399,9 @@ public abstract class FreeTextSearchService {
                 } else if (Release.class.getName().equals( doc.get( IndexingTerms.ENTITY_TYPE_FIELD ) )) {
                     searchResults.add( (SearchResult<T>) new ReleaseSearchResult( doc, this ) );
 
+                } else if (ServiceAssembly.class.getName().equals( doc.get( IndexingTerms.ENTITY_TYPE_FIELD ) )) {
+                    searchResults.add( (SearchResult<T>) new AssemblySearchResult( doc, this ) );
+
                 } else {
                     searchResults.add( (SearchResult<T>) new EntitySearchResult( doc, this ) );
                 }
@@ -501,7 +505,7 @@ public abstract class FreeTextSearchService {
      * Returns the library with the specified search index ID.
      * 
      * @param searchIndexId the search index ID of the library to retrieve
-     * @param resolveContent flag indicating whether the content DETAILS should be pre-resolved; if false, content is
+     * @param resolveContent flag indicating whether the content details should be pre-resolved; if false, content is
      *        still available in the search results, but it will be initialized in a lazy fashion
      * @return LibrarySearchResult
      * @throws RepositoryException thrown if an error occurs while performing the search
@@ -515,20 +519,20 @@ public abstract class FreeTextSearchService {
      * Returns the library from the search index that is associated with the given repository item.
      * 
      * @param item the repository item for which to return the library from the search index
-     * @param resolveContent flag indicating whether the content DETAILS should be pre-resolved; if false, content is
+     * @param resolveContent flag indicating whether the content details should be pre-resolved; if false, content is
      *        still available in the search results, but it will be initialized in a lazy fashion
      * @return LibrarySearchResult
      * @throws RepositoryException thrown if an error occurs while performing the search
      */
     public LibrarySearchResult getLibrary(RepositoryItem item, boolean resolveContent) throws RepositoryException {
-        return (LibrarySearchResult) getLibraryOrRelease( item, resolveContent, RepositoryItemType.LIBRARY );
+        return (LibrarySearchResult) resolveSearchResult( item, resolveContent );
     }
 
     /**
      * Returns a list of libraries that correspond to the search index ID's provided.
      * 
      * @param searchIndexIds the search index ID's for the libraries to retrieve
-     * @param resolveContent flag indicating whether the content DETAILS should be pre-resolved; if false, content is
+     * @param resolveContent flag indicating whether the content details should be pre-resolved; if false, content is
      *        still available in the search results, but it will be initialized in a lazy fashion
      * @return List&lt;LibrarySearchResult&gt;
      * @throws RepositoryException thrown if an error occurs while performing the search
@@ -536,7 +540,7 @@ public abstract class FreeTextSearchService {
     public List<LibrarySearchResult> getLibraries(Collection<String> searchIndexIds, boolean resolveContent)
         throws RepositoryException {
         List<SearchResult<?>> rawResults =
-            getLibrariesOrReleases( searchIndexIds, resolveContent, RepositoryItemType.LIBRARY );
+            resolveSearchResults( searchIndexIds, resolveContent, RepositoryItemType.LIBRARY );
         List<LibrarySearchResult> results = new ArrayList<>();
 
         for (SearchResult<?> r : rawResults) {
@@ -549,7 +553,7 @@ public abstract class FreeTextSearchService {
      * Returns the release with the specified search index ID.
      * 
      * @param searchIndexId the search index ID of the release to retrieve
-     * @param resolveContent flag indicating whether the content DETAILS should be pre-resolved; if false, content is
+     * @param resolveContent flag indicating whether the content details should be pre-resolved; if false, content is
      *        still available in the search results, but it will be initialized in a lazy fashion
      * @return ReleaseSearchResult
      * @throws RepositoryException thrown if an error occurs while performing the search
@@ -563,20 +567,20 @@ public abstract class FreeTextSearchService {
      * Returns the release from the search index that is associated with the given repository item.
      * 
      * @param item the repository item for which to return the release from the search index
-     * @param resolveContent flag indicating whether the content DETAILS should be pre-resolved; if false, content is
+     * @param resolveContent flag indicating whether the content details should be pre-resolved; if false, content is
      *        still available in the search results, but it will be initialized in a lazy fashion
      * @return ReleaseSearchResult
      * @throws RepositoryException thrown if an error occurs while performing the search
      */
     public ReleaseSearchResult getRelease(RepositoryItem item, boolean resolveContent) throws RepositoryException {
-        return (ReleaseSearchResult) getLibraryOrRelease( item, resolveContent, RepositoryItemType.RELEASE );
+        return (ReleaseSearchResult) resolveSearchResult( item, resolveContent );
     }
 
     /**
      * Returns a list of releases that correspond to the search index ID's provided.
      * 
      * @param searchIndexIds the search index ID's for the releases to retrieve
-     * @param resolveContent flag indicating whether the content DETAILS should be pre-resolved; if false, content is
+     * @param resolveContent flag indicating whether the content details should be pre-resolved; if false, content is
      *        still available in the search results, but it will be initialized in a lazy fashion
      * @return List&lt;ReleaseSearchResult&gt;
      * @throws RepositoryException thrown if an error occurs while performing the search
@@ -584,11 +588,59 @@ public abstract class FreeTextSearchService {
     public List<ReleaseSearchResult> getReleases(Collection<String> searchIndexIds, boolean resolveContent)
         throws RepositoryException {
         List<SearchResult<?>> rawResults =
-            getLibrariesOrReleases( searchIndexIds, resolveContent, RepositoryItemType.RELEASE );
+            resolveSearchResults( searchIndexIds, resolveContent, RepositoryItemType.RELEASE );
         List<ReleaseSearchResult> results = new ArrayList<>();
 
         for (SearchResult<?> r : rawResults) {
             results.add( (ReleaseSearchResult) r );
+        }
+        return results;
+    }
+
+    /**
+     * Returns the assembly with the specified search index ID.
+     * 
+     * @param searchIndexId the search index ID of the assembly to retrieve
+     * @param resolveContent flag indicating whether the content details should be pre-resolved; if false, content is
+     *        still available in the search results, but it will be initialized in a lazy fashion
+     * @return AssemblySearchResult
+     * @throws RepositoryException thrown if an error occurs while performing the search
+     */
+    public AssemblySearchResult getAssembly(String searchIndexId, boolean resolveContent) throws RepositoryException {
+        List<AssemblySearchResult> results = getAssemblies( Arrays.asList( searchIndexId ), resolveContent );
+        return results.isEmpty() ? null : results.get( 0 );
+    }
+
+    /**
+     * Returns the service assembly from the search index that is associated with the given repository item.
+     * 
+     * @param item the repository item for which to return the assembly from the search index
+     * @param resolveContent flag indicating whether the content details should be pre-resolved; if false, content is
+     *        still available in the search results, but it will be initialized in a lazy fashion
+     * @return AssemblySearchResult
+     * @throws RepositoryException thrown if an error occurs while performing the search
+     */
+    public AssemblySearchResult getAssembly(RepositoryItem item, boolean resolveContent) throws RepositoryException {
+        return (AssemblySearchResult) resolveSearchResult( item, resolveContent );
+    }
+
+    /**
+     * Returns a list of service assemblies that correspond to the search index ID's provided.
+     * 
+     * @param searchIndexIds the search index ID's for the assemblies to retrieve
+     * @param resolveContent flag indicating whether the content details should be pre-resolved; if false, content is
+     *        still available in the search results, but it will be initialized in a lazy fashion
+     * @return List&lt;AssemblySearchResult&gt;
+     * @throws RepositoryException thrown if an error occurs while performing the search
+     */
+    public List<AssemblySearchResult> getAssemblies(Collection<String> searchIndexIds, boolean resolveContent)
+        throws RepositoryException {
+        List<SearchResult<?>> rawResults =
+            resolveSearchResults( searchIndexIds, resolveContent, RepositoryItemType.ASSEMBLY );
+        List<AssemblySearchResult> results = new ArrayList<>();
+
+        for (SearchResult<?> r : rawResults) {
+            results.add( (AssemblySearchResult) r );
         }
         return results;
     }
@@ -603,20 +655,27 @@ public abstract class FreeTextSearchService {
      * @return SearchResult&lt;?&gt;
      * @throws RepositoryException thrown if an error occurs while performing the search
      */
-    private SearchResult<?> getLibraryOrRelease(RepositoryItem item, boolean resolveContent,
-        RepositoryItemType itemType) throws RepositoryException {
+    private SearchResult<?> resolveSearchResult(RepositoryItem item, boolean resolveContent)
+        throws RepositoryException {
+        RepositoryItemType itemType = RepositoryItemType.fromFilename( item.getFilename() );
         SearchResult<?> searchResult = null;
         BooleanQuery query = newSearchIndexQuery();
+        Class<?> searchEntityType;
 
-        if (itemType == RepositoryItemType.RELEASE) {
-            query.add( new BooleanClause(
-                new TermQuery( new Term( IndexingTerms.ENTITY_TYPE_FIELD, Release.class.getName() ) ), Occur.MUST ) );
-
-        } else {
-            query.add( new BooleanClause(
-                new TermQuery( new Term( IndexingTerms.ENTITY_TYPE_FIELD, TLLibrary.class.getName() ) ), Occur.MUST ) );
+        switch (itemType) {
+            case ASSEMBLY:
+                searchEntityType = ServiceAssembly.class;
+                break;
+            case RELEASE:
+                searchEntityType = Release.class;
+                break;
+            case LIBRARY:
+            default:
+                searchEntityType = TLLibrary.class;
+                break;
         }
-
+        query.add( new BooleanClause(
+            new TermQuery( new Term( IndexingTerms.ENTITY_TYPE_FIELD, searchEntityType.getName() ) ), Occur.MUST ) );
         query.add( new BooleanClause(
             new TermQuery( new Term( IndexingTerms.BASE_NAMESPACE_FIELD, item.getBaseNamespace() ) ), Occur.MUST ) );
         query.add( new BooleanClause( new TermQuery( new Term( IndexingTerms.FILENAME_FIELD, item.getFilename() ) ),
@@ -626,12 +685,7 @@ public abstract class FreeTextSearchService {
         List<Document> queryResults = executeQuery( query, resolveContent ? null : nonContentAttrs );
 
         if (!queryResults.isEmpty()) {
-            if (itemType == RepositoryItemType.RELEASE) {
-                searchResult = new ReleaseSearchResult( queryResults.get( 0 ), this );
-
-            } else {
-                searchResult = new LibrarySearchResult( queryResults.get( 0 ), repositoryManager, this );
-            }
+            searchResult = buildSearchResult( queryResults.get( 0 ), itemType );
         }
         return searchResult;
     }
@@ -646,42 +700,69 @@ public abstract class FreeTextSearchService {
      * @return List&lt;LibrarySearchResult&gt;
      * @throws RepositoryException thrown if an error occurs while performing the search
      */
-    private List<SearchResult<?>> getLibrariesOrReleases(Collection<String> searchIndexIds, boolean resolveContent,
+    private List<SearchResult<?>> resolveSearchResults(Collection<String> searchIndexIds, boolean resolveContent,
         RepositoryItemType itemType) throws RepositoryException {
         List<SearchResult<?>> searchResults = new ArrayList<>();
 
         if ((searchIndexIds != null) && !searchIndexIds.isEmpty()) {
             BooleanQuery identityQuery = new BooleanQuery();
             BooleanQuery masterQuery = newSearchIndexQuery();
+            Class<?> searchEntityType;
             List<Document> queryResults;
 
             for (String searchIndexId : searchIndexIds) {
                 identityQuery.add( new BooleanClause(
                     new TermQuery( new Term( IndexingTerms.IDENTITY_FIELD, searchIndexId ) ), Occur.SHOULD ) );
             }
-            if (itemType == RepositoryItemType.RELEASE) {
-                masterQuery.add( new BooleanClause(
-                    new TermQuery( new Term( IndexingTerms.ENTITY_TYPE_FIELD, Release.class.getName() ) ),
-                    Occur.MUST ) );
 
-            } else {
-                masterQuery.add( new BooleanClause(
-                    new TermQuery( new Term( IndexingTerms.ENTITY_TYPE_FIELD, TLLibrary.class.getName() ) ),
-                    Occur.MUST ) );
+            switch (itemType) {
+                case ASSEMBLY:
+                    searchEntityType = ServiceAssembly.class;
+                    break;
+                case RELEASE:
+                    searchEntityType = Release.class;
+                    break;
+                case LIBRARY:
+                default:
+                    searchEntityType = TLLibrary.class;
+                    break;
             }
+            masterQuery.add( new BooleanClause(
+                new TermQuery( new Term( IndexingTerms.ENTITY_TYPE_FIELD, searchEntityType.getName() ) ),
+                Occur.MUST ) );
             masterQuery.add( identityQuery, Occur.MUST );
             queryResults = executeQuery( masterQuery, resolveContent ? null : nonContentAttrs );
 
             for (Document doc : queryResults) {
-                if (itemType == RepositoryItemType.RELEASE) {
-                    searchResults.add( new ReleaseSearchResult( doc, this ) );
-
-                } else {
-                    searchResults.add( new LibrarySearchResult( doc, repositoryManager, this ) );
-                }
+                searchResults.add( buildSearchResult( doc, itemType ) );
             }
         }
         return searchResults;
+    }
+
+    /**
+     * Constructs a search result using the document and item type provided.
+     * 
+     * @param doc the search index document from which to construct the result
+     * @param itemType the type of item represented by the document's content
+     * @return SearchResult&lt;?&gt;
+     */
+    private SearchResult<?> buildSearchResult(Document doc, RepositoryItemType itemType) {
+        SearchResult<?> searchResult;
+
+        switch (itemType) {
+            case ASSEMBLY:
+                searchResult = new AssemblySearchResult( doc, this );
+                break;
+            case RELEASE:
+                searchResult = new ReleaseSearchResult( doc, this );
+                break;
+            case LIBRARY:
+            default:
+                searchResult = new LibrarySearchResult( doc, repositoryManager, this );
+                break;
+        }
+        return searchResult;
     }
 
     /**
@@ -823,10 +904,60 @@ public abstract class FreeTextSearchService {
     }
 
     /**
+     * Returns the list of OTM assemblies that reference the release with the specified search index ID.
+     * 
+     * @param releaseIndex the index search result for the release to use as the target of the where-used search
+     * @param resolveContent flag indicating whether the content details should be pre-resolved; if false, content is
+     *        still available in the search results, but it will be initialized in a lazy fashion
+     * @return List&lt;AssemblySearchResult&gt;
+     * @throws RepositoryException thrown if an error occurs while performing the search
+     */
+    public List<AssemblySearchResult> getReleaseAssemblies(ReleaseSearchResult releaseIndex, boolean resolveContent)
+        throws RepositoryException {
+        IndexSearcher searcher = null;
+        try {
+            searchLock.readLock().lock();
+            List<AssemblySearchResult> searchResults = new ArrayList<>();
+            BooleanQuery query = newSearchIndexQuery();
+            List<Document> queryResults;
+
+            searcher = searchManager.acquire();
+
+            query.add( new BooleanClause(
+                new TermQuery( new Term( IndexingTerms.ENTITY_TYPE_FIELD, ServiceAssembly.class.getName() ) ),
+                Occur.MUST ) );
+            query.add( new BooleanClause(
+                new TermQuery( new Term( IndexingTerms.REFERENCED_RELEASE_FIELD, releaseIndex.getSearchIndexId() ) ),
+                Occur.MUST ) );
+
+            queryResults = executeQuery( searcher, query, resolveContent ? null : nonContentAttrs );
+
+            for (Document doc : queryResults) {
+                searchResults.add( new AssemblySearchResult( doc, this ) );
+            }
+            return searchResults;
+
+        } catch (Exception e) {
+            throw new RepositoryException( WHERE_USED_QUERY_ERROR + releaseIndex.getSearchIndexId(), e );
+
+        } finally {
+            try {
+                if (searcher != null) {
+                    searchManager.release( searcher );
+                }
+
+            } catch (Exception e) {
+                log.error( ERROR_RELEASING_INDEX_SEARCHER, e );
+            }
+            searchLock.readLock().unlock();
+        }
+    }
+
+    /**
      * Returns the list of OTM releases that reference the library with the specified search index ID.
      * 
      * @param libraryIndex the index search result for the library to use as the target of the where-used search
-     * @param resolveContent flag indicating whether the content DETAILS should be pre-resolved; if false, content is
+     * @param resolveContent flag indicating whether the content details should be pre-resolved; if false, content is
      *        still available in the search results, but it will be initialized in a lazy fashion
      * @return List&lt;ReleaseSearchResult&gt;
      * @throws RepositoryException thrown if an error occurs while performing the search

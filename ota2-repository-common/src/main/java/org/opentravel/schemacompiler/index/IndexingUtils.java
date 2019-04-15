@@ -59,6 +59,8 @@ import org.opentravel.schemacompiler.model.TLSimple;
 import org.opentravel.schemacompiler.model.TLSimpleFacet;
 import org.opentravel.schemacompiler.model.TLValueWithAttributes;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
+import org.opentravel.schemacompiler.repository.RepositoryItemType;
+import org.opentravel.schemacompiler.repository.ServiceAssemblyMember;
 import org.opentravel.schemacompiler.util.ClassSpecificFunction;
 import org.opentravel.schemacompiler.validate.Validatable;
 import org.opentravel.schemacompiler.validate.ValidationFinding;
@@ -125,17 +127,28 @@ public class IndexingUtils {
      * @return String
      */
     public static String getIdentityKey(RepositoryItem item) {
-        boolean isLibrary = item.getFilename().toLowerCase().endsWith( ".otm" );
+        RepositoryItemType itemType = RepositoryItemType.fromFilename( item.getFilename() );
         StringBuilder identityKey = new StringBuilder();
 
-        identityKey.append( isLibrary ? "LIB:" : "REL:" );
+        switch (itemType) {
+            case ASSEMBLY:
+                identityKey.append( "OSM:" );
+                break;
+            case RELEASE:
+                identityKey.append( "REL:" );
+                break;
+            case LIBRARY:
+            default:
+                identityKey.append( "LIB:" );
+                break;
+        }
         identityKey.append( item.getNamespace() ).append( ":" );
         identityKey.append( item.getLibraryName() );
         return identityKey.toString();
     }
 
     /**
-     * Returns the qualified identity key library associated with the given release member.
+     * Returns the qualified identity key of the library associated with the given release member.
      * 
      * @param member the release member for which to return the search index key
      * @return String
@@ -146,6 +159,21 @@ public class IndexingUtils {
         identityKey.append( "LIB:" );
         identityKey.append( member.getNamespace() ).append( ":" );
         identityKey.append( member.getLibraryName() );
+        return identityKey.toString();
+    }
+
+    /**
+     * Returns the qualified identity key of the release associated with the given service assembly member.
+     * 
+     * @param member the assembly member for which to return the search index key
+     * @return String
+     */
+    public static String getIdentityKey(ServiceAssemblyMember member) {
+        StringBuilder identityKey = new StringBuilder();
+
+        identityKey.append( "REL:" );
+        identityKey.append( member.getReleaseItem().getNamespace() ).append( ":" );
+        identityKey.append( member.getReleaseItem().getLibraryName() );
         return identityKey.toString();
     }
 

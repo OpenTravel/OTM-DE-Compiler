@@ -17,7 +17,7 @@
 package org.opentravel.schemacompiler.validate.assembly;
 
 import org.opentravel.schemacompiler.repository.ServiceAssembly;
-import org.opentravel.schemacompiler.repository.ServiceAssemblyItem;
+import org.opentravel.schemacompiler.repository.ServiceAssemblyMember;
 import org.opentravel.schemacompiler.util.URLUtils;
 import org.opentravel.schemacompiler.validate.FindingType;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
@@ -36,8 +36,8 @@ public class ServiceAssemblyValidator extends AssemblyValidatorBase<ServiceAssem
      */
     @Override
     public ValidationFindings validate(ServiceAssembly target) {
-        Validator<ServiceAssemblyItem> itemValidator =
-            getValidatorFactory().getValidatorForClass( ServiceAssemblyItem.class );
+        Validator<ServiceAssemblyMember> itemValidator =
+            getValidatorFactory().getValidatorForClass( ServiceAssemblyMember.class );
         AssemblyValidationBuilder builder = newValidationBuilder( target );
 
         builder.setProperty( "assemblyUrl", target.getAssemblyUrl() ).setFindingType( FindingType.ERROR )
@@ -59,8 +59,8 @@ public class ServiceAssemblyValidator extends AssemblyValidatorBase<ServiceAssem
             builder.addFinding( FindingType.ERROR, "version", ERROR_VERSION_IDENTIFIER, target.getVersion() );
         }
 
-        for (ServiceAssemblyItem item : target.getAllApis()) {
-            builder.addFindings( itemValidator.validate( item ) );
+        for (ServiceAssemblyMember member : target.getAllApis()) {
+            builder.addFindings( itemValidator.validate( member ) );
         }
         return builder.getFindings();
     }

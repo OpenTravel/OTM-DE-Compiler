@@ -72,15 +72,6 @@ public class HtmlDocletTest extends AbstractWriterTest {
     public void testGenerateLibraryFiles() throws Exception {
         DEST_DIR.mkdir();
         doclet.generateLibraryFiles( config.getModel() );
-        // for (TLLibrary lib : config.getModel().getUserDefinedLibraries()) {
-        // String basePath = config.getDestDirName()
-        // + DirectoryManager.getPath(AbstractDocumentationBuilder.getLibraryName(lib));
-        // for(LibraryMember member : lib.getNamedMembers()){
-        // if(! (member instanceof TLResource)){ //TODO temporary
-        // File file = new File(basePath + File.separator + member.getLocalName() + ".html");
-        // assertTrue("No member file: " + member.getLocalName(), file.exists());
-        // }
-        // }
-        // }
     }
+
 }

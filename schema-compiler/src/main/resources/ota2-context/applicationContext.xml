@@ -560,8 +560,8 @@
 					<property name="validatorClass" value="org.opentravel.schemacompiler.validate.assembly.ServiceAssemblyValidator" />
 				</bean>
 				<bean class="org.opentravel.schemacompiler.validate.ValidatorMapping">
-					<property name="targetClass" value="org.opentravel.schemacompiler.repository.ServiceAssemblyItem" />
-					<property name="validatorClass" value="org.opentravel.schemacompiler.validate.assembly.ServiceAssemblyItemValidator" />
+					<property name="targetClass" value="org.opentravel.schemacompiler.repository.ServiceAssemblyMember" />
+					<property name="validatorClass" value="org.opentravel.schemacompiler.validate.assembly.ServiceAssemblyMemberValidator" />
 				</bean>
 			</list>
 		</property>

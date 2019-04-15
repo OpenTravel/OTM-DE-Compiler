@@ -69,7 +69,7 @@ import javax.xml.validation.SchemaFactory;
 /**
  * Static helper methods that handle the loading and saving of releases to and from the local file system using JAXB.
  */
-public class ReleaseFileUtils implements AbstractFileUtils {
+public class ReleaseFileUtils extends AbstractFileUtils {
 
     private static final String SCHEMA_CONTEXT = "org.opentravel.ns.ota2.release_v01_00";
     private static final String RELEASE_FILE_NAMESPACE = "http://www.OpenTravel.org/ns/OTA2/Release_v01_00";
@@ -78,8 +78,6 @@ public class ReleaseFileUtils implements AbstractFileUtils {
     private static ObjectFactory objectFactory = new ObjectFactory();
     private static JAXBContext jaxbContext;
 
-    private RepositoryManager repositoryManager;
-
     /**
      * Constructor that supplies the repository manager to be used during object transformations during the loading
      * process.
@@ -87,7 +85,7 @@ public class ReleaseFileUtils implements AbstractFileUtils {
      * @param repositoryManager the repository manager instance
      */
     public ReleaseFileUtils(RepositoryManager repositoryManager) {
-        this.repositoryManager = repositoryManager;
+        super( repositoryManager );
     }
 
     /**
@@ -263,7 +261,7 @@ public class ReleaseFileUtils implements AbstractFileUtils {
     }
 
     /**
-     * Unmarshals the given JAXB release member from the string provided.
+     * Unmarshals a JAXB release member from the string provided.
      * 
      * @param memberContent the string content for the release member to be unmarshalled
      * @return ReleaseMemberType

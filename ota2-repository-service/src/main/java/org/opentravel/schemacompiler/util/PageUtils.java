@@ -67,6 +67,16 @@ public class PageUtils {
     }
 
     /**
+     * Returns true if the given namespace item represents an OTM service assembly.
+     * 
+     * @param item the namespace item to check
+     * @return boolean
+     */
+    public boolean isAssembly(NamespaceItem item) {
+        return (item != null) && RepositoryItemType.ASSEMBLY.isItemType( item.getFilename() );
+    }
+
+    /**
      * Returns the opposite of the current value between 'value1' and 'value2'.
      * 
      * @param currentValue the current value

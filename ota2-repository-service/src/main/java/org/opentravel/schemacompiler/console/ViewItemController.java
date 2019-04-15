@@ -163,6 +163,26 @@ public class ViewItemController extends BaseController {
         return targetPage;
     }
 
+    // TODO: Add release-assemblies page to display the assemblies to which a release is assigned
+
+    /**
+     * Called by the Spring MVC controller to display the service assembly view page.
+     * 
+     * @param baseNamespace the base namespace of the selected assembly
+     * @param filename the filename of the selected assembly to view
+     * @param version the version of the selected assembly to view
+     * @param session the HTTP session that contains information about an authenticated user
+     * @param model the model context to be used when rendering the page view
+     * @return String
+     */
+    @RequestMapping({"/assemblyView.html", "/assemblyView.htm"})
+    public String viewAssembly(@RequestParam(value = "baseNamespace") String baseNamespace,
+        @RequestParam(value = "filename") String filename, @RequestParam(value = "version") String version,
+        HttpSession session, Model model) {
+        // TODO: Implement the 'viewAssembly()' method
+        return null;
+    }
+
     /**
      * Called by the Spring MVC controller to display the general-information library page.
      * 

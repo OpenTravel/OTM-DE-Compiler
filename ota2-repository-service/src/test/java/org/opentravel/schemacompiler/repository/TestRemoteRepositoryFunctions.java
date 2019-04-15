@@ -93,9 +93,9 @@ public class TestRemoteRepositoryFunctions extends TestRepositoryFunctions {
     }
 
     @Override
-    public void test_19_ListNamespaceChildren() throws Exception {
-        super.test_19_ListNamespaceChildren();
-        assertEquals( 8, testRepository.get().listAllNamespaces().size() );
+    public void test_21_ListNamespaceChildren() throws Exception {
+        super.test_21_ListNamespaceChildren();
+        assertEquals( 9, testRepository.get().listAllNamespaces().size() );
     }
 
     @Test

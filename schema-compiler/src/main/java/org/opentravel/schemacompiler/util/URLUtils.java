@@ -76,6 +76,22 @@ public class URLUtils {
     }
 
     /**
+     * Converts the given <code>URL</code> to a <code>URI</code>. If the URL cannot be converted, a runtime exception is
+     * thrown.
+     * 
+     * @param url the URL to convert
+     * @return URI
+     */
+    public static URI toURI(URL url) {
+        try {
+            return (url == null) ? null : url.toURI();
+
+        } catch (URISyntaxException e) {
+            throw new SchemaCompilerRuntimeException( e );
+        }
+    }
+
+    /**
      * Returns true if the given URL is a reference to the local file system.
      * 
      * @param url the URL to analyze
@@ -388,18 +404,18 @@ public class URLUtils {
      * @return String
      */
     public static final String getUrlFilename(URL url) {
-        String filepath = url.getFile();
-        int lastPathBreak = filepath.lastIndexOf( '/' );
-        String filename;
+        String filename = null;
 
-        if (lastPathBreak < 0) {
-            filename = filepath;
+        if (url != null) {
+            String filepath = url.getFile();
+            int lastPathBreak = filepath.lastIndexOf( '/' );
 
-        } else if (lastPathBreak < filepath.length()) {
-            filename = filepath.substring( lastPathBreak + 1 );
+            if (lastPathBreak < 0) {
+                filename = filepath;
 
-        } else {
-            filename = null; // No filename if the path ends with a '/'
+            } else if (lastPathBreak < filepath.length()) {
+                filename = filepath.substring( lastPathBreak + 1 );
+            }
         }
         return filename;
     }

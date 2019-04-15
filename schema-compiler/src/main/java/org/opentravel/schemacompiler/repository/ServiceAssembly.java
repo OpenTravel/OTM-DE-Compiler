@@ -38,8 +38,9 @@ public class ServiceAssembly implements Validatable {
     private String baseNamespace;
     private String name;
     private String version;
-    private List<ServiceAssemblyItem> providerApis = new ArrayList<>();
-    private List<ServiceAssemblyItem> consumerApis = new ArrayList<>();
+    private String description;
+    private List<ServiceAssemblyMember> providerApis = new ArrayList<>();
+    private List<ServiceAssemblyMember> consumerApis = new ArrayList<>();
 
     /**
      * @see org.opentravel.schemacompiler.validate.Validatable#getValidationIdentity()
@@ -139,11 +140,29 @@ public class ServiceAssembly implements Validatable {
     }
 
     /**
+     * Returns the description of the service assembly.
+     * 
+     * @return String
+     */
+    public String getDescription() {
+        return description;
+    }
+
+    /**
+     * Assigns the description of the service assembly.
+     * 
+     * @param description the assembly description
+     */
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    /**
      * Returns the list of provider API releases for this assembly.
      *
      * @return List&lt;ServiceAssemblyItem&gt;
      */
-    public List<ServiceAssemblyItem> getProviderApis() {
+    public List<ServiceAssemblyMember> getProviderApis() {
         return Collections.unmodifiableList( providerApis );
     }
 
@@ -152,7 +171,7 @@ public class ServiceAssembly implements Validatable {
      * 
      * @param assemblyItem the assembly item to add
      */
-    public void addProviderApi(ServiceAssemblyItem assemblyItem) {
+    public void addProviderApi(ServiceAssemblyMember assemblyItem) {
         if (assemblyItem != null) {
             providerApis.add( assemblyItem );
             assemblyItem.setOwner( this );
@@ -164,7 +183,7 @@ public class ServiceAssembly implements Validatable {
      * 
      * @param assemblyItem the assembly item to remove
      */
-    public void removeProviderApi(ServiceAssemblyItem assemblyItem) {
+    public void removeProviderApi(ServiceAssemblyMember assemblyItem) {
         if (providerApis.contains( assemblyItem )) {
             providerApis.remove( assemblyItem );
             assemblyItem.setOwner( null );
@@ -176,7 +195,7 @@ public class ServiceAssembly implements Validatable {
      *
      * @return List&lt;ServiceAssemblyItem&gt;
      */
-    public List<ServiceAssemblyItem> getConsumerApis() {
+    public List<ServiceAssemblyMember> getConsumerApis() {
         return Collections.unmodifiableList( consumerApis );
     }
 
@@ -185,7 +204,7 @@ public class ServiceAssembly implements Validatable {
      * 
      * @param assemblyItem the assembly item to add
      */
-    public void addConsumerApi(ServiceAssemblyItem assemblyItem) {
+    public void addConsumerApi(ServiceAssemblyMember assemblyItem) {
         if (assemblyItem != null) {
             consumerApis.add( assemblyItem );
             assemblyItem.setOwner( this );
@@ -197,7 +216,7 @@ public class ServiceAssembly implements Validatable {
      * 
      * @param assemblyItem the assembly item to remove
      */
-    public void removeConsumerApi(ServiceAssemblyItem assemblyItem) {
+    public void removeConsumerApi(ServiceAssemblyMember assemblyItem) {
         if (consumerApis.contains( assemblyItem )) {
             consumerApis.remove( assemblyItem );
             assemblyItem.setOwner( null );
@@ -209,8 +228,8 @@ public class ServiceAssembly implements Validatable {
      *
      * @return List&lt;ServiceAssemblyItem&gt;
      */
-    public List<ServiceAssemblyItem> getAllApis() {
-        List<ServiceAssemblyItem> allApis = new ArrayList<>();
+    public List<ServiceAssemblyMember> getAllApis() {
+        List<ServiceAssemblyMember> allApis = new ArrayList<>();
 
         allApis.addAll( providerApis );
         allApis.addAll( consumerApis );

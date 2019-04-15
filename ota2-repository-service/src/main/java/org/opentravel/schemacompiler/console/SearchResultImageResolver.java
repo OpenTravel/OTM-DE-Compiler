@@ -40,6 +40,7 @@ import org.opentravel.schemacompiler.model.TLSimple;
 import org.opentravel.schemacompiler.model.TLValueWithAttributes;
 import org.opentravel.schemacompiler.repository.Release;
 import org.opentravel.schemacompiler.repository.RepositoryItemType;
+import org.opentravel.schemacompiler.repository.ServiceAssembly;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -110,12 +111,22 @@ public class SearchResultImageResolver {
      * @return String
      */
     private String internalGetIconImage(NamespaceItem item) {
-        Class<?> itemType = TLLibrary.class;
+        RepositoryItemType itemType = RepositoryItemType.fromFilename( item.getFilename() );
+        Class<?> itemClass;
 
-        if (RepositoryItemType.RELEASE.isItemType( item.getFilename() )) {
-            itemType = Release.class;
+        switch (itemType) {
+            case ASSEMBLY:
+                itemClass = ServiceAssembly.class;
+                break;
+            case RELEASE:
+                itemClass = Release.class;
+                break;
+            case LIBRARY:
+            default:
+                itemClass = TLLibrary.class;
+                break;
         }
-        return internalGetIconImage( itemType );
+        return internalGetIconImage( itemClass );
     }
 
     /**
@@ -140,6 +151,7 @@ public class SearchResultImageResolver {
         try {
             Map<Class<?>,String> iMap = new HashMap<>();
 
+            iMap.put( ServiceAssembly.class, "assembly.gif" );
             iMap.put( Release.class, "release.gif" );
             iMap.put( TLLibrary.class, "library.png" );
             iMap.put( TLSimple.class, "simple.gif" );

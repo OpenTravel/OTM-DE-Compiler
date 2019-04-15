@@ -76,7 +76,7 @@ import javax.xml.validation.SchemaFactory;
  * 
  * @author S. Livezey
  */
-public class ProjectFileUtils implements AbstractFileUtils {
+public class ProjectFileUtils extends AbstractFileUtils {
 
     private static final String SCHEMA_CONTEXT = ":org.w3._2001.xmlschema:org.opentravel.ns.ota2.project_v01_00";
     private static final String PROJECT_FILE_NAMESPACE = "http://www.OpenTravel.org/ns/OTA2/Project_v01_00";
@@ -86,6 +86,22 @@ public class ProjectFileUtils implements AbstractFileUtils {
     private static javax.xml.validation.Schema projectValidationSchema;
     private static ObjectFactory objectFactory = new ObjectFactory();
     private static JAXBContext jaxbContext;
+
+    /**
+     * Default constructor.
+     */
+    public ProjectFileUtils() {
+        this( null );
+    }
+
+    /**
+     * Constructor that supplies the repository manager to be used during file utility functions.
+     * 
+     * @param repositoryManager the repository manager instance
+     */
+    public ProjectFileUtils(RepositoryManager repositoryManager) {
+        super( repositoryManager );
+    }
 
     /**
      * Loads the JAXB representation of the project from the specified file location.
@@ -156,6 +172,7 @@ public class ProjectFileUtils implements AbstractFileUtils {
         File backupFile = null;
         try {
             backupFile = createBackupFile( projectFile );
+
         } catch (IOException e) {
             // If we could not create the backup file, proceed without one
         }

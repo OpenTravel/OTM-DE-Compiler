@@ -689,21 +689,44 @@ public class RepositoryManager implements Repository {
             if (localRepositoryId.equals( itemMetadata.getOwningRepository() )
                 && RepositoryUtils.isInclusiveStatus( itemStatus, includeStatus )) {
                 RepositoryItem item = RepositoryUtils.createRepositoryItem( this, itemMetadata );
-                String libraryKey = item.getLibraryName()
-                    + (RepositoryItemType.LIBRARY.isItemType( item.getFilename() ) ? ":OTM" : ":OTR");
-                List<RepositoryItemVersionedWrapper> libraryVersions = libraryVersionMap.get( libraryKey );
+                String itemKey = getItemKey( item );
 
-                if (libraryVersions == null) {
-                    libraryVersions = new ArrayList<>();
-                    libraryVersionMap.put( libraryKey, libraryVersions );
-                }
-                libraryVersions.add( new RepositoryItemVersionedWrapper( item ) );
+                libraryVersionMap.computeIfAbsent( itemKey, i -> new ArrayList<RepositoryItemVersionedWrapper>() );
+                libraryVersionMap.get( itemKey ).add( new RepositoryItemVersionedWrapper( item ) );
             }
         }
 
-        //
         sortRepositoryItems( itemList, libraryVersionMap, latestVersionsOnly );
         return itemList;
+    }
+
+    /**
+     * Returns a hash map key for the given repository item.
+     * 
+     * @param item the repository item for which to return a map key
+     * @return String
+     */
+    private String getItemKey(RepositoryItem item) {
+        RepositoryItemType itemType = RepositoryItemType.fromFilename( item.getFilename() );
+        String suffix = ":???";
+
+        if (itemType != null) {
+            switch (itemType) {
+                case LIBRARY:
+                    suffix = ":OTM";
+                    break;
+                case RELEASE:
+                    suffix = ":OTR";
+                    break;
+                case ASSEMBLY:
+                    suffix = ":OSM";
+                    break;
+                default:
+                    // No default action required
+                    break;
+            }
+        }
+        return item.getLibraryName() + suffix;
     }
 
     /**

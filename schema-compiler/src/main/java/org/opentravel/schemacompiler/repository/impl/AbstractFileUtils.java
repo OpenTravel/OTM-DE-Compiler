@@ -16,6 +16,7 @@
 
 package org.opentravel.schemacompiler.repository.impl;
 
+import org.opentravel.schemacompiler.repository.RepositoryManager;
 import org.opentravel.schemacompiler.util.FileUtils;
 
 import java.io.File;
@@ -29,7 +30,40 @@ import java.io.OutputStream;
  * Base class for utility file managers that provide methods for creating, restoring, and deleting backup files during
  * save operations.
  */
-public interface AbstractFileUtils {
+public abstract class AbstractFileUtils {
+
+    RepositoryManager repositoryManager;
+
+    /**
+     * Constructor that supplies the repository manager to be used during file utility operations.
+     * 
+     * @param repositoryManager the repository manager instance
+     */
+    public AbstractFileUtils(RepositoryManager repositoryManager) {
+        this.repositoryManager = repositoryManager;
+    }
+
+    /**
+     * Returns true if the given file references a location in the user's local repository -- either as a
+     * locally-managed item or a local copy of a remotely-managed library or release.
+     * 
+     * @param file the release or library file to analyze
+     * @return boolean
+     */
+    public boolean isRepositoryFile(File file) {
+        boolean result = false;
+
+        if (file != null) {
+            File repositoryLocation = repositoryManager.getRepositoryLocation();
+            File libraryFolder = file.getParentFile();
+
+            while (!result && (libraryFolder != null)) {
+                result = libraryFolder.equals( repositoryLocation );
+                libraryFolder = libraryFolder.getParentFile();
+            }
+        }
+        return result;
+    }
 
     /**
      * Creates a backup of the specified original file on the local file system. The location of the newly-created
@@ -39,7 +73,7 @@ public interface AbstractFileUtils {
      * @return File
      * @throws IOException thrown if the backup file cannot be created
      */
-    public default File createBackupFile(File originalFile) throws IOException {
+    public File createBackupFile(File originalFile) throws IOException {
         File backupFile;
 
         if (!originalFile.exists()) {
@@ -68,7 +102,7 @@ public interface AbstractFileUtils {
      * @param originalFilename the original name of the file to be restored (without the filepath)
      * @throws IOException thrown if the backup file cannot be restored
      */
-    public default void restoreBackupFile(File backupFile, String originalFilename) throws IOException {
+    public void restoreBackupFile(File backupFile, String originalFilename) throws IOException {
         if ((backupFile != null) && backupFile.exists()) {
             String filename = backupFile.getName();
 
@@ -94,7 +128,7 @@ public interface AbstractFileUtils {
      * 
      * @param backupFile the backup file to remove
      */
-    public default void removeBackupFile(File backupFile) {
+    public void removeBackupFile(File backupFile) {
         FileUtils.delete( backupFile );
     }
 
@@ -104,7 +138,7 @@ public interface AbstractFileUtils {
      * @param originalFile the original file for which a backup is being created
      * @return String
      */
-    public default String getBackupFilename(File originalFile) {
+    public String getBackupFilename(File originalFile) {
         String filename = null;
 
         if (originalFile != null) {
@@ -124,7 +158,7 @@ public interface AbstractFileUtils {
      * @param destinationFile the destination file's location
      * @throws IOException thrown if the file cannot be copied
      */
-    public default void copyFile(File sourceFile, File destinationFile) throws IOException {
+    public void copyFile(File sourceFile, File destinationFile) throws IOException {
         if (!destinationFile.getParentFile().exists()) {
             destinationFile.getParentFile().mkdirs();
         }

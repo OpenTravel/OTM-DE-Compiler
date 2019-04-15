@@ -16,95 +16,16 @@
 
 package org.opentravel.schemacompiler.repository;
 
-import org.opentravel.schemacompiler.validate.Validatable;
-
-import javax.xml.namespace.QName;
-
 /**
- * Encapsulates a single release API within a service assembly.
- * 
- * <p>
- * Assembly items consist of a <code>RepositoryItem</code> for the corresponding OTM release, plus the qualified name of
- * an OTM resource that is the primary API. If a resource name is not supplied, all resources contained within the
- * corresponding release will be included in the model.
+ * Represents a <code>RepositoryItem</code> component whose content is an OTM service assembly file.
  */
-public class ServiceAssemblyItem implements Validatable {
-
-    private ServiceAssembly owner;
-    private RepositoryItem releaseItem;
-    private QName resourceName;
+public interface ServiceAssemblyItem extends RepositoryItem {
 
     /**
-     * @see org.opentravel.schemacompiler.validate.Validatable#getValidationIdentity()
-     */
-    @Override
-    public String getValidationIdentity() {
-        StringBuilder identity = new StringBuilder();
-        ServiceAssembly owningAssembly = getOwner();
-
-        if (owningAssembly != null) {
-            identity.append( owningAssembly.getValidationIdentity() ).append( " : " );
-        }
-        if ((releaseItem == null) || (releaseItem.getFilename() == null)) {
-            identity.append( "[Unidentified Assembly Item Type]" );
-        } else {
-            identity.append( releaseItem.getFilename() );
-        }
-        return identity.toString();
-    }
-
-    /**
-     * Returns the owning assembly for this item.
-     *
+     * Returns the content of the OTM service assembly associated with this item.
+     * 
      * @return ServiceAssembly
      */
-    public ServiceAssembly getOwner() {
-        return owner;
-    }
-
-    /**
-     * Assigns the owning assembly for this item.
-     *
-     * @param owner the assembly to assign as this item's owner
-     */
-    public void setOwner(ServiceAssembly owner) {
-        this.owner = owner;
-    }
-
-    /**
-     * Returns the repository item for the associated OTM release.
-     *
-     * @return RepositoryItem
-     */
-    public RepositoryItem getReleaseItem() {
-        return releaseItem;
-    }
-
-    /**
-     * Assigns the repository item for the associated OTM release.
-     *
-     * @param releaseItem the repository item to assign
-     */
-    public void setReleaseItem(RepositoryItem releaseItem) {
-        this.releaseItem = releaseItem;
-    }
-
-    /**
-     * Returns the name of the primary API for the release.
-     *
-     * @return QName
-     */
-    public QName getResourceName() {
-        return resourceName;
-    }
-
-    /**
-     * Assigns the name of the primary API for the release.
-     *
-     * @param resourceName the qualified resource name to assign
-     */
-    public void setResourceName(QName resourceName) {
-        this.resourceName = resourceName;
-    }
+    public ServiceAssembly getContent();
 
 }

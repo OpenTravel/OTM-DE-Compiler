@@ -51,12 +51,12 @@ public class ReleaseSearchResult extends SearchResult<Release> {
     /**
      * Constructor that initializes the search result contents from the given <code>Document</code>.
      * 
-     * @param doc the index document from which to initialize the library information
+     * @param doc the index document from which to initialize the release information
      * @param searchService the indexing search service that created this search result
      */
     public ReleaseSearchResult(Document doc, FreeTextSearchService searchService) {
         super( doc, searchService );
-        ReleaseFileUtils fileUtils = new ReleaseFileUtils( null );
+        ReleaseFileUtils fileUtils = new ReleaseFileUtils( searchService.getRepositoryManager() );
         String statusStr = doc.get( IndexingTerms.STATUS_FIELD );
 
         if (statusStr != null) {
@@ -120,7 +120,7 @@ public class ReleaseSearchResult extends SearchResult<Release> {
             }
 
         } catch (LibraryLoaderException e) {
-            log.error( "Error initializing library content.", e );
+            log.error( "Error initializing release content.", e );
         }
     }
 

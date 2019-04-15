@@ -21,6 +21,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
+import org.opentravel.schemacompiler.index.AssemblySearchResult;
 import org.opentravel.schemacompiler.index.FreeTextSearchService;
 import org.opentravel.schemacompiler.index.LibrarySearchResult;
 import org.opentravel.schemacompiler.index.RealTimeFreeTextSearchService;
@@ -52,11 +53,12 @@ public class TestFreeTextSearchService {
             List<SearchResult<Object>> searchResults = service.search( "version", null, false, false );
             Collection<String> filenames = getFilenames( searchResults );
 
-            assertEquals( 4, searchResults.size() );
+            assertEquals( 5, searchResults.size() );
             assertTrue( filenames.contains( "Version_Test_1_0_0.otm" ) );
             assertTrue( filenames.contains( "Version_Test_1_1_0.otm" ) );
             assertTrue( filenames.contains( "Version_Test_1_1_1.otm" ) );
             assertTrue( filenames.contains( "Version_Release_1_0_0.otr" ) );
+            assertTrue( filenames.contains( "Version_Assembly_1_0_0.osm" ) );
 
         } finally {
             service.stopService();
@@ -70,11 +72,12 @@ public class TestFreeTextSearchService {
             List<SearchResult<Object>> searchResults = service.search( "version", null, false, false );
             Collection<String> filenames = getFilenames( searchResults );
 
-            assertEquals( 4, searchResults.size() );
+            assertEquals( 5, searchResults.size() );
             assertTrue( filenames.contains( "Version_Test_1_0_0.otm" ) );
             assertTrue( filenames.contains( "Version_Test_1_1_0.otm" ) );
             assertTrue( filenames.contains( "Version_Test_1_1_1.otm" ) );
             assertTrue( filenames.contains( "Version_Release_1_0_0.otr" ) );
+            assertTrue( filenames.contains( "Version_Assembly_1_0_0.osm" ) );
 
             // Perform a where-used search for the release
             for (LibrarySearchResult libResult : getLibraryResults( searchResults )) {
@@ -137,7 +140,7 @@ public class TestFreeTextSearchService {
         List<SearchResult<Object>> searchResults;
 
         searchResults = service.search( "Version", TLLibraryStatus.DRAFT, false, true );
-        assertEquals( 4, searchResults.size() );
+        assertEquals( 5, searchResults.size() );
 
         // Test resolution of item content and search results based on search index IDs and
         // repository items
@@ -165,6 +168,19 @@ public class TestFreeTextSearchService {
                     release.getName() + "_" + release.getVersion().replace( '.', '_' ) + ".otr", release.getVersion() );
                 rsr = service.getRelease( item, true );
                 assertEquals( result.getSearchIndexId(), rsr.getSearchIndexId() );
+
+            } else if (result.getEntityType().equals( ServiceAssembly.class )) {
+                AssemblySearchResult asr = service.getAssembly( result.getSearchIndexId(), true );
+                ServiceAssembly assembly = asr.getItemContent();
+                RepositoryItem item;
+
+                assertNotNull( assembly );
+                assertEquals( result.getSearchIndexId(), asr.getSearchIndexId() );
+                item = service.getRepositoryManager().getRepositoryItem( assembly.getBaseNamespace(),
+                    assembly.getName() + "_" + assembly.getVersion().replace( '.', '_' ) + ".osm",
+                    assembly.getVersion() );
+                asr = service.getAssembly( item, true );
+                assertEquals( result.getSearchIndexId(), asr.getSearchIndexId() );
             }
         }
 
@@ -177,11 +193,11 @@ public class TestFreeTextSearchService {
         assertEquals( 0, searchResults.size() );
 
         searchResults = service.search( "Version", TLLibraryStatus.DRAFT, true, true );
-        assertEquals( 2, searchResults.size() );
+        assertEquals( 3, searchResults.size() );
         searchResults = service.search( "Version", TLLibraryStatus.UNDER_REVIEW, true, true );
-        assertEquals( 1, searchResults.size() );
+        assertEquals( 2, searchResults.size() );
         searchResults = service.search( "Version", TLLibraryStatus.FINAL, true, true );
-        assertEquals( 1, searchResults.size() );
+        assertEquals( 2, searchResults.size() );
         searchResults = service.search( "Version", TLLibraryStatus.OBSOLETE, true, true );
         assertEquals( 0, searchResults.size() );
 
@@ -228,6 +244,9 @@ public class TestFreeTextSearchService {
 
             } else if (result instanceof ReleaseSearchResult) {
                 filenames.add( ((ReleaseSearchResult) result).getFilename() );
+
+            } else if (result instanceof AssemblySearchResult) {
+                filenames.add( ((AssemblySearchResult) result).getFilename() );
             }
         }
         return filenames;

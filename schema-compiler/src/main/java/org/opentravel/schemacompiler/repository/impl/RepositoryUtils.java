@@ -202,13 +202,10 @@ public class RepositoryUtils {
                 File wipFile = repositoryManager.getFileManager().getLibraryWipContentLocation( item.getBaseNamespace(),
                     item.getFilename() );
 
-                // If the WIP file does not exist in the local repository, the item's state will
-                // remain
-                // as MANAGED_LOCKED. This situation can arise when the user accesses repository
-                // content
-                // from a different workstation (hence, a different local repository) from the one
-                // where
-                // he/she originally obtained the item's lock.
+                // If the WIP file does not exist in the local repository, the item's state will remain as
+                // MANAGED_LOCKED. This situation can arise when the user accesses repository content from a different
+                // workstation (hence, a different local repository) from the one where he/she originally obtained the
+                // item's lock.
                 if (wipFile.exists()) {
                     item.setState( RepositoryItemState.MANAGED_WIP );
                 }

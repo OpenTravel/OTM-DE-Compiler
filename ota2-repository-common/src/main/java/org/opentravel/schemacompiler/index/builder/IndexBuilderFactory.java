@@ -96,12 +96,21 @@ public class IndexBuilderFactory {
 
         if (sourceObject instanceof RepositoryItem) {
             RepositoryItem item = (RepositoryItem) sourceObject;
+            RepositoryItemType itemType = RepositoryItemType.fromFilename( item.getFilename() );
 
-            if (RepositoryItemType.RELEASE.isItemType( item.getFilename() )) {
-                builder = (IndexBuilder<T>) new ReleaseIndexBuilder();
-
-            } else {
-                builder = (IndexBuilder<T>) new LibraryIndexBuilder();
+            switch (itemType) {
+                case LIBRARY:
+                    builder = (IndexBuilder<T>) new LibraryIndexBuilder();
+                    break;
+                case RELEASE:
+                    builder = (IndexBuilder<T>) new ReleaseIndexBuilder();
+                    break;
+                case ASSEMBLY:
+                    builder = (IndexBuilder<T>) new AssemblyIndexBuilder();
+                    break;
+                default:
+                    builder = null;
+                    break;
             }
 
         } else if (sourceObject instanceof NamedEntity) {
@@ -114,11 +123,14 @@ public class IndexBuilderFactory {
             throw new IllegalArgumentException(
                 "No index builder defined for objects of type: " + sourceObject.getClass().getSimpleName() );
         }
-        builder.setFactory( this );
-        builder.setSourceObject( sourceObject );
-        builder.setRepositoryManager( repositoryManager );
-        builder.setIndexWriter( indexWriter );
-        builder.setCreateIndex( createIndex );
+
+        if (builder != null) {
+            builder.setFactory( this );
+            builder.setSourceObject( sourceObject );
+            builder.setRepositoryManager( repositoryManager );
+            builder.setIndexWriter( indexWriter );
+            builder.setCreateIndex( createIndex );
+        }
         return builder;
     }
 

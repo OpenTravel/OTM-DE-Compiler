@@ -44,15 +44,15 @@ public class TestServiceAssembly {
 
     @Test
     public void testIdentityFunctions() throws Exception {
-        ServiceAssemblyItem providerItem = new ServiceAssemblyItem();
+        ServiceAssemblyMember providerMember = new ServiceAssemblyMember();
 
-        assertEquals( "[Unidentified Assembly Item Type]", providerItem.getValidationIdentity() );
+        assertEquals( "[Unidentified Assembly Member Type]", providerMember.getValidationIdentity() );
 
-        providerItem.setReleaseItem( newReleaseItem( "ProviderRelease" ) );
-        assertEquals( "ProviderRelease_1_0_0.otr", providerItem.getValidationIdentity() );
+        providerMember.setReleaseItem( newReleaseItem( "ProviderRelease" ) );
+        assertEquals( "ProviderRelease_1_0_0.otr", providerMember.getValidationIdentity() );
 
-        assembly.addProviderApi( providerItem );
-        assertEquals( "TestAssembly.osm : ProviderRelease_1_0_0.otr", providerItem.getValidationIdentity() );
+        assembly.addProviderApi( providerMember );
+        assertEquals( "TestAssembly.osm : ProviderRelease_1_0_0.otr", providerMember.getValidationIdentity() );
 
         assertEquals( "http://www.opentravel.org/assemblies", assembly.getBaseNamespace() );
         assertEquals( "http://www.opentravel.org/assemblies/v1", assembly.getNamespace() );
@@ -68,27 +68,27 @@ public class TestServiceAssembly {
     }
 
     @Test
-    public void testAssemblyItemManagement() throws Exception {
-        ServiceAssemblyItem providerItem = new ServiceAssemblyItem();
-        ServiceAssemblyItem consumerItem = new ServiceAssemblyItem();
+    public void testAssemblyMemberManagement() throws Exception {
+        ServiceAssemblyMember providerMember = new ServiceAssemblyMember();
+        ServiceAssemblyMember consumerMember = new ServiceAssemblyMember();
 
-        providerItem.setReleaseItem( newReleaseItem( "ProviderRelease" ) );
-        consumerItem.setReleaseItem( newReleaseItem( "ConsumerRelease" ) );
-        assembly.addProviderApi( providerItem );
-        assembly.addConsumerApi( consumerItem );
+        providerMember.setReleaseItem( newReleaseItem( "ProviderRelease" ) );
+        consumerMember.setReleaseItem( newReleaseItem( "ConsumerRelease" ) );
+        assembly.addProviderApi( providerMember );
+        assembly.addConsumerApi( consumerMember );
 
         assertEquals( 2, assembly.getAllApis().size() );
         assertEquals( 1, assembly.getProviderApis().size() );
         assertEquals( 1, assembly.getConsumerApis().size() );
-        assertEquals( providerItem, assembly.getProviderApis().get( 0 ) );
-        assertEquals( consumerItem, assembly.getConsumerApis().get( 0 ) );
-        assertEquals( assembly, providerItem.getOwner() );
-        assertEquals( assembly, consumerItem.getOwner() );
+        assertEquals( providerMember, assembly.getProviderApis().get( 0 ) );
+        assertEquals( consumerMember, assembly.getConsumerApis().get( 0 ) );
+        assertEquals( assembly, providerMember.getOwner() );
+        assertEquals( assembly, consumerMember.getOwner() );
 
-        assembly.removeProviderApi( providerItem );
+        assembly.removeProviderApi( providerMember );
         assertEquals( 1, assembly.getAllApis().size() );
 
-        assembly.removeConsumerApi( consumerItem );
+        assembly.removeConsumerApi( consumerMember );
         assertEquals( 0, assembly.getAllApis().size() );
     }
 
