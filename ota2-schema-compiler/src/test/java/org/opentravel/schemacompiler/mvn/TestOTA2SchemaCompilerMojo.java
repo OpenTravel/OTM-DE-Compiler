@@ -57,6 +57,32 @@ public class TestOTA2SchemaCompilerMojo {
         executeMojo( config );
     }
 
+    @Test
+    public void testCompileManagedAssembly_providerModel() throws Exception {
+        File pomFile = new File( testProjectsFolder, "/test-project-3/pom.xml" );
+        PlexusConfiguration config = rule.extractPluginConfiguration( "ota2-schema-compiler", pomFile );
+
+        executeMojo( config );
+    }
+
+    @Test
+    public void testCompileManagedAssembly_consumerModel() throws Exception {
+        File pomFile = new File( testProjectsFolder, "/test-project-3/pom.xml" );
+        PlexusConfiguration config = rule.extractPluginConfiguration( "ota2-schema-compiler", pomFile );
+
+        config.getChild( "assembly" ).getChild( "modelType" ).setValue( "consumer" );
+        executeMojo( config );
+    }
+
+    @Test
+    public void testCompileManagedAssembly_implementationModel() throws Exception {
+        File pomFile = new File( testProjectsFolder, "/test-project-3/pom.xml" );
+        PlexusConfiguration config = rule.extractPluginConfiguration( "ota2-schema-compiler", pomFile );
+
+        config.getChild( "assembly" ).getChild( "modelType" ).setValue( "implementation" );
+        executeMojo( config );
+    }
+
     @Test(expected = MojoExecutionException.class)
     public void testLibraryNotFound() throws Exception {
         File pomFile = new File( testProjectsFolder, "/test-project-1/pom.xml" );
@@ -109,6 +135,15 @@ public class TestOTA2SchemaCompilerMojo {
         PlexusConfiguration config = rule.extractPluginConfiguration( "ota2-schema-compiler", pomFile );
 
         config.getChild( "bindingStyle" ).setValue( "XYZ" );
+        executeMojo( config );
+    }
+
+    @Test(expected = MojoExecutionException.class)
+    public void testCompileInvalidAssembly() throws Exception {
+        File pomFile = new File( testProjectsFolder, "/test-project-3/pom.xml" );
+        PlexusConfiguration config = rule.extractPluginConfiguration( "ota2-schema-compiler", pomFile );
+
+        config.getChild( "assembly" ).getChild( "filename" ).setValue( "Version_Release_1_0_0.otr" );
         executeMojo( config );
     }
 

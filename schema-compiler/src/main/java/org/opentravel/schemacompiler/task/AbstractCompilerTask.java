@@ -27,7 +27,6 @@ import org.opentravel.schemacompiler.codegen.util.ResourceCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
 import org.opentravel.schemacompiler.ioc.CompilerExtensionRegistry;
 import org.opentravel.schemacompiler.loader.LibraryInputSource;
-import org.opentravel.schemacompiler.loader.LibraryLoaderException;
 import org.opentravel.schemacompiler.loader.LibraryModelLoader;
 import org.opentravel.schemacompiler.loader.impl.CatalogLibraryNamespaceResolver;
 import org.opentravel.schemacompiler.loader.impl.LibraryStreamInputSource;
@@ -50,9 +49,14 @@ import org.opentravel.schemacompiler.repository.ProjectItem;
 import org.opentravel.schemacompiler.repository.ProjectManager;
 import org.opentravel.schemacompiler.repository.ReleaseManager;
 import org.opentravel.schemacompiler.repository.ReleaseMember;
+import org.opentravel.schemacompiler.repository.RemoteRepository;
+import org.opentravel.schemacompiler.repository.Repository;
 import org.opentravel.schemacompiler.repository.RepositoryException;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
+import org.opentravel.schemacompiler.repository.RepositoryItemType;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
+import org.opentravel.schemacompiler.repository.ServiceAssembly;
+import org.opentravel.schemacompiler.repository.ServiceAssemblyManager;
 import org.opentravel.schemacompiler.util.SchemaCompilerException;
 import org.opentravel.schemacompiler.util.URLUtils;
 import org.opentravel.schemacompiler.validate.FindingType;
@@ -87,6 +91,7 @@ public abstract class AbstractCompilerTask implements CommonCompilerTaskOptions 
     protected RepositoryManager repositoryManager;
     private Map<String,File> generatedFiles = new TreeMap<>();
     private List<AbstractLibrary> primaryLibraries = new ArrayList<>();
+    private AssemblyModelType modelType = AssemblyModelType.IMPLEMENTATION;
     private String validationRuleSetId;
     private String catalogLocation;
     private String outputFolder;
@@ -126,31 +131,34 @@ public abstract class AbstractCompilerTask implements CommonCompilerTaskOptions 
     }
 
     /**
-     * Loads a model using the content of the specified library (or project or release) file and compiles the output
-     * using the options assigned for this task.
+     * Loads a model using the content of the specified file and compiles the output using the options assigned for this
+     * task. The file specified by the URL may be an OTM library, project, release, or service assembly.
      * 
-     * @param libraryOrProjectOrReleaseUrl the URL location of the library/project/release file
+     * @param url the URL location of the library/project/release/assembly file
      * @return ValidationFindings
      * @throws SchemaCompilerException thrown if an unexpected error occurs during the compilation process
      */
-    public ValidationFindings compileOutput(URL libraryOrProjectOrReleaseUrl) throws SchemaCompilerException {
-        Collection<TLLibrary> userDefinedLibraries = new ArrayList<>();
-        Collection<XSDLibrary> legacySchemas = new ArrayList<>();
+    public ValidationFindings compileOutput(URL url) throws SchemaCompilerException {
         ValidationFindings findings;
 
-        if (isProjectFile( libraryOrProjectOrReleaseUrl )) {
-            findings = compileProject( libraryOrProjectOrReleaseUrl, userDefinedLibraries, legacySchemas );
+        if (isProjectFile( url )) {
+            findings = compileProject( url );
 
-        } else if (isReleaseFile( libraryOrProjectOrReleaseUrl )) {
-            findings = compileRelease( libraryOrProjectOrReleaseUrl, userDefinedLibraries, legacySchemas );
+        } else {
+            RepositoryItemType itemType = RepositoryItemType.fromFilename( url.getPath() );
 
-        } else { // Must be an OTM file
-            findings = compileLibrary( libraryOrProjectOrReleaseUrl, userDefinedLibraries, legacySchemas );
-        }
-
-        // Proceed with compilation if no errors were detected during the load
-        if (!findings.hasFinding( FindingType.ERROR )) {
-            findings.addAll( compileOutput( userDefinedLibraries, legacySchemas ) );
+            switch (itemType) {
+                case ASSEMBLY:
+                    findings = compileAssembly( url );
+                    break;
+                case RELEASE:
+                    findings = compileRelease( url );
+                    break;
+                case LIBRARY:
+                default:
+                    findings = compileLibrary( url );
+                    break;
+            }
         }
         return findings;
     }
@@ -225,22 +233,32 @@ public abstract class AbstractCompilerTask implements CommonCompilerTaskOptions 
     }
 
     /**
-     * Loads the specified <code>Release</code> from an OTM repository and compiles the output using the options that
-     * have been pre-configured in the release.
+     * Validates an existing <code>ServiceAssembly</code> instance and compiles the output for the specified model type.
      * 
-     * @param releaseItem the repository item for a release that contains all of the libraries for which to compile
-     *        output
+     * @param assembly the service assembly for which to compile output
      * @return ValidationFindings
      * @throws SchemaCompilerException thrown if an unexpected error occurs during the compilation process
      */
-    public ValidationFindings compileOutput(RepositoryItem releaseItem) throws SchemaCompilerException {
-        ReleaseManager releaseManager = new ReleaseManager( repositoryManager );
+    public ValidationFindings compileOutput(ServiceAssembly assembly) throws SchemaCompilerException {
+        ServiceAssemblyManager assemblyManager = new ServiceAssemblyManager( repositoryManager );
         ValidationFindings findings = new ValidationFindings();
+        TLModel model;
 
-        releaseManager.loadRelease( releaseItem, findings );
+        switch (modelType) {
+            case PROVIDER:
+                model = assemblyManager.loadProviderModel( assembly, findings );
+                break;
+            case CONSUMER:
+                model = assemblyManager.loadConsumerModel( assembly, findings );
+                break;
+            case IMPLEMENTATION:
+            default:
+                model = assemblyManager.loadImplementationModel( assembly, findings );
+                break;
+        }
 
         if (!findings.hasFinding( FindingType.ERROR )) {
-            findings.addAll( compileOutput( releaseManager ) );
+            findings.addAll( compileOutput( model ) );
         }
         return findings;
     }
@@ -277,21 +295,36 @@ public abstract class AbstractCompilerTask implements CommonCompilerTaskOptions 
     }
 
     /**
+     * Loads the specified item from an OTM repository and compiles the output.
+     * 
+     * @param item the repository item for which to compile output
+     * @return ValidationFindings
+     * @throws SchemaCompilerException thrown if an unexpected error occurs during the compilation process
+     */
+    public ValidationFindings compileOutput(RepositoryItem item) throws SchemaCompilerException {
+        Repository repository = item.getRepository();
+        URL itemUrl;
+
+        if (repository instanceof RemoteRepository) {
+            ((RemoteRepository) repository).downloadContent( item, true );
+        }
+        itemUrl = repositoryManager.getContentLocation( item );
+        return compileOutput( itemUrl );
+    }
+
+    /**
      * Compiles the project at the URL provided.
      * 
      * @param projectUrl the URL of the project to compile
-     * @param userDefinedLibraries the list of user-defined libraries in the model
-     * @param legacySchemas the list of legacy XML schemas in the model
      * @return ValidationFindings
-     * @throws LibraryLoaderException thrown if an error occurs while loading the library
-     * @throws RepositoryException thrown if a remote repository cannot be accessed
+     * @throws SchemaCompilerException thrown if an error occurs while loading the project or compiling output
      */
-    private ValidationFindings compileProject(URL projectUrl, Collection<TLLibrary> userDefinedLibraries,
-        Collection<XSDLibrary> legacySchemas) throws LibraryLoaderException, RepositoryException {
-        ValidationFindings findings;
-        findings = new ValidationFindings();
+    private ValidationFindings compileProject(URL projectUrl) throws SchemaCompilerException {
+        ValidationFindings findings = new ValidationFindings();
         ProjectManager projectManager = new ProjectManager( false );
         Project project = projectManager.loadProject( URLUtils.toFile( projectUrl ), findings );
+        Collection<TLLibrary> userDefinedLibraries = new ArrayList<>();
+        Collection<XSDLibrary> legacySchemas = new ArrayList<>();
 
         for (ProjectItem item : project.getProjectItems()) {
             AbstractLibrary itemContent = item.getContent();
@@ -307,6 +340,7 @@ public abstract class AbstractCompilerTask implements CommonCompilerTaskOptions 
             }
         }
         projectFilename = project.getProjectFile().getName();
+        compileOutput( userDefinedLibraries, legacySchemas );
         return findings;
     }
 
@@ -316,14 +350,13 @@ public abstract class AbstractCompilerTask implements CommonCompilerTaskOptions 
      * @param userDefinedLibraries the list of user-defined libraries in the model
      * @param legacySchemas the list of legacy XML schemas in the model
      * @return ValidationFindings
-     * @throws LibraryLoaderException thrown if an error occurs while loading the library
+     * @throws SchemaCompilerException thrown if an error occurs while loading the library or compiling output
      */
-    private ValidationFindings compileLibrary(URL libraryUrl, Collection<TLLibrary> userDefinedLibraries,
-        Collection<XSDLibrary> legacySchemas) throws LibraryLoaderException {
-        ValidationFindings findings;
+    private ValidationFindings compileLibrary(URL libraryUrl) throws SchemaCompilerException {
         LibraryInputSource<InputStream> libraryInput = new LibraryStreamInputSource( libraryUrl );
         LibraryModelLoader<InputStream> modelLoader = new LibraryModelLoader<>();
         String catalogLoc = getCatalogLocation();
+        ValidationFindings findings;
         TLModel model;
 
         if (catalogLoc != null) {
@@ -332,9 +365,8 @@ public abstract class AbstractCompilerTask implements CommonCompilerTaskOptions 
         }
         findings = modelLoader.loadLibraryModel( libraryInput );
         model = modelLoader.getLibraryModel();
-        userDefinedLibraries.addAll( model.getUserDefinedLibraries() );
-        legacySchemas.addAll( model.getLegacySchemaLibraries() );
         primaryLibraries.add( model.getLibrary( libraryUrl ) );
+        compileOutput( model );
         return findings;
     }
 
@@ -342,47 +374,36 @@ public abstract class AbstractCompilerTask implements CommonCompilerTaskOptions 
      * Compiles the release at the URL provided.
      * 
      * @param releaseUrl the URL of the release to compile
-     * @param userDefinedLibraries the list of user-defined libraries in the model
-     * @param legacySchemas the list of legacy XML schemas in the model
      * @return ValidationFindings
-     * @throws RepositoryException thrown if a remote repository cannot be accessed
+     * @throws SchemaCompilerException thrown if an error occurs while generating release output
      */
-    private ValidationFindings compileRelease(URL releaseUrl, Collection<TLLibrary> userDefinedLibraries,
-        Collection<XSDLibrary> legacySchemas) throws RepositoryException {
-        ValidationFindings findings;
-        findings = new ValidationFindings();
+    private ValidationFindings compileRelease(URL releaseUrl) throws SchemaCompilerException {
         ReleaseManager releaseManager = new ReleaseManager( repositoryManager );
-        String targetFolder = getOutputFolder();
+        ValidationFindings findings = new ValidationFindings();
 
         releaseManager.loadRelease( URLUtils.toFile( releaseUrl ), findings );
 
-        for (ReleaseMember member : releaseManager.getRelease().getPrincipalMembers()) {
-            AbstractLibrary library = releaseManager.getLibrary( member );
-
-            if (library != null) {
-                primaryLibraries.add( library );
-            }
+        if (!findings.hasFinding( FindingType.ERROR )) {
+            findings.addAll( compileOutput( releaseManager ) );
         }
+        return findings;
+    }
 
-        for (ReleaseMember member : releaseManager.getRelease().getAllMembers()) {
-            AbstractLibrary library = releaseManager.getLibrary( member );
+    /**
+     * Compiles the service assembly at the URL provided.
+     * 
+     * @param assemblyUrl the URL of the assembly to compile
+     * @return ValidationFindings
+     * @throws SchemaCompilerException thrown if an error occurs while generating assembly output
+     */
+    private ValidationFindings compileAssembly(URL assemblyUrl) throws SchemaCompilerException {
+        ServiceAssemblyManager assemblyManager = new ServiceAssemblyManager( repositoryManager );
+        ValidationFindings findings = new ValidationFindings();
+        ServiceAssembly assembly = assemblyManager.loadAssembly( URLUtils.toFile( assemblyUrl ), findings );
 
-            if (library != null) {
-                if (library instanceof TLLibrary) {
-                    userDefinedLibraries.add( (TLLibrary) library );
-
-                } else if (library instanceof XSDLibrary) {
-                    legacySchemas.add( (XSDLibrary) library );
-                }
-            }
+        if (!findings.hasFinding( FindingType.ERROR )) {
+            findings.addAll( compileOutput( assembly ) );
         }
-
-        // For a release, the release compiler options take precedence over
-        // any other options assigned for this task.
-        CompilerExtensionRegistry
-            .setActiveExtension( releaseManager.getRelease().getCompileOptions().getBindingStyle() );
-        applyTaskOptions( releaseManager.getRelease().getCompileOptions() );
-        setOutputFolder( targetFolder );
         return findings;
     }
 
@@ -478,17 +499,6 @@ public abstract class AbstractCompilerTask implements CommonCompilerTaskOptions 
      */
     protected boolean isProjectFile(URL url) {
         return url.getFile().toLowerCase().endsWith( ".otp" );
-    }
-
-    /**
-     * Returns true if the given file represents an OTM release (.otr) file, or false if the URL should be interpreted
-     * as referring to a project or individual library.
-     * 
-     * @param url the URL to analyze
-     * @return boolean
-     */
-    protected boolean isReleaseFile(URL url) {
-        return url.getFile().toLowerCase().endsWith( ".otr" );
     }
 
     /**
@@ -816,6 +826,31 @@ public abstract class AbstractCompilerTask implements CommonCompilerTaskOptions 
      */
     public void setRepositoryManager(RepositoryManager repositoryManager) {
         this.repositoryManager = repositoryManager;
+    }
+
+    /**
+     * Returns the type of assembly model for which to compile output (ignored for non-assembly model types).
+     * 
+     * @return AssemblyModelType
+     */
+    public AssemblyModelType getModelType() {
+        return modelType;
+    }
+
+    /**
+     * Assigns the type of assembly model for which to compile output (ignored for non-assembly model types). If a null
+     * value is specified, the assembly's implementation model will be assumed.
+     * 
+     * @param modelType the type of assembly model for which to compile output (default to implementation model in case
+     *        of null)
+     */
+    public void setModelType(AssemblyModelType modelType) {
+        if (modelType == null) {
+            this.modelType = AssemblyModelType.IMPLEMENTATION;
+
+        } else {
+            this.modelType = modelType;
+        }
     }
 
     /**

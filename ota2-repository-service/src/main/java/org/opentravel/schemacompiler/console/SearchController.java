@@ -19,6 +19,7 @@ package org.opentravel.schemacompiler.console;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opentravel.ns.ota2.security_v01_00.RepositoryPermission;
+import org.opentravel.schemacompiler.index.AssemblySearchResult;
 import org.opentravel.schemacompiler.index.EntitySearchResult;
 import org.opentravel.schemacompiler.index.FreeTextSearchService;
 import org.opentravel.schemacompiler.index.FreeTextSearchServiceFactory;
@@ -38,6 +39,7 @@ import org.opentravel.schemacompiler.repository.RepositoryException;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
 import org.opentravel.schemacompiler.repository.RepositorySecurityException;
+import org.opentravel.schemacompiler.repository.ServiceAssembly;
 import org.opentravel.schemacompiler.security.UserPrincipal;
 import org.opentravel.schemacompiler.util.MessageFormatter;
 import org.opentravel.schemacompiler.util.PageUtils;
@@ -65,9 +67,9 @@ public class SearchController extends BaseController {
 
     private static Log log = LogFactory.getLog( SearchController.class );
     private static MessageFormatter messageFormatter = new MessageFormatter();
-    private static List<Class<?>> entityFilterTypes =
-        Arrays.asList( TLLibrary.class, Release.class, TLBusinessObject.class, TLChoiceObject.class, TLCoreObject.class,
-            TLValueWithAttributes.class, TLAbstractEnumeration.class, TLSimple.class );
+    private static List<Class<?>> entityFilterTypes = Arrays.asList( TLLibrary.class, Release.class,
+        ServiceAssembly.class, TLBusinessObject.class, TLChoiceObject.class, TLCoreObject.class,
+        TLValueWithAttributes.class, TLAbstractEnumeration.class, TLSimple.class );
     private static Map<String,Class<?>> entityFilterMap;
 
     private FreeTextSearchService searchService;
@@ -158,7 +160,14 @@ public class SearchController extends BaseController {
                 continue;
             }
 
-            if (result instanceof ReleaseSearchResult) {
+            if (result instanceof AssemblySearchResult) {
+                AssemblySearchResult assembly = (AssemblySearchResult) result;
+                RepositoryItem assemblyItem = getRepositoryManager().getRepositoryItem( assembly.getBaseNamespace(),
+                    assembly.getFilename(), assembly.getVersion() );
+
+                addIfReadAuthorized( result, assemblyItem, searchResults, user );
+
+            } else if (result instanceof ReleaseSearchResult) {
                 ReleaseSearchResult release = (ReleaseSearchResult) result;
                 RepositoryItem releaseItem = getRepositoryManager().getRepositoryItem( release.getBaseNamespace(),
                     release.getFilename(), release.getVersion() );

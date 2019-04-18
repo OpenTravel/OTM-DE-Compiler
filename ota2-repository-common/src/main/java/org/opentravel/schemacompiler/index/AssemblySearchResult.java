@@ -20,12 +20,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.util.BytesRef;
-import org.opentravel.schemacompiler.loader.LibraryLoaderException;
+import org.opentravel.ns.ota2.assembly_v01_00.AssemblyItemType;
+import org.opentravel.ns.ota2.assembly_v01_00.AssemblyType;
+import org.opentravel.schemacompiler.model.TLLibraryStatus;
 import org.opentravel.schemacompiler.repository.RepositoryException;
-import org.opentravel.schemacompiler.repository.ServiceAssembly;
-import org.opentravel.schemacompiler.repository.ServiceAssemblyMember;
 import org.opentravel.schemacompiler.repository.impl.ServiceAssemblyFileUtils;
 
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -35,7 +36,7 @@ import javax.xml.bind.JAXBException;
 /**
  * Search result object that encapsulates all relevant information about an OTM service assembly.
  */
-public class AssemblySearchResult extends SearchResult<ServiceAssembly> {
+public class AssemblySearchResult extends SearchResult<AssemblyType> {
 
     private static Log log = LogFactory.getLog( AssemblySearchResult.class );
 
@@ -46,8 +47,8 @@ public class AssemblySearchResult extends SearchResult<ServiceAssembly> {
     private String version;
     private List<String> referencedProviderIds = new ArrayList<>();
     private List<String> referencedConsumerIds = new ArrayList<>();
-    private List<ServiceAssemblyMember> externalProviders = new ArrayList<>();
-    private List<ServiceAssemblyMember> externalConsumers = new ArrayList<>();
+    private List<AssemblyItemType> externalProviders = new ArrayList<>();
+    private List<AssemblyItemType> externalConsumers = new ArrayList<>();
 
     /**
      * Constructor that initializes the search result contents from the given <code>Document</code>.
@@ -85,12 +86,12 @@ public class AssemblySearchResult extends SearchResult<ServiceAssembly> {
      * @param memberList the list to which the assembly member will be added
      * @param fileUtils the file utilities to use when unmarshalling the assembly member
      */
-    private void addAssemblyMember(String memberContent, List<ServiceAssemblyMember> memberList,
+    private void addAssemblyMember(String memberContent, List<AssemblyItemType> memberList,
         ServiceAssemblyFileUtils fileUtils) {
         try {
             memberList.add( fileUtils.unmarshalAssemblyMemberContent( memberContent ) );
 
-        } catch (JAXBException | RepositoryException e) {
+        } catch (JAXBException e) {
             // Ignore error and continue
         }
     }
@@ -107,10 +108,10 @@ public class AssemblySearchResult extends SearchResult<ServiceAssembly> {
 
             if (content != null) {
                 setItemContent( new ServiceAssemblyFileUtils( getSearchService().getRepositoryManager() )
-                    .loadAssemblyContent( content ) );
+                    .loadJaxbAssembly( new StringReader( content ) ) );
             }
 
-        } catch (LibraryLoaderException e) {
+        } catch (RepositoryException | JAXBException e) {
             log.error( "Error initializing service assembly content.", e );
         }
     }
@@ -161,6 +162,15 @@ public class AssemblySearchResult extends SearchResult<ServiceAssembly> {
     }
 
     /**
+     * Returns the version of the OTM service assembly (always FINAL for assemblies).
+     * 
+     * @return TLLibraryStatus
+     */
+    public TLLibraryStatus getStatus() {
+        return TLLibraryStatus.FINAL;
+    }
+
+    /**
      * Returns the search index ID's of all provider-side releases that are referenced by this service assembly.
      * 
      * @return List&lt;String&gt;
@@ -181,18 +191,18 @@ public class AssemblySearchResult extends SearchResult<ServiceAssembly> {
     /**
      * Returns the list provider-side releases that are managed by external repositories.
      * 
-     * @return List&lt;ServiceAssemblyMember&gt;
+     * @return List&lt;AssemblyItemType&gt;
      */
-    public List<ServiceAssemblyMember> getExternalProviders() {
+    public List<AssemblyItemType> getExternalProviders() {
         return externalProviders;
     }
 
     /**
      * Returns the list consumer-side releases that are managed by external repositories.
      * 
-     * @return List&lt;ServiceAssemblyMember&gt;
+     * @return List&lt;AssemblyItemType&gt;
      */
-    public List<ServiceAssemblyMember> getExternalConsumers() {
+    public List<AssemblyItemType> getExternalConsumers() {
         return externalConsumers;
     }
 

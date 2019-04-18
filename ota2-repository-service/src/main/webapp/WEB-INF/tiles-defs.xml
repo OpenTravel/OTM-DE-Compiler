@@ -68,6 +68,10 @@
 		<put-attribute name="title" value="OTA2.0 Repository - Library Releases" />
 		<put-attribute name="body" value="/WEB-INF/console/libraryReleases.jsp" />
 	</definition>
+	<definition name="libraryAssemblies" extends="baseLayoutNoTitle">
+		<put-attribute name="title" value="OTA2.0 Repository - Library Assemblies" />
+		<put-attribute name="body" value="/WEB-INF/console/libraryAssemblies.jsp" />
+	</definition>
 	<definition name="libraryHistory" extends="baseLayoutNoTitle">
 		<put-attribute name="title" value="OTA2.0 Repository - Library History" />
 		<put-attribute name="body" value="/WEB-INF/console/libraryHistory.jsp" />
@@ -83,6 +87,14 @@
 	<definition name="releaseView" extends="baseLayoutNoTitle">
 		<put-attribute name="title" value="OTA2.0 Repository - Release" />
 		<put-attribute name="body" value="/WEB-INF/console/releaseView.jsp" />
+	</definition>
+	<definition name="releaseAssemblies" extends="baseLayoutNoTitle">
+		<put-attribute name="title" value="OTA2.0 Repository - Release Assemblies" />
+		<put-attribute name="body" value="/WEB-INF/console/releaseAssemblies.jsp" />
+	</definition>
+	<definition name="assemblyView" extends="baseLayoutNoTitle">
+		<put-attribute name="title" value="OTA2.0 Repository - Assembly" />
+		<put-attribute name="body" value="/WEB-INF/console/assemblyView.jsp" />
 	</definition>
 	<definition name="entityDictionary" extends="baseLayoutNoTitle">
 		<put-attribute name="title" value="OTA2.0 Repository - Entity Dictionary" />

@@ -78,6 +78,9 @@
 		<c:if test="${pageUtils.isRelease( item )}">
 			<c:set var="itemPage" value="releaseView.html"/>
 		</c:if>
+		<c:if test="${pageUtils.isAssembly( item )}">
+			<c:set var="itemPage" value="assemblyView.html"/>
+		</c:if>
 		<c:choose>
 			<c:when test="${filename == null}">
 				<c:choose>

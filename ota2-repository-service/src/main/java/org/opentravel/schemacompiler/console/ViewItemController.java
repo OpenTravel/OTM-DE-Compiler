@@ -20,6 +20,7 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opentravel.ns.ota2.repositoryinfoext_v01_00.SubscriptionTarget;
+import org.opentravel.schemacompiler.index.AssemblySearchResult;
 import org.opentravel.schemacompiler.index.EntitySearchResult;
 import org.opentravel.schemacompiler.index.FreeTextSearchService;
 import org.opentravel.schemacompiler.index.FreeTextSearchServiceFactory;
@@ -89,6 +90,8 @@ public class ViewItemController extends BaseController {
     private static final String LIBRARY = "library";
     private static final String ENTITY = "entity";
     public static final String LIBRARY_NOT_AUTHORIZED = "You are not authorized to view the requested library.";
+    public static final String RELEASE_NOT_AUTHORIZED = "You are not authorized to view the requested release.";
+    public static final String ASSEMBLY_NOT_AUTHORIZED = "You are not authorized to view the requested assembly.";
     public static final String ENTITY_NOT_AUTHORIZED = "You are not authorized to view the requested entity.";
     public static final String ENTITY_NOT_FOUND = "The requested entity could not be found.";
     public static final String ERROR_DISPLAYING_LIBRARY = "An error occured while displaying the library.";
@@ -147,7 +150,7 @@ public class ViewItemController extends BaseController {
                 model.addAttribute( "externalReferences", release.getExternalReferences() );
 
             } else {
-                setErrorMessage( "You are not authorized to view the requested release.", model );
+                setErrorMessage( RELEASE_NOT_AUTHORIZED, model );
                 targetPage = new SearchController().defaultSearchPage( session, model );
             }
 
@@ -163,7 +166,56 @@ public class ViewItemController extends BaseController {
         return targetPage;
     }
 
-    // TODO: Add release-assemblies page to display the assemblies to which a release is assigned
+    /**
+     * Called by the Spring MVC controller to display the assemblies with which a release is associated.
+     * 
+     * @param baseNamespace the base namespace of the selected release
+     * @param filename the filename of the selected release to view
+     * @param version the version of the selected release to view
+     * @param session the HTTP session that contains information about an authenticated user
+     * @param model the model context to be used when rendering the page view
+     * @return String
+     */
+    @RequestMapping({"/releaseAssemblies.html", "/releaseAssemblies.htm"})
+    public String releaseAssemblies(@RequestParam(value = "baseNamespace") String baseNamespace,
+        @RequestParam(value = "filename") String filename, @RequestParam(value = "version") String version,
+        HttpSession session, Model model) {
+        String targetPage = null;
+        try {
+            RepositorySecurityManager securityManager = getSecurityManager();
+            UserPrincipal user = getCurrentUser( session );
+            RepositoryItem item = getRepositoryManager().getRepositoryItem( baseNamespace, filename, version );
+
+            checkItemType( item, RepositoryItemType.RELEASE );
+
+            if (securityManager.isReadAuthorized( user, item )) {
+                FreeTextSearchService searchService = FreeTextSearchServiceFactory.getInstance();
+                String releaseIndexId = IndexingUtils.getIdentityKey( item );
+                ReleaseSearchResult release = searchService.getRelease( releaseIndexId, true );
+                List<AssemblySearchResult> releaseAssemblies = searchService.getReleaseAssemblies( release, true );
+
+                model.addAttribute( IMAGE_RESOLVER, new SearchResultImageResolver() );
+                model.addAttribute( PAGE_UTILS, new PageUtils() );
+                model.addAttribute( "item", item );
+                model.addAttribute( "release", release );
+                model.addAttribute( "releaseAssemblies", releaseAssemblies );
+
+            } else {
+                setErrorMessage( RELEASE_NOT_AUTHORIZED, model );
+                targetPage = new SearchController().defaultSearchPage( session, model );
+            }
+
+        } catch (Exception e) {
+            log.error( "An error occured while displaying the release.", e );
+            setErrorMessage( "An error occured while displaying the release (see server log for details).", model );
+            targetPage = new SearchController().defaultSearchPage( session, model );
+        }
+
+        if (targetPage == null) {
+            targetPage = applyCommonValues( model, "releaseAssemblies" );
+        }
+        return targetPage;
+    }
 
     /**
      * Called by the Spring MVC controller to display the service assembly view page.
@@ -179,8 +231,56 @@ public class ViewItemController extends BaseController {
     public String viewAssembly(@RequestParam(value = "baseNamespace") String baseNamespace,
         @RequestParam(value = "filename") String filename, @RequestParam(value = "version") String version,
         HttpSession session, Model model) {
-        // TODO: Implement the 'viewAssembly()' method
-        return null;
+        String targetPage = null;
+        try {
+            RepositorySecurityManager securityManager = getSecurityManager();
+            UserPrincipal user = getCurrentUser( session );
+            RepositoryItem item = getRepositoryManager().getRepositoryItem( baseNamespace, filename, version );
+
+            checkItemType( item, RepositoryItemType.ASSEMBLY );
+
+            if (securityManager.isReadAuthorized( user, item )) {
+                FreeTextSearchService searchService = FreeTextSearchServiceFactory.getInstance();
+                String assemblyIndexId = IndexingUtils.getIdentityKey( item );
+                AssemblySearchResult assembly = searchService.getAssembly( assemblyIndexId, true );
+
+                if (assembly == null) {
+                    throw new RepositoryException( "The requested release cannot be displayed." );
+                }
+                List<ReleaseSearchResult> providerReleases =
+                    searchService.getReleases( assembly.getReferencedProviderIds(), true );
+                List<ReleaseSearchResult> consumerReleases =
+                    searchService.getReleases( assembly.getReferencedConsumerIds(), true );
+
+                Collections.sort( providerReleases, (ReleaseSearchResult r1, ReleaseSearchResult r2) -> r1
+                    .getReleaseName().compareTo( r2.getReleaseName() ) );
+                Collections.sort( consumerReleases, (ReleaseSearchResult r1, ReleaseSearchResult r2) -> r1
+                    .getReleaseName().compareTo( r2.getReleaseName() ) );
+
+                model.addAttribute( IMAGE_RESOLVER, new SearchResultImageResolver() );
+                model.addAttribute( PAGE_UTILS, new PageUtils() );
+                model.addAttribute( "item", item );
+                model.addAttribute( "assembly", assembly );
+                model.addAttribute( "providerReleases", providerReleases );
+                model.addAttribute( "consumerReleases", consumerReleases );
+                model.addAttribute( "externalProviders", assembly.getExternalProviders() );
+                model.addAttribute( "externalConsumers", assembly.getExternalConsumers() );
+
+            } else {
+                setErrorMessage( ASSEMBLY_NOT_AUTHORIZED, model );
+                targetPage = new SearchController().defaultSearchPage( session, model );
+            }
+
+        } catch (Exception e) {
+            log.error( "An error occured while displaying the assembly.", e );
+            setErrorMessage( "An error occured while displaying the assembly (see server log for details).", model );
+            targetPage = new SearchController().defaultSearchPage( session, model );
+        }
+
+        if (targetPage == null) {
+            targetPage = applyCommonValues( model, "assemblyView" );
+        }
+        return targetPage;
     }
 
     /**
@@ -382,6 +482,67 @@ public class ViewItemController extends BaseController {
 
         if (targetPage == null) {
             targetPage = applyCommonValues( model, "libraryReleases" );
+        }
+        return targetPage;
+    }
+
+    /**
+     * Called by the Spring MVC controller to display the library releases page.
+     * 
+     * @param baseNamespace the base namespace of the selected library
+     * @param filename the filename of the selected library to view
+     * @param version the version of the selected library to view
+     * @param session the HTTP session that contains information about an authenticated user
+     * @param model the model context to be used when rendering the page view
+     * @return String
+     */
+    @RequestMapping({"/libraryAssemblies.html", "/libraryAssemblies.htm"})
+    public String libraryAssemblies(@RequestParam(value = "baseNamespace") String baseNamespace,
+        @RequestParam(value = "filename") String filename, @RequestParam(value = "version") String version,
+        HttpSession session, Model model) {
+        String targetPage = null;
+        try {
+            RepositorySecurityManager securityManager = getSecurityManager();
+            UserPrincipal user = getCurrentUser( session );
+            RepositoryItem item = getRepositoryManager().getRepositoryItem( baseNamespace, filename, version );
+
+            checkItemType( item, RepositoryItemType.LIBRARY );
+
+            if (securityManager.isReadAuthorized( user, item )) {
+                FreeTextSearchService searchService = FreeTextSearchServiceFactory.getInstance();
+                LibrarySearchResult library = searchService.getLibrary( item, false );
+                List<ReleaseSearchResult> releaseList = searchService.getLibraryReleases( library, false );
+                List<AssemblySearchResult> libraryAssemblies = new ArrayList<>();
+                Set<String> assemblyIds = new HashSet<>();
+
+                for (ReleaseSearchResult release : releaseList) {
+                    List<AssemblySearchResult> releaseAssemblies = searchService.getReleaseAssemblies( release, true );
+
+                    for (AssemblySearchResult assembly : releaseAssemblies) {
+                        if (!assemblyIds.contains( assembly.getSearchIndexId() )) {
+                            libraryAssemblies.add( assembly );
+                            assemblyIds.add( assembly.getSearchIndexId() );
+                        }
+                    }
+                }
+
+                model.addAttribute( PAGE_UTILS, new PageUtils() );
+                model.addAttribute( "item", item );
+                model.addAttribute( "libraryAssemblies", libraryAssemblies );
+
+            } else {
+                setErrorMessage( LIBRARY_NOT_AUTHORIZED, model );
+                targetPage = new SearchController().defaultSearchPage( session, model );
+            }
+
+        } catch (Exception e) {
+            log.error( ERROR_DISPLAYING_LIBRARY, e );
+            setErrorMessage( ERROR_DISPLAYING_LIBRARY2, model );
+            targetPage = new SearchController().defaultSearchPage( session, model );
+        }
+
+        if (targetPage == null) {
+            targetPage = applyCommonValues( model, "libraryAssemblies" );
         }
         return targetPage;
     }

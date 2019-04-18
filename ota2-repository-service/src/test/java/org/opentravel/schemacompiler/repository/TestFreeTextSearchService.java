@@ -21,6 +21,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
+import org.opentravel.ns.ota2.assembly_v01_00.AssemblyIdentityType;
+import org.opentravel.ns.ota2.assembly_v01_00.AssemblyType;
 import org.opentravel.schemacompiler.index.AssemblySearchResult;
 import org.opentravel.schemacompiler.index.FreeTextSearchService;
 import org.opentravel.schemacompiler.index.LibrarySearchResult;
@@ -171,14 +173,15 @@ public class TestFreeTextSearchService {
 
             } else if (result.getEntityType().equals( ServiceAssembly.class )) {
                 AssemblySearchResult asr = service.getAssembly( result.getSearchIndexId(), true );
-                ServiceAssembly assembly = asr.getItemContent();
+                AssemblyType assembly = asr.getItemContent();
+                AssemblyIdentityType asmIdentity;
                 RepositoryItem item;
 
                 assertNotNull( assembly );
                 assertEquals( result.getSearchIndexId(), asr.getSearchIndexId() );
-                item = service.getRepositoryManager().getRepositoryItem( assembly.getBaseNamespace(),
-                    assembly.getName() + "_" + assembly.getVersion().replace( '.', '_' ) + ".osm",
-                    assembly.getVersion() );
+                asmIdentity = assembly.getAssemblyIdentity();
+                item = service.getRepositoryManager().getRepositoryItem( asmIdentity.getBaseNamespace(),
+                    asmIdentity.getFilename(), asmIdentity.getVersion() );
                 asr = service.getAssembly( item, true );
                 assertEquals( result.getSearchIndexId(), asr.getSearchIndexId() );
             }

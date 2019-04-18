@@ -30,8 +30,12 @@
 					</execution>
 				</executions>
 				<configuration>
-					<otmProject>${basedir}/src/test/resources/test-models/test-project.otp</otmProject>
-					<snapshotProjectFolder>${basedir}/target/test-output/snapshot-test-5</snapshotProjectFolder>
+					<assembly>
+						<baseNamespace>http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test</baseNamespace>
+						<filename>Version_Assembly_1_0_0.osm</filename>
+						<version>1.0.0</version>
+					</assembly>
+					<snapshotProjectFolder>${basedir}/target/test-output/snapshot-test-10</snapshotProjectFolder>
 				</configuration>
 			</plugin>
 		</plugins>

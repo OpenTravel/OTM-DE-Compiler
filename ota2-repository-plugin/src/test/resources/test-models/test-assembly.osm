@@ -7,13 +7,19 @@
         <osm:Version>1.0.0</osm:Version>
     </osm:AssemblyIdentity>
     <osm:Provider>
+        <osm:RepositoryID>test-repository</osm:RepositoryID>
         <osm:BaseNamespace>http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test</osm:BaseNamespace>
+        <osm:Namespace>http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test/v1_0_0</osm:Namespace>
         <osm:Filename>Version_Release_1_0_0.otr</osm:Filename>
+        <osm:LibraryName>Version_Release</osm:LibraryName>
         <osm:Version>1.0.0</osm:Version>
     </osm:Provider>
     <osm:Consumer>
+        <osm:RepositoryID>test-repository</osm:RepositoryID>
         <osm:BaseNamespace>http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test</osm:BaseNamespace>
+        <osm:Namespace>http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test/v1_0_0</osm:Namespace>
         <osm:Filename>Version_Release_1_0_0.otr</osm:Filename>
+        <osm:LibraryName>Version_Release</osm:LibraryName>
         <osm:Version>1.0.0</osm:Version>
     </osm:Consumer>
 </osm:Assembly>

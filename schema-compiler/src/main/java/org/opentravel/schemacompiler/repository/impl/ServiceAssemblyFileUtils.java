@@ -26,6 +26,7 @@ import org.opentravel.schemacompiler.ioc.SchemaDeclarations;
 import org.opentravel.schemacompiler.loader.LibraryLoaderException;
 import org.opentravel.schemacompiler.loader.LoaderConstants;
 import org.opentravel.schemacompiler.loader.impl.FileValidationSource;
+import org.opentravel.schemacompiler.repository.Repository;
 import org.opentravel.schemacompiler.repository.RepositoryException;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
@@ -137,23 +138,20 @@ public class ServiceAssemblyFileUtils extends AbstractFileUtils {
     }
 
     /**
-     * Loads the OTM assembly from the given content string.
+     * Loads the OTM assembly from the given reader.
      * 
-     * @param contentString the assembly content to unmarshal
+     * @param reader the reader from which to obtain the assembly content
      * @return ServiceAssembly
-     * @throws LibraryLoaderException thrown if the content cannot be loaded
+     * @throws JAXBException thrown if the assembly content cannot be parsed
+     * @throws RepositoryException thrown if one or more of the assembly's constituent repository items cannot be
+     *         resolved
      */
-    public ServiceAssembly loadAssemblyContent(String contentString) throws LibraryLoaderException {
-        try {
-            return loadAssembly( new StringReader( contentString ) );
-
-        } catch (JAXBException | RepositoryException e) {
-            throw new LibraryLoaderException( "Error loading OTM release content.", e );
-        }
+    private ServiceAssembly loadAssembly(Reader reader) throws JAXBException, RepositoryException {
+        return transformToOtmAssembly( loadJaxbAssembly( reader ) );
     }
 
     /**
-     * Loads the OTM assembly from the given reader
+     * Loads the raw JAXB assembly content from the given reader.
      * 
      * @param reader the reader from which to obtain the assembly content
      * @return ServiceAssembly
@@ -162,14 +160,12 @@ public class ServiceAssemblyFileUtils extends AbstractFileUtils {
      *         resolved
      */
     @SuppressWarnings("unchecked")
-    private ServiceAssembly loadAssembly(Reader reader) throws JAXBException, RepositoryException {
+    public AssemblyType loadJaxbAssembly(Reader reader) throws JAXBException, RepositoryException {
         Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
         unmarshaller.setSchema( releaseValidationSchema );
 
         JAXBElement<AssemblyType> documentElement = (JAXBElement<AssemblyType>) unmarshaller.unmarshal( reader );
-        AssemblyType jaxbAssembly = documentElement.getValue();
-
-        return transformToOtmAssembly( jaxbAssembly );
+        return documentElement.getValue();
     }
 
     /**
@@ -204,7 +200,7 @@ public class ServiceAssemblyFileUtils extends AbstractFileUtils {
         }
 
         try (Writer writer = new FileWriter( assemblyFile )) {
-            marshalAssembly( assembly, writer );
+            marshalAssembly( transformToJaxbAssembly( assembly ), writer );
             success = true;
 
         } catch (JAXBException | IOException e) {
@@ -223,14 +219,13 @@ public class ServiceAssemblyFileUtils extends AbstractFileUtils {
     }
 
     /**
-     * Marshals the given assembly content to the writer provided.
+     * Marshals the given JAXB assembly content to the writer provided.
      * 
-     * @param assembly the assembly to be marshalled
+     * @param jaxbAssembly the JAXB assembly to be marshalled
      * @param writer the writer to which the marshalled content will be written
      * @throws JAXBException thrown if the assembly content cannot be marshalled
      */
-    public void marshalAssembly(ServiceAssembly assembly, Writer writer) throws JAXBException {
-        AssemblyType jaxbAssembly = transformToJaxbAssembly( assembly );
+    public void marshalAssembly(AssemblyType jaxbAssembly, Writer writer) throws JAXBException {
         Marshaller marshaller = jaxbContext.createMarshaller();
 
         marshaller.setProperty( Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE );
@@ -240,29 +235,28 @@ public class ServiceAssemblyFileUtils extends AbstractFileUtils {
     }
 
     /**
-     * Marshals the given assembly content and returns the resulting string.
+     * Marshals the given JAXB assembly content and returns the resulting string.
      * 
-     * @param assembly the assembly to be marshalled
+     * @param jaxbAssembly the JAXB assembly to be marshalled
      * @return String
      * @throws JAXBException thrown if the assembly content cannot be marshalled
      */
-    public String marshalAssemblyContent(ServiceAssembly assembly) throws JAXBException {
+    public String marshalAssemblyContent(AssemblyType jaxbAssembly) throws JAXBException {
         StringWriter writer = new StringWriter();
 
-        marshalAssembly( assembly, writer );
+        marshalAssembly( jaxbAssembly, writer );
         return writer.toString();
     }
 
     /**
-     * Marshals the given assembly member content to the writer provided.
+     * Marshals the given JAXB assembly member content to the writer provided.
      * 
-     * @param member the assembly member to be marshalled
+     * @param jaxbMember the JAXB assembly member to be marshalled
      * @param isProvider flag indicating whether the given item represents a consumer or a provider API
      * @return String
      * @throws JAXBException thrown if the assembly content cannot be marshalled
      */
-    public String marshalAssemblyMember(ServiceAssemblyMember member, boolean isProvider) throws JAXBException {
-        AssemblyItemType jaxbMember = transformToJaxbAssemblyItem( member );
+    public String marshalAssemblyMember(AssemblyItemType jaxbMember, boolean isProvider) throws JAXBException {
         Marshaller marshaller = jaxbContext.createMarshaller();
         StringWriter writer = new StringWriter();
         Object memberElement;
@@ -284,18 +278,16 @@ public class ServiceAssemblyFileUtils extends AbstractFileUtils {
      * Unmarshals a JAXB assembly member from the string provided.
      * 
      * @param memberContent the string content for the assembly member to be unmarshalled
-     * @return ReleaseMemberType
-     * @throws RepositoryException thrown if the repository item for the associated release cannot be identified
-     * @throws IOException thrown if the assembly member cannot be unmarshalled
+     * @return AssemblyItemType
+     * @throws JAXBException thrown if the assembly member cannot be unmarshalled
      */
     @SuppressWarnings("unchecked")
-    public ServiceAssemblyMember unmarshalAssemblyMemberContent(String memberContent)
-        throws RepositoryException, JAXBException {
+    public AssemblyItemType unmarshalAssemblyMemberContent(String memberContent) throws JAXBException {
         Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
         JAXBElement<AssemblyItemType> memberElement =
             (JAXBElement<AssemblyItemType>) unmarshaller.unmarshal( new StringReader( memberContent ) );
 
-        return transformToAssemblyMember( memberElement.getValue() );
+        return memberElement.getValue();
     }
 
     /**
@@ -355,7 +347,10 @@ public class ServiceAssemblyFileUtils extends AbstractFileUtils {
         RepositoryItem rItem = member.getReleaseItem();
         QName resourceName = member.getResourceName();
 
+        jaxbItem.setRepositoryID( rItem.getRepository().getId() );
         jaxbItem.setBaseNamespace( rItem.getBaseNamespace() );
+        jaxbItem.setNamespace( rItem.getNamespace() );
+        jaxbItem.setLibraryName( rItem.getLibraryName() );
         jaxbItem.setFilename( rItem.getFilename() );
         jaxbItem.setVersion( rItem.getVersion() );
 
@@ -406,14 +401,23 @@ public class ServiceAssemblyFileUtils extends AbstractFileUtils {
      */
     private ServiceAssemblyMember transformToAssemblyMember(AssemblyItemType jaxbItem) throws RepositoryException {
         ServiceAssemblyMember member = new ServiceAssemblyMember();
-        RepositoryItem rItem = repositoryManager.getRepositoryItem( jaxbItem.getBaseNamespace(), jaxbItem.getFilename(),
-            jaxbItem.getVersion() );
+        Repository repository = repositoryManager;
+        RepositoryItem rItem;
 
+        if (jaxbItem.getRepositoryID() != null) {
+            repository = repositoryManager.getRepository( jaxbItem.getRepositoryID() );
+
+            if (repository == null) {
+                throw new RepositoryException(
+                    "Unknown repository referenced by member release: " + jaxbItem.getRepositoryID() );
+            }
+        }
+        rItem =
+            repository.getRepositoryItem( jaxbItem.getBaseNamespace(), jaxbItem.getFilename(), jaxbItem.getVersion() );
         member.setReleaseItem( rItem );
 
         if (jaxbItem.getResourceName() != null) {
             QualifiedNameType jaxbResourceName = jaxbItem.getResourceName();
-
             member.setResourceName( new QName( jaxbResourceName.getNamespace(), jaxbResourceName.getLocalName() ) );
         }
         return member;

@@ -25,20 +25,22 @@ import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.util.BytesRef;
+import org.opentravel.ns.ota2.assembly_v01_00.AssemblyItemType;
+import org.opentravel.ns.ota2.assembly_v01_00.AssemblyType;
 import org.opentravel.schemacompiler.index.IndexingTerms;
 import org.opentravel.schemacompiler.index.IndexingUtils;
-import org.opentravel.schemacompiler.loader.LibraryLoaderException;
 import org.opentravel.schemacompiler.model.TLLibraryStatus;
 import org.opentravel.schemacompiler.repository.Repository;
 import org.opentravel.schemacompiler.repository.RepositoryException;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
 import org.opentravel.schemacompiler.repository.ServiceAssembly;
-import org.opentravel.schemacompiler.repository.ServiceAssemblyMember;
+import org.opentravel.schemacompiler.repository.impl.RepositoryItemImpl;
 import org.opentravel.schemacompiler.repository.impl.ServiceAssemblyFileUtils;
 import org.opentravel.schemacompiler.util.URLUtils;
 
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -61,17 +63,22 @@ public class AssemblyIndexBuilder extends IndexBuilder<RepositoryItem> {
             ServiceAssemblyFileUtils fileUtils = new ServiceAssemblyFileUtils( repositoryManager );
             URL assemblyUrl = repositoryManager.getContentLocation( sourceObject );
             File assemblyFile = URLUtils.toFile( assemblyUrl );
-            ServiceAssembly assembly = fileUtils.loadAssemblyFile( assemblyFile, null );
+            AssemblyType assembly = fileUtils.loadJaxbAssembly( new FileReader( assemblyFile ) );
             String assemblyContent = fileUtils.marshalAssemblyContent( assembly );
+            List<AssemblyItemType> allAssemblyItems = new ArrayList<>();
             boolean latestVersion = isLatestVersion( sourceObject );
 
-            addFreeTextKeywords( assembly.getName() );
+            addFreeTextKeywords( assembly.getAssemblyIdentity().getName() );
             addFreeTextKeywords( assembly.getDescription() );
-            assembly.getAllApis().forEach( m -> {
+
+            allAssemblyItems.addAll( assembly.getProvider() );
+            allAssemblyItems.addAll( assembly.getConsumer() );
+
+            allAssemblyItems.forEach( m -> {
                 if (m.getResourceName() != null) {
-                    addFreeTextKeywords( m.getResourceName().getLocalPart() );
+                    addFreeTextKeywords( m.getResourceName().getLocalName() );
                 }
-                addFreeTextKeywords( m.getReleaseItem().getLibraryName() );
+                addFreeTextKeywords( m.getLibraryName() );
             } );
 
             // Create the list of search ID's for referenced libraries
@@ -80,11 +87,11 @@ public class AssemblyIndexBuilder extends IndexBuilder<RepositoryItem> {
             List<String> externalProviders = new ArrayList<>();
             List<String> externalConsumers = new ArrayList<>();
 
-            for (ServiceAssemblyMember member : assembly.getProviderApis()) {
+            for (AssemblyItemType member : assembly.getProvider()) {
                 addMember( member, true, referencedProviderIds, externalProviders, repositoryManager.getId(),
                     fileUtils );
             }
-            for (ServiceAssemblyMember member : assembly.getConsumerApis()) {
+            for (AssemblyItemType member : assembly.getConsumer()) {
                 addMember( member, false, referencedConsumerIds, externalConsumers, repositoryManager.getId(),
                     fileUtils );
             }
@@ -97,7 +104,8 @@ public class AssemblyIndexBuilder extends IndexBuilder<RepositoryItem> {
             indexDoc.add( new StringField( IndexingTerms.SEARCH_INDEX_FIELD, Boolean.TRUE + "", Field.Store.NO ) );
             indexDoc.add(
                 new StringField( IndexingTerms.ENTITY_TYPE_FIELD, ServiceAssembly.class.getName(), Field.Store.YES ) );
-            indexDoc.add( new StringField( IndexingTerms.ENTITY_NAME_FIELD, assembly.getName(), Field.Store.YES ) );
+            indexDoc.add( new StringField( IndexingTerms.ENTITY_NAME_FIELD, assembly.getAssemblyIdentity().getName(),
+                Field.Store.YES ) );
             indexDoc.add(
                 new StringField( IndexingTerms.ENTITY_NAMESPACE_FIELD, sourceObject.getNamespace(), Field.Store.YES ) );
             indexDoc.add( new StringField( IndexingTerms.BASE_NAMESPACE_FIELD, sourceObject.getBaseNamespace(),
@@ -144,7 +152,7 @@ public class AssemblyIndexBuilder extends IndexBuilder<RepositoryItem> {
 
             getIndexWriter().updateDocument( new Term( IndexingTerms.IDENTITY_FIELD, identityKey ), indexDoc );
 
-        } catch (RepositoryException | IOException | JAXBException | LibraryLoaderException e) {
+        } catch (RepositoryException | IOException | JAXBException e) {
             log.error( "Error creating index for OTM service assembly: " + sourceObject.getFilename(), e );
         }
     }
@@ -161,13 +169,20 @@ public class AssemblyIndexBuilder extends IndexBuilder<RepositoryItem> {
      * @param fileUtils the release file utils to use when encoding external members
      * @throws JAXBException thrown if an error occurs while adding the member
      */
-    private void addMember(ServiceAssemblyMember member, boolean isProvider, List<String> internalReferences,
+    private void addMember(AssemblyItemType member, boolean isProvider, List<String> internalReferences,
         List<String> externalReferences, String localRepositoryId, ServiceAssemblyFileUtils fileUtils)
         throws JAXBException {
-        Repository releaseRepo = member.getReleaseItem().getRepository();
+        Repository releaseRepo = getRepositoryManager().getRepository( member.getRepositoryID() );
 
         if ((releaseRepo != null) && localRepositoryId.equals( releaseRepo.getId() )) {
-            internalReferences.add( IndexingUtils.getIdentityKey( member ) );
+            RepositoryItemImpl memberItem = new RepositoryItemImpl();
+
+            memberItem.setBaseNamespace( member.getBaseNamespace() );
+            memberItem.setNamespace( member.getNamespace() );
+            memberItem.setFilename( member.getFilename() );
+            memberItem.setLibraryName( member.getLibraryName() );
+            memberItem.setVersion( member.getVersion() );
+            internalReferences.add( IndexingUtils.getIdentityKey( memberItem ) );
 
         } else { // external reference
             externalReferences.add( fileUtils.marshalAssemblyMember( member, isProvider ) );

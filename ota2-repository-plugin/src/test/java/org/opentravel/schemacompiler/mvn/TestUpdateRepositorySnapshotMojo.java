@@ -61,7 +61,29 @@ public class TestUpdateRepositorySnapshotMojo extends AbstractRepositoryMojoTest
     }
 
     @Test
-    public void testUpdateFromAssembly() throws Exception {
+    public void testUpdateFromManagedAssembly() throws Exception {
+        File pomFile = new File( testProjectsFolder, "/test-project-10/pom.xml" );
+        PlexusConfiguration config = rule.extractPluginConfiguration( "ota2-repository-plugin", pomFile );
+
+        executeInitializeMojo( config );
+        executeUpdateMojo( config );
+    }
+
+    @Test
+    public void testUpdateFromManagedAssembly_selectModelTypes() throws Exception {
+        File pomFile = new File( testProjectsFolder, "/test-project-10/pom.xml" );
+        PlexusConfiguration config = rule.extractPluginConfiguration( "ota2-repository-plugin", pomFile );
+        String[] modelTypes = {"provider", "consumer", "implementation"};
+
+        for (String modelType : modelTypes) {
+            config.getChild( "assembly" ).getChild( "modelType" ).setValue( modelType );
+            executeInitializeMojo( config );
+            executeUpdateMojo( config );
+        }
+    }
+
+    @Test
+    public void testUpdateFromUnmanagedAssembly() throws Exception {
         File pomFile = new File( testProjectsFolder, "/test-project-8/pom.xml" );
         PlexusConfiguration config = rule.extractPluginConfiguration( "ota2-repository-plugin", pomFile );
 

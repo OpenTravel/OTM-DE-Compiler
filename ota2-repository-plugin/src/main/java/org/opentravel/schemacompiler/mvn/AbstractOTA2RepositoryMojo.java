@@ -50,6 +50,7 @@ import org.opentravel.schemacompiler.saver.LibrarySaveException;
 import org.opentravel.schemacompiler.saver.impl.Library15FileSaveHandler;
 import org.opentravel.schemacompiler.saver.impl.Library16FileSaveHandler;
 import org.opentravel.schemacompiler.security.LibraryCrcCalculator;
+import org.opentravel.schemacompiler.task.AssemblyModelType;
 import org.opentravel.schemacompiler.util.FileUtils;
 import org.opentravel.schemacompiler.util.OTM16Upgrade;
 import org.opentravel.schemacompiler.util.SchemaCompilerException;
@@ -84,7 +85,7 @@ import java.util.Set;
  */
 public abstract class AbstractOTA2RepositoryMojo extends AbstractMojo {
 
-    private static final String SNAPSHOT_SUFFIX = "#snapshot";
+    private static final String SNAPSHOT_PROJECTID_SUFFIX = "#snapshot";
 
     private static final String DEFAULT_SNAPSHOT_SUFFIX = "-snapshot";
     private static final String PROVIDER_SNAPSHOT_SUFFIX = "-provider-snapshot";
@@ -102,7 +103,12 @@ public abstract class AbstractOTA2RepositoryMojo extends AbstractMojo {
      */
     @Parameter
     protected Release release;
-    private RepositoryItem releaseItem = null;
+
+    /**
+     * The repository information for the OTM service assembly to be compiled.
+     */
+    @Parameter
+    protected Assembly assembly;
 
     /**
      * The folder location where the snapshot project will be created. If not specified, this will be the same folder as
@@ -120,6 +126,8 @@ public abstract class AbstractOTA2RepositoryMojo extends AbstractMojo {
     @Parameter(readonly = true, defaultValue = "${project.basedir}")
     private File javaProjectFolder;
 
+    private RepositoryItem repositoryItem;
+    private AssemblyModelType modelType;
     private RepositoryManager repositoryManager;
     private RepositoryManager alternateRepositoryManager;
 
@@ -147,51 +155,64 @@ public abstract class AbstractOTA2RepositoryMojo extends AbstractMojo {
      */
     protected void createOrUpdateSnapshot() throws MojoFailureException, MojoExecutionException {
         Map<String,TLModel> modelsBySnapshot = new HashMap<>();
-        ProjectManager projectManager;
-        ReleaseManager releaseManager;
-        Project originalProject = null;
-        ServiceAssembly assembly = null;
+        String ssBaseNamespace;
+        String ssProjectName;
         Log log = getLog();
 
         try {
             ValidationFindings findings = new ValidationFindings();
 
             initRepositoryManager();
-            projectManager = new ProjectManager( new TLModel(), false, repositoryManager );
-            releaseManager = new ReleaseManager( repositoryManager );
 
             if (otmProject != null) {
                 if (RepositoryItemType.RELEASE.isItemType( otmProject.getName() )) { // Load from an OTR file
                     log.info( "Loading OTM release: " + otmProject.getName() );
+                    ReleaseManager releaseManager = new ReleaseManager( repositoryManager );
+
                     releaseManager.loadRelease( otmProject, findings );
                     modelsBySnapshot.put( DEFAULT_SNAPSHOT_SUFFIX, releaseManager.getModel() );
+                    ssBaseNamespace = releaseManager.getRelease().getBaseNamespace();
+                    ssProjectName = releaseManager.getRelease().getName();
 
                 } else if (otmProject.getName().toLowerCase().endsWith( ".otp" )) { // Load from an OTP file
                     log.info( "Loading OTM project: " + otmProject.getName() );
-                    originalProject = projectManager.loadProject( otmProject, findings );
-                    modelsBySnapshot.put( DEFAULT_SNAPSHOT_SUFFIX, projectManager.getModel() );
+                    ProjectManager projectManager = new ProjectManager( new TLModel(), false, repositoryManager );
+                    Project originalProject = projectManager.loadProject( otmProject, findings );
 
-                    // TODO: Add support for repository-managed assemblies
+                    modelsBySnapshot.put( DEFAULT_SNAPSHOT_SUFFIX, projectManager.getModel() );
+                    ssBaseNamespace = originalProject.getProjectId();
+                    ssProjectName = originalProject.getName();
+                    projectManager.closeAll();
+
                 } else if (otmProject.getName().toLowerCase().endsWith( ".osm" )) { // Load from an OSR file
                     log.info( "Loading OTM service assembly: " + otmProject.getName() );
                     ServiceAssemblyManager assemblyManager = new ServiceAssemblyManager( repositoryManager );
+                    ServiceAssembly svcAssembly = assemblyManager.loadAssembly( otmProject, findings );
 
-                    assembly = assemblyManager.loadAssembly( otmProject, findings );
-                    modelsBySnapshot.put( PROVIDER_SNAPSHOT_SUFFIX,
-                        assemblyManager.loadProviderModel( assembly, findings ) );
-                    modelsBySnapshot.put( CONSUMER_SNAPSHOT_SUFFIX,
-                        assemblyManager.loadConsumerModel( assembly, findings ) );
-                    modelsBySnapshot.put( IMPL_SNAPSHOT_SUFFIX,
-                        assemblyManager.loadImplementationModel( assembly, findings ) );
+                    loadAssemblyModels( svcAssembly, assemblyManager, modelsBySnapshot, findings );
+                    ssBaseNamespace = svcAssembly.getBaseNamespace();
+                    ssProjectName = svcAssembly.getName();
 
                 } else {
                     throw new MojoFailureException( "Unknown file type: " + otmProject.getName() );
                 }
 
-            } else { // Must be a repository-managed OTM release
-                log.info( "Loading OTM release: " + releaseItem.getFilename() );
-                releaseManager.loadRelease( releaseItem, findings );
-                modelsBySnapshot.put( DEFAULT_SNAPSHOT_SUFFIX, releaseManager.getModel() );
+            } else {
+                if (release != null) {
+                    log.info( "Loading OTM release: " + repositoryItem.getFilename() );
+                    ReleaseManager releaseManager = new ReleaseManager( repositoryManager );
+
+                    releaseManager.loadRelease( repositoryItem, findings );
+                    modelsBySnapshot.put( DEFAULT_SNAPSHOT_SUFFIX, releaseManager.getModel() );
+
+                } else if (assembly != null) {
+                    ServiceAssemblyManager assemblyManager = new ServiceAssemblyManager( repositoryManager );
+                    ServiceAssembly svcAssembly = assemblyManager.loadAssembly( repositoryItem, findings );
+
+                    loadAssemblyModels( svcAssembly, assemblyManager, modelsBySnapshot, findings );
+                }
+                ssBaseNamespace = repositoryItem.getBaseNamespace();
+                ssProjectName = repositoryItem.getLibraryName();
             }
 
             // Ensure no errors exist in the OTM project or release before proceeding
@@ -208,8 +229,31 @@ public abstract class AbstractOTA2RepositoryMojo extends AbstractMojo {
             File snapshotProjectFile = getSnapshotProjectFile( snapshotSuffix );
             File snapshotLibraryFolder = getSnapshotLibraryFolder( snapshotSuffix );
 
-            saveSnapshotProject( snapshotProjectFile, snapshotLibraryFolder, originalProject, assembly, model,
-                projectManager, releaseManager );
+            saveSnapshotProject( snapshotProjectFile, snapshotLibraryFolder, ssBaseNamespace, ssProjectName, model );
+        }
+    }
+
+    /**
+     * Loads the model(s) required for the service assembly. If the 'modelType' field of the assembly specified by the
+     * user was null, all three models will be loaded.
+     * 
+     * @param assembly the assembly from which to load the required model(s)
+     * @param assemblyManager the assembly manager to use when loading the models
+     * @param modelsBySnapshot the map of models for which snapshots will be created
+     * @param findings errors/warnings detected during the load
+     * @throws SchemaCompilerException thrown if an error occurs while loading the model(s)
+     */
+    private void loadAssemblyModels(ServiceAssembly assembly, ServiceAssemblyManager assemblyManager,
+        Map<String,TLModel> modelsBySnapshot, ValidationFindings findings) throws SchemaCompilerException {
+
+        if ((modelType == null) || (modelType == AssemblyModelType.PROVIDER)) {
+            modelsBySnapshot.put( PROVIDER_SNAPSHOT_SUFFIX, assemblyManager.loadProviderModel( assembly, findings ) );
+        }
+        if ((modelType == null) || (modelType == AssemblyModelType.CONSUMER)) {
+            modelsBySnapshot.put( CONSUMER_SNAPSHOT_SUFFIX, assemblyManager.loadConsumerModel( assembly, findings ) );
+        }
+        if ((modelType == null) || (modelType == AssemblyModelType.IMPLEMENTATION)) {
+            modelsBySnapshot.put( IMPL_SNAPSHOT_SUFFIX, assemblyManager.loadImplementationModel( assembly, findings ) );
         }
     }
 
@@ -218,17 +262,13 @@ public abstract class AbstractOTA2RepositoryMojo extends AbstractMojo {
      * 
      * @param snapshotProjectFile the file where the snapshot project should be saved
      * @param snapshotLibraryFolder the folder where all of the snapshot libraries will be stored
-     * @param originalProject the original project that contains the non-snapshot libraries (null if assembly is
-     *        present)
-     * @param assembly the assembly from which the original model was loaded (null if originalProject is present)
+     * @param ssBaseNamespace the base namespace to use as the ID of the snapshot project
+     * @param ssProjectName the name of the snapshot project to be created
      * @param model the model that contains all of the libraries to include in the snapshot
-     * @param projectManager the project manager instance
-     * @param releaseManager the release manager instance (null if the source was not a release)
      * @throws MojoExecutionException thrown if an error occurs while creating the snapshot
      */
-    private void saveSnapshotProject(File snapshotProjectFile, File snapshotLibraryFolder, Project originalProject,
-        ServiceAssembly assembly, TLModel model, ProjectManager projectManager, ReleaseManager releaseManager)
-        throws MojoExecutionException {
+    private void saveSnapshotProject(File snapshotProjectFile, File snapshotLibraryFolder, String ssBaseNamespace,
+        String ssProjectName, TLModel model) throws MojoExecutionException {
         File backupProject = backup( snapshotProjectFile );
         File backupFolder = backup( snapshotLibraryFolder );
         ProjectType snapshotProject = new ProjectType();
@@ -238,18 +278,8 @@ public abstract class AbstractOTA2RepositoryMojo extends AbstractMojo {
         try {
             log.info( "Building snapshot project: " + snapshotProjectFile.getName() );
 
-            if (assembly != null) {
-                snapshotProject.setProjectId( assembly.getBaseNamespace() + SNAPSHOT_SUFFIX );
-                snapshotProject.setName( assembly.getName() );
-
-            } else if (originalProject != null) {
-                snapshotProject.setProjectId( originalProject.getProjectId() + SNAPSHOT_SUFFIX );
-                snapshotProject.setName( originalProject.getName() );
-
-            } else { // Must be an OTM release
-                snapshotProject.setProjectId( releaseManager.getRelease().getBaseNamespace() + SNAPSHOT_SUFFIX );
-                snapshotProject.setName( releaseManager.getRelease().getName() );
-            }
+            snapshotProject.setProjectId( ssBaseNamespace + SNAPSHOT_PROJECTID_SUFFIX );
+            snapshotProject.setName( ssProjectName );
 
             List<File> snapshotLibraryFiles = new ArrayList<>();
             Map<String,Boolean> otm16Registry = new HashMap<>();
@@ -279,7 +309,6 @@ public abstract class AbstractOTA2RepositoryMojo extends AbstractMojo {
             // Save each library in its original format
             saveSnapshotLibraries( snapshotLibraryFolder, otm16Registry, model );
             deleteProjectBackup( snapshotProjectFile );
-            projectManager.closeAll();
             success = true;
 
             // Create the snapshot project file
@@ -507,28 +536,47 @@ public abstract class AbstractOTA2RepositoryMojo extends AbstractMojo {
             }
 
         } else if (release != null) {
-            try {
-                releaseItem = repositoryManager.getRepositoryItem( release.getBaseNamespace(), release.getFilename(),
-                    release.getVersion() );
+            loadAndValidateRepositoryItem( release.getBaseNamespace(), release.getFilename(), release.getVersion(),
+                RepositoryItemType.RELEASE );
 
-                if (!RepositoryItemType.RELEASE.isItemType( releaseItem.getFilename() )) {
-                    throw new MojoFailureException(
-                        "The specified repository item is not an OTM release: " + releaseItem.getFilename() );
-                }
-
-            } catch (RepositoryException e) {
-                throw new MojoFailureException(
-                    "The specified repository item does not exist or is not an OTM release.", e );
-
-            } catch (Exception e) {
-                throw new MojoFailureException( "Unknown error while accessing the OTM repository", e );
-            }
+        } else if (assembly != null) {
+            modelType = AssemblyModelType.fromIdentifier( assembly.getModelType() );
+            loadAndValidateRepositoryItem( assembly.getBaseNamespace(), assembly.getFilename(), assembly.getVersion(),
+                RepositoryItemType.ASSEMBLY );
 
         } else {
             throw new MojoFailureException( "Either a libraryFile or a release must be specified." );
         }
 
         return isValid;
+    }
+
+    /**
+     * Loads the specified repository item for this mojo and verifies that it is of the expected file type.
+     * 
+     * @param baseNamespace the base namespace of the repository item to load
+     * @param filename the base namespace of the repository item to load
+     * @param version the base namespace of the repository item to load
+     * @param expectedItemType the expected type of the repository item
+     * @throws MojoFailureException thrown if the repository item does not exist or it is not of the expected type
+     */
+    private void loadAndValidateRepositoryItem(String baseNamespace, String filename, String version,
+        RepositoryItemType expectedItemType) throws MojoFailureException {
+        try {
+            repositoryItem = repositoryManager.getRepositoryItem( baseNamespace, filename, version );
+
+            if (!expectedItemType.isItemType( filename )) {
+                throw new MojoFailureException( String.format( "The specified repository item is not an OTM %s: %s",
+                    expectedItemType.toString().toLowerCase(), filename ) );
+            }
+
+        } catch (RepositoryException e) {
+            throw new MojoFailureException( "The specified repository item does not exist or is not an OTM release.",
+                e );
+
+        } catch (Exception e) {
+            throw new MojoFailureException( "Unknown error while accessing the OTM repository", e );
+        }
     }
 
     /**
@@ -580,13 +628,17 @@ public abstract class AbstractOTA2RepositoryMojo extends AbstractMojo {
      * @return String
      */
     private String getSnapshotFilename(String snapshotSuffix) {
-        String sourceFilename;
+        String sourceFilename = "";
         String snapshotFilename;
 
         if (otmProject != null) {
             sourceFilename = otmProject.getName();
-        } else {
-            sourceFilename = releaseItem.getFilename();
+
+        } else if (release != null) {
+            sourceFilename = release.getFilename();
+
+        } else if (assembly != null) {
+            sourceFilename = assembly.getFilename();
         }
         int extIdx = sourceFilename.lastIndexOf( '.' );
 

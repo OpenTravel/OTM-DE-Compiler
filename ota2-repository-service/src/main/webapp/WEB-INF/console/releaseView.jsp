@@ -18,41 +18,9 @@
 <%@taglib prefix="tiles" uri="http://tiles.apache.org/tags-tiles"%>
 <%@taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<c:url var="namespaceUrl" value="/console/browse.html">
-	<c:param name="baseNamespace" value="${item.baseNamespace}" />
-</c:url>
-<c:url var="allVersionsUrl" value="/console/browse.html">
-	<c:param name="baseNamespace" value="${item.baseNamespace}" />
-	<c:param name="filename" value="${item.filename}" />
-</c:url>
 
-<table style="border-collapse:collapse;width:100%;float:left;">
-	<tr>
-		<td>
-			<h2 style="padding-bottom: 0;">Release: ${item.libraryName} <small>(${item.version})</small></h2>
-			<h3 style="padding-top: 0;">Namespace: <a href="${namespaceUrl}">${item.namespace}</a></h3>
-		</td>
-		<td style="white-space:nowrap;width:10%;text-align:left;">
-			<c:if test="${sessionScope.isAdminAuthorized}">
-				<c:url var="deleteItemUrl" value="/console/adminDeleteItem.html">
-					<c:param name="baseNamespace" value="${item.baseNamespace}" />
-					<c:param name="filename" value="${item.filename}" />
-					<c:param name="version" value="${item.version}" />
-				</c:url>
-				[ <a href="${deleteItemUrl}">Delete this Release</a> ]<br/>
-			</c:if>
-			Maven Plugin Dependency:
-			<img src="${pageContext.request.contextPath}/images/clipboard.png"
-					onclick="copyDependencyToClipboard();" style="cursor:pointer;" />
-		</td>
-	</tr>
-	<tr>
-		<td colspan="2" style="padding-top:10px;">
-			Release Type: <spring:message code="${release.itemContent.status}" />
-			<br/><br/>
-		</td>
-	</tr>
-</table>
+<c:set var="currentTab" value="VIEW"/>
+<%@include file="releaseTabs.jsp" %>
 
 <c:if test="${release.itemContent.description != null}">
 <div class="contentContainer" style="width:100%">
@@ -221,34 +189,5 @@
 	</c:forEach>
 </table>
 
-<script lang="javascript">
-function copyDependencyToClipboard() {
-	var dependencyText = "<release>\n"
-		+ "\t<baseNamespace>${item.baseNamespace}</baseNamespace>\n"
-		+ "\t<filename>${item.filename}</filename>\n"
-		+ "\t<version>${item.version}</version>\n"
-		+ "</release>"
-	
-    if (window.clipboardData && window.clipboardData.setData) {
-        // IE specific code path to prevent textarea being shown while dialog is visible.
-        alert("Maven plugin dependency copied to clipboard.");
-        return clipboardData.setData("Text", dependencyText); 
-
-    } else if (document.queryCommandSupported && document.queryCommandSupported("copy")) {
-        var textarea = document.createElement("textarea");
-        textarea.textContent = dependencyText;
-        textarea.style.position = "fixed";  // Prevent scrolling to bottom of page in MS Edge.
-        document.body.appendChild(textarea);
-        textarea.select();
-        try {
-            alert("Maven plugin dependency copied to clipboard.");
-            return document.execCommand("copy");  // Security exception may be thrown by some browsers.
-        } catch (ex) {
-            console.warn("Copy to clipboard failed.", ex);
-            return false;
-        } finally {
-            document.body.removeChild(textarea);
-        }
-    }
-}
-</script>
+<c:set var="itemTypeTag" value="release" />
+<%@include file="clipboardDependencyJS.jsp" %>

@@ -70,6 +70,11 @@ public enum RepositoryItemType {
                 break;
             }
         }
+
+        // Special case (primarily used for testing puposes)
+        if ((itemType == null) && itemFilename.toLowerCase().endsWith( ".xml" )) {
+            itemType = LIBRARY;
+        }
         return itemType;
     }
 

@@ -12,26 +12,27 @@
 		<plugins>
 			<plugin>
 				<groupId>org.opentravel.otm</groupId>
-				<artifactId>ota2-repository-plugin</artifactId>
+				<artifactId>ota2-schema-compiler</artifactId>
 				<executions>
 					<execution>
-						<id>initialize-snapshot</id>
+						<id>ota2-compile</id>
 						<goals>
-							<goal>initialize-snapshot</goal>
-						</goals>
-					</execution>
-				</executions>
-				<executions>
-					<execution>
-						<id>update-snapshot</id>
-						<goals>
-							<goal>update-snapshot</goal>
+							<goal>ota2-compile</goal>
 						</goals>
 					</execution>
 				</executions>
 				<configuration>
-					<otmProject>${basedir}/src/test/resources/test-models/test-project.otp</otmProject>
-					<snapshotProjectFolder>${basedir}/target/test-output/snapshot-test-5</snapshotProjectFolder>
+					<assembly>
+						<baseNamespace>http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test</baseNamespace>
+						<filename>Version_Assembly_1_0_0.osm</filename>
+						<version>1.0.0</version>
+						<modelType>provider</modelType>
+					</assembly>
+					<outputFolder>${basedir}/target/test-output/test-project-2</outputFolder>
+					<compileSchemas>true</compileSchemas>
+					<compileJson>true</compileJson>
+					<bindingStyle>OTA2</bindingStyle>
+					<debug>true</debug>
 				</configuration>
 			</plugin>
 		</plugins>

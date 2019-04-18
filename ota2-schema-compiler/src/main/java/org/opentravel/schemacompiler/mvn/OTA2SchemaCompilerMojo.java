@@ -29,6 +29,7 @@ import org.opentravel.schemacompiler.repository.RepositoryException;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
 import org.opentravel.schemacompiler.repository.RepositoryItemType;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
+import org.opentravel.schemacompiler.task.AssemblyModelType;
 import org.opentravel.schemacompiler.task.CommonCompilerTaskOptions;
 import org.opentravel.schemacompiler.task.CompileAllCompilerTask;
 import org.opentravel.schemacompiler.task.CompileAllTaskOptions;
@@ -66,6 +67,12 @@ public class OTA2SchemaCompilerMojo extends AbstractMojo implements CompileAllTa
      */
     @Parameter
     protected Release release;
+
+    /**
+     * The repository information for the OTM service assembly to be compiled.
+     */
+    @Parameter
+    protected Assembly assembly;
 
     /**
      * The location of the library catalog file.
@@ -192,15 +199,26 @@ public class OTA2SchemaCompilerMojo extends AbstractMojo implements CompileAllTa
                 initRepositoryManager( null );
 
                 // Validate the source file or managed release and the output folder
-                RepositoryItem releaseItem = null;
+                AssemblyModelType assemblyModelType = null;
+                RepositoryItem repositoryItem = null;
+                String logMessage;
 
                 if (libraryFile != null) {
                     if (!libraryFile.exists()) {
                         throw new FileNotFoundException( "Source file not found: " + libraryFile.getAbsolutePath() );
                     }
+                    logMessage = String.format( "Compiling OTA2 Library: %s", libraryFile.getName() );
 
                 } else if (release != null) {
-                    releaseItem = getReleaseItem();
+                    logMessage = String.format( "Compiling OTA2 Release: %s", release.getFilename() );
+                    repositoryItem = getReleaseItem();
+
+                } else if (assembly != null) {
+                    if (assembly.getModelType() != null) {
+                        assemblyModelType = AssemblyModelType.fromIdentifier( assembly.getModelType() );
+                    }
+                    logMessage = String.format( "Compiling OTA2 Service Assembly: %s", assembly.getFilename() );
+                    repositoryItem = getAssemblyItem();
 
                 } else {
                     throw new MojoFailureException( "Either a libraryFile or a release must be specified." );
@@ -222,16 +240,16 @@ public class OTA2SchemaCompilerMojo extends AbstractMojo implements CompileAllTa
                 ValidationFindings findings = null;
                 Log log = getLog();
 
+                log.info( logMessage );
                 compilerTask.applyTaskOptions( this );
                 compilerTask.setRepositoryManager( repositoryManager );
+                compilerTask.setModelType( assemblyModelType );
 
                 if (libraryFile != null) {
-                    log.info( "Compiling OTA2 Library: " + libraryFile.getName() );
                     findings = compilerTask.compileOutput( libraryFile );
 
-                } else if (releaseItem != null) {
-                    log.info( "Compiling OTA2 Release: " + releaseItem.getFilename() );
-                    findings = compilerTask.compileOutput( releaseItem );
+                } else if (repositoryItem != null) {
+                    findings = compilerTask.compileOutput( repositoryItem );
                 }
                 displayValidationFindings( findings );
 
@@ -312,6 +330,34 @@ public class OTA2SchemaCompilerMojo extends AbstractMojo implements CompileAllTa
             throw new MojoExecutionException( "Unknown error while accessing the OTM repository", e );
         }
         return releaseItem;
+    }
+
+    /**
+     * Returns the repository item for the service assembly to be loaded.
+     * 
+     * @return RepositoryItem
+     * @throws MojoFailureException thrown if the specified assembly does not exist
+     * @throws MojoExecutionException thrown if an error occurs while accessing the OTM repository
+     */
+    private RepositoryItem getAssemblyItem() throws MojoFailureException, MojoExecutionException {
+        RepositoryItem assemblyItem;
+        try {
+            assemblyItem = repositoryManager.getRepositoryItem( assembly.getBaseNamespace(), assembly.getFilename(),
+                assembly.getVersion() );
+
+            if (!RepositoryItemType.ASSEMBLY.isItemType( assemblyItem.getFilename() )) {
+                throw new RepositoryException(
+                    "The specified repository item is not an OTM service assembly: " + assemblyItem.getFilename() );
+            }
+
+        } catch (RepositoryException e) {
+            throw new MojoFailureException(
+                "The specified repository item does not exist or is not an OTM service assembly.", e );
+
+        } catch (Exception e) {
+            throw new MojoExecutionException( "Unknown error while accessing the OTM repository", e );
+        }
+        return assemblyItem;
     }
 
     /**

@@ -113,6 +113,17 @@
 					<c:param name="filename" value="${resultItem.filename}" />
 				</c:url>
 			</c:when>
+			<c:when test="${resultItem.entityType.simpleName == 'ServiceAssembly'}">
+				<c:url var="itemUrl" value="/console/assemblyView.html">
+					<c:param name="baseNamespace" value="${resultItem.baseNamespace}" />
+					<c:param name="filename" value="${resultItem.filename}" />
+					<c:param name="version" value="${resultItem.version}" />
+				</c:url>
+				<c:url var="allVersionsUrl" value="/console/browse.html">
+					<c:param name="baseNamespace" value="${resultItem.baseNamespace}" />
+					<c:param name="filename" value="${resultItem.filename}" />
+				</c:url>
+			</c:when>
 			<c:otherwise>
 				<c:url var="itemUrl" value="/console/entityDictionary.html">
 					<c:param name="namespace" value="${resultItem.itemNamespace}" />

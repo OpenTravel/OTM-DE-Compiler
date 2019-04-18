@@ -46,9 +46,40 @@ public class TestViewItemController extends AbstractConsoleTest {
     }
 
     @Test
-    public void testReleaseView() throws Exception {
+    public void testReleaseViews() throws Exception {
         String releaseUrl = getLibraryUrl( "/console/releaseView.html",
             "http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test", "Version_Release_1_0_0.otr", "1.0.0" );
+        String[] viewLinks = new String[] {"Assemblies"};
+
+        try (WebClient client = newWebClient( true )) {
+            HtmlPage page = client.getPage( releaseUrl );
+
+            for (String linkName : viewLinks) {
+                page = page.getAnchorByText( linkName ).click();
+            }
+        }
+    }
+
+    @Test
+    public void testReleaseViews_notAuthorized() throws Exception {
+        String[] urlPaths = new String[] {"/console/releaseView.html", "/console/releaseAssemblies.html"};
+
+        try (WebClient client = newWebClient( false )) {
+            for (String urlPath : urlPaths) {
+                String releaseUrl =
+                    getLibraryUrl( urlPath, "http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test",
+                        "Version_Release_1_0_0.otr", "1.0.0" );
+                HtmlPage page = client.getPage( releaseUrl );
+
+                assertTrue( page.asText().contains( ViewItemController.RELEASE_NOT_AUTHORIZED ) );
+            }
+        }
+    }
+
+    @Test
+    public void testAssemblyViews() throws Exception {
+        String releaseUrl = getLibraryUrl( "/console/assemblyView.html",
+            "http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test", "Version_Assembly_1_0_0.osm", "1.0.0" );
 
         try (WebClient client = newWebClient( true )) {
             client.getPage( releaseUrl );
@@ -56,11 +87,27 @@ public class TestViewItemController extends AbstractConsoleTest {
     }
 
     @Test
+    public void testAssemblyViews_notAuthorized() throws Exception {
+        String[] urlPaths = new String[] {"/console/assemblyView.html"};
+
+        try (WebClient client = newWebClient( false )) {
+            for (String urlPath : urlPaths) {
+                String releaseUrl =
+                    getLibraryUrl( urlPath, "http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test",
+                        "Version_Assembly_1_0_0.osm", "1.0.0" );
+                HtmlPage page = client.getPage( releaseUrl );
+
+                assertTrue( page.asText().contains( ViewItemController.ASSEMBLY_NOT_AUTHORIZED ) );
+            }
+        }
+    }
+
+    @Test
     public void testLibraryViews() throws Exception {
         String libraryUrl = getLibraryUrl( "/console/libraryDictionary.html",
             "http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test", "Version_Test_1_0_0.otm", "1.0.0" );
-        String[] viewLinks = new String[] {"Uses / Where-Used", "Errors & Warnings", "Releases", "History",
-            "General Info", "Raw Content"};
+        String[] viewLinks = new String[] {"Uses / Where-Used", "Errors & Warnings", "Releases", "Assemblies",
+            "History", "General Info", "Raw Content"};
 
         try (WebClient client = newWebClient( true )) {
             HtmlPage page = client.getPage( libraryUrl );
@@ -74,8 +121,8 @@ public class TestViewItemController extends AbstractConsoleTest {
     @Test
     public void testLibraryViews_notAuthorized() throws Exception {
         String[] urlPaths = new String[] {"/console/libraryDictionary.html", "/console/libraryUsage.html",
-            "/console/libraryValidation.html", "/console/libraryReleases.html", "/console/libraryHistory.html",
-            "/console/libraryInfo.html", "/console/libraryRawContent.html"};
+            "/console/libraryValidation.html", "/console/libraryReleases.html", "/console/libraryAssemblies.html",
+            "/console/libraryHistory.html", "/console/libraryInfo.html", "/console/libraryRawContent.html"};
 
         try (WebClient client = newWebClient( false )) {
             for (String urlPath : urlPaths) {

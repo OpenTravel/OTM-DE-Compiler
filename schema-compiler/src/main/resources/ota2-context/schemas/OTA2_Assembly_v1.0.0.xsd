@@ -26,8 +26,11 @@
 	<xsd:element name="Consumer" type="AssemblyItemType" />
 	<xsd:complexType name="AssemblyItemType">
 		<xsd:sequence>
+			<xsd:element name="RepositoryID" type="RepositoryID" minOccurs="1" maxOccurs="1" />
 			<xsd:element name="BaseNamespace" type="xsd:anyURI" minOccurs="1" maxOccurs="1" />
+			<xsd:element name="Namespace" type="xsd:anyURI" minOccurs="1" maxOccurs="1" />
 			<xsd:element name="Filename" type="Filename" minOccurs="1" maxOccurs="1" />
+			<xsd:element name="LibraryName" type="Library_Name" minOccurs="1" maxOccurs="1" />
 			<xsd:element name="Version" type="String_Short" minOccurs="1" maxOccurs="1" />
 			<xsd:element ref="ResourceName" minOccurs="0" maxOccurs="1" />
 		</xsd:sequence>
@@ -41,11 +44,23 @@
 		</xsd:sequence>
 	</xsd:complexType>
 	
+	<xsd:simpleType name="RepositoryID">
+		<xsd:restriction base="xsd:string">
+			<xsd:pattern value="([A-Za-z0-9\-._~!$&amp;'()*+,;=]|%[0-9A-Fa-f]{2})*" />
+		</xsd:restriction>
+	</xsd:simpleType>
+
 	<xsd:simpleType name="Filename">
 		<xsd:restriction base="xsd:string">
 			<xsd:pattern value="[A-Za-z0-9/\.\-\|:_]*" />
 		</xsd:restriction>
 	</xsd:simpleType>
+
+   <xsd:simpleType name="Library_Name">
+      <xsd:restriction base="xsd:string">
+         <xsd:pattern value="[A-Za-z][A-Za-z0-9/\.\-\|:_\s]*" />
+      </xsd:restriction>
+   </xsd:simpleType>
 
 	<xsd:simpleType name="String_Short">
 		<xsd:restriction base="xsd:string">

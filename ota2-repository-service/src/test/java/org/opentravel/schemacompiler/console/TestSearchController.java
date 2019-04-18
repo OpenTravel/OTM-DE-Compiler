@@ -60,6 +60,7 @@ public class TestSearchController extends AbstractConsoleTest {
             page = form.getInputByValue( "Search" ).click();
             assertTrue( page.asText().contains( "Version_Test" ) );
             assertTrue( page.asText().contains( "Version_Release" ) );
+            assertTrue( page.asText().contains( "Version_Assembly" ) );
         }
     }
 
