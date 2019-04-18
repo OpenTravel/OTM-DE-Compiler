@@ -33,15 +33,17 @@
 		<jaxb.version>2.3.0.1</jaxb.version>
 		<gson.version>2.5</gson.version>
 		<jackson.version>2.8.11</jackson.version>
+		<jackson.databind.version>2.8.11.3-redhat-00001</jackson.databind.version>
 		<spring.version>4.3.21.RELEASE</spring.version>
 		<httpcomponents.version>4.4</httpcomponents.version>
-		<maven.plugin.api.version>3.2.5</maven.plugin.api.version>
+		<maven.plugin.api.version>3.3.9</maven.plugin.api.version>
 		<maven.annotations.version>3.4</maven.annotations.version>
 		<maven.testing.harness.version>3.3.0</maven.testing.harness.version>
 		<commons.text.version>1.1</commons.text.version>
 		<commons.cli.version>1.2</commons.cli.version>
 		<commons.codec.version>1.9</commons.codec.version>
 		<commons.validator.version>1.6</commons.validator.version>
+		<commons.collections.version>3.2.2</commons.collections.version>
 		<jersey.version>2.17</jersey.version>
 		<lucene.version>5.0.0</lucene.version>
 		<svnkit.version>1.8.7</svnkit.version>
@@ -56,6 +58,7 @@
 		<slf4j.version>1.7.10</slf4j.version>
 		<junit.version>4.12</junit.version>
 		<htmlunit.version>2.17</htmlunit.version>
+		<xercesimpl.version>2.12.0</xercesimpl.version>
 		<mockito.version>2.23.4</mockito.version>
 		<mockrunner.jms.version>2.0.1</mockrunner.jms.version>
 		<unboundid.ldap.version>4.0.9</unboundid.ldap.version>
@@ -211,7 +214,7 @@
 			<dependency>
 				<groupId>com.fasterxml.jackson.core</groupId>
 				<artifactId>jackson-databind</artifactId>
-				<version>${jackson.version}</version>
+				<version>${jackson.databind.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.fasterxml.jackson.core</groupId>
@@ -277,6 +280,11 @@
 				<groupId>commons-validator</groupId>
 				<artifactId>commons-validator</artifactId>
 				<version>${commons.validator.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>commons-collections</groupId>
+				<artifactId>commons-collections</artifactId>
+				<version>${commons.collections.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-cli</groupId>
@@ -419,6 +427,11 @@
 				<version>${htmlunit.version}</version>
 			</dependency>
 			<dependency>
+				<groupId>xerces</groupId>
+				<artifactId>xercesImpl</artifactId>
+				<version>${xercesimpl.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>org.mockito</groupId>
 				<artifactId>mockito-core</artifactId>
 				<version>${mockito.version}</version>
@@ -463,15 +476,9 @@
 
 	<repositories>
 		<repository>
-			<id>repository.maven.central-public</id>
-			<name>Maven Central repository</name>
-			<url>http://repo1.maven.org/maven2/</url>
-			<layout>default</layout>
-		</repository>
-		<repository>
-			<id>repository.jboss.org-public</id>
-			<name>JBoss.org Maven repository</name>
-			<url>https://repository.jboss.org/nexus/content/groups/public</url>
+			<id>jboss-eap-repository</id>
+			<name>JBoss EAP Maven repository</name>
+			<url>https://maven.repository.redhat.com/ga/</url>
 			<layout>default</layout>
 		</repository>
 	</repositories>
