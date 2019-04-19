@@ -19,7 +19,6 @@ package org.opentravel.schemacompiler.model;
 import org.opentravel.schemacompiler.event.ModelEventType;
 import org.opentravel.schemacompiler.model.TLAlias.AliasListManager;
 import org.opentravel.schemacompiler.model.TLContextualFacet.ContextualFacetListManager;
-import org.opentravel.schemacompiler.util.OTM16Upgrade;
 import org.opentravel.schemacompiler.version.Versioned;
 
 import java.util.ArrayList;
@@ -114,39 +113,6 @@ public class TLBusinessObject extends TLComplexTypeBase implements TLFacetOwner,
             baseNamespace = getNamespace();
         }
         return baseNamespace;
-    }
-
-    /**
-     * @see org.opentravel.schemacompiler.model.TLLibraryMember#setOwningLibrary(org.opentravel.schemacompiler.model.AbstractLibrary)
-     */
-    @Override
-    public void setOwningLibrary(AbstractLibrary owningLibrary) {
-        if (!OTM16Upgrade.otm16Enabled) {
-            for (TLContextualFacet facet : getCustomFacets()) {
-                removeContextualFacetMember( facet, owningLibrary );
-            }
-            for (TLContextualFacet facet : getQueryFacets()) {
-                removeContextualFacetMember( facet, owningLibrary );
-            }
-            for (TLContextualFacet facet : getUpdateFacets()) {
-                removeContextualFacetMember( facet, owningLibrary );
-            }
-        }
-        super.setOwningLibrary( owningLibrary );
-    }
-
-    /**
-     * Removes the given contextual facet from this library and adds it to the new owning library provided.
-     * 
-     * @param facet the facet whose ownership is to be moved
-     * @param owningLibrary the new owning library for the contextual facet
-     */
-    private void removeContextualFacetMember(TLContextualFacet facet, AbstractLibrary owningLibrary) {
-        if (owningLibrary != null) {
-            owningLibrary.addNamedMember( facet );
-        } else {
-            this.getOwningLibrary().removeNamedMember( facet );
-        }
     }
 
     /**
@@ -413,7 +379,6 @@ public class TLBusinessObject extends TLComplexTypeBase implements TLFacetOwner,
      * @param customFacet the custom facet value to add
      */
     public void addCustomFacet(TLContextualFacet customFacet) {
-        contextualFacetAdded( customFacet );
         customFacetManager.addChild( customFacet );
     }
 
@@ -425,7 +390,6 @@ public class TLBusinessObject extends TLComplexTypeBase implements TLFacetOwner,
      * @throws IndexOutOfBoundsException thrown if the index is out of range (index &lt; 0 || index &gt; size())
      */
     public void addCustomFacet(int index, TLContextualFacet customFacet) {
-        contextualFacetAdded( customFacet );
         customFacetManager.addChild( index, customFacet );
     }
 
@@ -435,7 +399,6 @@ public class TLBusinessObject extends TLComplexTypeBase implements TLFacetOwner,
      * @param customFacet the custom facet value to remove
      */
     public void removeCustomFacet(TLContextualFacet customFacet) {
-        contextualFacetRemoved( customFacet );
         customFacetManager.removeChild( customFacet );
     }
 
@@ -530,7 +493,6 @@ public class TLBusinessObject extends TLComplexTypeBase implements TLFacetOwner,
      * @param queryFacet the query facet value to add
      */
     public void addQueryFacet(TLContextualFacet queryFacet) {
-        contextualFacetAdded( queryFacet );
         queryFacetManager.addChild( queryFacet );
     }
 
@@ -542,7 +504,6 @@ public class TLBusinessObject extends TLComplexTypeBase implements TLFacetOwner,
      * @throws IndexOutOfBoundsException thrown if the index is out of range (index &lt; 0 || index &gt; size())
      */
     public void addQueryFacet(int index, TLContextualFacet queryFacet) {
-        contextualFacetAdded( queryFacet );
         queryFacetManager.addChild( index, queryFacet );
     }
 
@@ -552,7 +513,6 @@ public class TLBusinessObject extends TLComplexTypeBase implements TLFacetOwner,
      * @param queryFacet the query facet value to remove
      */
     public void removeQueryFacet(TLContextualFacet queryFacet) {
-        contextualFacetRemoved( queryFacet );
         queryFacetManager.removeChild( queryFacet );
     }
 
@@ -647,7 +607,6 @@ public class TLBusinessObject extends TLComplexTypeBase implements TLFacetOwner,
      * @param updateFacet the update facet to add
      */
     public void addUpdateFacet(TLContextualFacet updateFacet) {
-        contextualFacetAdded( updateFacet );
         updateFacetManager.addChild( updateFacet );
     }
 
@@ -659,7 +618,6 @@ public class TLBusinessObject extends TLComplexTypeBase implements TLFacetOwner,
      * @throws IndexOutOfBoundsException thrown if the index is out of range (index &lt; 0 || index &gt; size())
      */
     public void addUpdateFacet(int index, TLContextualFacet updateFacet) {
-        contextualFacetAdded( updateFacet );
         updateFacetManager.addChild( index, updateFacet );
     }
 
@@ -669,7 +627,6 @@ public class TLBusinessObject extends TLComplexTypeBase implements TLFacetOwner,
      * @param updateFacet the update facet value to remove
      */
     public void removeUpdateFacet(TLContextualFacet updateFacet) {
-        contextualFacetRemoved( updateFacet );
         updateFacetManager.removeChild( updateFacet );
     }
 

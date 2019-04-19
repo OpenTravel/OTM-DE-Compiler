@@ -23,10 +23,7 @@ import org.opentravel.schemacompiler.model.LibraryElement;
 import org.opentravel.schemacompiler.model.LibraryMember;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLAttributeOwner;
-import org.opentravel.schemacompiler.model.TLBusinessObject;
-import org.opentravel.schemacompiler.model.TLChoiceObject;
 import org.opentravel.schemacompiler.model.TLContext;
-import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLExtensionPointFacet;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLFacetOwner;
@@ -49,7 +46,6 @@ import org.opentravel.schemacompiler.repository.RepositoryItem;
 import org.opentravel.schemacompiler.repository.RepositoryItemState;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
 import org.opentravel.schemacompiler.util.ModelElementCloner;
-import org.opentravel.schemacompiler.util.OTM16Upgrade;
 import org.opentravel.schemacompiler.util.URLUtils;
 import org.opentravel.schemacompiler.validate.FindingType;
 import org.opentravel.schemacompiler.validate.ValidationException;
@@ -637,13 +633,6 @@ public abstract class AbstractVersionHelper {
             if (!patchedFacetType.isContextual()) {
                 targetFacet =
                     FacetCodegenUtils.getFacetOfType( (TLFacetOwner) majorOrMinorVersionTarget, patchedFacetType );
-
-            } else {
-                if (!OTM16Upgrade.otm16Enabled) {
-                    TLContextualFacet patchedFacet = (TLContextualFacet) extendedEntity;
-
-                    targetFacet = getTargetFacet( patchedFacet, patchedFacetType, majorOrMinorVersionTarget );
-                }
             }
         }
 
@@ -655,47 +644,6 @@ public abstract class AbstractVersionHelper {
             mergeUtils.mergeProperties( (TLPropertyOwner) targetFacet, patchVersion.getElements(), referenceHandler );
             mergeUtils.mergeIndicators( (TLIndicatorOwner) targetFacet, patchVersion.getIndicators() );
         }
-    }
-
-    /**
-     * Returns the contextual facet that should be the ultimate target for the patch rollup.
-     * 
-     * @param patchedFacet the facet that was originally patched by the extension point facet
-     * @param patchedFacetType the type of the patched facet
-     * @param majorOrMinorVersionTarget the library that is the target of the rollup operation
-     * @return TLMemberFieldOwner
-     */
-    private TLMemberFieldOwner getTargetFacet(TLContextualFacet patchedFacet, TLFacetType patchedFacetType,
-        Versioned majorOrMinorVersionTarget) {
-        TLMemberFieldOwner targetFacet;
-        targetFacet = FacetCodegenUtils.getFacetOfType( (TLFacetOwner) majorOrMinorVersionTarget, patchedFacetType,
-            patchedFacet.getName() );
-
-        // If a matching contextual facet does not yet exist, create one automatically
-        if (targetFacet == null) {
-            TLContextualFacet contextualFacet = new TLContextualFacet();
-
-            contextualFacet.setName( patchedFacet.getName() );
-
-            if (majorOrMinorVersionTarget instanceof TLBusinessObject) {
-                if (patchedFacet.getFacetType() == TLFacetType.CUSTOM) {
-                    ((TLBusinessObject) majorOrMinorVersionTarget).addCustomFacet( contextualFacet );
-                    targetFacet = contextualFacet;
-
-                } else {
-                    ((TLBusinessObject) majorOrMinorVersionTarget).addQueryFacet( contextualFacet );
-                    targetFacet = contextualFacet;
-                }
-
-            } else if (majorOrMinorVersionTarget instanceof TLChoiceObject) {
-                ((TLChoiceObject) majorOrMinorVersionTarget).addChoiceFacet( contextualFacet );
-                targetFacet = contextualFacet;
-
-            } else {
-                // At this time, only business objects have contextual facets
-            }
-        }
-        return targetFacet;
     }
 
     /**

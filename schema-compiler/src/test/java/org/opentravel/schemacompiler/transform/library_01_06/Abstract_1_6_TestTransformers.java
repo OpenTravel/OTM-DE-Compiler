@@ -16,10 +16,7 @@
 
 package org.opentravel.schemacompiler.transform.library_01_06;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
 import org.opentravel.schemacompiler.transform.AbstractTestTransformers;
-import org.opentravel.schemacompiler.util.OTM16Upgrade;
 
 /**
  * Base class for all transformer tests that utilize library schema v1.5 data.
@@ -27,19 +24,6 @@ import org.opentravel.schemacompiler.util.OTM16Upgrade;
  * @author S. Livezey
  */
 public abstract class Abstract_1_6_TestTransformers extends AbstractTestTransformers {
-
-    private static boolean originalEnabledFlag;
-
-    @BeforeClass
-    public static void enableOTM16() throws Exception {
-        originalEnabledFlag = OTM16Upgrade.otm16Enabled;
-        OTM16Upgrade.otm16Enabled = true;
-    }
-
-    @AfterClass
-    public static void disableOTM16() throws Exception {
-        OTM16Upgrade.otm16Enabled = originalEnabledFlag;
-    }
 
     /**
      * @see org.opentravel.schemacompiler.transform.AbstractTestTransformers#getBaseLocation()

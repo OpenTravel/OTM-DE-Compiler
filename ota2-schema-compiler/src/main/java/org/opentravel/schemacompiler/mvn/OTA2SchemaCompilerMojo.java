@@ -34,7 +34,6 @@ import org.opentravel.schemacompiler.task.CommonCompilerTaskOptions;
 import org.opentravel.schemacompiler.task.CompileAllCompilerTask;
 import org.opentravel.schemacompiler.task.CompileAllTaskOptions;
 import org.opentravel.schemacompiler.task.TaskFactory;
-import org.opentravel.schemacompiler.util.OTM16Upgrade;
 import org.opentravel.schemacompiler.util.URLUtils;
 import org.opentravel.schemacompiler.validate.FindingMessageFormat;
 import org.opentravel.schemacompiler.validate.FindingType;
@@ -223,17 +222,9 @@ public class OTA2SchemaCompilerMojo extends AbstractMojo implements CompileAllTa
                 } else {
                     throw new MojoFailureException( "Either a libraryFile or a release must be specified." );
                 }
+
                 createOutputFolder();
-
-                // Select the user-specified schema compiler extension
-                if (bindingStyle != null) {
-                    if (CompilerExtensionRegistry.getAvailableExtensionIds().contains( bindingStyle )) {
-                        CompilerExtensionRegistry.setActiveExtension( bindingStyle );
-
-                    } else {
-                        throw new MojoFailureException( "Invalid binding style specified: " + bindingStyle );
-                    }
-                }
+                initBindingStyle();
 
                 // Execute the compilation and return
                 CompileAllCompilerTask compilerTask = TaskFactory.getTask( CompileAllCompilerTask.class );
@@ -255,6 +246,22 @@ public class OTA2SchemaCompilerMojo extends AbstractMojo implements CompileAllTa
 
             } catch (Exception e) {
                 throw new MojoExecutionException( "Error during OTA2 library compilation.", e );
+            }
+        }
+    }
+
+    /**
+     * Select the user-specified schema compiler extension.
+     * 
+     * @throws MojoFailureException thrown if an invalid binding style has been specified
+     */
+    private void initBindingStyle() throws MojoFailureException {
+        if (bindingStyle != null) {
+            if (CompilerExtensionRegistry.getAvailableExtensionIds().contains( bindingStyle )) {
+                CompilerExtensionRegistry.setActiveExtension( bindingStyle );
+
+            } else {
+                throw new MojoFailureException( "Invalid binding style specified: " + bindingStyle );
             }
         }
     }
@@ -559,13 +566,6 @@ public class OTA2SchemaCompilerMojo extends AbstractMojo implements CompileAllTa
         } catch (Exception e) {
             throw new ExceptionInInitializerError( e );
         }
-    }
-
-    /**
-     * Since this is a read-only application, enable the OTM 1.6 file format for all operations.
-     */
-    static {
-        OTM16Upgrade.otm16Enabled = true;
     }
 
 }

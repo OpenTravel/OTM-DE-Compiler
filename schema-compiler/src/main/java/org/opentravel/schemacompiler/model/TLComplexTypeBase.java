@@ -20,7 +20,6 @@ import org.opentravel.schemacompiler.event.ModelEvent;
 import org.opentravel.schemacompiler.event.ModelEventBuilder;
 import org.opentravel.schemacompiler.event.ModelEventType;
 import org.opentravel.schemacompiler.model.TLEquivalent.EquivalentListManager;
-import org.opentravel.schemacompiler.util.OTM16Upgrade;
 
 import java.util.Comparator;
 import java.util.List;
@@ -217,37 +216,6 @@ public abstract class TLComplexTypeBase extends TLLibraryMember
             }
             this.documentation = documentation;
             publishEvent( event );
-        }
-    }
-
-    /**
-     * Called when a contextual facet is added to this entity, regardless of its facet type.
-     * 
-     * @param facet the contextual facet that was added
-     */
-    protected void contextualFacetAdded(TLContextualFacet facet) {
-        if (!OTM16Upgrade.otm16Enabled) {
-            AbstractLibrary owningLibrary = getOwningLibrary();
-
-            if (owningLibrary != null) {
-                owningLibrary.addNamedMember( facet );
-            }
-            facet.setOwningEntityName( getLocalName() );
-        }
-    }
-
-    /**
-     * Called when a contextual facet is removed from this entity, regardless of its facet type.
-     * 
-     * @param facet the contextual facet that was removed
-     */
-    protected void contextualFacetRemoved(TLContextualFacet facet) {
-        if (!OTM16Upgrade.otm16Enabled) {
-            AbstractLibrary owningLibrary = getOwningLibrary();
-
-            if (owningLibrary != null) {
-                owningLibrary.removeNamedMember( facet );
-            }
         }
     }
 

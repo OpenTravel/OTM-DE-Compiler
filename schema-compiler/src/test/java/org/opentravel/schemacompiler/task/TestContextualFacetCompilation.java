@@ -20,8 +20,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opentravel.schemacompiler.codegen.CodeGeneratorTestAssertions;
 import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
@@ -32,7 +30,6 @@ import org.opentravel.schemacompiler.model.TLFacetType;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.repository.ProjectManager;
-import org.opentravel.schemacompiler.util.OTM16Upgrade;
 import org.opentravel.schemacompiler.util.SchemaCompilerTestUtils;
 import org.opentravel.schemacompiler.validate.FindingType;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
@@ -56,19 +53,6 @@ public class TestContextualFacetCompilation {
     public static final String LIBNAME_BASELIB = "base_library";
     public static final String LIBNAME_FACETS1 = "facets1_library";
     public static final String LIBNAME_FACETS2 = "facets2_library";
-
-    private static boolean originalEnabledFlag;
-
-    @BeforeClass
-    public static void enableOTM16() throws Exception {
-        originalEnabledFlag = OTM16Upgrade.otm16Enabled;
-        OTM16Upgrade.otm16Enabled = true;
-    }
-
-    @AfterClass
-    public static void disableOTM16() throws Exception {
-        OTM16Upgrade.otm16Enabled = originalEnabledFlag;
-    }
 
     @Test
     public void testFacetCompilation_baseLibrary() throws Exception {

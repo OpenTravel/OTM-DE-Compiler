@@ -52,7 +52,6 @@ import org.opentravel.schemacompiler.saver.impl.Library16FileSaveHandler;
 import org.opentravel.schemacompiler.security.LibraryCrcCalculator;
 import org.opentravel.schemacompiler.task.AssemblyModelType;
 import org.opentravel.schemacompiler.util.FileUtils;
-import org.opentravel.schemacompiler.util.OTM16Upgrade;
 import org.opentravel.schemacompiler.util.SchemaCompilerException;
 import org.opentravel.schemacompiler.util.URLUtils;
 import org.opentravel.schemacompiler.validate.FindingMessageFormat;
@@ -731,13 +730,6 @@ public abstract class AbstractOTA2RepositoryMojo extends AbstractMojo {
                 this.repositoryManager = alternateRepositoryManager;
             }
         }
-    }
-
-    /**
-     * Since this is a read-only application, enable the OTM 1.6 file format for all operations.
-     */
-    static {
-        OTM16Upgrade.otm16Enabled = true;
     }
 
 }

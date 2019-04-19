@@ -19,7 +19,6 @@ package org.opentravel.schemacompiler.model;
 import org.opentravel.schemacompiler.event.ModelEvent;
 import org.opentravel.schemacompiler.event.ModelEventBuilder;
 import org.opentravel.schemacompiler.event.ModelEventType;
-import org.opentravel.schemacompiler.util.OTM16Upgrade;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -53,13 +52,7 @@ public class TLContextualFacet extends TLFacet implements LibraryMember, TLFacet
      */
     @Override
     public AbstractLibrary getOwningLibrary() {
-        AbstractLibrary library = owningLibrary;
-
-        if ((library == null) && !OTM16Upgrade.otm16Enabled) {
-            TLFacetOwner owner = getOwningEntity();
-            library = (owner == null) ? null : owner.getOwningLibrary();
-        }
-        return library;
+        return owningLibrary;
     }
 
     /**

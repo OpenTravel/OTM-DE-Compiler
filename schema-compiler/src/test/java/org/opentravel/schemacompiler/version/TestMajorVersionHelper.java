@@ -34,7 +34,6 @@ import org.opentravel.schemacompiler.model.TLOperation;
 import org.opentravel.schemacompiler.model.TLResource;
 import org.opentravel.schemacompiler.model.TLSimple;
 import org.opentravel.schemacompiler.model.TLValueWithAttributes;
-import org.opentravel.schemacompiler.util.OTM16Upgrade;
 
 import java.io.File;
 import java.util.List;
@@ -237,14 +236,11 @@ public class TestMajorVersionHelper extends AbstractVersionHelperTests {
         assertContainsElements( lookupChoice.getChoiceFacet( "ChoiceB" ), "choiceBElement1", "choiceBElement11",
             "choiceBElement12" );
 
-        if (OTM16Upgrade.otm16Enabled) {
-            assertEquals( 1, lookupChoice.getChoiceFacet( "ChoiceB" ).getChildFacets().size() );
-            assertEquals( "SubChoice1", lookupChoice.getChoiceFacet( "ChoiceB" ).getChildFacets().get( 0 ).getName() );
-            assertEquals( 1,
-                lookupChoice.getChoiceFacet( "ChoiceB" ).getChildFacet( "SubChoice1" ).getElements().size() );
-            assertContainsElements( lookupChoice.getChoiceFacet( "ChoiceB" ).getChildFacet( "SubChoice1" ),
-                "subChoiceB1Element1" );
-        }
+        assertEquals( 1, lookupChoice.getChoiceFacet( "ChoiceB" ).getChildFacets().size() );
+        assertEquals( "SubChoice1", lookupChoice.getChoiceFacet( "ChoiceB" ).getChildFacets().get( 0 ).getName() );
+        assertEquals( 1, lookupChoice.getChoiceFacet( "ChoiceB" ).getChildFacet( "SubChoice1" ).getElements().size() );
+        assertContainsElements( lookupChoice.getChoiceFacet( "ChoiceB" ).getChildFacet( "SubChoice1" ),
+            "subChoiceB1Element1" );
 
         assertNotNull( lookupVWA );
         assertNotNull( lookupVWA.getParentType() );
@@ -456,25 +452,22 @@ public class TestMajorVersionHelper extends AbstractVersionHelperTests {
         assertEquals( 1, minorVersionTestResource.getAction( "MinorVersionTestAction" ).getResponses().size() );
 
         // Validate that the folder structure was rolled-up correctly
-        if (OTM16Upgrade.otm16Enabled) {
-            List<TLFolder> folders = newMajorVersionLibrary.getFolders();
+        List<TLFolder> folders = newMajorVersionLibrary.getFolders();
 
-            assertEquals( 2, folders.size() );
-            assertEquals( 3, folders.get( 0 ).getFolders().size() );
-            assertEquals( 0, folders.get( 1 ).getFolders().size() );
-            assertEquals( "Folder1", folders.get( 0 ).getName() );
-            assertEquals( "Folder1-1", folders.get( 0 ).getFolders().get( 0 ).getName() );
-            assertEquals( "Folder1-2", folders.get( 0 ).getFolders().get( 1 ).getName() );
-            assertEquals( "Folder1-3", folders.get( 0 ).getFolders().get( 2 ).getName() );
-            assertEquals( "Folder2", folders.get( 1 ).getName() );
-            assertEquals( 1, folders.get( 0 ).getEntities().size() );
-            assertEquals( "LookupCore", folders.get( 0 ).getEntities().get( 0 ).getLocalName() );
-            assertEquals( 1, folders.get( 0 ).getFolders().get( 0 ).getEntities().size() );
-            assertEquals( "LookupChoice",
-                folders.get( 0 ).getFolders().get( 0 ).getEntities().get( 0 ).getLocalName() );
-            assertEquals( 1, folders.get( 1 ).getEntities().size() );
-            assertEquals( "LookupBO", folders.get( 1 ).getEntities().get( 0 ).getLocalName() );
-        }
+        assertEquals( 2, folders.size() );
+        assertEquals( 3, folders.get( 0 ).getFolders().size() );
+        assertEquals( 0, folders.get( 1 ).getFolders().size() );
+        assertEquals( "Folder1", folders.get( 0 ).getName() );
+        assertEquals( "Folder1-1", folders.get( 0 ).getFolders().get( 0 ).getName() );
+        assertEquals( "Folder1-2", folders.get( 0 ).getFolders().get( 1 ).getName() );
+        assertEquals( "Folder1-3", folders.get( 0 ).getFolders().get( 2 ).getName() );
+        assertEquals( "Folder2", folders.get( 1 ).getName() );
+        assertEquals( 1, folders.get( 0 ).getEntities().size() );
+        assertEquals( "LookupCore", folders.get( 0 ).getEntities().get( 0 ).getLocalName() );
+        assertEquals( 1, folders.get( 0 ).getFolders().get( 0 ).getEntities().size() );
+        assertEquals( "LookupChoice", folders.get( 0 ).getFolders().get( 0 ).getEntities().get( 0 ).getLocalName() );
+        assertEquals( 1, folders.get( 1 ).getEntities().size() );
+        assertEquals( "LookupBO", folders.get( 1 ).getEntities().get( 0 ).getLocalName() );
 
         // Verify the total number of elements to make sure nothing
         // exists, except for the items we just tested.

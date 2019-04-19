@@ -38,7 +38,6 @@ import org.opentravel.schemacompiler.model.TLProperty;
 import org.opentravel.schemacompiler.model.TLPropertyOwner;
 import org.opentravel.schemacompiler.model.TLResource;
 import org.opentravel.schemacompiler.model.TLResourceParentRef;
-import org.opentravel.schemacompiler.util.OTM16Upgrade;
 import org.opentravel.schemacompiler.util.SchemaCompilerTestUtils;
 import org.opentravel.schemacompiler.util.URLUtils;
 import org.opentravel.schemacompiler.validate.FindingType;
@@ -99,8 +98,7 @@ public abstract class AbstractVersionHelperTests {
      * @return File
      */
     private static File getTestFolder() {
-        return new File( System.getProperty( "user.dir" ),
-            OTM16Upgrade.otm16Enabled ? "/src/test/resources/versions_1_6" : "/src/test/resources/versions" );
+        return new File( System.getProperty( "user.dir" ), "/src/test/resources/versions_1_6" );
     }
 
     /**

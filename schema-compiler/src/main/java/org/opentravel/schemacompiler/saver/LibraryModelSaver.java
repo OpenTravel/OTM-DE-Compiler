@@ -20,7 +20,6 @@ import org.apache.commons.beanutils.BeanUtils;
 import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLModel;
-import org.opentravel.schemacompiler.saver.impl.Library15FileSaveHandler;
 import org.opentravel.schemacompiler.saver.impl.Library16FileSaveHandler;
 import org.opentravel.schemacompiler.security.LibraryCrcCalculator;
 import org.opentravel.schemacompiler.transform.ObjectTransformer;
@@ -31,7 +30,6 @@ import org.opentravel.schemacompiler.transform.symbols.SymbolTableFactory;
 import org.opentravel.schemacompiler.transform.tl2jaxb.TL2JaxbLibrarySymbolResolver;
 import org.opentravel.schemacompiler.transform.util.ChameleonFilter;
 import org.opentravel.schemacompiler.transform.util.LibraryPrefixResolver;
-import org.opentravel.schemacompiler.util.OTM16Upgrade;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
 import org.opentravel.schemacompiler.validate.save.TLModelSaveValidator;
 
@@ -47,8 +45,7 @@ import java.util.List;
  */
 public final class LibraryModelSaver {
 
-    private LibrarySaveHandler<?> saveHandler =
-        OTM16Upgrade.otm16Enabled ? new Library16FileSaveHandler() : new Library15FileSaveHandler();
+    private LibrarySaveHandler<?> saveHandler = new Library16FileSaveHandler();
 
     /**
      * Returns the <code>LibrarySaveHandler</code> instance that will be used to persist the JAXB library instances.

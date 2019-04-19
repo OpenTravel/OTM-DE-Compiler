@@ -21,7 +21,6 @@ import org.opentravel.schemacompiler.loader.LibraryLoaderException;
 import org.opentravel.schemacompiler.loader.LibraryModuleInfo;
 import org.opentravel.schemacompiler.loader.LibraryModuleLoader;
 import org.opentravel.schemacompiler.loader.LoaderConstants;
-import org.opentravel.schemacompiler.util.OTM16Upgrade;
 import org.opentravel.schemacompiler.validate.ValidationFinding;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
 
@@ -43,9 +42,7 @@ public class MultiVersionLibraryModuleLoader extends AbstractLibraryModuleLoader
      */
     public MultiVersionLibraryModuleLoader() {
         // Assign the prioritized list of delegate module loaders
-        if (OTM16Upgrade.otm16Enabled) {
-            moduleLoaders.add( new LibrarySchema16ModuleLoader() );
-        }
+        moduleLoaders.add( new LibrarySchema16ModuleLoader() );
         moduleLoaders.add( new LibrarySchema15ModuleLoader() );
         moduleLoaders.add( new LibrarySchema14ModuleLoader() );
     }

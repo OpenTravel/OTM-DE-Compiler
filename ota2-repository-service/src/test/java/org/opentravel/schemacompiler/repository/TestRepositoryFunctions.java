@@ -32,7 +32,6 @@ import org.opentravel.schemacompiler.repository.testutil.RepositoryTestUtils;
 import org.opentravel.schemacompiler.task.CommonCompilerTaskOptions;
 import org.opentravel.schemacompiler.task.CompileAllCompilerTask;
 import org.opentravel.schemacompiler.task.CompileAllTaskOptions;
-import org.opentravel.schemacompiler.util.OTM16Upgrade;
 import org.opentravel.schemacompiler.util.URLUtils;
 import org.opentravel.schemacompiler.validate.FindingType;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
@@ -292,12 +291,9 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
         assertFalse( findings.hasFinding( FindingType.ERROR ) );
         assertNotNull( projectItem );
 
+        // We must promote twice to get the library to the FINAL status
         projectManager.promote( projectItem );
-        if (OTM16Upgrade.otm16Enabled) {
-            // If OTM 1.6 is enabled, we must promote a second time to get the library
-            // into the FINAL status
-            projectManager.promote( projectItem );
-        }
+        projectManager.promote( projectItem );
 
         assertEquals( TLLibraryStatus.FINAL, projectItem.getStatus() );
         model.set( projectManager.getModel() );
@@ -328,8 +324,7 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
         repositoryManager.get().recalculateCrc( projectItem );
         model.set( projectManager.getModel() );
 
-        if (DEBUG)
-            System.out.println( "DONE - Success." );
+        logDebug( "DONE - Success." );
     }
 
     public void test_08_DemoteLibrary() throws Exception {
@@ -352,12 +347,9 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
         assertFalse( findings.hasFinding( FindingType.ERROR ) );
         assertNotNull( projectItem );
 
+        // We must demote twice to get the library back into the DRAFT status
         projectManager.demote( projectItem );
-        if (OTM16Upgrade.otm16Enabled) {
-            // If OTM 1.6 is enabled, we must demote a second time to get the library
-            // back into the DRAFT status
-            projectManager.demote( projectItem );
-        }
+        projectManager.demote( projectItem );
 
         assertEquals( TLLibraryStatus.DRAFT, projectItem.getStatus() );
         model.set( projectManager.getModel() );
@@ -415,12 +407,11 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
         assertNotNull( projectItem );
 
         RepositoryItemHistory history = repositoryManager.get().getHistory( projectItem );
-        int expectedCommits = OTM16Upgrade.otm16Enabled ? 8 : 6;
 
         assertEquals( projectItem.getBaseNamespace(), history.getRepositoryItem().getBaseNamespace() );
         assertEquals( projectItem.getFilename(), history.getRepositoryItem().getFilename() );
         assertEquals( projectItem.getVersion(), history.getRepositoryItem().getVersion() );
-        assertEquals( expectedCommits, history.getCommitHistory().size() );
+        assertEquals( 8, history.getCommitHistory().size() );
 
         for (RepositoryItemCommit itemCommit : history.getCommitHistory()) {
             assertNotNull( itemCommit.getUser() );

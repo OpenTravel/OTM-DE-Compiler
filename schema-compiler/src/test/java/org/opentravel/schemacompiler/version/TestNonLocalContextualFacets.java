@@ -19,14 +19,11 @@ package org.opentravel.schemacompiler.version;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opentravel.schemacompiler.model.TLChoiceObject;
 import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLModel;
-import org.opentravel.schemacompiler.util.OTM16Upgrade;
 
 import java.io.File;
 
@@ -34,19 +31,6 @@ import java.io.File;
  * Verifies the versioning features for non-local contextual facet rollups.
  */
 public class TestNonLocalContextualFacets extends AbstractVersionHelperTests {
-
-    private static boolean originalEnabledFlag;
-
-    @BeforeClass
-    public static void enableOTM16() throws Exception {
-        originalEnabledFlag = OTM16Upgrade.otm16Enabled;
-        OTM16Upgrade.otm16Enabled = true;
-    }
-
-    @AfterClass
-    public static void disableOTM16() throws Exception {
-        OTM16Upgrade.otm16Enabled = originalEnabledFlag;
-    }
 
     @Test
     public void testNonLocalContextualFacetRollups() throws Exception {

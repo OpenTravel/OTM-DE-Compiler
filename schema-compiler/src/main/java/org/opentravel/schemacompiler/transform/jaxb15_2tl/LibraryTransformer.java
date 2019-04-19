@@ -32,7 +32,6 @@ import org.opentravel.schemacompiler.model.TLService;
 import org.opentravel.schemacompiler.transform.ObjectTransformer;
 import org.opentravel.schemacompiler.transform.symbols.DefaultTransformerContext;
 import org.opentravel.schemacompiler.transform.util.BaseTransformer;
-import org.opentravel.schemacompiler.util.OTM16Upgrade;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -140,15 +139,13 @@ public class LibraryTransformer extends BaseTransformer<Library,TLLibrary,Defaul
      * @param target the target library to which the contextual facets will be assigned
      */
     private void assignContextualFacets(TLLibrary target) {
-        if (OTM16Upgrade.otm16Enabled) {
-            for (TLBusinessObject bo : target.getBusinessObjectTypes()) {
-                bo.getCustomFacets().forEach( target::addNamedMember );
-                bo.getQueryFacets().forEach( target::addNamedMember );
-                bo.getUpdateFacets().forEach( target::addNamedMember );
-            }
-            for (TLChoiceObject choice : target.getChoiceObjectTypes()) {
-                choice.getChoiceFacets().forEach( target::addNamedMember );
-            }
+        for (TLBusinessObject bo : target.getBusinessObjectTypes()) {
+            bo.getCustomFacets().forEach( target::addNamedMember );
+            bo.getQueryFacets().forEach( target::addNamedMember );
+            bo.getUpdateFacets().forEach( target::addNamedMember );
+        }
+        for (TLChoiceObject choice : target.getChoiceObjectTypes()) {
+            choice.getChoiceFacets().forEach( target::addNamedMember );
         }
     }
 

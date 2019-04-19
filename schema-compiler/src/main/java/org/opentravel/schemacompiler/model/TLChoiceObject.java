@@ -19,7 +19,6 @@ package org.opentravel.schemacompiler.model;
 import org.opentravel.schemacompiler.event.ModelEventType;
 import org.opentravel.schemacompiler.model.TLAlias.AliasListManager;
 import org.opentravel.schemacompiler.model.TLContextualFacet.ContextualFacetListManager;
-import org.opentravel.schemacompiler.util.OTM16Upgrade;
 import org.opentravel.schemacompiler.version.Versioned;
 
 import java.util.ArrayList;
@@ -121,23 +120,6 @@ public class TLChoiceObject extends TLComplexTypeBase implements TLFacetOwner, T
             result = this.getOwningLibrary().isLaterVersion( otherVersionedItem.getOwningLibrary() );
         }
         return result;
-    }
-
-    /**
-     * @see org.opentravel.schemacompiler.model.TLLibraryMember#setOwningLibrary(org.opentravel.schemacompiler.model.AbstractLibrary)
-     */
-    @Override
-    public void setOwningLibrary(AbstractLibrary owningLibrary) {
-        if (!OTM16Upgrade.otm16Enabled) {
-            for (TLContextualFacet facet : getChoiceFacets()) {
-                if (owningLibrary != null) {
-                    owningLibrary.addNamedMember( facet );
-                } else {
-                    this.getOwningLibrary().removeNamedMember( facet );
-                }
-            }
-        }
-        super.setOwningLibrary( owningLibrary );
     }
 
     /**
@@ -318,7 +300,6 @@ public class TLChoiceObject extends TLComplexTypeBase implements TLFacetOwner, T
      * @param choiceFacet the choice facet value to add
      */
     public void addChoiceFacet(TLContextualFacet choiceFacet) {
-        contextualFacetAdded( choiceFacet );
         choiceFacetManager.addChild( choiceFacet );
     }
 
@@ -330,7 +311,6 @@ public class TLChoiceObject extends TLComplexTypeBase implements TLFacetOwner, T
      * @throws IndexOutOfBoundsException thrown if the index is out of range (index &lt; 0 || index &gt; size())
      */
     public void addChoiceFacet(int index, TLContextualFacet choiceFacet) {
-        contextualFacetAdded( choiceFacet );
         choiceFacetManager.addChild( index, choiceFacet );
     }
 
@@ -340,7 +320,6 @@ public class TLChoiceObject extends TLComplexTypeBase implements TLFacetOwner, T
      * @param choiceFacet the choice facet value to remove
      */
     public void removeChoiceFacet(TLContextualFacet choiceFacet) {
-        contextualFacetRemoved( choiceFacet );
         choiceFacetManager.removeChild( choiceFacet );
     }
 

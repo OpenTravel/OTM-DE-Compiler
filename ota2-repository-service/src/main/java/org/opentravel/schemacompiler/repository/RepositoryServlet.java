@@ -24,7 +24,6 @@ import org.glassfish.jersey.servlet.ServletContainer;
 import org.opentravel.schemacompiler.index.FreeTextSearchServiceFactory;
 import org.opentravel.schemacompiler.notification.NotificationServiceFactory;
 import org.opentravel.schemacompiler.subscription.SubscriptionManager;
-import org.opentravel.schemacompiler.util.OTM16Upgrade;
 
 import java.io.IOException;
 
@@ -65,7 +64,6 @@ public class RepositoryServlet extends ServletContainer {
     @SuppressWarnings("squid:S2696")
     public void init() throws ServletException {
         super.init();
-        OTM16Upgrade.otm16Enabled = true;
         FreeTextSearchServiceFactory.registerServiceOwner( this );
         SubscriptionManager sManager = RepositoryComponentFactory.getDefault().getSubscriptionManager();
 

@@ -26,7 +26,6 @@ import org.junit.Test;
 import org.opentravel.schemacompiler.loader.LibraryInputSource;
 import org.opentravel.schemacompiler.loader.LibraryModelLoader;
 import org.opentravel.schemacompiler.loader.impl.LibraryStreamInputSource;
-import org.opentravel.schemacompiler.util.OTM16Upgrade;
 import org.opentravel.schemacompiler.util.SchemaCompilerTestUtils;
 import org.opentravel.schemacompiler.validate.FindingType;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
@@ -182,9 +181,6 @@ public class TestModelUnits {
             List<LibraryMember> memberList = new ArrayList<>( library.getNamedMembers() );
 
             for (LibraryMember member : memberList) {
-                if (!OTM16Upgrade.otm16Enabled && (member instanceof TLContextualFacet)) {
-                    continue; // skip contextual facet removal for pre-1.6 cutover
-                }
                 library.removeNamedMember( member );
             }
             assertEquals( 0, library.getNamedMembers().size() );

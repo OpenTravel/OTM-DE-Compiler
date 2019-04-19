@@ -23,7 +23,6 @@ import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLFacetOwner;
 import org.opentravel.schemacompiler.model.TLFacetType;
-import org.opentravel.schemacompiler.util.OTM16Upgrade;
 import org.opentravel.schemacompiler.validate.FindingType;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
 import org.opentravel.schemacompiler.validate.base.TLContextualFacetBaseValidator;
@@ -95,16 +94,6 @@ public class TLContextualFacetCompileValidator extends TLContextualFacetBaseVali
 
         checkSchemaNamingConflicts( target, builder );
 
-        if (!OTM16Upgrade.otm16Enabled) {
-
-            if ((owningEntity != null) && (target.getOwningLibrary() != owningEntity.getOwningLibrary())) {
-                builder.addFinding( FindingType.ERROR, "owningLibrary", ERROR_OTM_16_OWNING_LIBRARY_MISMATCH );
-            }
-
-            if (owningEntity instanceof TLContextualFacet) {
-                builder.addFinding( FindingType.ERROR, OWNING_ENTITY, ERROR_OTM_16_INVALID_OWNER );
-            }
-        }
         return builder.getFindings();
     }
 
