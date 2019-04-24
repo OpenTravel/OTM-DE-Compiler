@@ -1,0 +1,7 @@
+---
+# Common variables for most OTM repository installations
+tomcat_archive: apache-tomcat-8.5.40
+tomcat_download_url: "http://mirrors.advancedhosters.com/apache/tomcat/tomcat-8/v8.5.40/bin/{{tomcat_archive}}.zip"
+repo_base_download_url: "http://ec2-52-27-163-193.us-west-2.compute.amazonaws.com/job/OTM-DE-Compiler/lastStableBuild/org.opentravel.otm"
+repo_service_download_url: "{{repo_base_download_url}}$ota2-repository-service/artifact/org.opentravel.otm/ota2-repository-service/4.0-SNAPSHOT/ota2-repository-service-4.0-SNAPSHOT.war"
+index_service_download_url: "{{repo_base_download_url}}$ota2-indexing-service/artifact/org.opentravel.otm/ota2-indexing-service/4.0-SNAPSHOT/ota2-indexing-service-4.0-SNAPSHOT-bin.zip"

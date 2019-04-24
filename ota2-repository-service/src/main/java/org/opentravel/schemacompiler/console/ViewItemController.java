@@ -658,10 +658,10 @@ public class ViewItemController extends BaseController {
                     RepositoryComponentFactory.getDefault().getSubscriptionManager();
                 FreeTextSearchService searchService = FreeTextSearchServiceFactory.getInstance();
                 boolean otm16Enabled = RepositoryUtils.isOTM16Library( item, getRepositoryManager() );
-                boolean hasAllVersionsSubscription =
-                    !subscriptionManager.getAllVersionsSubscriptions( sTarget, user.getUserId() ).isEmpty();
-                boolean hasSingleVersionSubscription =
-                    !subscriptionManager.getSingleVersionSubscriptions( sTarget, user.getUserId() ).isEmpty();
+                boolean hasAllVersionsSubscription = (subscriptionManager != null)
+                    && !subscriptionManager.getAllVersionsSubscriptions( sTarget, user.getUserId() ).isEmpty();
+                boolean hasSingleVersionSubscription = (subscriptionManager != null)
+                    && !subscriptionManager.getSingleVersionSubscriptions( sTarget, user.getUserId() ).isEmpty();
                 String indexItemId = IndexingUtils.getIdentityKey( item );
                 LibrarySearchResult indexItem = searchService.getLibrary( indexItemId, false );
                 UserPrincipal lockedByUser = null;
@@ -672,7 +672,8 @@ public class ViewItemController extends BaseController {
                 model.addAttribute( "otm16Enabled", otm16Enabled );
                 model.addAttribute( "lockedByUser", lockedByUser );
                 model.addAttribute( "indexItem", indexItem );
-                model.addAttribute( "canEditSubscription", (user != UserPrincipal.ANONYMOUS_USER) );
+                model.addAttribute( "canEditSubscription",
+                    (subscriptionManager != null) && (user != UserPrincipal.ANONYMOUS_USER) );
                 model.addAttribute( "hasAllVersionsSubscription", hasAllVersionsSubscription );
                 model.addAttribute( "hasSingleVersionSubscription", hasSingleVersionSubscription );
                 model.addAttribute( "item", item );

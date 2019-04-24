@@ -1,0 +1,21 @@
+---
+- name: --> Shutdown OTM Repository Indexing Service
+  block:
+  - name: Shutdown ota2-indexing-service process
+    shell: ./shutdown.sh
+    args:
+      chdir: "{{indexsvc_dir}}"
+  - name: Wait for service shutdown to complete
+    wait_for:
+      port: "{{indexing_activemq_port}}"
+      state: stopped
+      timeout: 60
+  - name: Check to make sure indexing process is shut down
+    shell: pgrep -f ota2-indexing-service
+    ignore_errors: yes
+    changed_when: false
+    register: indexing_run_status
+  - name: Force indexing service shutdown (if necessary)
+    shell: kill -9 {{item}}
+    with_items: "{{indexing_run_status.stdout_lines}}"
+    when: indexing_run_status.stdout != ''

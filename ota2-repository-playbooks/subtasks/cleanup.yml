@@ -1,0 +1,13 @@
+---
+- name: --> Cleanup Temporary Files
+  block:
+  - name: Cleanup remote host files
+    shell: "rm -rf *"
+    args:
+      chdir: "{{uploads_dir}}"
+      warn: false
+  - name: Cleaning up local temp directory
+    file:
+      path: "{{playbook_dir}}/temp"
+      state: absent
+    delegate_to: localhost

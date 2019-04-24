@@ -1,0 +1,25 @@
+---
+#
+# Sample host-specific variables file
+#
+# Create a copy for each host named '{{inventory_hostname}}-vars.yml' and place in the '/vars' directory
+# of your inventory folder (where your ansible 'hosts' file is located).
+#
+# Commented variables provided below only need to be uncommented if you plan on changing the default value.
+#
+otmrepo_id: sample-repository
+otmrepo_display_name: Sample Repository
+otmrepo_root_ns: http://www.sample.org/models
+#base_dir: /opt
+#tomcat_port: "8080"
+#tomcat_dir: "{{base_dir}}/tomcat"
+#indexing_jmx_port: "1099"
+#indexing_activemq_port: "61616"
+#indexsvc_dir: "{{base_dir}}/otm/ota2-indexing-service"
+#svnrepo_dir: "{{base_dir}}/otm/otm_svnrepo"
+#otmrepo_dir: "{{base_dir}}/otm/otm-db/repository"
+#searchindex_dir: "{{base_dir}}/otm/otm-db/search-index"
+#uploads_dir: "{{base_dir}}/uploads"
+#svn_port: "3690"
+#svn_user: otmuser
+#svn_password: otmpA55w0rd

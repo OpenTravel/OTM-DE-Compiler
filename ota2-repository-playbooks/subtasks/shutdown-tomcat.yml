@@ -1,0 +1,21 @@
+---
+- name: --> Shutdown OTM Repository Tomcat Server
+  block:
+  - name: Shutdown ota2-indexing-service process
+    shell: bin/shutdown.sh
+    args:
+      chdir: "{{tomcat_dir}}"
+  - name: Wait for service shutdown to complete
+    wait_for:
+      port: "{{tomcat_port}}"
+      state: stopped
+      timeout: 60
+  - name: Check to make sure Tomcat server is shut down
+    shell: pgrep -f tomcat
+    ignore_errors: yes
+    changed_when: false
+    register: tomcat_run_status
+  - name: Force Tomcat shutdown (if necessary)
+    shell: kill -9 {{item}}
+    with_items: "{{tomcat_run_status.stdout_lines}}"
+    when: tomcat_run_status.stdout != ''

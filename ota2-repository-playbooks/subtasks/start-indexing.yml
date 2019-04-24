@@ -1,0 +1,16 @@
+---
+- name: --> Start OTM Repository Indexing Service
+  shell: pgrep -f ota2-indexing-service
+  ignore_errors: yes
+  changed_when: false
+  register: indexing_run_status
+- block:
+  - name: Start ota2-indexing-service process
+    shell: ./startup.sh
+    args:
+      chdir: "{{indexsvc_dir}}"
+  - name: Wait for service startup to complete
+    wait_for:
+      port: "{{indexing_activemq_port}}"
+      timeout: 10
+  when: indexing_run_status.stdout == ''

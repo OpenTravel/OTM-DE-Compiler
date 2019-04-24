@@ -1,0 +1,13 @@
+---
+- name: --> Shutdown OTM Repository Server
+  hosts: all
+  vars_files:
+    - vars/default-vars.yml
+    - "{{inventory_dir}}/vars/{{inventory_hostname}}-vars.yml"
+    - vars/otm-repository-vars.yml
+  tasks:
+  - import_tasks: subtasks/shutdown-tomcat.yml
+  - import_tasks: subtasks/shutdown-indexing.yml
+  - import_tasks: subtasks/start-indexing.yml
+  - import_tasks: subtasks/start-tomcat.yml
+  

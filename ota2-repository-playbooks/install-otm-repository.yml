@@ -1,0 +1,202 @@
+---
+- name: --> Install and Configure OTM Repository Server
+  hosts: all
+  vars_files:
+    - vars/default-vars.yml
+    - "{{inventory_dir}}/vars/{{inventory_hostname}}-vars.yml"
+    - vars/otm-repository-vars.yml
+  tasks:
+  - name: --> Download Artifacts to Controller
+    block:
+    - name: Creating local temp directory
+      file:
+        path: "{{playbook_dir}}/temp"
+        state: directory
+      delegate_to: localhost
+    - name: Download artifacts that will need to be uploaded later
+      get_url:
+        url: "{{item.url}}"
+        dest: "{{playbook_dir}}/temp/{{item.file}}"
+      with_items:
+        - { url: "{{tomcat_download_url}}", file: "{{tomcat_archive}}.zip" }
+        - { url: "{{repo_service_download_url}}", file: "ROOT.war" }
+        - { url: "{{index_service_download_url}}", file: "ota2-indexing-service.zip" }
+      delegate_to: localhost
+  
+  - name: --> Create Base Folder Structure
+    block:
+    - name: Creating missing folders
+      file:
+        path: "{{item}}"
+        state: directory
+      with_items:
+        - "{{base_dir}}"
+        - "{{indexsvc_dir}}"
+        - "{{svnrepo_dir}}"
+        - "{{searchindex_dir}}"
+        - "{{uploads_dir}}"
+        - "{{uploads_dir}}/repo_tmp"
+  
+  - name: --> Check for Existence of Major Components
+    block:
+    - name: Check for Java 1.8 installation
+      shell: "java -version 2>&1 >/dev/null | grep 'java version' | awk '{print $3}'"
+      register: java_status
+    - name: Check for existing SVN repository checkout
+      stat: 
+        path: "{{otmrepo_dir}}/.svn"
+      register: svn_status
+    - name: Check for existing Tomcat OTM repository configuration
+      stat: 
+        path: "{{tomcat_dir}}/conf/ota2-repository-config.xml"
+      register: tomcat_status
+    - name: Check for existing Indexing Service configuration
+      stat: 
+        path: "{{indexsvc_dir}}/conf/indexing-service.properties"
+      register: indexing_status
+    
+  # TODO: Allow SVN to be configured for an off-host SVN provider
+  - debug:
+      msg: The Subversion repository appears to already be created (skipping)
+    when: svn_status.stat.exists == true
+  - name: --> Install and Configure SVN Server
+    block:
+    - name: Install Subversion package
+      package:
+        name: subversion
+        state: latest
+    - name: Check if a Subversion server is running
+      shell: pgrep 'svnserve'
+      ignore_errors: yes
+      changed_when: false
+      register: svnserve_status
+    - name: Kill Subversion server process if one is already running
+      shell: kill $(pgrep 'svnserve')
+      when: svnserve_status.stdout != ''
+    - name: Create SVN repository
+      command: "svnadmin create '{{svnrepo_dir}}'"
+      args:
+        creates: "{{svnrepo_dir}}/README.txt"
+    - name: Configure SVN user account and permissions
+      template:
+        src: "templates/svn/{{item.src}}"
+        dest: "{{svnrepo_dir}}/conf/{{item.dest}}"
+      with_items:
+      - { src: authz.j2, dest: authz }
+      - { src: passwd.j2, dest: passwd }
+      - { src: svnserve.j2, dest: svnserve.conf }
+    - name: Start the SVN server
+      command: "svnserve -d --listen-port {{svn_port}} -r '{{svnrepo_dir}}'"
+    - name: Copy the initial OTM repository content
+      template:
+        src: "templates/otm-repo/{{item.src}}"
+        dest: "{{uploads_dir}}/repo_tmp/{{item.dest}}"
+      with_items:
+      - { src: auth.j2, dest: auth.xml }
+      - { src: group-assignments.j2, dest: group-assignments.xml }
+      - { src: repository-metadata.j2, dest: repository-metadata.xml }
+      - { src: repository-users.j2, dest: repository-users.xml }
+    - name: Copy the script that will create the initial root namespace
+      template:
+        src: "templates/otm-repo/{{item.src}}"
+        dest: "{{uploads_dir}}/{{item.dest}}"
+        mode: 0754
+      with_items:
+      - { src: create-nsid.j2, dest: create-nsid.sh }
+    - name: Execute the script to create the initial root namespace
+      command: ./create-nsid.sh
+      args:
+        chdir: "{{uploads_dir}}"
+    - name: Import the initial content into the SVN repository
+      command: "svn import {{uploads_dir}}/repo_tmp svn://localhost:{{svn_port}} --username {{svn_user}} --password {{svn_password}} -m 'Initial import'"
+      args:
+        warn: false
+    - name: Checkout to managed repository location
+      subversion:
+        repo: "svn://localhost:{{svn_port}}"
+        dest: "{{otmrepo_dir}}"
+    when: svn_status.stat.exists == false
+    
+  - debug:
+      msg: The Tomcat server appears to already be created (skipping)
+    when: tomcat_status.stat.exists == true
+  - name: --> Install and Configure Tomcat Server
+    block:
+    - block:
+      - name: Make sure Java 1.8 is installed (Debian or Ubuntu)
+        package:
+          name: openjdk-8-jdk
+          state: latest
+        when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+      - name: Make sure Java 1.8 is installed (CentOS or RHEL)
+        package:
+          name: java-1.8.0-openjdk-devel
+          state: latest
+        when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+      when: java_status.stdout is not search("1.8")
+    - name: Upload Tomcat distribution archive to remote host
+      copy:
+        src: "{{playbook_dir}}/temp/{{tomcat_archive}}.zip"
+        dest: "{{uploads_dir}}/{{tomcat_archive}}.zip"
+    - name: Unpack distribution archive
+      unarchive:
+        src: "{{uploads_dir}}/{{tomcat_archive}}.zip"
+        dest: "{{base_dir}}"
+    - name: Create version-independent symlink
+      file:
+        src: "{{base_dir}}/{{tomcat_archive}}"
+        dest: "{{tomcat_dir}}"
+        state: link
+    - name: Modify shell script permissions to allow execution
+      shell: "chmod 754 {{tomcat_dir}}/bin/*.sh"
+      args:
+        warn: false
+    - name: Remove pre-installed web applications
+      shell: "rm -rf *"
+      args:
+        chdir: "{{tomcat_dir}}/webapps"
+        warn: false
+    - name: Change default tomcat port (if necessary)
+      xml:
+        path: "{{tomcat_dir}}/conf/server.xml"
+        xpath: /Server/Service/Connector
+        attribute: port
+        value: "{{tomcat_port}}"
+      when: tomcat_port != "8080"
+    - name: Copy OTM repository configuration files
+      template:
+        src: "templates/otm-config/{{item.src}}"
+        dest: "{{tomcat_dir}}/conf/{{item.dest}}"
+      with_items:
+      - { src: ota2-repository-config.j2, dest: ota2-repository-config.xml }
+      - { src: svnCredentials.j2, dest: svnCredentials.properties }
+    - name: Install the OTA2 Repository Web Service application
+      copy:
+        src: "{{playbook_dir}}/temp/ROOT.war"
+        dest: "{{tomcat_dir}}/webapps/ROOT.war"
+    when: tomcat_status.stat.exists == false
+    
+  - debug:
+      msg: The Indexing Service appears to already be created (skipping)
+    when: indexing_status.stat.exists == true
+  - name: --> Install and Configure the Indexing Service
+    block:
+    - name: Upload ota2-indexing-service archive to remote host
+      copy:
+        src: "{{playbook_dir}}/temp/ota2-indexing-service.zip"
+        dest: "{{uploads_dir}}/ota2-indexing-service.zip"
+    - name: Unpack the ota2-indexing-service archive
+      unarchive:
+        src: "{{uploads_dir}}/ota2-indexing-service.zip"
+        dest: "{{indexsvc_dir}}/.."
+    - name: Copy ota2-indexing-service configuration files
+      template:
+        src: "templates/indexing-config/{{item.src}}"
+        dest: "{{indexsvc_dir}}/conf/{{item.dest}}"
+      with_items:
+      - { src: indexing-service.j2, dest: indexing-service.properties }
+    when: indexing_status.stat.exists == false
+    
+  - import_tasks: subtasks/start-indexing.yml
+  - import_tasks: subtasks/start-tomcat.yml
+  - import_tasks: subtasks/cleanup.yml

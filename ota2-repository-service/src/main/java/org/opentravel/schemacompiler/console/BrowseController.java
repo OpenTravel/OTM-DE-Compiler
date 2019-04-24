@@ -103,9 +103,10 @@ public class BrowseController extends BaseController {
                 model.addAttribute( "parentItems", getParentNamespaceItems( baseNamespace ) );
                 model.addAttribute( "canCreateNamespaceExtension",
                     securityManager.isAuthorized( user, baseNamespace, RepositoryPermission.WRITE ) );
-                model.addAttribute( "canEditSubscription", (user != UserPrincipal.ANONYMOUS_USER) );
-                model.addAttribute( "hasSubscription",
-                    !subscriptionManager.getNamespaceSubscriptions( baseNamespace, user.getUserId() ).isEmpty() );
+                model.addAttribute( "canEditSubscription",
+                    (subscriptionManager != null) && (user != UserPrincipal.ANONYMOUS_USER) );
+                model.addAttribute( "hasSubscription", (subscriptionManager != null)
+                    && !subscriptionManager.getNamespaceSubscriptions( baseNamespace, user.getUserId() ).isEmpty() );
 
                 if (!repositoryManager.listRootNamespaces().contains( baseNamespace )
                     && repositoryManager.listNamespaceChildren( baseNamespace ).isEmpty()

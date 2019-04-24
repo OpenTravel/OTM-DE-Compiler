@@ -1,0 +1,66 @@
+---
+- name: --> Upgrade OTM Repository Software
+  hosts: all
+  vars_files:
+    - vars/default-vars.yml
+    - "{{inventory_dir}}/vars/{{inventory_hostname}}-vars.yml"
+    - vars/otm-repository-vars.yml
+  tasks:
+  - name: --> Download Artifacts to Controller
+    block:
+    - name: Creating local temp directory
+      file:
+        path: "{{playbook_dir}}/temp"
+        state: directory
+      delegate_to: localhost
+    - name: Download artifacts that will need to be uploaded later
+      get_url:
+        url: "{{item.url}}"
+        dest: "{{playbook_dir}}/temp/{{item.file}}"
+      with_items:
+        - { url: "{{repo_service_download_url}}", file: "ROOT.war" }
+        - { url: "{{index_service_download_url}}", file: "ota2-indexing-service.zip" }
+      delegate_to: localhost
+
+  - import_tasks: subtasks/shutdown-tomcat.yml
+  - import_tasks: subtasks/shutdown-indexing.yml
+
+  - name: --> Upgrade the Indexing Service
+    block:
+    - name: Upload ota2-indexing-service archive to remote host
+      copy:
+        src: "{{playbook_dir}}/temp/ota2-indexing-service.zip"
+        dest: "{{uploads_dir}}/ota2-indexing-service.zip"
+    - name: Unpack the ota2-indexing-service archive
+      unarchive:
+        src: "{{uploads_dir}}/ota2-indexing-service.zip"
+        dest: "{{uploads_dir}}"
+    - name: Delete /lib directory from current installation
+      file:
+        path: "{{indexsvc_dir}}/lib"
+        state: absent
+    - name: Replace indexing libraries with files from most recent archive
+      shell: "mv lib {{indexsvc_dir}}"
+      args:
+        chdir: "{{uploads_dir}}/ota2-indexing-service"
+        warn: false
+      register: copy_status
+
+  - name: --> Upgrade the Tomcat web service
+    block:
+    - name: Delete the OTM Repository Web Service appplication from the current installation
+      file:
+        path: "{{item}}"
+        state: absent
+      with_items:
+        - "{{tomcat_dir}}/webapps/ROOT.war"
+        - "{{tomcat_dir}}/webapps/ROOT"
+        - "{{tomcat_dir}}/work/Catalina/localhost/ROOT"
+    - name: Install the updated OTA2 Repository Web Service application
+      copy:
+        src: "{{playbook_dir}}/temp/ROOT.war"
+        dest: "{{tomcat_dir}}/webapps/ROOT.war"
+
+  - import_tasks: subtasks/start-indexing.yml
+  - import_tasks: subtasks/start-tomcat.yml
+  - import_tasks: subtasks/cleanup.yml
