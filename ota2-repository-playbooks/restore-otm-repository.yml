@@ -1,0 +1,45 @@
+---
+#
+# Recover OTM repository data from a previous backup.
+#
+# Usage: > ansible-playbook -e target_host=<inventory-hostname> backup_archive=<archive-file> restore-otm-repository.yml
+#
+- name: --> Restore OTM Repository Data from Backup
+  hosts: "{{target_host}}"
+  vars_files:
+    - vars/default-vars.yml
+    - "{{inventory_dir}}/vars/{{inventory_hostname}}-vars.yml"
+    - vars/otm-repository-vars.yml
+  vars:
+    backup_timestamp: "{{ansible_date_time.year}}{{ansible_date_time.month}}{{ansible_date_time.day}}{{ansible_date_time.hour}}{{ansible_date_time.minute}}"
+    svn_url: "svn://localhost:{{svn_port}}"
+  tasks:
+  - import_tasks: subtasks/shutdown-tomcat.yml
+  - import_tasks: subtasks/shutdown-indexing.yml
+  
+  - name: Copy backup archive to remote host
+    copy:
+      src: "{{backup_archive}}"
+      dest: "{{uploads_dir}}/"
+    register: uploaded_archive
+  - name: Unarchive the SVN dump file
+    command: "gunzip {{uploaded_archive.dest}}"
+  - name: Identify the dump filename
+    set_fact:
+      svn_dumpfile: "{{ uploaded_archive.dest | regex_replace('\\.gz', '') | regex_replace( '.*?/', '' ) }}"
+  - name: Rename the existing SVN repository folder
+    command: "mv {{svnrepo_dir}} {{svnrepo_dir}}-bk-{{backup_timestamp}}"
+  - name: Rename the existing SVN checkout folder
+    command: "mv {{otmrepo_dir}} {{otmrepo_dir}}-bk-{{backup_timestamp}}"
+  - import_tasks: subtasks/init-svn-repository.yml
+  - name: Restore contents of SVN repository from backup
+    shell: "svnadmin load '{{svnrepo_dir}}' < '{{uploads_dir}}/{{svn_dumpfile}}'"
+  - name: Checkout to managed repository location
+    subversion:
+      repo: "{{svn_url}}"
+      dest: "{{otmrepo_dir}}"
+
+  - import_tasks: subtasks/start-indexing.yml
+  - import_tasks: subtasks/start-tomcat.yml
+  - import_tasks: subtasks/cleanup.yml
+  

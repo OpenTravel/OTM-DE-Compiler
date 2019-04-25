@@ -8,6 +8,8 @@ indexsvc_dir: "{{base_dir}}/otm/ota2-indexing-service"
 svnrepo_dir: "{{base_dir}}/otm/otm_svnrepo"
 otmrepo_dir: "{{base_dir}}/otm/otm-db/repository"
 searchindex_dir: "{{base_dir}}/otm/otm-db/search-index"
+backups_dir: "{{base_dir}}/otm/backups"
+controller_backup_dir: "~/otm-backups/{{inventory_hostname}}"
 uploads_dir: "{{base_dir}}/uploads"
 svn_port: "3690"
 svn_user: otmuser

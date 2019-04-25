@@ -1,0 +1,12 @@
+---
+- name: --> Shutdown the local SVN Daemon
+  block:
+  - name: Check if a Subversion server is running
+    shell: pgrep 'svnserve'
+    ignore_errors: yes
+    changed_when: false
+    register: svnserve_status
+  - name: Kill Subversion server process if one is already running
+    shell: kill $(pgrep 'svnserve')
+    when: svnserve_status.stdout != ''
+  when: remote_svn_url is undefined

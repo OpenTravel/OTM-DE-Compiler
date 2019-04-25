@@ -1,0 +1,34 @@
+---
+- name: --> Backup OTM Repository Data
+  hosts: all
+  vars_files:
+    - vars/default-vars.yml
+    - "{{inventory_dir}}/vars/{{inventory_hostname}}-vars.yml"
+    - vars/otm-repository-vars.yml
+  vars:
+    backup_timestamp: "{{ansible_date_time.year}}{{ansible_date_time.month}}{{ansible_date_time.day}}{{ansible_date_time.hour}}{{ansible_date_time.minute}}"
+    svn_dumpfile: "repo-{{backup_timestamp}}.svn.dump"
+  tasks:
+  - name: Find existing backup files
+    find:
+      paths: "{{backups_dir}}"
+      patterns: "repo-[0-9]+.svn.dump.gz"
+      use_regex: True
+    register: existing_backup_files
+  - name: Dump contents of SVN repository
+    shell: "svnadmin dump '{{svnrepo_dir}}' > '{{backups_dir}}/{{svn_dumpfile}}'"
+  - name: Compress SVN backup file
+    archive:
+      path: "{{backups_dir}}/{{svn_dumpfile}}"
+      dest: "{{backups_dir}}/{{svn_dumpfile}}.gz"
+      remove: True
+  - name: Copy archive file back to controller
+    fetch:
+      src: "{{backups_dir}}/{{svn_dumpfile}}.gz"
+      dest: "{{controller_backup_dir}}/{{svn_dumpfile}}.gz"
+      flat: True
+  - name: Delete all but latest backup from the remote host
+    file:
+      path: "{{item.path}}"
+      state: absent
+    with_items: "{{existing_backup_files.files}}"

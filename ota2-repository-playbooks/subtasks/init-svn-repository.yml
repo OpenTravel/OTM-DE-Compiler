@@ -1,0 +1,15 @@
+---
+- import_tasks: subtasks/shutdown-svn.yml
+- name: Create SVN repository
+  command: "svnadmin create '{{svnrepo_dir}}'"
+  args:
+    creates: "{{svnrepo_dir}}/README.txt"
+- name: Configure SVN user account and permissions
+  template:
+    src: "templates/svn/{{item.src}}"
+    dest: "{{svnrepo_dir}}/conf/{{item.dest}}"
+  with_items:
+  - { src: authz.j2, dest: authz }
+  - { src: passwd.j2, dest: passwd }
+  - { src: svnserve.j2, dest: svnserve.conf }
+- import_tasks: subtasks/start-svn.yml

@@ -19,7 +19,10 @@ otmrepo_root_ns: http://www.sample.org/models
 #svnrepo_dir: "{{base_dir}}/otm/otm_svnrepo"
 #otmrepo_dir: "{{base_dir}}/otm/otm-db/repository"
 #searchindex_dir: "{{base_dir}}/otm/otm-db/search-index"
+#backups_dir: "{{base_dir}}/otm/backups"
+#controller_backup_dir: "~/otm-backups/{{inventory_hostname}}"
 #uploads_dir: "{{base_dir}}/uploads"
+#remote_svn_url: http://www.remotesvn.com/otm-repository
 #svn_port: "3690"
 #svn_user: otmuser
 #svn_password: otmpA55w0rd

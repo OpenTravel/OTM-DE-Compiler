@@ -34,6 +34,7 @@
         - "{{indexsvc_dir}}"
         - "{{svnrepo_dir}}"
         - "{{searchindex_dir}}"
+        - "{{backups_dir}}"
         - "{{uploads_dir}}"
         - "{{uploads_dir}}/repo_tmp"
   
@@ -55,38 +56,22 @@
         path: "{{indexsvc_dir}}/conf/indexing-service.properties"
       register: indexing_status
     
-  # TODO: Allow SVN to be configured for an off-host SVN provider
   - debug:
       msg: The Subversion repository appears to already be created (skipping)
     when: svn_status.stat.exists == true
   - name: --> Install and Configure SVN Server
     block:
-    - name: Install Subversion package
-      package:
-        name: subversion
-        state: latest
-    - name: Check if a Subversion server is running
-      shell: pgrep 'svnserve'
-      ignore_errors: yes
-      changed_when: false
-      register: svnserve_status
-    - name: Kill Subversion server process if one is already running
-      shell: kill $(pgrep 'svnserve')
-      when: svnserve_status.stdout != ''
-    - name: Create SVN repository
-      command: "svnadmin create '{{svnrepo_dir}}'"
-      args:
-        creates: "{{svnrepo_dir}}/README.txt"
-    - name: Configure SVN user account and permissions
-      template:
-        src: "templates/svn/{{item.src}}"
-        dest: "{{svnrepo_dir}}/conf/{{item.dest}}"
-      with_items:
-      - { src: authz.j2, dest: authz }
-      - { src: passwd.j2, dest: passwd }
-      - { src: svnserve.j2, dest: svnserve.conf }
-    - name: Start the SVN server
-      command: "svnserve -d --listen-port {{svn_port}} -r '{{svnrepo_dir}}'"
+    - name: Install and configure local SVN repository
+      block:
+      - name: Install Subversion package
+        package:
+          name: subversion
+          state: latest
+      - import_tasks: subtasks/init-svn-repository.yml
+      when: remote_svn_url is undefined
+    - name: Determin the Subversion URL to use in subsequent tasks
+      set_fact:
+        svn_url: "{{ remote_svn_url if remote_svn_url is defined else 'svn://localhost:{{svn_port}}'}}"
     - name: Copy the initial OTM repository content
       template:
         src: "templates/otm-repo/{{item.src}}"
@@ -108,12 +93,12 @@
       args:
         chdir: "{{uploads_dir}}"
     - name: Import the initial content into the SVN repository
-      command: "svn import {{uploads_dir}}/repo_tmp svn://localhost:{{svn_port}} --username {{svn_user}} --password {{svn_password}} -m 'Initial import'"
+      command: "svn import {{uploads_dir}}/repo_tmp {{svn_url}} --username {{svn_user}} --password {{svn_password}} -m 'Initial import'"
       args:
         warn: false
     - name: Checkout to managed repository location
       subversion:
-        repo: "svn://localhost:{{svn_port}}"
+        repo: "{{svn_url}}"
         dest: "{{otmrepo_dir}}"
     when: svn_status.stat.exists == false
     

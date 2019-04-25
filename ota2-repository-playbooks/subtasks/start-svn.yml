@@ -1,0 +1,4 @@
+---
+- name: --> Start the local SVN Daemon
+  command: "svnserve -d --listen-port {{svn_port}} -r '{{svnrepo_dir}}'"
+  when: remote_svn_url is undefined
