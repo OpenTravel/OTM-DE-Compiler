@@ -6,7 +6,7 @@
     ignore_errors: yes
     changed_when: false
     register: svnserve_status
-  - name: Kill Subversion server process if one is already running
+  - name: Kill Subversion server process if one is running
     shell: kill $(pgrep 'svnserve')
     when: svnserve_status.stdout != ''
   when: remote_svn_url is undefined

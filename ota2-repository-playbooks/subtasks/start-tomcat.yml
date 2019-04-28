@@ -1,13 +1,8 @@
 ---
 - name: --> Start OTM Repository Tomcat Server
-  shell: pgrep -f tomcat
-  ignore_errors: yes
-  changed_when: false
-  register: tomcat_run_status
-- block:
-  - name: Start tomcat server
-    shell: "{{tomcat_dir}}/bin/startup.sh"
-  - name: Wait for server startup to complete
-    wait_for:
-      port: "{{tomcat_port}}"
-  when: tomcat_run_status.stdout == ''
+  service:
+    name: ota2-tomcat
+    state: started
+- name: Wait for server startup to complete
+  wait_for:
+    port: "{{tomcat_port}}"

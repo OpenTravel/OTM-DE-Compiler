@@ -1,4 +1,12 @@
 ---
 - name: --> Start the local SVN Daemon
-  command: "svnserve -d --listen-port {{svn_port}} -r '{{svnrepo_dir}}'"
+  block:
+  - name: Check if a Subversion server is running
+    shell: pgrep 'svnserve'
+    ignore_errors: yes
+    changed_when: false
+    register: svnserve_status
+  - name: --> Start the SVN daemon process
+    command: "svnserve -d --listen-port {{svn_port}} -r '{{svnrepo_dir}}'"
+    when: svnserve_status.stdout == ''
   when: remote_svn_url is undefined

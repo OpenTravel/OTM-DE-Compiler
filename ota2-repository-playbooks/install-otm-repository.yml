@@ -93,7 +93,7 @@
       args:
         chdir: "{{uploads_dir}}"
     - name: Import the initial content into the SVN repository
-      command: "svn import {{uploads_dir}}/repo_tmp {{svn_url}} --username {{svn_user}} --password {{svn_password}} -m 'Initial import'"
+      shell: "svn import {{uploads_dir}}/repo_tmp {{svn_url}} --username {{svn_user}} --password {{svn_password}} --no-auth-cache -m 'Initial import'"
       args:
         warn: false
     - name: Checkout to managed repository location
@@ -108,6 +108,9 @@
   - name: --> Install and Configure Tomcat Server
     block:
     - block:
+      - name: Ensure Java 1.8 package is available (Ubuntu only)
+        command: "add-apt-repository -y ppa:openjdk-r/ppa"
+        when: ansible_distribution == 'Ubuntu'
       - name: Make sure Java 1.8 is installed (Debian or Ubuntu)
         package:
           name: openjdk-8-jdk
@@ -119,13 +122,9 @@
           state: latest
         when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
       when: java_status.stdout is not search("1.8")
-    - name: Upload Tomcat distribution archive to remote host
-      copy:
-        src: "{{playbook_dir}}/temp/{{tomcat_archive}}.zip"
-        dest: "{{uploads_dir}}/{{tomcat_archive}}.zip"
-    - name: Unpack distribution archive
+    - name: Upload Tomcat distribution to remote host
       unarchive:
-        src: "{{uploads_dir}}/{{tomcat_archive}}.zip"
+        src: "{{playbook_dir}}/temp/{{tomcat_archive}}.zip"
         dest: "{{base_dir}}"
     - name: Create version-independent symlink
       file:
@@ -159,6 +158,12 @@
       copy:
         src: "{{playbook_dir}}/temp/ROOT.war"
         dest: "{{tomcat_dir}}/webapps/ROOT.war"
+    - name: Install the OTM Repository tomcat service
+      template:
+        src: "templates/otm-config/ota2-tomcat.j2"
+        dest: "/lib/systemd/system/ota2-tomcat.service"
+#      when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+    # TODO: Add service templates for Debian and Ubuntu
     when: tomcat_status.stat.exists == false
     
   - debug:
@@ -166,13 +171,9 @@
     when: indexing_status.stat.exists == true
   - name: --> Install and Configure the Indexing Service
     block:
-    - name: Upload ota2-indexing-service archive to remote host
-      copy:
-        src: "{{playbook_dir}}/temp/ota2-indexing-service.zip"
-        dest: "{{uploads_dir}}/ota2-indexing-service.zip"
-    - name: Unpack the ota2-indexing-service archive
+    - name: Upload ota2-indexing-service to remote host
       unarchive:
-        src: "{{uploads_dir}}/ota2-indexing-service.zip"
+        src: "{{playbook_dir}}/temp/ota2-indexing-service.zip"
         dest: "{{indexsvc_dir}}/.."
     - name: Copy ota2-indexing-service configuration files
       template:
@@ -180,6 +181,12 @@
         dest: "{{indexsvc_dir}}/conf/{{item.dest}}"
       with_items:
       - { src: indexing-service.j2, dest: indexing-service.properties }
+    - name: Install the ota2-indexing system service
+      template:
+        src: "templates/indexing-config/ota2-indexing.j2"
+        dest: "/lib/systemd/system/ota2-indexing.service"
+#      when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+    # TODO: Add service templates for Debian and Ubuntu
     when: indexing_status.stat.exists == false
     
   - import_tasks: subtasks/start-indexing.yml

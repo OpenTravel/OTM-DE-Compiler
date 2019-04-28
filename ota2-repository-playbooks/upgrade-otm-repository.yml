@@ -28,12 +28,8 @@
   - name: --> Upgrade the Indexing Service
     block:
     - name: Upload ota2-indexing-service archive to remote host
-      copy:
-        src: "{{playbook_dir}}/temp/ota2-indexing-service.zip"
-        dest: "{{uploads_dir}}/ota2-indexing-service.zip"
-    - name: Unpack the ota2-indexing-service archive
       unarchive:
-        src: "{{uploads_dir}}/ota2-indexing-service.zip"
+        src: "{{playbook_dir}}/temp/ota2-indexing-service.zip"
         dest: "{{uploads_dir}}"
     - name: Delete /lib directory from current installation
       file:
