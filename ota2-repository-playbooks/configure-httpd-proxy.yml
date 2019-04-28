@@ -6,6 +6,8 @@
     - "{{inventory_dir}}/vars/{{inventory_hostname}}-vars.yml"
     - vars/otm-repository-vars.yml
   tasks:
+  - debug:
+      var: ansible_distribution
   - name: Setup OS-specific configuration (Debian)
     set_fact:
       package_name: apache2
@@ -23,7 +25,7 @@
       package_name: httpd
       conf_directory: /etc/httpd/conf.d
       modules_directory: /etc/httpd/modules
-    when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+    when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
   - name: Install the apache2/httpd package
     package:
       name: "{{package_name}}"

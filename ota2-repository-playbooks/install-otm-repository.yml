@@ -120,7 +120,7 @@
         package:
           name: java-1.8.0-openjdk-devel
           state: latest
-        when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+        when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
       when: java_status.stdout is not search("1.8")
     - name: Upload Tomcat distribution to remote host
       unarchive:
@@ -162,8 +162,6 @@
       template:
         src: "templates/otm-config/ota2-tomcat.j2"
         dest: "/lib/systemd/system/ota2-tomcat.service"
-#      when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
-    # TODO: Add service templates for Debian and Ubuntu
     when: tomcat_status.stat.exists == false
     
   - debug:
@@ -185,8 +183,6 @@
       template:
         src: "templates/indexing-config/ota2-indexing.j2"
         dest: "/lib/systemd/system/ota2-indexing.service"
-#      when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
-    # TODO: Add service templates for Debian and Ubuntu
     when: indexing_status.stat.exists == false
     
   - import_tasks: subtasks/start-indexing.yml
