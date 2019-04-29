@@ -1,0 +1,37 @@
+- name: --> Validate OTM Repository Server Setup
+  hosts: all
+  vars_files:
+    - vars/default-vars.yml
+    - "{{inventory_dir}}/vars/{{inventory_hostname}}-vars.yml"
+    - vars/otm-repository-vars.yml
+  tasks:
+  - name: Check for existence of required components
+    stat:
+      path: "{{item.path}}"
+    register: components_status
+    with_items:
+      - { name: "Tomcat Server", path: "{{tomcat_dir}}" }
+      - { name: "OTM Repository Configuration", path: "{{tomcat_dir}}/conf/ota2-repository-config.xml" }
+      - { name: "OTM Repository Data Directory", path: "{{otmrepo_dir}}" }
+      - { name: "OTM Repository Search Index Directory", path: "{{searchindex_dir}}" }
+      - { name: "OTM Repository Backups Directory", path: "{{backups_dir}}" }
+      - { name: "Repository Indexing Service", path: "{{indexsvc_dir}}/startup.sh" }
+      - { name: "Uploads Directory", path: "{{uploads_dir}}" }
+  - name: Fail if one or more required components is not installed
+    fail:
+      msg: "Component {{item.item.name}} not installed"
+    when: item.stat.exists == False
+    with_items: "{{components_status.results}}"
+  - name: Check configuration of repository identity
+    shell: "grep -i '{{item.str}}' {{otmrepo_dir}}/repository-metadata.xml"
+    register: repo_config_status
+    with_items:
+      - { name: "otmrepo_id", str: ">{{otmrepo_id}}<" }
+      - { name: "otmrepo_display_name", str: ">{{otmrepo_display_name}}<" }
+      - { name: "otmrepo_root_ns", str: ">{{otmrepo_root_ns}}<" }
+  - name: Fail if one or more repository configuration settings is not properly configured
+    fail:
+      msg: "Property {{item.item.name}} not properly configured"
+    when: item.stdout == ''
+    with_items: "{{repo_config_status.results}}"
+    
