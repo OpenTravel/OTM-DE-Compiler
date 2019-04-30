@@ -10,13 +10,13 @@
     block:
     - name: Creating local temp directory
       file:
-        path: "{{playbook_dir}}/temp"
+        path: "{{controller_temp_dir}}"
         state: directory
       delegate_to: localhost
     - name: Download artifacts that will need to be uploaded later
       get_url:
         url: "{{item.url}}"
-        dest: "{{playbook_dir}}/temp/{{item.file}}"
+        dest: "{{controller_temp_dir}}/{{item.file}}"
       with_items:
         - { url: "{{repo_service_download_url}}", file: "ROOT.war" }
         - { url: "{{index_service_download_url}}", file: "ota2-indexing-service.zip" }
@@ -29,7 +29,7 @@
     block:
     - name: Upload ota2-indexing-service archive to remote host
       unarchive:
-        src: "{{playbook_dir}}/temp/ota2-indexing-service.zip"
+        src: "{{controller_temp_dir}}/ota2-indexing-service.zip"
         dest: "{{uploads_dir}}"
     - name: Delete /lib directory from current installation
       file:
@@ -54,7 +54,7 @@
         - "{{tomcat_dir}}/work/Catalina/localhost/ROOT"
     - name: Install the updated OTA2 Repository Web Service application
       copy:
-        src: "{{playbook_dir}}/temp/ROOT.war"
+        src: "{{controller_temp_dir}}/ROOT.war"
         dest: "{{tomcat_dir}}/webapps/ROOT.war"
 
   - import_tasks: subtasks/start-indexing.yml

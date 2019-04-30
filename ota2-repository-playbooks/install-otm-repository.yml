@@ -10,13 +10,13 @@
     block:
     - name: Creating local temp directory
       file:
-        path: "{{playbook_dir}}/temp"
+        path: "{{controller_temp_dir}}"
         state: directory
       delegate_to: localhost
     - name: Download artifacts that will need to be uploaded later
       get_url:
         url: "{{item.url}}"
-        dest: "{{playbook_dir}}/temp/{{item.file}}"
+        dest: "{{controller_temp_dir}}/{{item.file}}"
       with_items:
         - { url: "{{tomcat_download_url}}", file: "{{tomcat_archive}}.zip" }
         - { url: "{{repo_service_download_url}}", file: "ROOT.war" }
@@ -124,7 +124,7 @@
       when: java_status.stdout is not search("1.8")
     - name: Upload Tomcat distribution to remote host
       unarchive:
-        src: "{{playbook_dir}}/temp/{{tomcat_archive}}.zip"
+        src: "{{controller_temp_dir}}/{{tomcat_archive}}.zip"
         dest: "{{base_dir}}"
     - name: Create version-independent symlink
       file:
@@ -156,7 +156,7 @@
       - { src: svnCredentials.j2, dest: svnCredentials.properties }
     - name: Install the OTA2 Repository Web Service application
       copy:
-        src: "{{playbook_dir}}/temp/ROOT.war"
+        src: "{{controller_temp_dir}}/ROOT.war"
         dest: "{{tomcat_dir}}/webapps/ROOT.war"
     - name: Install the OTM Repository tomcat service
       template:
@@ -171,7 +171,7 @@
     block:
     - name: Upload ota2-indexing-service to remote host
       unarchive:
-        src: "{{playbook_dir}}/temp/ota2-indexing-service.zip"
+        src: "{{controller_temp_dir}}/ota2-indexing-service.zip"
         dest: "{{indexsvc_dir}}/.."
     - name: Copy ota2-indexing-service configuration files
       template:

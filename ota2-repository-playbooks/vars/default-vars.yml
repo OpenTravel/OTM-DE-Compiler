@@ -10,6 +10,7 @@ otmrepo_dir: "{{base_dir}}/otm/otm-db/repository"
 searchindex_dir: "{{base_dir}}/otm/otm-db/search-index"
 backups_dir: "{{base_dir}}/otm/backups"
 controller_backup_dir: "~/otm-backups/{{inventory_hostname}}"
+controller_temp_dir: "~/ansible_temp"
 uploads_dir: "{{base_dir}}/uploads"
 svn_port: "3690"
 svn_user: otmuser

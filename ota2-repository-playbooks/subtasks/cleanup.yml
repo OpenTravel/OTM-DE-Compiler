@@ -8,6 +8,6 @@
       warn: false
   - name: Cleaning up local temp directory
     file:
-      path: "{{playbook_dir}}/temp"
+      path: "{{controller_temp_dir}}"
       state: absent
     delegate_to: localhost
