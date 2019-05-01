@@ -7,7 +7,8 @@
       chdir: "{{uploads_dir}}"
       warn: false
   - name: Cleaning up local temp directory
-    file:
-      path: "{{controller_temp_dir}}"
-      state: absent
+    shell: "rm -rf *"
+    args:
+      chdir: "{{controller_temp_dir}}"
+      warn: false
     delegate_to: localhost

@@ -537,7 +537,7 @@ public class ReleaseManager {
 
         } else if (releaseContainsLockedItems()) {
             throw new IllegalStateException(
-                "The release contains one or more libraries that are locked for editing." );
+                "The release contains one or more libraries that are locked for editing by the current user." );
         }
 
         // Reload the release model just to be sure it is in-sync and contains no errors
@@ -996,7 +996,8 @@ public class ReleaseManager {
     }
 
     /**
-     * Returns true if the release is loaded and one or more of the libraries it contains are locked for editing.
+     * Returns true if the release is loaded and one or more of the libraries it contains are locked for editing by the
+     * current user. The lock check is only performed if a release member is effective on the library's latest commit.
      * 
      * @return boolean
      * @throws RepositoryException thrown if the remote repository cannot be accessed
@@ -1006,19 +1007,65 @@ public class ReleaseManager {
 
         if (release != null) {
             for (ReleaseMember member : release.getAllMembers()) {
-                RepositoryItem memberItem = member.getRepositoryItem();
-                RepositoryItem repoItem = repositoryManager.getRepositoryItem( memberItem.getBaseNamespace(),
-                    memberItem.getFilename(), memberItem.getVersion() );
-                RepositoryItemState itemState = repoItem.getState();
+                boolean latestCommit = isLatestCommit( member );
 
-                if ((itemState == RepositoryItemState.MANAGED_LOCKED)
-                    || (itemState == RepositoryItemState.MANAGED_WIP)) {
-                    result = true;
-                    break;
+                // Only check for library locks if the release member is effective on the latest
+                // commit to the repository.
+                if (latestCommit) {
+                    RepositoryItem memberItem = member.getRepositoryItem();
+                    RepositoryItem repoItem = repositoryManager.getRepositoryItem( memberItem.getBaseNamespace(),
+                        memberItem.getFilename(), memberItem.getVersion() );
+                    RepositoryItemState itemState = repoItem.getState();
+
+                    // It is okay if the library is locked, as long as it is not locked by
+                    // the current user. This means that the current user's view of the release
+                    // is the same as the rest of the world (except for the person editing the
+                    // locked library).
+                    if (itemState == RepositoryItemState.MANAGED_WIP) {
+                        result = true;
+                        break;
+                    }
                 }
             }
         }
         return result;
+    }
+
+    /**
+     * Returns true if the given release member is effectively on the latest repository commit of the library. A member
+     * is considered to be on the latest commit if one of the following conditions is true:
+     * 
+     * <ul>
+     * <li>The effective date of the release member is set to null</li>
+     * <li>The effective date of the member is on or later than all of the commit dates in the member's history</li>
+     * </ul>
+     * 
+     * @param member the release member to check
+     * @return boolean
+     */
+    private boolean isLatestCommit(ReleaseMember member) {
+        boolean latestCommit = (member.getEffectiveDate() == null);
+
+        if (!latestCommit) {
+            try {
+                latestCommit = true;
+
+                // If the member's effective date falls on or after all of the commit dates
+                // in its history, then the member is effectively at the latest commit.
+                for (RepositoryItemCommit commit : getCommitHistory( member )) {
+                    latestCommit &= ((commit.getEffectiveOn() != null)
+                        && !member.getEffectiveDate().before( commit.getEffectiveOn() ));
+                }
+
+            } catch (RepositoryException e) {
+                // If history cannot be retrieved, proceed with the assumption that this member is on the latest
+                // commit
+                log.warn( "Error retrieving history for release member: " + member.getRepositoryItem().getFilename(),
+                    e );
+                latestCommit = true;
+            }
+        }
+        return latestCommit;
     }
 
     /**

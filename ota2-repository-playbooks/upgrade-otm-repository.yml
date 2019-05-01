@@ -32,9 +32,9 @@
         src: "{{controller_temp_dir}}/ota2-indexing-service.zip"
         dest: "{{uploads_dir}}"
     - name: Delete /lib directory from current installation
-      file:
-        path: "{{indexsvc_dir}}/lib"
-        state: absent
+      command: "rm -rf {{indexsvc_dir}}/lib"
+      args:
+        warn: false
     - name: Replace indexing libraries with files from most recent archive
       shell: "mv lib {{indexsvc_dir}}"
       args:
@@ -45,9 +45,9 @@
   - name: --> Upgrade the Tomcat web service
     block:
     - name: Delete the OTM Repository Web Service appplication from the current installation
-      file:
-        path: "{{item}}"
-        state: absent
+      command: "rm -rf {{item}}"
+      args:
+        warn: false
       with_items:
         - "{{tomcat_dir}}/webapps/ROOT.war"
         - "{{tomcat_dir}}/webapps/ROOT"
