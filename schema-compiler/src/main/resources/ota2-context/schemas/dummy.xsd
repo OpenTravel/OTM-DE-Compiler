@@ -1,0 +1,8 @@
+<xs:schema id="Dummy" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+	<!-- This dummy schema is needed as a workaround for a Java 11+ incompatibility with the JAXB XJC generator plugin -->
+	<xs:element name="Dummy">
+		<xs:complexType>
+			<xs:sequence />
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

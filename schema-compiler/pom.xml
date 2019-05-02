@@ -144,11 +144,24 @@
 				<configuration>
 					<outputDirectory>${project.build.directory}/generated-sources/xjc</outputDirectory>
 					<sources>
+						<source>src/main/resources/ota2-context/schemas/dummy.xsd</source>
 						<source>src/main/resources/ota2-context/schemas</source>
 					</sources>
 					<strict>true</strict>
 					<verbose>false</verbose>
 				</configuration>
+				<dependencies>
+					<dependency>
+						<groupId>org.glassfish.jaxb</groupId>
+						<artifactId>jaxb-xjc</artifactId>
+						<version>${jaxb.xjc.version}</version>
+					</dependency>
+					<dependency>
+						<groupId>com.sun.activation</groupId>
+						<artifactId>jakarta.activation</artifactId>
+						<version>${jakarta.activation.version}</version>
+					</dependency>
+				</dependencies>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.felix</groupId>
