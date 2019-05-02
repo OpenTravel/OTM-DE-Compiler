@@ -13,6 +13,7 @@
 
 	<properties>
 		<checkstyle.config>${basedir}/../checkstyle.xml</checkstyle.config>
+		<license.file>${basedir}/../apache2-license.txt</license.file>
 	</properties>
 	
 	<dependencies>

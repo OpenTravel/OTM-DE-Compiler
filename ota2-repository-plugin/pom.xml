@@ -14,6 +14,7 @@
 
 	<properties>
 		<checkstyle.config>${basedir}/../checkstyle.xml</checkstyle.config>
+		<license.file>${basedir}/../apache2-license.txt</license.file>
 	</properties>
 	
 	<dependencies>
@@ -47,11 +48,6 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.maven.plugin-testing</groupId>
-			<artifactId>maven-plugin-testing-harness</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.apache.maven</groupId>
 			<artifactId>maven-aether-provider</artifactId>
 			<scope>test</scope>
@@ -68,7 +64,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-plugin-plugin</artifactId>
-				<version>3.6.0</version>
 			</plugin>
 		</plugins>
 	</build>

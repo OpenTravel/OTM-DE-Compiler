@@ -14,6 +14,7 @@
 
 	<properties>
 		<checkstyle.config>${basedir}/../checkstyle.xml</checkstyle.config>
+		<license.file>${basedir}/../apache2-license.txt</license.file>
 	</properties>
 	
 	<dependencies>
@@ -131,7 +132,6 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>jaxb2-maven-plugin</artifactId>
-				<version>${jaxb2.plugin.version}</version>
 				<executions>
 					<execution>
 						<id>xjc</id>
@@ -153,7 +153,6 @@
 			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-bundle-plugin</artifactId>
-				<version>${felix.bundle.plugin.version}</version>
 				<extensions>true</extensions>
 				<configuration>
 					<archive>
