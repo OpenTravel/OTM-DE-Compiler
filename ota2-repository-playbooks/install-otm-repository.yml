@@ -55,6 +55,14 @@
       stat: 
         path: "{{indexsvc_dir}}/conf/indexing-service.properties"
       register: indexing_status
+    - name: Check for existence of the systemd service manager
+      stat: 
+        path: "/lib/systemd/system"
+      register: systemd_status
+    - name: Check for existence of the init.d service manager
+      stat: 
+        path: "/etc/init.d"
+      register: initd_status
     
   - debug:
       msg: The Subversion repository appears to already be created (skipping)
@@ -158,10 +166,18 @@
       copy:
         src: "{{controller_temp_dir}}/ROOT.war"
         dest: "{{tomcat_dir}}/webapps/ROOT.war"
-    - name: Install the OTM Repository tomcat service
+    - name: Install the OTM Repository tomcat systemd service
       template:
-        src: "templates/otm-config/ota2-tomcat.j2"
+        src: "templates/otm-config/ota2-tomcat-systemd.j2"
         dest: "/lib/systemd/system/ota2-tomcat.service"
+        mode: 0644
+      when: systemd_status.stat.exists == true
+    - name: Install the OTM Repository tomcat init.d service
+      template:
+        src: "templates/otm-config/ota2-tomcat-initd.j2"
+        dest: "/etc/init.d/ota2-tomcat"
+        mode: 0755
+      when: initd_status.stat.exists == true
     when: tomcat_status.stat.exists == false
     
   - debug:
@@ -179,10 +195,18 @@
         dest: "{{indexsvc_dir}}/conf/{{item.dest}}"
       with_items:
       - { src: indexing-service.j2, dest: indexing-service.properties }
-    - name: Install the ota2-indexing system service
+    - name: Install the ota2-indexing systemd service
       template:
-        src: "templates/indexing-config/ota2-indexing.j2"
+        src: "templates/indexing-config/ota2-indexing-systemd.j2"
         dest: "/lib/systemd/system/ota2-indexing.service"
+        mode: 0644
+      when: systemd_status.stat.exists == true
+    - name: Install the ota2-indexing init.d service
+      template:
+        src: "templates/indexing-config/ota2-indexing-initd.j2"
+        dest: "/etc/init.d/ota2-indexing"
+        mode: 0755
+      when: initd_status.stat.exists == true
     when: indexing_status.stat.exists == false
     
   - import_tasks: subtasks/start-indexing.yml

@@ -1,0 +1,83 @@
+#!/bin/bash
+#
+# ota2-indexing        Startup script for the ota2-indexing-service
+#
+### BEGIN INIT INFO
+# Provides: ota2-indexing
+# Required-Start: $local_fs $remote_fs $network
+# Required-Stop: $local_fs $remote_fs $network
+# Short-Description: start and stop the ota2-indexing-service
+# Description: Provides free-text indexing services for the OTM repository.
+### END INIT INFO
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+if [ -f /etc/sysconfig/ota2-indexing ]; then
+        . /etc/sysconfig/ota2-indexing
+fi
+
+prog=ota2-indexing
+[ -e /etc/sysconfig/$prog ] && . /etc/sysconfig/$prog
+
+start() {
+    echo -n $"Starting $prog"
+    cd {{indexsvc_dir}}
+    ./startup.sh
+    retval=$?
+    echo
+    return $retval
+}
+
+stop() {
+    echo -n $"Stopping $prog"
+    cd {{indexsvc_dir}}
+    ./shutdown.sh
+    retval=$?
+    echo
+    return $retval
+}
+
+restart() {
+    stop
+    start
+}
+
+reload() {
+    restart
+}
+
+force_reload() {
+    restart
+}
+
+rh_status() {
+    pslist=$( pgrep -f ota2-indexing-service 2>&1 )
+    if [ -z "$pslist" ]; then
+       echo Service ota2-indexing is stopped
+       retval=1
+    else
+       echo Service ota2-indexing is running
+       retval=0
+    fi
+    return $retval
+}
+
+case "$1" in
+    start)
+        $1
+        ;;
+    stop)
+        $1
+        ;;
+    restart)
+        $1
+        ;;
+    status)
+        rh_status
+        ;;
+    *)
+        echo $"Usage: $0 {start|stop|status|restart}"
+        exit 2
+esac
+exit $?
