@@ -96,8 +96,7 @@ public class VersionHandlerFactory {
         ModelElementCloner cloner = null;
 
         if (model != null) {
-            clonerRegistry.computeIfAbsent( model, m -> clonerRegistry.put( m, new ModelElementCloner( m ) ) );
-            cloner = clonerRegistry.get( model );
+            cloner = clonerRegistry.computeIfAbsent( model, m -> new ModelElementCloner( m ) );
         }
         return cloner;
     }

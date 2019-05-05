@@ -136,8 +136,8 @@ public class LegacyTypeExampleProvider {
             String[] valueArray = propertyValue.split( "," );
 
             if ((valueArray != null) && (valueArray.length > 0)) {
-                exampleTypeMappings.computeIfAbsent( typeName, t -> exampleTypeMappings.put( t, new ArrayList<>() ) );
-                exampleTypeMappings.get( typeName ).addAll( Arrays.asList( valueArray ) );
+                exampleTypeMappings.computeIfAbsent( typeName, t -> new ArrayList<>() )
+                    .addAll( Arrays.asList( valueArray ) );
             }
         }
     }

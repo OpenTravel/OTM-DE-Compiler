@@ -236,11 +236,9 @@ public class VersionChainFactory {
             String baseNS = library.getBaseNamespace();
             Map<String,MajorVersionEntityGroup> nsGroupMap;
 
-            entityGroupMap.computeIfAbsent( baseNS, ns -> entityGroupMap.put( ns, new HashMap<>() ) );
-            nsGroupMap = entityGroupMap.get( library.getBaseNamespace() );
-            nsGroupMap.computeIfAbsent( majorVersionNamespace,
-                ns -> nsGroupMap.put( ns, new MajorVersionEntityGroup( majorVersionNamespace, vScheme ) ) );
-            entityGroup = nsGroupMap.get( majorVersionNamespace );
+            nsGroupMap = entityGroupMap.computeIfAbsent( baseNS, ns -> new HashMap<>() );
+            entityGroup = nsGroupMap.computeIfAbsent( majorVersionNamespace,
+                ns -> new MajorVersionEntityGroup( majorVersionNamespace, vScheme ) );
         }
         return entityGroup;
     }

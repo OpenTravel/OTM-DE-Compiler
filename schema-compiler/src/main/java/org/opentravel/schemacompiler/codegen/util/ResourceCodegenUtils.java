@@ -549,11 +549,9 @@ public class ResourceCodegenUtils {
 
         for (QualifiedAction action : actionList) {
             String actionId = action.getAction().getActionId();
-            Integer actionCount;
+            Integer actionCount = actionCountsById.computeIfAbsent( actionId, a -> 1 );
             String suffix;
 
-            actionCountsById.computeIfAbsent( actionId, a -> actionCountsById.put( a, 1 ) );
-            actionCount = actionCountsById.get( actionId );
             suffix = (actionCount == 1) ? "" : (actionCount + "");
             action.setActionId( actionId + suffix );
             actionCountsById.put( actionId, actionCount + 1 );

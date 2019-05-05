@@ -156,8 +156,7 @@ public class RepositoryLockManager {
      */
     private ReadWriteLock getReadWriteLock(LockableResource resource) {
         synchronized (lockRegistry) {
-            lockRegistry.computeIfAbsent( resource, r -> lockRegistry.put( r, new ReentrantReadWriteLock( true ) ) );
-            return lockRegistry.get( resource );
+            return lockRegistry.computeIfAbsent( resource, r -> new ReentrantReadWriteLock( true ) );
         }
     }
 

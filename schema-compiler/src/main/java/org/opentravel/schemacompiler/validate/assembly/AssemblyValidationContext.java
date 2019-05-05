@@ -147,9 +147,8 @@ public class AssemblyValidationContext implements ValidationContext {
                         int commitNumber = getCommitNumber( member );
 
                         if (commitNumber >= 0) {
-                            libraryCommitNumbers.computeIfAbsent( libraryId,
-                                id -> libraryCommitNumbers.put( id, new HashSet<>() ) );
-                            libraryCommitNumbers.get( libraryId ).add( commitNumber );
+                            libraryCommitNumbers.computeIfAbsent( libraryId, id -> new HashSet<>() )
+                                .add( commitNumber );
                         }
                         libraryItems.add( member.getRepositoryItem() );
                     }

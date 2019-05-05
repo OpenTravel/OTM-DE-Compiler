@@ -670,9 +670,7 @@ public abstract class TLValidatorBase<T extends Validatable> implements Validato
             (Map<String,String>) getContextCacheEntry( "majorVersionNamespaceMappings", HashMap.class );
         String libraryNamespace = library.getNamespace();
 
-        majorVersionNamespaceMappings.computeIfAbsent( libraryNamespace,
-            ns -> majorVersionNamespaceMappings.put( ns, getMajorVersionNS( library ) ) );
-        return majorVersionNamespaceMappings.get( libraryNamespace );
+        return majorVersionNamespaceMappings.computeIfAbsent( libraryNamespace, ns -> getMajorVersionNS( library ) );
     }
 
     /**

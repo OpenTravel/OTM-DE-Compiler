@@ -62,9 +62,8 @@ public class ExtensionPointRegistry {
                 NamedEntity extendedEntity = (extension == null) ? null : extension.getExtendsEntity();
 
                 if (extendedEntity instanceof TLPatchableFacet) {
-                    TLPatchableFacet extendedFacet = (TLPatchableFacet) extendedEntity;
-                    registryMap.computeIfAbsent( extendedFacet, f -> registryMap.put( f, new ArrayList<>() ) );
-                    registryMap.get( extendedFacet ).add( xpFacet );
+                    registryMap.computeIfAbsent( (TLPatchableFacet) extendedEntity, f -> new ArrayList<>() )
+                        .add( xpFacet );
                 }
             }
         }
@@ -173,12 +172,10 @@ public class ExtensionPointRegistry {
         List<TLExtensionPointFacet> hExtensionPoints = registryMap.get( facet );
 
         if (hExtensionPoints != null) {
-            epFacetMap.computeIfAbsent( facet.getFacetType(), ft -> epFacetMap.put( ft, new ArrayList<>() ) );
-            List<TLExtensionPointFacet> extensionPoints = epFacetMap.get( facet.getFacetType() );
+            List<TLExtensionPointFacet> extensionPoints =
+                epFacetMap.computeIfAbsent( facet.getFacetType(), ft -> new ArrayList<>() );
 
-            for (TLExtensionPointFacet xpFacet : hExtensionPoints) {
-                extensionPoints.add( 0, xpFacet ); // add to beginning of list
-            }
+            hExtensionPoints.forEach( xpFacet -> extensionPoints.add( 0, xpFacet ) );
         }
     }
 

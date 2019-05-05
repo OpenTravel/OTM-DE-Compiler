@@ -132,8 +132,7 @@ public class ResourceFilenameBuilder implements CodeGenerationFilenameBuilder<TL
         detailsByFilename = new HashMap<>();
 
         for (FilenameDetails fd : filenameDetails) {
-            detailsByFilename.computeIfAbsent( fd.getFilename(), fn -> detailsByFilename.put( fn, new ArrayList<>() ) );
-            detailsByFilename.get( fd.getFilename() ).add( fd );
+            detailsByFilename.computeIfAbsent( fd.getFilename(), fn -> new ArrayList<>() ).add( fd );
         }
         return detailsByFilename;
     }

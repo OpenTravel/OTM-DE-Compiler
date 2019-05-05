@@ -79,8 +79,7 @@ public class OTA2VersionComparator implements Comparator<Versioned> {
      * @return VersionIdentifier
      */
     private VersionIdentifier getVersionIdentifier(String versionStr) {
-        identifierCache.computeIfAbsent( versionStr, v -> identifierCache.put( v, new VersionIdentifier( v ) ) );
-        return identifierCache.get( versionStr );
+        return identifierCache.computeIfAbsent( versionStr, v -> new VersionIdentifier( v ) );
     }
 
     /**

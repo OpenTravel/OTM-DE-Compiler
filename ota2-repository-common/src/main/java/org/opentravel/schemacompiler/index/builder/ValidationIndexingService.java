@@ -176,15 +176,13 @@ public class ValidationIndexingService {
         if (library != null) {
             String libraryIndexId = IndexingUtils.getIdentityKey( library );
 
-            findingsByLibrary.computeIfAbsent( libraryIndexId, id -> findingsByLibrary.put( id, new ArrayList<>() ) );
-            findingsByLibrary.get( libraryIndexId ).add( finding );
+            findingsByLibrary.computeIfAbsent( libraryIndexId, id -> new ArrayList<>() ).add( finding );
         }
         if (entity != null) {
             String libraryIndexId = IndexingUtils.getIdentityKey( (TLLibrary) entity.getOwningLibrary() );
             String entityIndexId = IndexingUtils.getIdentityKey( entity );
 
-            findingsByEntity.computeIfAbsent( entityIndexId, id -> findingsByEntity.put( id, new ArrayList<>() ) );
-            findingsByEntity.get( entityIndexId ).add( finding );
+            findingsByEntity.computeIfAbsent( entityIndexId, id -> new ArrayList<>() ).add( finding );
             librariesByEntity.put( entityIndexId, libraryIndexId );
         }
     }

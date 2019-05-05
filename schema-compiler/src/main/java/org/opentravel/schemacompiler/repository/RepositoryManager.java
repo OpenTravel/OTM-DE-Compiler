@@ -691,8 +691,8 @@ public class RepositoryManager implements Repository {
                 RepositoryItem item = RepositoryUtils.createRepositoryItem( this, itemMetadata );
                 String itemKey = getItemKey( item );
 
-                libraryVersionMap.computeIfAbsent( itemKey, i -> new ArrayList<RepositoryItemVersionedWrapper>() );
-                libraryVersionMap.get( itemKey ).add( new RepositoryItemVersionedWrapper( item ) );
+                libraryVersionMap.computeIfAbsent( itemKey, i -> new ArrayList<RepositoryItemVersionedWrapper>() )
+                    .add( new RepositoryItemVersionedWrapper( item ) );
             }
         }
 

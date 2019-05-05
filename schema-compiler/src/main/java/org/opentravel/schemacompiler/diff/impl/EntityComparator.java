@@ -607,8 +607,8 @@ public class EntityComparator extends BaseComparator {
             QName ownerName = getAdjustedQName(
                 new QName( (mappedNS != null) ? mappedNS : fieldOwner.getNamespace(), fieldOwner.getLocalName() ) );
 
-            fieldMap.computeIfAbsent( ownerName, n -> fieldMap.put( n, new ArrayList<>() ) );
-            fieldMap.get( ownerName ).add( (TLMemberField<TLMemberFieldOwner>) field );
+            fieldMap.computeIfAbsent( ownerName, n -> new ArrayList<>() )
+                .add( (TLMemberField<TLMemberFieldOwner>) field );
         }
         return fieldMap;
     }

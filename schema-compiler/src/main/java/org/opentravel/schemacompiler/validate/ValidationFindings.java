@@ -183,8 +183,7 @@ public class ValidationFindings {
             throw new NullPointerException(
                 "The message key for validation findings cannot be a null or empty string." );
         }
-        messageKeysBySourceObject.computeIfAbsent( source, s -> messageKeysBySourceObject.put( s, new ArrayList<>() ) );
-        List<String> messageKeys = messageKeysBySourceObject.get( source );
+        List<String> messageKeys = messageKeysBySourceObject.computeIfAbsent( source, s -> new ArrayList<>() );
 
         if (!messageKeys.contains( messageKey )) {
             ValidationFinding message = new ValidationFinding( source, type, messageKey, messageParams );

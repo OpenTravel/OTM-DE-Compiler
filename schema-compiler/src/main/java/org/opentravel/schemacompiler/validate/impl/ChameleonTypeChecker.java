@@ -178,9 +178,8 @@ public class ChameleonTypeChecker {
         String schemaNamespace = legacySchema.getNamespace();
 
         if (((schemaNamespace == null) || schemaNamespace.equals( AnonymousEntityFilter.ANONYMOUS_PSEUDO_NAMESPACE ))) {
-            chameleonSchemaMappings.computeIfAbsent( referringNamespace,
-                ns -> chameleonSchemaMappings.put( ns, new ArrayList<>() ) );
-            List<XSDLibrary> chameleonSchemas = chameleonSchemaMappings.get( referringNamespace );
+            List<XSDLibrary> chameleonSchemas =
+                chameleonSchemaMappings.computeIfAbsent( referringNamespace, ns -> new ArrayList<>() );
 
             if (!chameleonSchemas.contains( legacySchema )) {
                 chameleonSchemas.add( legacySchema );

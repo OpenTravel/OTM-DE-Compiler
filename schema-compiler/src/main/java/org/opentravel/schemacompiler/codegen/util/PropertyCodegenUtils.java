@@ -647,9 +647,8 @@ public class PropertyCodegenUtils {
             NamedEntity inheritanceRoot = getInheritanceRoot( propertyType );
             Set<NamedEntity> propertyInheritanceRoots;
 
-            simpleInheritanceRoots.computeIfAbsent( property.getName(),
-                n -> simpleInheritanceRoots.put( n, new HashSet<>() ) );
-            propertyInheritanceRoots = simpleInheritanceRoots.get( property.getName() );
+            propertyInheritanceRoots =
+                simpleInheritanceRoots.computeIfAbsent( property.getName(), n -> new HashSet<>() );
 
             // Properties whose types are members of an inheritance hierarchy of same-name
             // inherited properties should be skipped if they were eclipsed by lower-level

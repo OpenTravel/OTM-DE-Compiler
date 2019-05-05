@@ -976,9 +976,8 @@ public final class LibraryModelLoader<C> {
         for (String namespace : libraryModel.getNamespaces()) {
             for (AbstractLibrary library : libraryModel.getLibrariesForNamespace( namespace )) {
                 if (library instanceof XSDLibrary) {
-                    schemasByNamespace.computeIfAbsent( namespace,
-                        ns -> schemasByNamespace.put( ns, new ArrayList<>() ) );
-                    schemasByNamespace.get( namespace ).add( (XSDLibrary) library );
+                    schemasByNamespace.computeIfAbsent( namespace, ns -> new ArrayList<>() )
+                        .add( (XSDLibrary) library );
                 }
             }
         }

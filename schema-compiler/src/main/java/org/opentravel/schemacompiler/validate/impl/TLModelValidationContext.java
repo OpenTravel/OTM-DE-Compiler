@@ -84,15 +84,14 @@ public class TLModelValidationContext implements ValidationContext {
      */
     @SuppressWarnings("unchecked")
     public <T> T getContextCacheEntry(String cacheKey, Class<T> entryType) {
-        validationCache.computeIfAbsent( cacheKey, k -> {
+        return (T) validationCache.computeIfAbsent( cacheKey, k -> {
             try {
-                return validationCache.put( k, entryType.newInstance() );
+                return entryType.newInstance();
 
             } catch (InstantiationException | IllegalAccessException e) {
                 return null;
             }
         } );
-        return (T) validationCache.get( cacheKey );
     }
 
     /**

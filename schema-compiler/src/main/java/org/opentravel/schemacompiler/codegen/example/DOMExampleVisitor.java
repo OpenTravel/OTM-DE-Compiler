@@ -887,9 +887,8 @@ public class DOMExampleVisitor extends AbstractExampleVisitor<Element> {
      * @return Element
      */
     private Element createXmlElement(String namespace, String localName, String preferredPrefix) {
-        namespaceMappings.computeIfAbsent( namespace, ns -> addUniquePrefix( ns, preferredPrefix ) );
+        String prefix = namespaceMappings.computeIfAbsent( namespace, ns -> getUniquePrefix( ns, preferredPrefix ) );
         Element element = domDocument.createElementNS( namespace.intern(), localName.intern() );
-        String prefix = namespaceMappings.get( namespace );
         Element rootElement = domDocument.getDocumentElement();
 
         if (rootElement == null) {
@@ -911,7 +910,7 @@ public class DOMExampleVisitor extends AbstractExampleVisitor<Element> {
      * @param preferredPrefix the preferred prefix to use for the namespace
      * @return String
      */
-    private String addUniquePrefix(String namespace, String preferredPrefix) {
+    private String getUniquePrefix(String namespace, String preferredPrefix) {
         String prefix = preferredPrefix;
 
         if (prefix == null) {
@@ -926,7 +925,6 @@ public class DOMExampleVisitor extends AbstractExampleVisitor<Element> {
                 prefix = prefixStr + (nsCounter++);
             }
         }
-        namespaceMappings.put( namespace, prefix );
         return prefix;
     }
 

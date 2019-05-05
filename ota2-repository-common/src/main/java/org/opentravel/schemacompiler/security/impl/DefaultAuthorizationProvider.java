@@ -232,9 +232,7 @@ public class DefaultAuthorizationProvider implements AuthorizationProvider {
      * @return AuthorizationResource
      */
     private synchronized AuthorizationResource getAuthorizationResource(String namespace) {
-        authorizationCache.computeIfAbsent( namespace,
-            ns -> authorizationCache.put( ns, newAuthResource( fileUtils, ns ) ) );
-        return authorizationCache.get( namespace );
+        return authorizationCache.computeIfAbsent( namespace, ns -> newAuthResource( fileUtils, ns ) );
     }
 
     /**

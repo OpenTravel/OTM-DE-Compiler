@@ -196,8 +196,7 @@ public class SchemaNameValidationRegistry {
             }
 
             if (typeName != null) {
-                typeNameEntities.computeIfAbsent( typeName, n -> typeNameEntities.put( n, new HashSet<>() ) );
-                typeNameEntities.get( typeName ).add( entity );
+                typeNameEntities.computeIfAbsent( typeName, n -> new HashSet<>() ).add( entity );
                 entityTypeNames.put( entity, typeName );
             }
         }
@@ -308,10 +307,8 @@ public class SchemaNameValidationRegistry {
          */
         private void addElementNameToRegistry(QName elementName, NamedEntity entity) {
             if ((elementName != null) && (entity != null) && hasGlobalType( entity )) {
-                elementNameEntities.computeIfAbsent( elementName, n -> elementNameEntities.put( n, new HashSet<>() ) );
-                entityElementNames.computeIfAbsent( entity, e -> entityElementNames.put( e, new HashSet<>() ) );
-                elementNameEntities.get( elementName ).add( entity );
-                entityElementNames.get( entity ).add( elementName );
+                elementNameEntities.computeIfAbsent( elementName, n -> new HashSet<>() ).add( entity );
+                entityElementNames.computeIfAbsent( entity, e -> new HashSet<>() ).add( elementName );
             }
         }
 

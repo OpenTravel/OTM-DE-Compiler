@@ -923,9 +923,8 @@ public class FacetCodegenUtils {
                 NamedEntity extendedEntity = extension.getExtendsEntity();
 
                 if ((extendingEntity instanceof TLFacetOwner) && (extendedEntity instanceof TLFacetOwner)) {
-                    registry.computeIfAbsent( (TLFacetOwner) extendedEntity,
-                        e -> registry.put( e, new ArrayList<>() ) );
-                    registry.get( extendedEntity ).add( (TLFacetOwner) extendingEntity );
+                    registry.computeIfAbsent( (TLFacetOwner) extendedEntity, e -> new ArrayList<>() )
+                        .add( (TLFacetOwner) extendingEntity );
                 }
                 return true;
             }

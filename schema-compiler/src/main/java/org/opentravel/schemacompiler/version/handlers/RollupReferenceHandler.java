@@ -272,9 +272,7 @@ public class RollupReferenceHandler {
          */
         public void addReference(LibraryElement referencingEntity, Object referencedEntity) {
             if (referencedEntity != null) {
-                rollupReferences.computeIfAbsent( referencingEntity,
-                    e -> rollupReferences.put( e, new ArrayList<>() ) );
-                rollupReferences.get( referencingEntity ).add( referencedEntity );
+                rollupReferences.computeIfAbsent( referencingEntity, e -> new ArrayList<>() ).add( referencedEntity );
             }
         }
 

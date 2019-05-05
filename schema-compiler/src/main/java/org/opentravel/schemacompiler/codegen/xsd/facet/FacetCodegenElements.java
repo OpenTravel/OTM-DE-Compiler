@@ -85,8 +85,7 @@ public class FacetCodegenElements {
      */
     public void addFacetElement(NamedEntity elementOwner, Element element) {
         if (element != null) {
-            facetElements.computeIfAbsent( elementOwner, o -> facetElements.put( o, new ArrayList<>() ) );
-            facetElements.get( elementOwner ).add( element );
+            facetElements.computeIfAbsent( elementOwner, o -> new ArrayList<>() ).add( element );
         }
     }
 

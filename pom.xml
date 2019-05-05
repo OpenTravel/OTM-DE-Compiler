@@ -30,28 +30,31 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 		<!-- Dependency Versions -->
-		<jaxb.version>2.3.0.1</jaxb.version>
+		<jaxb.api.version>2.4.0-b180830.0359</jaxb.api.version>
+		<jaxb.core.version>2.3.0.1</jaxb.core.version>
+		<jaxb.runtime.version>2.4.0-b180830.0438</jaxb.runtime.version>
 		<jaxb.xjc.version>2.3.2</jaxb.xjc.version>
 		<jakarta.activation.version>1.2.1</jakarta.activation.version>
 		<gson.version>2.5</gson.version>
 		<jackson.version>2.8.11</jackson.version>
 		<jackson.databind.version>2.8.11.3-redhat-00001</jackson.databind.version>
 		<spring.version>4.3.21.RELEASE</spring.version>
-		<httpcomponents.version>4.4</httpcomponents.version>
-		<maven.plugin.api.version>3.3.9</maven.plugin.api.version>
-		<maven.annotations.version>3.4</maven.annotations.version>
+		<httpcomponents.version>4.5.8</httpcomponents.version>
+		<maven.plugin.api.version>3.5.4</maven.plugin.api.version>
+		<maven.annotations.version>3.5.2</maven.annotations.version>
+		<maven.aether.provider.version>3.3.9</maven.aether.provider.version>
 		<maven.testing.harness.version>3.3.0</maven.testing.harness.version>
 		<commons.text.version>1.1</commons.text.version>
 		<commons.cli.version>1.2</commons.cli.version>
 		<commons.codec.version>1.9</commons.codec.version>
 		<commons.validator.version>1.6</commons.validator.version>
 		<commons.collections.version>3.2.2</commons.collections.version>
-		<jersey.version>2.17</jersey.version>
+		<jersey.version>2.28</jersey.version>
 		<lucene.version>5.0.0</lucene.version>
 		<svnkit.version>1.8.7</svnkit.version>
 		<jms.version>1.1</jms.version>
-		<activemq.version>5.15.8</activemq.version>
-		<activemq.client.version>5.15.9</activemq.client.version>
+		<activemq.version>5.15.9</activemq.version>
+		<activemq.broker.version>5.15.8</activemq.broker.version>
 		<javax.mail.version>1.5.5</javax.mail.version>
 		<tiles.version>3.0.5</tiles.version>
 		<jstl.version>1.2</jstl.version>
@@ -60,7 +63,7 @@
 		<jsp.api.version>2.1</jsp.api.version>
 		<slf4j.version>1.7.10</slf4j.version>
 		<junit.version>4.12</junit.version>
-		<htmlunit.version>2.17</htmlunit.version>
+		<htmlunit.version>2.35.0</htmlunit.version>
 		<xercesimpl.version>2.12.0</xercesimpl.version>
 		<mockito.version>2.23.4</mockito.version>
 		<mockrunner.jms.version>2.0.1</mockrunner.jms.version>
@@ -79,7 +82,7 @@
 		<versions.plugin.version>2.7</versions.plugin.version>
 		<dependency.plugin.version>2.8</dependency.plugin.version>
 		<jar.plugin.version>2.4</jar.plugin.version>
-		<war.plugin.version>2.2</war.plugin.version>
+		<war.plugin.version>3.2.2</war.plugin.version>
 		<install.plugin.version>3.0.0-M1</install.plugin.version>
 		<deploy.plugin.version>3.0.0-M1</deploy.plugin.version>
 		<clean.plugin.version>3.1.0</clean.plugin.version>
@@ -164,6 +167,7 @@
 				<configuration>
 					<excludes>
 						<exclude>**com.steadystate*</exclude>
+						<exclude>**com.gargoylesoftware.css*</exclude>
 					</excludes>
 				</configuration>
 				<executions>
@@ -348,14 +352,19 @@
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
+				<groupId>javax.xml.bind</groupId>
+				<artifactId>jaxb-api</artifactId>
+				<version>${jaxb.api.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>org.glassfish.jaxb</groupId>
 				<artifactId>jaxb-core</artifactId>
-				<version>${jaxb.version}</version>
+				<version>${jaxb.core.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.glassfish.jaxb</groupId>
 				<artifactId>jaxb-runtime</artifactId>
-				<version>${jaxb.version}</version>
+				<version>${jaxb.runtime.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.google.code.gson</groupId>
@@ -405,7 +414,7 @@
 			<dependency>
 				<groupId>org.apache.maven</groupId>
 				<artifactId>maven-aether-provider</artifactId>
-				<version>${maven.plugin.api.version}</version>
+				<version>${maven.aether.provider.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.maven</groupId>
@@ -453,6 +462,11 @@
 				<version>${jersey.version}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.glassfish.jersey.inject</groupId>
+				<artifactId>jersey-hk2</artifactId>
+				<version>${jersey.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>org.glassfish.jersey.containers</groupId>
 				<artifactId>jersey-container-servlet</artifactId>
 				<version>${jersey.version}</version>
@@ -495,11 +509,6 @@
 			<dependency>
 				<groupId>org.apache.activemq</groupId>
 				<artifactId>activemq-client</artifactId>
-				<version>${activemq.client.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.activemq</groupId>
-				<artifactId>activemq-broker</artifactId>
 				<version>${activemq.version}</version>
 			</dependency>
 			<dependency>
@@ -509,8 +518,13 @@
 			</dependency>
 			<dependency>
 				<groupId>org.apache.activemq</groupId>
+				<artifactId>activemq-broker</artifactId>
+				<version>${activemq.broker.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.activemq</groupId>
 				<artifactId>activemq-kahadb-store</artifactId>
-				<version>${activemq.version}</version>
+				<version>${activemq.broker.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.sun.mail</groupId>

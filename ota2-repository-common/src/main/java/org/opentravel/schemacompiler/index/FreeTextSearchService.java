@@ -1319,9 +1319,8 @@ public abstract class FreeTextSearchService {
                 subscriptionTarget.setBaseNamespace( doc.get( IndexingTerms.BASE_NAMESPACE_FIELD ) );
                 subscriptionTarget.setLibraryName( doc.get( IndexingTerms.LIBRARY_NAME_FIELD ) );
                 subscriptionTarget.setVersion( doc.get( IndexingTerms.VERSION_FIELD ) );
-                return resultMap.put( k, new SubscriptionSearchResult( subscriptionTarget, userId ) );
-            } );
-            resultMap.get( resultKey ).getEventTypes().add( eventType );
+                return new SubscriptionSearchResult( subscriptionTarget, userId );
+            } ).getEventTypes().add( eventType );
         }
         searchResults.addAll( resultMap.values() );
         Collections.sort( searchResults );

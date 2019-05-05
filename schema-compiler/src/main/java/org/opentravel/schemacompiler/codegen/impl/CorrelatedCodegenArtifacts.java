@@ -45,8 +45,7 @@ public class CorrelatedCodegenArtifacts {
         }
 
         if (artifact != null) {
-            entityArtifactMap.computeIfAbsent( entity, e -> entityArtifactMap.put( e, new CodegenArtifacts() ) );
-            entityArtifactMap.get( entity ).addArtifact( artifact );
+            entityArtifactMap.computeIfAbsent( entity, e -> new CodegenArtifacts() ).addArtifact( artifact );
         }
     }
 

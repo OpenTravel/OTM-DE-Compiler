@@ -168,13 +168,11 @@ public final class SymbolTable {
 
         if ((namespace == null) || AnonymousEntityFilter.ANONYMOUS_PSEUDO_NAMESPACE.equals( namespace )) {
             // Add the entity to the collection of anonymous (no-namespace) names
-            anonymousEntities.computeIfAbsent( localName, n -> anonymousEntities.put( n, new ArrayList<>() ) );
-            anonymousEntities.get( localName ).add( entity );
+            anonymousEntities.computeIfAbsent( localName, n -> new ArrayList<>() ).add( entity );
 
         } else {
             // Add the entity to the symbol table maps
-            namespaceSymbols.computeIfAbsent( namespace, ns -> namespaceSymbols.put( ns, new HashMap<>() ) );
-            namespaceSymbols.get( namespace ).put( localName, entity );
+            namespaceSymbols.computeIfAbsent( namespace, ns -> new HashMap<>() ).put( localName, entity );
         }
 
         // Search for any entities that are derived from the concrete entity we just registered

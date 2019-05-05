@@ -283,9 +283,8 @@ class EntityReferenceResolutionVisitor extends ModelElementVisitorAdapter {
             String fieldName = parameter.getFieldRefName();
             List<TLMemberField<TLMemberFieldOwner>> memberFields;
 
-            inheritedFieldCache.computeIfAbsent( facetRefKey, k -> inheritedFieldCache.put( k,
-                (List<TLMemberField<TLMemberFieldOwner>>) ResourceCodegenUtils.getAllParameterFields( facetRef ) ) );
-            memberFields = inheritedFieldCache.get( facetRefKey );
+            memberFields = inheritedFieldCache.computeIfAbsent( facetRefKey,
+                k -> (List<TLMemberField<TLMemberFieldOwner>>) ResourceCodegenUtils.getAllParameterFields( facetRef ) );
 
             for (TLMemberField<?> memberField : memberFields) {
                 if (fieldName.equals( memberField.getName() )) {
