@@ -67,5 +67,4 @@
 			<outputDirectory>ota2-indexing-service/logs</outputDirectory>
 		</fileSet>
 	</fileSets>
-	
 </assembly>

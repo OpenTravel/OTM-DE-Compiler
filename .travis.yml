@@ -4,6 +4,17 @@ install: true
 script: mvn clean install
 cache:
   directories:
-  - $HOME/.m2
+  - "$HOME/.m2"
 after_success:
-  - bash <(curl -s https://copilot.blackducksoftware.com/ci/travis/scripts/upload)
+- bash <(curl -s https://copilot.blackducksoftware.com/ci/travis/scripts/upload)
+deploy:
+  provider: releases
+  api_key:
+    secure: KTJ/6+zy6APQLiQ0QwdRbMEoxVJTlCTh5csQgRdaHpF/ovfaajyMq8za3TCiEFqhIrRBAio5xFZZCmGS/jbNVQvDUceaUk3+ez1EjfJVqIdgeOzCmbA+NjHFYxc58YuZfweLqycZp7Jb501VcxgmIOzzSGZ27Rye2JV8L9KUbgxiIW+5yj/PHEYM338pqsH4YMIMP3yecVd597qZcfyMBvp+ihcRm42o935lapjxbWLOdTwSrJ02kKPu2w07UPZJEike/hO03EGQj8dvclJ9fVke82cUOANJRO+n8U8rP01B/77D7Hx8z6+VA/6gsv516LLZP9hgynsCajNZvFvAqyjJb6G05nJ4tGXVWe17N3zJuq2pQ0qESYb5CzhYZCFVYR7RiTo2kiyBPRzsA5c2CTY4JKYiC7hBLG792huGqgqTYuGxQMpGqyJGe/0fRuN7scMrijhuLHS18XMR2/auASQUZcYz8KfmRFDg7B+MkKH4mXfUVk/66E1STZ0xTwN4JI0AFIAHJIS9xLAjBqKBON5kfeCvN1ytAiCNJGK++mltPQTwXTSjLS6eSAM+PjL/N6aUdRqf02YFVTXWaSoUzw7JpjaeVRzKGqCidSMWGdARTTTUFC9ZFKaV4aL3KdLc9mVUgqiVoxY0qdCuGVBChsJnZqShQXeUgeNGQSGRimA=
+  file:
+  - ota2-repository-service/target/ota2-repository-service.war
+  - ota2-indexing-service/target/ota2-indexing-service.zip
+  skip_cleanup: true
+  on:
+    repo: OpenTravel/OTM-DE-Compiler
+    tags: true
