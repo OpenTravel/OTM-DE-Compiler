@@ -32,6 +32,7 @@
       get_url:
         url: "{{item.url}}"
         dest: "{{controller_temp_dir}}/{{item.file}}"
+        validate_certs: false
       with_items:
         - { url: "{{repo_service_download_url}}", file: "ROOT.war" }
         - { url: "{{index_service_download_url}}", file: "ota2-indexing-service.zip" }
