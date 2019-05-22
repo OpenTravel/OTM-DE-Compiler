@@ -32,6 +32,7 @@
       get_url:
         url: "{{item.url}}"
         dest: "{{controller_temp_dir}}/{{item.file}}"
+        validate_certs: false
       with_items:
         - { url: "{{tomcat_download_url}}", file: "{{tomcat_archive}}.zip" }
         - { url: "{{repo_service_download_url}}", file: "ROOT.war" }
