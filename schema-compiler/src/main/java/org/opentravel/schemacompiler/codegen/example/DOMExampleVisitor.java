@@ -887,7 +887,7 @@ public class DOMExampleVisitor extends AbstractExampleVisitor<Element> {
      * @return Element
      */
     private Element createXmlElement(String namespace, String localName, String preferredPrefix) {
-        String prefix = namespaceMappings.computeIfAbsent( namespace, ns -> getUniquePrefix( ns, preferredPrefix ) );
+        String prefix = namespaceMappings.computeIfAbsent( namespace, ns -> getUniquePrefix( preferredPrefix ) );
         Element element = domDocument.createElementNS( namespace.intern(), localName.intern() );
         Element rootElement = domDocument.getDocumentElement();
 
@@ -906,11 +906,10 @@ public class DOMExampleVisitor extends AbstractExampleVisitor<Element> {
     /**
      * Ensures that a unique prefix has been added to the mappings for the spefified namespace.
      * 
-     * @param namespace the namespace for which to declare a unique prefix
      * @param preferredPrefix the preferred prefix to use for the namespace
      * @return String
      */
-    private String getUniquePrefix(String namespace, String preferredPrefix) {
+    private String getUniquePrefix(String preferredPrefix) {
         String prefix = preferredPrefix;
 
         if (prefix == null) {
@@ -929,7 +928,7 @@ public class DOMExampleVisitor extends AbstractExampleVisitor<Element> {
     }
 
     /**
-     * Adds an EXAMPLE role value for the given core object and each of the extended objects that it inherits role
+     * Adds an example role value for the given core object and each of the extended objects that it inherits role
      * attributes from.
      * 
      * @param coreObject the core object for which to generate role attributes

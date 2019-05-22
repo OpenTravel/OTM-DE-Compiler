@@ -233,7 +233,7 @@ public abstract class AbstractWsdlCodeGenerator<S extends LibraryMember> extends
                 jaxbPackages.append( ":" ).append( jaxbPackage );
             }
         }
-        return contextCache.computeIfAbsent( jaxbPackages.toString(), p -> newContext( p ) );
+        return contextCache.computeIfAbsent( jaxbPackages.toString(), AbstractWsdlCodeGenerator::newContext );
     }
 
     /**

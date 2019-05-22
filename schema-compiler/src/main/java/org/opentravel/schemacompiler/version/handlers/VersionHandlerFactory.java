@@ -30,6 +30,7 @@ import org.opentravel.schemacompiler.util.ModelElementCloner;
 import org.opentravel.schemacompiler.util.SchemaCompilerRuntimeException;
 import org.opentravel.schemacompiler.version.Versioned;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -76,12 +77,13 @@ public class VersionHandlerFactory {
                 "No version handler registered for entity type: " + versionedType.getName() );
         }
         try {
-            VersionHandler<V> handler = (VersionHandler<V>) handlerClass.newInstance();
+            VersionHandler<V> handler = (VersionHandler<V>) handlerClass.getConstructor().newInstance();
 
             handler.setFactory( this );
             return handler;
 
-        } catch (InstantiationException | IllegalAccessException e) {
+        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
+            | NoSuchMethodException | SecurityException e) {
             throw new SchemaCompilerRuntimeException( "Error creating version handler instance.", e );
         }
     }
@@ -96,7 +98,7 @@ public class VersionHandlerFactory {
         ModelElementCloner cloner = null;
 
         if (model != null) {
-            cloner = clonerRegistry.computeIfAbsent( model, m -> new ModelElementCloner( m ) );
+            cloner = clonerRegistry.computeIfAbsent( model, ModelElementCloner::new );
         }
         return cloner;
     }
