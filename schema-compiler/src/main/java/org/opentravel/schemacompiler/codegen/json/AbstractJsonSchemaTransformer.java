@@ -123,18 +123,19 @@ public abstract class AbstractJsonSchemaTransformer<S, T> extends AbstractCodege
      * Recursively generates schema artifacts for all contextual facets in the given list.
      * 
      * @param facetList the list of contextual facets
+     * @param isGhostFacets flag indicating whether the list of facets is comprised of ghosts
      * @param delegateFactory the facet code generation delegate factory
      * @param artifacts the container for all generated schema artifacts
      */
-    protected void generateContextualFacetArtifacts(List<TLContextualFacet> facetList,
+    protected void generateContextualFacetArtifacts(List<TLContextualFacet> facetList, boolean isGhostFacets,
         FacetJsonSchemaDelegateFactory delegateFactory, CorrelatedCodegenArtifacts artifacts) {
         for (TLContextualFacet facet : facetList) {
-            if (facet.isLocalFacet()) {
+            if (isGhostFacets || facet.isLocalFacet()) {
                 List<TLContextualFacet> ghostFacets = FacetCodegenUtils.findGhostFacets( facet, facet.getFacetType() );
 
-                generateFacetArtifacts( delegateFactory.getDelegate( facet ), artifacts, false );
-                generateContextualFacetArtifacts( facet.getChildFacets(), delegateFactory, artifacts );
-                generateContextualFacetArtifacts( ghostFacets, delegateFactory, artifacts );
+                generateFacetArtifacts( delegateFactory.getDelegate( facet ), artifacts, isGhostFacets );
+                generateContextualFacetArtifacts( facet.getChildFacets(), false, delegateFactory, artifacts );
+                generateContextualFacetArtifacts( ghostFacets, true, delegateFactory, artifacts );
             }
         }
     }

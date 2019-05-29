@@ -40,8 +40,8 @@ public class TLChoiceObjectJsonCodegenTransformer
 
         generateFacetArtifacts( delegateFactory.getDelegate( source.getSharedFacet() ), artifacts, false );
 
-        generateContextualFacetArtifacts( source.getChoiceFacets(), delegateFactory, artifacts );
-        generateContextualFacetArtifacts( FacetCodegenUtils.findGhostFacets( source, TLFacetType.CHOICE ),
+        generateContextualFacetArtifacts( source.getChoiceFacets(), false, delegateFactory, artifacts );
+        generateContextualFacetArtifacts( FacetCodegenUtils.findGhostFacets( source, TLFacetType.CHOICE ), true,
             delegateFactory, artifacts );
 
         return artifacts.getConsolidatedArtifacts();

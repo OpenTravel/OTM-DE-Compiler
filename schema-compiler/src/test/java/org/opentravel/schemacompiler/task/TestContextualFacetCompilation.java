@@ -34,6 +34,9 @@ import org.opentravel.schemacompiler.util.SchemaCompilerTestUtils;
 import org.opentravel.schemacompiler.validate.FindingType;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.github.fge.jackson.JsonLoader;
+
 import java.io.File;
 import java.util.HashSet;
 import java.util.List;
@@ -157,6 +160,39 @@ public class TestContextualFacetCompilation {
         assertContainsFacets( nonLocalGhostFacets2, "ExtFacetTestChoice_ChoiceF2_ChoiceF2B",
             "ExtFacetTestBO_CustomF2_CustomF2B", "ExtFacetTestBO_Query_QueryF2_QueryF2B",
             "ExtFacetTestBO_Update_UpdateF2_UpdateF2B" );
+    }
+
+    @Test
+    public void testResourceFacetCompilation() throws Exception {
+        File projectFile =
+            new File( SchemaCompilerTestUtils.getBaseLibraryLocation() + "/test-package-facets/project_resource.otp" );
+        File targetFolder =
+            new File( System.getProperty( "user.dir" ) + "/target/codegen-output/testResourceFacetCompilation" );
+        File swaggerFile = new File(
+            targetFolder + "/swagger/facets_resource_library_FacetResource/FacetResource_1_0_0.defs.swagger" );
+        CompileAllCompilerTask compilerTask = TaskFactory.getTask( CompileAllCompilerTask.class );
+        ValidationFindings findings;
+
+        configureTask( compilerTask, targetFolder );
+        compilerTask.setCompileSchemas( true );
+        compilerTask.setCompileJsonSchemas( true );
+        compilerTask.setCompileServices( false );
+        compilerTask.setCompileSwagger( true );
+        findings = compilerTask.compileOutput( projectFile );
+
+        SchemaCompilerTestUtils.printFindings( findings );
+        assertFalse( findings.hasFinding( FindingType.ERROR ) );
+        assertTrue( swaggerFile.exists() );
+        CodeGeneratorTestAssertions.validateGeneratedFiles( compilerTask.getGeneratedFiles() );
+
+        // Validate that the non-local ghost facets exist in the definitions section of the swagger document
+        JsonNode swaggerNode = JsonLoader.fromFile( swaggerFile );
+        JsonNode defsNode = swaggerNode.get( "definitions" );
+
+        assertFalse( defsNode.has( "ExtFacetTestChoiceChoiceF2ChoiceF2A" ) );
+        assertTrue( defsNode.has( "ExtFacetTestBOCustomF2CustomF2A" ) );
+        assertTrue( defsNode.has( "ExtFacetTestBOQueryQueryF2QueryF2A" ) );
+        assertTrue( defsNode.has( "ExtFacetTestBOUpdateUpdateF2UpdateF2A" ) );
     }
 
     private void assertContainsFacets(List<TLContextualFacet> facetList, String... localNames) {

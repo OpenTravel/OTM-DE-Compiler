@@ -42,14 +42,14 @@ public class TLBusinessObjectJsonCodegenTransformer
         generateFacetArtifacts( delegateFactory.getDelegate( source.getSummaryFacet() ), artifacts, false );
         generateFacetArtifacts( delegateFactory.getDelegate( source.getDetailFacet() ), artifacts, false );
 
-        generateContextualFacetArtifacts( source.getCustomFacets(), delegateFactory, artifacts );
-        generateContextualFacetArtifacts( FacetCodegenUtils.findGhostFacets( source, TLFacetType.CUSTOM ),
+        generateContextualFacetArtifacts( source.getCustomFacets(), false, delegateFactory, artifacts );
+        generateContextualFacetArtifacts( FacetCodegenUtils.findGhostFacets( source, TLFacetType.CUSTOM ), true,
             delegateFactory, artifacts );
-        generateContextualFacetArtifacts( source.getQueryFacets(), delegateFactory, artifacts );
-        generateContextualFacetArtifacts( FacetCodegenUtils.findGhostFacets( source, TLFacetType.QUERY ),
+        generateContextualFacetArtifacts( source.getQueryFacets(), false, delegateFactory, artifacts );
+        generateContextualFacetArtifacts( FacetCodegenUtils.findGhostFacets( source, TLFacetType.QUERY ), true,
             delegateFactory, artifacts );
-        generateContextualFacetArtifacts( source.getUpdateFacets(), delegateFactory, artifacts );
-        generateContextualFacetArtifacts( FacetCodegenUtils.findGhostFacets( source, TLFacetType.UPDATE ),
+        generateContextualFacetArtifacts( source.getUpdateFacets(), false, delegateFactory, artifacts );
+        generateContextualFacetArtifacts( FacetCodegenUtils.findGhostFacets( source, TLFacetType.UPDATE ), true,
             delegateFactory, artifacts );
 
         return artifacts.getConsolidatedArtifacts();
