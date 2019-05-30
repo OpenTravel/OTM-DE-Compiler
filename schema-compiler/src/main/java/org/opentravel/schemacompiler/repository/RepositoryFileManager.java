@@ -1221,10 +1221,12 @@ public abstract class RepositoryFileManager {
         if (ota2Home == null) {
             String userHome = System.getProperty( "user.home" ).replace( '\\', '/' );
 
-            homeFolder.append( userHome );
+            if ((userHome != null) && !userHome.equals( "?" )) {
+                homeFolder.append( userHome );
 
-            if (!userHome.endsWith( "/" )) {
-                homeFolder.append( '/' );
+                if (!userHome.endsWith( "/" )) {
+                    homeFolder.append( '/' );
+                }
             }
             homeFolder.append( REPOSITORY_HOME_FOLDER );
 
