@@ -83,7 +83,7 @@ public class IndexContentHelper {
      * @return Library
      * @throws RepositoryException thrown if an error occurs during unmarshalling
      */
-    public static Library unmarshallLibrary(File contentFile) throws RepositoryException {
+    public static TLLibrary unmarshallLibrary(File contentFile) throws RepositoryException {
         try {
             Unmarshaller u = jaxbContext.createUnmarshaller();
             JAXBElement<?> libraryElement = (JAXBElement<?>) FileUtils.unmarshalFileContent( contentFile, u );
@@ -99,7 +99,7 @@ public class IndexContentHelper {
             } else {
                 throw new RepositoryException( "Unrecognized library file format: " + contentFile.getName() );
             }
-            return library;
+            return transformLibrary( library );
 
         } catch (JAXBException | IOException e) {
             throw new RepositoryException( "Error unmarshalling library content: " + contentFile.getName(), e );
@@ -149,14 +149,17 @@ public class IndexContentHelper {
     }
 
     /**
-     * Marshalls the contents of the given JAXB library as a string.
+     * Marshalls the contents of the given library as a string.
      * 
-     * @param jaxbLibrary the JAXB library to be marshalled as a string
+     * @param library the library to be marshalled as a string
      * @return String
      * @throws RepositoryException thrown if an error occurs during marshalling
      */
-    public static String marshallLibrary(Library jaxbLibrary) throws RepositoryException {
+    public static String marshallLibrary(TLLibrary library) throws RepositoryException {
         try {
+            ObjectTransformer<TLLibrary,Library,?> transformer =
+                saverTransformFactory.getTransformer( library, Library.class );
+            Library jaxbLibrary = transformer.transform( library );
             JAXBElement<Library> libraryElement = objectFactory.createLibrary( jaxbLibrary );
             Marshaller m = jaxbContext.createMarshaller();
             StringWriter writer = new StringWriter();

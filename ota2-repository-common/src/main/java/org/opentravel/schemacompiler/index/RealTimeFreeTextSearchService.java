@@ -121,7 +121,6 @@ public class RealTimeFreeTextSearchService extends FreeTextSearchService {
 
             if (!deleteIndex) {
                 factory.getFacetService().getIndexBuilder().performIndexingAction();
-                factory.getValidationService().getIndexBuilder().performIndexingAction();
             }
             indexWriter.commit();
             refreshIndexReader();
@@ -139,11 +138,11 @@ public class RealTimeFreeTextSearchService extends FreeTextSearchService {
         try {
             IndexBuilderFactory factory = new IndexBuilderFactory( getRepositoryManager(), indexWriter );
             IndexBuilder<SubscriptionTarget> indexBuilder = factory.newSubscriptionIndexBuilder( subscriptionTarget );
-    
+
             indexBuilder.performIndexingAction();
             indexWriter.commit();
             refreshIndexReader();
-    
+
         } catch (IOException e) {
             log.error( "Error indexing subscription.", e );
         }

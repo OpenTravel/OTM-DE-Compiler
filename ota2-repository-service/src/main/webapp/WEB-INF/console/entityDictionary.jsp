@@ -48,6 +48,10 @@
 	<%@include file="entityDetails_bo.jsp" %>
 </c:if>
 
+<c:if test="${entity.entityType.simpleName == 'TLContextualFacet'}">
+	<%@include file="entityDetails_ctx.jsp" %>
+</c:if>
+
 <c:if test="${entity.entityType.simpleName == 'TLOperation'}">
 	<%@include file="entityDetails_operation.jsp" %>
 </c:if>

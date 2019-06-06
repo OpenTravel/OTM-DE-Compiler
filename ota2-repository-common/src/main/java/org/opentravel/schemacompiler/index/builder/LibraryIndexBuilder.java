@@ -34,23 +34,34 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.SearcherFactory;
 import org.apache.lucene.search.SearcherManager;
+import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.util.BytesRef;
-import org.opentravel.ns.ota2.librarymodel_v01_06.Library;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.LibraryInfoType;
+import org.opentravel.schemacompiler.ic.ImportManagementIntegrityChecker;
 import org.opentravel.schemacompiler.index.IndexingTerms;
 import org.opentravel.schemacompiler.index.IndexingUtils;
+import org.opentravel.schemacompiler.loader.LibraryLoaderException;
 import org.opentravel.schemacompiler.model.LibraryMember;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLInclude;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLLibraryStatus;
+import org.opentravel.schemacompiler.model.TLModel;
+import org.opentravel.schemacompiler.model.TLModelElement;
 import org.opentravel.schemacompiler.model.TLNamespaceImport;
 import org.opentravel.schemacompiler.model.TLOperation;
 import org.opentravel.schemacompiler.model.TLService;
+import org.opentravel.schemacompiler.repository.Project;
+import org.opentravel.schemacompiler.repository.ProjectManager;
 import org.opentravel.schemacompiler.repository.RepositoryException;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
+import org.opentravel.schemacompiler.saver.LibrarySaveException;
+import org.opentravel.schemacompiler.util.FileUtils;
+import org.opentravel.schemacompiler.validate.FindingMessageFormat;
+import org.opentravel.schemacompiler.validate.ValidationFinding;
+import org.opentravel.schemacompiler.validate.ValidationFindings;
 
 import java.io.File;
 import java.io.IOException;
@@ -63,11 +74,17 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.xml.namespace.QName;
 
 /**
  * Index builder used to construct search index documents for managed repository items.
  */
 public class LibraryIndexBuilder extends IndexBuilder<RepositoryItem> {
+
+    private static final Pattern findingSourcePattern = Pattern.compile( "[A-Za-z0-9_]*?\\.otm\\s+\\:\\s+(.*)" );
 
     private static Map<TLLibraryStatus,List<TLLibraryStatus>> inclusiveStatuses;
     private static Log log = LogFactory.getLog( LibraryIndexBuilder.class );
@@ -80,22 +97,25 @@ public class LibraryIndexBuilder extends IndexBuilder<RepositoryItem> {
         RepositoryItem sourceObject = getSourceObject();
         try {
             log.info( "Indexing Library: " + sourceObject.getFilename() );
+            deleteIndex(); // Start by deleting all index documents associated with this library
 
             // Now we can begin creating the index...
             Map<TLLibraryStatus,Boolean> latestVersionsByStatus = getLatestVersionsByStatus( sourceObject );
             Set<String> keywords = getFreeTextKeywords();
             LibraryInfoType libraryMetadata = loadLibraryMetadata( sourceObject );
-            Library jaxbLibrary = loadLibrary( sourceObject );
-            TLLibrary library = IndexContentHelper.transformLibrary( jaxbLibrary );
-            addLibraryEntityKeywords( library, keywords, latestVersionsByStatus, libraryMetadata );
+            TLLibrary jaxbLibrary = loadJaxbLibrary( sourceObject );
+            TLLibrary library = loadLibraryModel( sourceObject );
 
             // Add keywords from this library
             addFreeTextKeywords( library.getName() );
             addFreeTextKeywords( library.getPrefix() );
             addFreeTextKeywords( library.getComments() );
 
+            // Index the library's named entities and collect additional search keywords
+            indexLibraryEntities( library, keywords, latestVersionsByStatus, libraryMetadata );
+
             // Finish up by creating an index document for the library itself
-            String libraryContent = IndexContentHelper.marshallLibrary( jaxbLibrary );
+            String libraryContent = IndexContentHelper.marshallLibrary( library );
             String identityKey = IndexingUtils.getIdentityKey( sourceObject );
             Document indexDoc = new Document();
 
@@ -139,7 +159,7 @@ public class LibraryIndexBuilder extends IndexBuilder<RepositoryItem> {
                 indexDoc.add( new StoredField( IndexingTerms.CONTENT_DATA_FIELD, new BytesRef( libraryContent ) ) );
             }
 
-            for (TLInclude nsInclude : library.getIncludes()) {
+            for (TLInclude nsInclude : jaxbLibrary.getIncludes()) {
                 String includeKey = getIdentityKey( nsInclude, library.getNamespace() );
 
                 if (includeKey != null) {
@@ -147,7 +167,7 @@ public class LibraryIndexBuilder extends IndexBuilder<RepositoryItem> {
                         .add( new StringField( IndexingTerms.REFERENCED_LIBRARY_FIELD, includeKey, Field.Store.YES ) );
                 }
             }
-            for (TLNamespaceImport nsImport : library.getNamespaceImports()) {
+            for (TLNamespaceImport nsImport : jaxbLibrary.getNamespaceImports()) {
                 List<String> importKeys = getIdentityKeys( nsImport );
                 String prefix = nsImport.getPrefix();
                 String ns = nsImport.getNamespace();
@@ -162,9 +182,8 @@ public class LibraryIndexBuilder extends IndexBuilder<RepositoryItem> {
                 }
             }
             getIndexWriter().updateDocument( new Term( IndexingTerms.IDENTITY_FIELD, identityKey ), indexDoc );
-            getFactory().getValidationService().validateLibrary( sourceObject );
 
-        } catch (RepositoryException | IOException e) {
+        } catch (LibraryLoaderException | LibrarySaveException | RepositoryException | IOException e) {
             log.error( "Error creating index for repository item: " + sourceObject.getFilename(), e );
         }
     }
@@ -183,7 +202,6 @@ public class LibraryIndexBuilder extends IndexBuilder<RepositoryItem> {
         Set<TLLibraryStatus> laterVersionStatuses = new HashSet<>();
         Map<TLLibraryStatus,Boolean> latestVersionsByStatus = new EnumMap<>( TLLibraryStatus.class );
 
-        // Start by
         for (RepositoryItem itemVersion : getRepositoryManager().listItems( baseNS, false, true )) {
             if (libraryName.equals( itemVersion.getLibraryName() )) {
                 if (sourceObject.getVersion().equals( itemVersion.getVersion() )) {
@@ -200,20 +218,22 @@ public class LibraryIndexBuilder extends IndexBuilder<RepositoryItem> {
     }
 
     /**
-     * Adds keywords from the library's entity to the set provided.
+     * Indexes the named entities of the given libraries. Also, collects search keywords from the library's named
+     * entities to the set provided.
      * 
-     * @param library the library from which to obtain the entity keywords
+     * @param library the library whose named entities are to be indexed
      * @param keywords the set of keywords being constructed
      * @param latestVersionsByStatus map that indicates the latest-version indicators by status
      * @param libraryMetadata meta-data from the library that identifies the locked-by user
      */
-    private void addLibraryEntityKeywords(TLLibrary library, Set<String> keywords,
+    private void indexLibraryEntities(TLLibrary library, Set<String> keywords,
         Map<TLLibraryStatus,Boolean> latestVersionsByStatus, LibraryInfoType libraryMetadata) {
         List<NamedEntity> entityList = new ArrayList<>();
 
         // Assemble a list of all entities in the library
         for (LibraryMember entity : library.getNamedMembers()) {
             if ((entity instanceof TLContextualFacet) && ((TLContextualFacet) entity).isLocalFacet()) {
+                // TODO: Are non-local facets really being indexed, or do we simply have a display issue?
                 continue; // skip local contextual facets since they will be indexed under their owner
             }
             if (entity instanceof TLService) {
@@ -241,6 +261,72 @@ public class LibraryIndexBuilder extends IndexBuilder<RepositoryItem> {
                 keywords.addAll( builder.getFreeTextKeywords() );
             }
         }
+    }
+
+    /**
+     * Adds documents to the search index for each of the validation findings provided that correspond to the given
+     * library or one of its entities.
+     * 
+     * @param library the library for which to index validation findings
+     * @param findings the validation findings to index
+     */
+    private void indexValidationFindings(TLLibrary library, ValidationFindings findings) {
+        for (ValidationFinding finding : findings.getAllFindingsAsList()) {
+            try {
+                TLModelElement findingTarget = IndexingUtils.getTargetEntity( finding.getSource() );
+                NamedEntity targetEntity = null;
+                TLLibrary targetLibrary = null;
+
+                if (findingTarget instanceof TLLibrary) {
+                    targetLibrary = (TLLibrary) findingTarget;
+
+                } else if (findingTarget instanceof NamedEntity) {
+                    targetEntity = (NamedEntity) findingTarget;
+                    targetLibrary = (TLLibrary) targetEntity.getOwningLibrary();
+                }
+
+                // Skip findings that are not attributed to the library we are indexing
+                if (targetLibrary != library) {
+                    continue;
+                }
+
+                String libraryIndexId = IndexingUtils.getIdentityKey( targetLibrary );
+                String entityIndexId = (targetEntity == null) ? null : IndexingUtils.getIdentityKey( targetEntity );
+                QName sourceObjectName = IndexingUtils.getQualifiedName( finding.getSource() );
+                String findingSource = finding.getSource().getValidationIdentity();
+                String identityKey = IndexingUtils.getIdentityKey( finding );
+                Document indexDoc = new Document();
+                Matcher m = findingSourcePattern.matcher( findingSource );
+
+                if (m.matches()) {
+                    findingSource = m.group( 1 );
+                }
+
+                indexDoc.add( new StringField( IndexingTerms.IDENTITY_FIELD, identityKey, Field.Store.YES ) );
+                indexDoc.add( new StringField( IndexingTerms.ENTITY_TYPE_FIELD, ValidationFinding.class.getName(),
+                    Field.Store.YES ) );
+                indexDoc.add( new StringField( IndexingTerms.ENTITY_NAMESPACE_FIELD, sourceObjectName.getNamespaceURI(),
+                    Field.Store.YES ) );
+                indexDoc.add( new StringField( IndexingTerms.ENTITY_NAME_FIELD, sourceObjectName.getLocalPart(),
+                    Field.Store.YES ) );
+                indexDoc.add( new StringField( IndexingTerms.TARGET_LIBRARY_FIELD, libraryIndexId, Field.Store.YES ) );
+                indexDoc.add( new StringField( IndexingTerms.FINDING_SOURCE_FIELD, findingSource, Field.Store.YES ) );
+                indexDoc.add( new StringField( IndexingTerms.FINDING_TYPE_FIELD, finding.getType().toString(),
+                    Field.Store.YES ) );
+                indexDoc.add( new StringField( IndexingTerms.FINDING_MESSAGE_FIELD,
+                    finding.getFormattedMessage( FindingMessageFormat.MESSAGE_ONLY_FORMAT ), Field.Store.YES ) );
+
+                if (entityIndexId != null) {
+                    indexDoc
+                        .add( new StringField( IndexingTerms.TARGET_ENTITY_FIELD, entityIndexId, Field.Store.YES ) );
+                }
+                getIndexWriter().updateDocument( new Term( IndexingTerms.IDENTITY_FIELD, identityKey ), indexDoc );
+
+            } catch (IOException e) {
+                log.warn( "Error creating index document for validation finding.", e );
+            }
+        }
+
     }
 
     /**
@@ -272,41 +358,53 @@ public class LibraryIndexBuilder extends IndexBuilder<RepositoryItem> {
     @Override
     public void deleteIndex() {
         RepositoryItem sourceObject = getSourceObject();
-        String sourceObjectIdentity = IndexingUtils.getIdentityKey( sourceObject );
+        String libraryIndexId = IndexingUtils.getIdentityKey( sourceObject );
 
         try (SearcherManager searchManager = new SearcherManager( getIndexWriter(), true, new SearcherFactory() )) {
             QueryParser parser = new QueryParser( IndexingTerms.OWNING_LIBRARY_FIELD, new StandardAnalyzer() );
             Query entityQuery = parser.parse( "\"" + IndexingUtils.getIdentityKey( sourceObject ) + "\"" );
+            Query validationQuery = new TermQuery( new Term( IndexingTerms.TARGET_LIBRARY_FIELD, libraryIndexId ) );
             IndexSearcher searcher = searchManager.acquire();
             IndexWriter indexWriter = getIndexWriter();
-
-            // Search for the entity documents that are owned by the library whose index is being deleted
-            TopDocs searchResults = searcher.search( entityQuery, Integer.MAX_VALUE );
             List<String> documentKeys = new ArrayList<>();
 
-            for (ScoreDoc scoreDoc : searchResults.scoreDocs) {
-                Document entityDoc = searcher.doc( scoreDoc.doc );
-                IndexableField entityId = entityDoc.getField( IndexingTerms.IDENTITY_FIELD );
-
-                if (entityId != null) {
-                    documentKeys.add( entityId.stringValue() );
-                }
-            }
-            documentKeys.add( sourceObjectIdentity );
+            documentKeys.addAll( findIndexIds( entityQuery, searcher ) );
+            documentKeys.addAll( findIndexIds( validationQuery, searcher ) );
+            documentKeys.add( libraryIndexId );
             searchManager.release( searcher );
 
             // Delete all of the documents from the search index
             for (String documentId : documentKeys) {
-                log.info( "Deleting index: " + documentId );
+                log.debug( "Deleting index: " + documentId );
                 indexWriter.deleteDocuments( new Term( IndexingTerms.IDENTITY_FIELD, documentId ) );
             }
-
-            // Delete any associated validation findings from the search index
-            getFactory().getValidationService().deleteValidationResults( sourceObjectIdentity );
 
         } catch (IOException | ParseException e) {
             log.error( "Error deleting search index for repository item.", e );
         }
+    }
+
+    /**
+     * Search for the entity or validation documents that are owned by the library whose index is being deleted.
+     * 
+     * @param query the search index query to use for locating document IDs
+     * @param searcher the searcher that will perform the query
+     * @return List&lt;String&gt;
+     * @throws IOException thrown if an error occurs while running the search query
+     */
+    private List<String> findIndexIds(Query query, IndexSearcher searcher) throws IOException {
+        TopDocs searchResults = searcher.search( query, Integer.MAX_VALUE );
+        List<String> documentKeys = new ArrayList<>();
+
+        for (ScoreDoc scoreDoc : searchResults.scoreDocs) {
+            Document entityDoc = searcher.doc( scoreDoc.doc );
+            IndexableField entityId = entityDoc.getField( IndexingTerms.IDENTITY_FIELD );
+
+            if (entityId != null) {
+                documentKeys.add( entityId.stringValue() );
+            }
+        }
+        return documentKeys;
     }
 
     /**
@@ -367,16 +465,57 @@ public class LibraryIndexBuilder extends IndexBuilder<RepositoryItem> {
     }
 
     /**
-     * Loads the contents of the given repository item as a JAXB object.
+     * Loads the library model into memory. In addition to performing the load, this method also performs indexing on
+     * the validation findings discovered during the load so that validation does not need to be re-run later.
+     * 
+     * @param item the repository item of the library to be loaded
+     * @return TLLibrary
+     * @throws LibraryLoaderException thrown if the library cannot be loaded
+     * @throws LibrarySaveException thrown if an error occurs while creating the temporary project file
+     * @throws RepositoryException thrown if an error occurs while retrieving the library's content from the repository
+     * @throws IOException thrown if the temporary project file cannot be created on the local file system
+     */
+    private TLLibrary loadLibraryModel(RepositoryItem item)
+        throws LibraryLoaderException, LibrarySaveException, RepositoryException, IOException {
+        File projectFile = null;
+        try {
+            TLModel model = new TLModel();
+            ProjectManager manager = new ProjectManager( model, false, getRepositoryManager() );
+            projectFile = File.createTempFile( "project", ".otp" );
+            Project project = manager.newProject( projectFile, "http://www.OpenTravel.org/repository/index",
+                "IndexValidation", null );
+            ValidationFindings findings = new ValidationFindings();
+            TLLibrary library;
+
+            // Load the library; the validation findings will be populated as a side-effect of the load
+            manager.addManagedProjectItems( Arrays.asList( item ), project, findings );
+            library = (TLLibrary) model.getLibrary( item.getNamespace(), item.getLibraryName() );
+
+            if (library == null) {
+                throw new LibraryLoaderException( "Unable to load library: " + item.getFilename() );
+            }
+            ImportManagementIntegrityChecker.verifyReferencedLibraries( library );
+            indexValidationFindings( library, findings );
+            return library;
+
+        } finally {
+            FileUtils.delete( projectFile );
+        }
+    }
+
+    /**
+     * Loads the contents of the given repository item as a JAXB object and transforms it to a <code>TLLibrary</code>
+     * structure. The difference between this method is that the resulting library is not incorporated into a model and
+     * none of its references have been resolved.
      * 
      * @param item the repository item to load
      * @return Library
      * @throws RepositoryException thrown if an error occurs while accessing the repository content
      */
-    protected Library loadLibrary(RepositoryItem item) throws RepositoryException {
+    protected TLLibrary loadJaxbLibrary(RepositoryItem item) throws RepositoryException {
         File contentFile = getRepositoryManager().getFileManager().getLibraryContentLocation( item.getBaseNamespace(),
             item.getFilename(), item.getVersion() );
-        Library library = null;
+        TLLibrary library = null;
 
         if ((contentFile != null) && contentFile.exists()) {
             library = IndexContentHelper.unmarshallLibrary( contentFile );

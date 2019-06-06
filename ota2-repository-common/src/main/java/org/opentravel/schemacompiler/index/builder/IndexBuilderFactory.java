@@ -31,7 +31,6 @@ public class IndexBuilderFactory {
     private RepositoryManager repositoryManager;
     private IndexWriter indexWriter;
     private FacetIndexingService facetService;
-    private ValidationIndexingService validationService;
 
     /**
      * Constructor that specifies the repository manager and index writer to use when creating or deleting search index
@@ -44,7 +43,6 @@ public class IndexBuilderFactory {
         this.repositoryManager = repositoryManager;
         this.indexWriter = indexWriter;
         this.facetService = new FacetIndexingService( this.indexWriter );
-        this.validationService = new ValidationIndexingService( this.repositoryManager, this.indexWriter );
     }
 
     /**
@@ -141,15 +139,6 @@ public class IndexBuilderFactory {
      */
     public FacetIndexingService getFacetService() {
         return facetService;
-    }
-
-    /**
-     * Returns the service that can be used to perform validations of OTM libraries.
-     *
-     * @return ValidationIndexingService
-     */
-    public ValidationIndexingService getValidationService() {
-        return validationService;
     }
 
 }

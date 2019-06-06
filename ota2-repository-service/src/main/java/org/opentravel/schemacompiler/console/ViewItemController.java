@@ -779,7 +779,7 @@ public class ViewItemController extends BaseController {
                 UserPrincipal user = getCurrentUser( session );
 
                 if (securityManager.isReadAuthorized( user, indexLibrary.getRepositoryItem() )) {
-                    ReferenceFinder refFinder = new ReferenceFinder( indexEntity.getItemContent(), indexLibrary );
+                    ReferenceFinder refFinder = new ReferenceFinder( indexEntity, indexLibrary );
                     Map<String,EntitySearchResult> entitiesByReference =
                         refFinder.buildEntityReferenceMap( searchService );
                     List<FacetIdentityWrapper> entityFacets = buildFacetList( indexEntity.getItemContent() );
@@ -970,6 +970,11 @@ public class ViewItemController extends BaseController {
 
             facetList.add( new FacetIdentityWrapper( facetOwner.getSharedFacet() ) );
             addContextualFacets( facetOwner.getChoiceFacets(), facetList );
+
+        } else if (entity instanceof TLContextualFacet) {
+            TLContextualFacet facetOwner = (TLContextualFacet) entity;
+
+            addContextualFacets( facetOwner.getChildFacets(), facetList );
 
         } else if (entity instanceof TLCoreObject) {
             TLCoreObject facetOwner = (TLCoreObject) entity;

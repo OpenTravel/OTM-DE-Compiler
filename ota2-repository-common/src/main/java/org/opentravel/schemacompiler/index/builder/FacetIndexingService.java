@@ -221,6 +221,7 @@ public class FacetIndexingService {
         String extendsEntityKey = facetOwner.get( IndexingTerms.EXTENDS_ENTITY_FIELD );
         String entityDescription = facetOwner.get( IndexingTerms.ENTITY_DESCRIPTION_FIELD );
         BytesRef facetOwnerContent = facetOwner.getBinaryValue( IndexingTerms.CONTENT_DATA_FIELD );
+        String[] facetOwnerKeys = facetOwner.getValues( IndexingTerms.FACET_OWNER_FIELD );
         String[] referenceIdentityKeys = facetOwner.getValues( IndexingTerms.REFERENCE_IDENTITY_FIELD );
         String[] referencedEntityKeys = facetOwner.getValues( IndexingTerms.REFERENCED_ENTITY_FIELD );
         Document indexDoc = new Document();
@@ -263,6 +264,10 @@ public class FacetIndexingService {
         }
         if (facetOwnerContent != null) {
             indexDoc.add( new StoredField( IndexingTerms.CONTENT_DATA_FIELD, facetOwnerContent ) );
+        }
+        for (String facetOwnerKey : facetOwnerKeys) {
+            indexDoc.add( new StringField( IndexingTerms.FACET_OWNER_FIELD,
+                IndexingUtils.getSearchableIdentityKey( facetOwnerKey ), Field.Store.YES ) );
         }
         for (String key : referenceIdentityKeys) {
             indexDoc.add( new StringField( IndexingTerms.REFERENCE_IDENTITY_FIELD, key, Field.Store.YES ) );

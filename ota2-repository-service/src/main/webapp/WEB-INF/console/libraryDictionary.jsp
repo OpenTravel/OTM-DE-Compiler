@@ -37,7 +37,7 @@
 	</tr>
 	<c:if test="${entityList.isEmpty()}">
 		<tr class="d0">
-			<td>No entities defined for this library.</td>
+			<td colspan="3">No entities defined for this library.</td>
 		</tr>
 	</c:if>
 	<c:set var="rowStyle" value="d0" />
@@ -48,7 +48,7 @@
 		</c:url>
 		<tr class="${rowStyle}">
 			<td>
-				<img src="${pageContext.request.contextPath}/images/${imageResolver.getIconImage( entity )}" />&nbsp;<a href="${entityUrl}">${entity.itemName}</a>
+				<img src="${pageContext.request.contextPath}/images/${imageResolver.getIconImage( entity )}" />&nbsp;<a href="${entityUrl}">${entity.itemLocalName}</a>
 			</td>
 			<td><spring:message code="${entity.entityType.simpleName}" /></td>
 			<td>${entity.itemDescription}</td>

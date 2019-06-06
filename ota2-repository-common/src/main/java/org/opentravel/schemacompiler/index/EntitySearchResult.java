@@ -30,16 +30,9 @@ import org.opentravel.schemacompiler.model.TLFacetType;
 import org.opentravel.schemacompiler.model.TLLibraryStatus;
 import org.opentravel.schemacompiler.repository.RepositoryException;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
-
-import javax.xml.namespace.QName;
 
 /**
  * Search result object that encapsulates all relevant information about an OTM entity.
@@ -98,7 +91,8 @@ public class EntitySearchResult extends SearchResult<NamedEntity> {
             if (content != null) {
                 NamedEntity entity = IndexContentHelper.unmarshallEntity( content );
 
-                if ((entity instanceof TLBusinessObject) || (entity instanceof TLChoiceObject)) {
+                if ((entity instanceof TLBusinessObject) || (entity instanceof TLChoiceObject)
+                    || (entity instanceof TLContextualFacet)) {
                     initializeContextualFacets( (TLFacetOwner) entity, itemDoc );
                 }
                 setItemContent( entity );
@@ -118,41 +112,17 @@ public class EntitySearchResult extends SearchResult<NamedEntity> {
      */
     private void initializeContextualFacets(TLFacetOwner facetOwner, Document itemDoc) {
         BytesRef[] facetContents = itemDoc.getBinaryValues( IndexingTerms.FACET_CONTENT_FIELD );
-        Map<QName,TLFacetOwner> facetOwnerMap = new HashMap<>();
-        List<TLContextualFacet> facetList = new ArrayList<>();
 
         // Start by unmarshalling each of the contextual facets
         for (BytesRef binaryContent : facetContents) {
             try {
-                facetList
-                    .add( (TLContextualFacet) IndexContentHelper.unmarshallEntity( binaryContent.utf8ToString() ) );
+                TLContextualFacet facet =
+                    (TLContextualFacet) IndexContentHelper.unmarshallEntity( binaryContent.utf8ToString() );
+
+                addContextualFacet( facet, facetOwner );
 
             } catch (RepositoryException e) {
                 log.warn( "Error unmarshalling contextual facet content.", e );
-            }
-        }
-
-        // The initial facet owner is the original one passed to this method
-        facetOwnerMap.put( new QName( itemDoc.get( IndexingTerms.ENTITY_NAMESPACE_FIELD ), facetOwner.getLocalName() ),
-            facetOwner );
-
-        // Continue making passes through the facet list until we cannot resolve anything else
-        int originalSize = -1;
-
-        while (!facetList.isEmpty() && (facetList.size() != originalSize)) {
-            originalSize = facetList.size();
-            Iterator<TLContextualFacet> iterator = facetList.iterator();
-
-            while (iterator.hasNext()) {
-                TLContextualFacet facet = iterator.next();
-                QName ownerName = IndexingUtils.getContextualFacetOwnerQName( facet );
-                TLFacetOwner owner = facetOwnerMap.get( ownerName );
-
-                if (owner != null) {
-                    addContextualFacet( facet, owner );
-                    facetOwnerMap.put( new QName( facet.getFacetNamespace(), facet.getLocalName() ), facet );
-                    iterator.remove();
-                }
             }
         }
     }

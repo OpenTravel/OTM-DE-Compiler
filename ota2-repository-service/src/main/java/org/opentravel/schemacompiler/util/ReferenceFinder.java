@@ -37,6 +37,7 @@ import org.opentravel.schemacompiler.model.TLSimpleFacet;
 import org.opentravel.schemacompiler.model.TLValueWithAttributes;
 import org.opentravel.schemacompiler.repository.RepositoryException;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -61,9 +62,12 @@ public class ReferenceFinder {
      * @param entity the entity to scan for references
      * @param indexLibrary the source library from which all references are relative
      */
-    public ReferenceFinder(NamedEntity entity, LibrarySearchResult indexLibrary) {
+    public ReferenceFinder(EntitySearchResult entity, LibrarySearchResult indexLibrary) {
         this.nameResolver = new EntityNameResolver( indexLibrary );
-        scanEntity( entity );
+        scanEntity( entity.getItemContent() );
+
+        // In addition to model identity names, also add all of the known search index ID's for the entity
+        entity.getReferenceIdentityIds().forEach( id -> referencesToIndexIds.put( id, id ) );
     }
 
     /**
@@ -89,7 +93,7 @@ public class ReferenceFinder {
             }
         }
 
-        // Build the final map of entities mapped to the original type reference names
+        // Build the map of entities mapped to the original type reference names
         for (Entry<String,String> entry : referencesToIndexIds.entrySet()) {
             String entityRef = entry.getKey();
             String referenceIndexId = entry.getValue();
@@ -99,6 +103,8 @@ public class ReferenceFinder {
                 entitiesByReference.put( entityRef, indexEntity );
             }
         }
+
+        // Add
         return entitiesByReference;
     }
 
@@ -116,6 +122,9 @@ public class ReferenceFinder {
 
         } else if (entity instanceof TLCoreObject) {
             scanEntity( (TLCoreObject) entity );
+
+        } else if (entity instanceof TLContextualFacet) {
+            scanEntity( (TLContextualFacet) entity );
 
         } else if (entity instanceof TLValueWithAttributes) {
             scanEntity( (TLValueWithAttributes) entity );
@@ -174,6 +183,15 @@ public class ReferenceFinder {
         scanExtension( entity.getExtension() );
         scanFacet( entity.getSummaryFacet() );
         scanFacet( entity.getDetailFacet() );
+    }
+
+    /**
+     * Scans the given <code>TLContextualFacet</code> for type references.
+     * 
+     * @param entity the entity to scan for references
+     */
+    private void scanEntity(TLContextualFacet entity) {
+        scanContextualFacets( Arrays.asList( (TLContextualFacet) entity ) );
     }
 
     /**
@@ -265,6 +283,7 @@ public class ReferenceFinder {
     private void scanContextualFacets(List<TLContextualFacet> facetList) {
         if (facetList != null) {
             for (TLContextualFacet facet : facetList) {
+                addQualifiedName( facet.getOwningEntityName() );
                 scanFacet( facet );
                 scanContextualFacets( facet.getChildFacets() );
             }

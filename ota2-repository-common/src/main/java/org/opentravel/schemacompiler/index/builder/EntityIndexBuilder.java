@@ -70,8 +70,10 @@ import org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter;
 import org.opentravel.schemacompiler.visitor.ModelNavigator;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -93,7 +95,6 @@ public class EntityIndexBuilder<T extends NamedEntity> extends IndexBuilder<T> {
     private Set<String> referenceIdentityKeys = new HashSet<>();
     private Set<String> referencedEntityKeys = new HashSet<>();
     private String extendsEntityKey;
-    private String facetOwnerKey;
 
     /**
      * @see org.opentravel.schemacompiler.index.builder.IndexBuilder#createIndex()
@@ -104,7 +105,7 @@ public class EntityIndexBuilder<T extends NamedEntity> extends IndexBuilder<T> {
         TLLibrary owningLibrary = (TLLibrary) sourceObject.getOwningLibrary();
 
         try {
-            log.debug( "Indexing Model Entity: " + sourceObject.getLocalName() );
+            log.info( "Indexing Model Entity: " + sourceObject.getLocalName() );
 
             // Recursively gather keywords and references
             ModelNavigator.navigate( sourceObject, new KeywordAndReferenceVisitor() );
@@ -155,7 +156,7 @@ public class EntityIndexBuilder<T extends NamedEntity> extends IndexBuilder<T> {
                 indexDoc
                     .add( new StringField( IndexingTerms.EXTENDS_ENTITY_FIELD, extendsEntityKey, Field.Store.YES ) );
             }
-            if (facetOwnerKey != null) {
+            for (String facetOwnerKey : getFacetOwnerKeys( sourceObject )) {
                 indexDoc.add( new StringField( IndexingTerms.FACET_OWNER_FIELD, facetOwnerKey, Field.Store.YES ) );
             }
             if (entityContent != null) {
@@ -169,10 +170,20 @@ public class EntityIndexBuilder<T extends NamedEntity> extends IndexBuilder<T> {
             }
             getIndexWriter().updateDocument( new Term( IndexingTerms.IDENTITY_FIELD, identityKey ), indexDoc );
 
-            // If the entity is a Choice or Business Object, add it to the list of facet
+            // If the entity is a facet owner, add it and all of its parent facet owners (if any) to the list of facet
             // owners to be post-processed for their contextual facet content
-            if ((sourceObject instanceof TLBusinessObject) || (sourceObject instanceof TLChoiceObject)) {
-                getFactory().getFacetService().addFacetOwnerID( identityKey );
+            NamedEntity entity = sourceObject;
+
+            while (entity instanceof TLContextualFacet) {
+                TLContextualFacet ctxFacet = (TLContextualFacet) entity;
+                String facetIdentity = IndexingUtils.getIdentityKey( ctxFacet, false );
+
+                getFactory().getFacetService().addFacetOwnerID( facetIdentity );
+                entity = ctxFacet.getOwningEntity();
+            }
+
+            if ((entity instanceof TLBusinessObject) || (entity instanceof TLChoiceObject)) {
+                getFactory().getFacetService().addFacetOwnerID( IndexingUtils.getIdentityKey( entity ) );
             }
 
         } catch (IOException | RepositoryException e) {
@@ -278,6 +289,26 @@ public class EntityIndexBuilder<T extends NamedEntity> extends IndexBuilder<T> {
     }
 
     /**
+     * If the given entity is a contextual facet, all of its parent owning facets will be returned in the resulting
+     * list.
+     * 
+     * @param entity the entity for which to capture facet owner keys
+     * @return List&lt;String&gt;
+     */
+    protected List<String> getFacetOwnerKeys(NamedEntity entity) {
+        List<String> ownerKeys = new ArrayList<>();
+
+        while (entity instanceof TLContextualFacet) {
+            TLContextualFacet facet = (TLContextualFacet) entity;
+            NamedEntity facetOwner = facet.getOwningEntity();
+
+            ownerKeys.add( IndexingUtils.getIdentityKey( facetOwner ) );
+            entity = facetOwner;
+        }
+        return ownerKeys;
+    }
+
+    /**
      * Adds a reference identity that may be either the source object itself or one of its <code>NamedEntity</code>
      * child objects such as a facet or alias.
      * 
@@ -333,6 +364,19 @@ public class EntityIndexBuilder<T extends NamedEntity> extends IndexBuilder<T> {
             }
         }
         return identityKey;
+    }
+
+    /**
+     * Adds the identity key for the given type reference to the list of referenced entities.
+     * 
+     * @param typeReference the type reference string to resolve
+     */
+    protected void addEntityReference(NamedEntity entityRef) {
+        String identityKey = IndexingUtils.getIdentityKey( entityRef );
+
+        if (identityKey != null) {
+            referencedEntityKeys.add( identityKey );
+        }
     }
 
     /**
@@ -666,9 +710,10 @@ public class EntityIndexBuilder<T extends NamedEntity> extends IndexBuilder<T> {
             // reassemble the contextual facet structure(s) when the owner's content is retrieved from the
             // search index.
             if (facet == getSourceObject()) {
-                facetOwnerKey = resolveTypeReference( facet.getOwningEntityName() );
-                facet.setOwningEntityName( facetOwnerKey );
                 facet.setFacetNamespace( facet.getOwningLibrary().getNamespace() );
+                extendsEntityKey = IndexingUtils.getIdentityKey( facet.getOwningEntity(), true );
+                addEntityReference( facet.getOwningEntity() );
+                addReferenceIdentity( facet.getOwningEntity() );
             }
             return true;
         }

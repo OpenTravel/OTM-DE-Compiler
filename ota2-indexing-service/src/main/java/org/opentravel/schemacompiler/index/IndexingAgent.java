@@ -336,7 +336,6 @@ public class IndexingAgent {
 
         if (!deleteIndex) {
             factory.getFacetService().getIndexBuilder().performIndexingAction();
-            factory.getValidationService().getIndexBuilder().performIndexingAction();
         }
         indexWriter.commit();
         sendCommitNotifiation();

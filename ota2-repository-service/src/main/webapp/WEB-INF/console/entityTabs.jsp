@@ -39,7 +39,7 @@
 	<c:param name="localName" value="${entity.itemLocalName}" />
 </c:url>
 
-<h2 style="padding-bottom: 0;"><spring:message code="${entity.entityType.simpleName}" />: ${entity.itemName} <small>(${library.repositoryItem.version})</small></h2>
+<h2 style="padding-bottom: 0;"><spring:message code="${entity.entityType.simpleName}" />: ${entity.itemLocalName} <small>(${library.repositoryItem.version})</small></h2>
 <h3 style="padding-top: 0;">Library: <a href="${libraryUrl}">${library.itemName}</a> <small>(<a href="${namespaceUrl}">${entity.itemNamespace}</a>)</small></h3>
 
 <ul class="tab">
