@@ -617,6 +617,7 @@ public class DependencyNavigator extends AbstractNavigator<NamedEntity> {
             .addAssignment( TLChoiceObject.class, (e, v) -> navigateChoiceObject( e ) )
             .addAssignment( TLCoreObject.class, (e, v) -> navigateCoreObject( e ) )
             .addAssignment( TLBusinessObject.class, (e, v) -> navigateBusinessObject( e ) )
+            .addAssignment( TLContextualFacet.class, (e, v) -> navigateContextualFacet( e ) )
             .addAssignment( TLResource.class, (e, v) -> navigateResource( e ) )
             .addAssignment( TLActionFacet.class, (e, v) -> navigateActionFacet( e ) )
             .addAssignment( XSDSimpleType.class, (e, v) -> navigateXSDSimpleType( e ) )
