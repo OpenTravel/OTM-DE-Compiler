@@ -20,7 +20,12 @@
     - vars/default-vars.yml
     - "{{inventory_dir}}/vars/{{inventory_hostname}}-vars.yml"
     - vars/otm-repository-vars.yml
+  vars:
+    backup_timestamp: "{{ansible_date_time.year}}{{ansible_date_time.month}}{{ansible_date_time.day}}{{ansible_date_time.hour}}{{ansible_date_time.minute}}"
+    svn_dumpfile: "repo-{{backup_timestamp}}.svn.dump"
   tasks:
+  - import_tasks: subtasks/backup-repository.yml
+  
   - name: --> Download Artifacts to Controller
     block:
     - name: Creating local temp directory

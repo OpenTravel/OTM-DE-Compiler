@@ -26,3 +26,16 @@
       state: stopped
       timeout: 60
       delay: 10
+  - name: Check that Tomcat process has shut down
+    command: "pgrep -f tomcat"
+    ignore_errors: true
+    register: tomcat_status
+  - name: Wait for normal shutdown
+    pause:
+      seconds: 10
+    when: tomcat_status.stdout != ""
+  - name: Forcibly kill Tomcat process (if necessary)
+    command: "kill {{item}}"
+    ignore_errors: true
+    with_items: "{{tomcat_status.stdout_lines}}"
+    when: tomcat_status.stdout != ""

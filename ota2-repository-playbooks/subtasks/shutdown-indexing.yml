@@ -20,8 +20,21 @@
     service:
       name: ota2-indexing
       state: stopped
-  - name: Wait for service shutdown to complete
+  - name: Wait for indexing service shutdown to complete
     wait_for:
       port: "{{indexing_activemq_port}}"
       state: stopped
       timeout: 60
+  - name: Check that indexing service process has shut down
+    command: "pgrep -f ota2-indexing"
+    ignore_errors: true
+    register: indexing_status
+  - name: Wait for normal shutdown
+    pause:
+      seconds: 10
+    when: indexing_status.stdout != ""
+  - name: Forcibly kill indexing service process (if necessary)
+    command: "kill {{item}}"
+    ignore_errors: true
+    with_items: "{{indexing_status.stdout_lines}}"
+    when: indexing_status.stdout != ""

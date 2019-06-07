@@ -1,0 +1,41 @@
+---
+#
+# Copyright (C) 2014 OpenTravel Alliance (info@opentravel.org)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#         http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+- name: --> Backup OTM Repository Data
+  block:
+  - name: Find existing backup files
+    find:
+      paths: "{{backups_dir}}"
+      patterns: "repo-[0-9]+.svn.dump.gz"
+      use_regex: True
+    register: existing_backup_files
+  - name: Dump contents of SVN repository
+    shell: "svnadmin dump '{{svnrepo_dir}}' > '{{backups_dir}}/{{svn_dumpfile}}'"
+  - name: Compress SVN backup file
+    archive:
+      path: "{{backups_dir}}/{{svn_dumpfile}}"
+      dest: "{{backups_dir}}/{{svn_dumpfile}}.gz"
+      remove: True
+  - name: Copy archive file back to controller
+    fetch:
+      src: "{{backups_dir}}/{{svn_dumpfile}}.gz"
+      dest: "{{controller_backup_dir}}/{{svn_dumpfile}}.gz"
+      flat: True
+  - name: Delete all but latest backup from the remote host
+    file:
+      path: "{{item.path}}"
+      state: absent
+    with_items: "{{existing_backup_files.files}}"  
