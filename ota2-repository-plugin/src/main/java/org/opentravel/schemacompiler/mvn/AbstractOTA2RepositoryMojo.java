@@ -181,7 +181,6 @@ public abstract class AbstractOTA2RepositoryMojo extends AbstractMojo {
                     modelsBySnapshot.put( DEFAULT_SNAPSHOT_SUFFIX, projectManager.getModel() );
                     ssBaseNamespace = originalProject.getProjectId();
                     ssProjectName = originalProject.getName();
-                    projectManager.closeAll();
 
                 } else if (otmProject.getName().toLowerCase().endsWith( ".osm" )) { // Load from an OSR file
                     log.info( "Loading OTM service assembly: " + otmProject.getName() );
