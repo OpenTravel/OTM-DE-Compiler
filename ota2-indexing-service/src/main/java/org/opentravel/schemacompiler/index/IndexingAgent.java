@@ -417,6 +417,7 @@ public class IndexingAgent {
                 return msg;
             }
         } );
+        System.out.println( "COMMIT MESSAGE SENT" );
     }
 
     /**
