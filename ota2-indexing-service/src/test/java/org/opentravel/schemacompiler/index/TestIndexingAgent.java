@@ -89,7 +89,6 @@ public class TestIndexingAgent extends AbstractIndexingServiceTest {
     @AfterClass
     public static void tearDown() throws Exception {
         indexAgent.shutdown();
-        indexAgent.closeIndexWriter();
         amqBroker.stop();
         amqBroker.waitUntilStopped();
         context.close();
