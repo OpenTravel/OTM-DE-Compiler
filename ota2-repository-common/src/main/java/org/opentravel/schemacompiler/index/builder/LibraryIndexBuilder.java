@@ -45,13 +45,13 @@ import org.opentravel.schemacompiler.loader.LibraryLoaderException;
 import org.opentravel.schemacompiler.model.LibraryMember;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLContextualFacet;
+import org.opentravel.schemacompiler.model.TLFacetOwner;
 import org.opentravel.schemacompiler.model.TLInclude;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLLibraryStatus;
 import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.model.TLModelElement;
 import org.opentravel.schemacompiler.model.TLNamespaceImport;
-import org.opentravel.schemacompiler.model.TLOperation;
 import org.opentravel.schemacompiler.model.TLService;
 import org.opentravel.schemacompiler.repository.Project;
 import org.opentravel.schemacompiler.repository.ProjectManager;
@@ -96,7 +96,7 @@ public class LibraryIndexBuilder extends IndexBuilder<RepositoryItem> {
     public void createIndex() {
         RepositoryItem sourceObject = getSourceObject();
         try {
-            log.info( "Indexing Library: " + sourceObject.getFilename() );
+            log.debug( "Indexing Library: " + sourceObject.getFilename() );
             deleteIndex(); // Start by deleting all index documents associated with this library
 
             // Now we can begin creating the index...
@@ -182,6 +182,7 @@ public class LibraryIndexBuilder extends IndexBuilder<RepositoryItem> {
                 }
             }
             getIndexWriter().updateDocument( new Term( IndexingTerms.IDENTITY_FIELD, identityKey ), indexDoc );
+            ProjectManager.clearInstanceMap();
 
         } catch (LibraryLoaderException | LibrarySaveException | RepositoryException | IOException e) {
             log.error( "Error creating index for repository item: " + sourceObject.getFilename(), e );
@@ -233,16 +234,9 @@ public class LibraryIndexBuilder extends IndexBuilder<RepositoryItem> {
         // Assemble a list of all entities in the library
         for (LibraryMember entity : library.getNamedMembers()) {
             if ((entity instanceof TLContextualFacet) && ((TLContextualFacet) entity).isLocalFacet()) {
-                // TODO: Are non-local facets really being indexed, or do we simply have a display issue?
                 continue; // skip local contextual facets since they will be indexed under their owner
             }
-            if (entity instanceof TLService) {
-                for (TLOperation op : ((TLService) entity).getOperations()) {
-                    entityList.add( op );
-                }
-            } else {
-                entityList.add( entity );
-            }
+            addLibraryEntity( entity, entityList );
         }
 
         // Create an index for each entity; keywords for this library include the keywords
@@ -260,6 +254,36 @@ public class LibraryIndexBuilder extends IndexBuilder<RepositoryItem> {
                 builder.performIndexingAction();
                 keywords.addAll( builder.getFreeTextKeywords() );
             }
+        }
+    }
+
+    /**
+     * Adds the given entity (and its parents or children, when necessary) to the list of entities to be indexed.
+     * 
+     * @param entity the library entity to add
+     * @param entityList the list of entities to be indexed
+     */
+    private void addLibraryEntity(LibraryMember entity, List<NamedEntity> entityList) {
+        if (entity instanceof TLService) {
+            ((TLService) entity).getOperations().forEach( entityList::add );
+
+        } else {
+            // If this is a contextual facet, index all of the owners (even if they are not in this library) so we
+            // can make sure they are available in the search index during the contextual facet resolution phase of
+            // the indexing process.
+            if (entity instanceof TLContextualFacet) {
+                TLContextualFacet facet = (TLContextualFacet) entity;
+
+                while (facet != null) {
+                    TLFacetOwner owner = facet.getOwningEntity();
+
+                    if (owner != null) {
+                        entityList.add( owner );
+                    }
+                    facet = (owner instanceof TLContextualFacet) ? (TLContextualFacet) owner : null;
+                }
+            }
+            entityList.add( entity );
         }
     }
 

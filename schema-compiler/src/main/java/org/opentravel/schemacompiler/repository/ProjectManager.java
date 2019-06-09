@@ -182,6 +182,13 @@ public final class ProjectManager {
     }
 
     /**
+     * Clears the associations between models and <code>ProjectManager</code> instances.
+     */
+    public static void clearInstanceMap() {
+        instanceMap.clear();
+    }
+
+    /**
      * Returns the repository manager used to download and edit content from a remote OTA2.0 repository.
      * 
      * @return RepositoryManager

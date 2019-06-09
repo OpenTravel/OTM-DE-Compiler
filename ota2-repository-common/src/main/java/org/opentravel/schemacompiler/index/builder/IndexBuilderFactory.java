@@ -46,6 +46,15 @@ public class IndexBuilderFactory {
     }
 
     /**
+     * Assigns the index writer instance to use for indexing jobs.
+     *
+     * @param indexWriter the index writer instance to assign
+     */
+    public void setIndexWriter(IndexWriter indexWriter) {
+        this.indexWriter = indexWriter;
+    }
+
+    /**
      * Returns a new <code>IndexBuilder</code> that will construct search index document(s) for the given source object.
      * 
      * @param indexSource the source object for the search index document

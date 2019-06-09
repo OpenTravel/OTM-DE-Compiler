@@ -202,15 +202,15 @@ public class JMSFreeTextSearchService extends FreeTextSearchService {
                 JAXBContext jaxbContext = RepositoryJaxbContext.getExtContext();
                 Marshaller m = jaxbContext.createMarshaller();
                 StringWriter writer = new StringWriter();
-    
+
                 m.marshal( extObjectFactory.createSubscriptionTarget( subscriptionTarget ), writer );
                 sendIndexingJob( IndexingConstants.JOB_TYPE_SUBSCRIPTION, writer.toString() );
                 log.info( "Submitted processing request for subscription indexing job." );
-    
+
             } else {
                 log.info( UNABLE_TO_SUBMIT );
             }
-    
+
         } catch (JAXBException e) {
             log.error( "Error submitting indexing job.", e );
         }
@@ -273,7 +273,7 @@ public class JMSFreeTextSearchService extends FreeTextSearchService {
                         Message msg = indexingService.receiveSelected( IndexingConstants.SELECTOR_COMMITMSG );
 
                         if (msg != null) {
-                            log.info( "Commit notification received from indexing agent." );
+                            log.debug( "Commit notification received from indexing agent." );
                             refreshIndexReader();
                         }
 

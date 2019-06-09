@@ -24,17 +24,13 @@ import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.IndexWriterConfig.OpenMode;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
-import org.opentravel.ns.ota2.repositoryinfo_v01_00.LibraryInfoListType;
-import org.opentravel.ns.ota2.repositoryinfo_v01_00.LibraryInfoType;
 import org.opentravel.ns.ota2.repositoryinfoext_v01_00.SubscriptionTarget;
 import org.opentravel.schemacompiler.index.builder.IndexBuilder;
 import org.opentravel.schemacompiler.index.builder.IndexBuilderFactory;
 import org.opentravel.schemacompiler.repository.RepositoryException;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
-import org.opentravel.schemacompiler.repository.impl.RepositoryUtils;
 import org.opentravel.schemacompiler.subscription.SubscriptionNavigator;
-import org.opentravel.schemacompiler.util.RepositoryJaxbContext;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.FileSystemXmlApplicationContext;
 import org.springframework.jms.core.JmsTemplate;
@@ -43,9 +39,6 @@ import org.springframework.jms.core.MessageCreator;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.Reader;
-import java.io.StringReader;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.jms.Connection;
@@ -53,10 +46,6 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.Session;
 import javax.jms.TextMessage;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
 
 /**
  * Main entry point for the agent that handles indexing requests in response to messages received from the remote
@@ -73,9 +62,9 @@ public class IndexingAgent {
     public static final String SEARCH_INDEX_LOCATION_BEANID = "searchIndexLocation";
 
     private boolean shutdownRequested = false;
-    private File repositoryLocation;
     private File searchIndexLocation;
     private RepositoryManager repositoryManager;
+    private IndexingJobManager jobManager;
     private Directory indexDirectory;
     private IndexWriterConfig writerConfig;
     private IndexWriter indexWriter;
@@ -118,8 +107,6 @@ public class IndexingAgent {
         // Run an empty commit of the index writer; this will initialize the search index directory
         // if it was not already setup prior to launching this agent.
         indexWriter.commit();
-
-        repositoryManager = new RepositoryManager( repositoryLocation );
     }
 
     /**
@@ -171,12 +158,15 @@ public class IndexingAgent {
             throw new FileNotFoundException(
                 "Search index location not specified in the agent configuration settings." );
         }
-        repositoryLocation = new File( repositoryLocationPath );
+        File repositoryLocation = new File( repositoryLocationPath );
+
         searchIndexLocation = new File( searchIndexLocationPath );
 
         if (!repositoryLocation.exists() || !repositoryLocation.isDirectory()) {
             throw new FileNotFoundException( "Invalid OTM repository location specified: " + repositoryLocationPath );
         }
+        repositoryManager = new RepositoryManager( repositoryLocation );
+        jobManager = new IndexingJobManager( repositoryManager, searchIndexLocation );
         running = false;
     }
 
@@ -211,11 +201,14 @@ public class IndexingAgent {
      * Starts listening for JMS messages and performs the appropriate indexing action when one is received.
      * 
      * @throws JMSException thrown if a fatal error occurs because the JMS connection is not available
+     * @throws IOException thrown if a watch service cannot be created for the local file system
      */
-    public void startListening() throws JMSException {
+    public void startListening() throws JMSException, IOException {
+        Thread jobThread = new Thread( this::watchForIndexingJobs, "Job Indexing Thread" );
         boolean initialStartup = true;
 
         checkJmsAvailable();
+        jobThread.start();
         running = true;
 
         log.info( "Indexing agent started for location: " + searchIndexLocation.getAbsolutePath() );
@@ -232,7 +225,7 @@ public class IndexingAgent {
                     String messageContent = message.getText();
 
                     if (messageType != null) {
-                        dispatchIndexingJob( messageType, messageContent );
+                        jobManager.addIndexingJobs( messageType, messageContent );
 
                     } else {
                         log.warn( "Job type not specified in indexing request - ignoring." );
@@ -245,6 +238,58 @@ public class IndexingAgent {
                 if (initialStartup) {
                     throw new IndexingRuntimeException( "Receive error during indexing agent startup", e );
                 }
+            }
+        }
+
+        // Wait for up to 30s the background indexing job thread to complete
+        try {
+            jobThread.join( 30000L );
+
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    /**
+     * Continuously scans for new indexing batch jobs until a shutdown is requested. When a new job has been detected,
+     * it is dispatched for processing by the indexing service.
+     */
+    private void watchForIndexingJobs() {
+        long waitDelay = 100L;
+
+        while (!shutdownRequested) {
+            // Continue processing batch jobs until no more exist
+            while (jobManager.nextIndexingJob()) {
+                try {
+                    switch (jobManager.currentJobType()) {
+                        case CREATE:
+                            processIndexingJob( jobManager.currentRepositoryItems(), false );
+                            break;
+                        case DELETE:
+                            processIndexingJob( jobManager.currentRepositoryItems(), true );
+                            break;
+                        case DELETE_ALL:
+                            processDeleteAll();
+                            break;
+                        case SUBSCRIPTION:
+                            processIndexingJob( jobManager.currentSubscriptionTarget() );
+                            break;
+                    }
+                    commitAndNotify();
+                    waitDelay = 100L;
+
+                } catch (Exception e) {
+                    log.error( "Error processing indexing job", e );
+                }
+            }
+
+            // Pause briefly before checking for new files
+            try {
+                Thread.sleep( waitDelay );
+                waitDelay = 1000L;
+
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
             }
         }
     }
@@ -287,32 +332,6 @@ public class IndexingAgent {
     }
 
     /**
-     * Forwards the given indexing message request to the proper method for processing.
-     * 
-     * @param messageType the type of the indexing request
-     * @param messageContent the message content of the indexing request
-     * @throws IOException thrown if an error occurrs while processing the indexing request
-     * @throws JAXBException thrown if the message content cannot be parsed
-     */
-    private void dispatchIndexingJob(String messageType, String messageContent) throws IOException, JAXBException {
-        if (messageType.equals( IndexingConstants.JOB_TYPE_CREATE_INDEX )) {
-            processIndexingJob( unmarshallRepositoryItems( messageContent ), false );
-
-        } else if (messageType.equals( IndexingConstants.JOB_TYPE_DELETE_INDEX )) {
-            processIndexingJob( unmarshallRepositoryItems( messageContent ), true );
-
-        } else if (messageType.equals( IndexingConstants.JOB_TYPE_SUBSCRIPTION )) {
-            processIndexingJob( unmarshallSubscriptionTarget( messageContent ), true );
-
-        } else if (messageType.equals( IndexingConstants.JOB_TYPE_DELETE_ALL )) {
-            processDeleteAll();
-
-        } else {
-            log.warn( "Unrecognized indexing job type [" + messageType + "] - ignoring." );
-        }
-    }
-
-    /**
      * Processes the given indexing job for the given list of items.
      * 
      * @param itemsToIndex the list of repository items to be indexed
@@ -337,27 +356,19 @@ public class IndexingAgent {
         if (!deleteIndex) {
             factory.getFacetService().getIndexBuilder().performIndexingAction();
         }
-        indexWriter.commit();
-        sendCommitNotifiation();
     }
 
     /**
      * Processes the given indexing job for the subscription target provided.
      * 
      * @param subscriptionTarget the subscription target to be indexed
-     * @param commitUpdates commits updates to the search index before returning
      * @throws IOException thrown if an error occurs while processing the indexing job
      */
-    protected void processIndexingJob(SubscriptionTarget subscriptionTarget, boolean commitUpdates) throws IOException {
+    protected void processIndexingJob(SubscriptionTarget subscriptionTarget) throws IOException {
         IndexBuilderFactory factory = new IndexBuilderFactory( repositoryManager, indexWriter );
         IndexBuilder<SubscriptionTarget> indexBuilder = factory.newSubscriptionIndexBuilder( subscriptionTarget );
 
         indexBuilder.performIndexingAction();
-
-        if (commitUpdates) {
-            indexWriter.commit();
-            sendCommitNotifiation();
-        }
     }
 
     /**
@@ -372,7 +383,7 @@ public class IndexingAgent {
         try {
             new SubscriptionNavigator( repositoryManager ).navigateSubscriptions( subscriptionList -> {
                 try {
-                    processIndexingJob( subscriptionList.getSubscriptionTarget(), false );
+                    processIndexingJob( subscriptionList.getSubscriptionTarget() );
 
                 } catch (IOException e) {
                     log.warn( "Error indexing subscription list.", e );
@@ -382,56 +393,22 @@ public class IndexingAgent {
         } catch (RepositoryException e) {
             log.warn( "Error during reindexing of repository subscriptions.", e );
         }
+    }
+
+    /**
+     * Commits and refreshes the index writer and sends a JMS message to the OTM repository as notification that an
+     * indexing job has been committed.
+     * 
+     * @throws IOException thrown if the index writer cannot be committed or refreshed
+     */
+    private void commitAndNotify() throws IOException {
         indexWriter.commit();
-        sendCommitNotifiation();
-    }
+        indexWriter.close();
 
-    /**
-     * Unmarshalls and returns the list of <code>RepositoryItem</code>s from the given message.
-     * 
-     * @param messageContent the raw message content to unmarshall
-     * @return List&lt;RepositoryItem&gt;
-     * @throws JAXBException thrown if an error occurs during unmarshalling
-     * @throws IOException thrown if the message content is unreadable
-     */
-    @SuppressWarnings("unchecked")
-    private List<RepositoryItem> unmarshallRepositoryItems(String messageContent) throws JAXBException, IOException {
-        try (Reader reader = new StringReader( messageContent )) {
-            JAXBContext jaxbContext = RepositoryJaxbContext.getContext();
-            Unmarshaller u = jaxbContext.createUnmarshaller();
-            JAXBElement<LibraryInfoListType> msgElement = (JAXBElement<LibraryInfoListType>) u.unmarshal( reader );
-            List<RepositoryItem> itemList = new ArrayList<>();
+        writerConfig = new IndexWriterConfig( new StandardAnalyzer() );
+        writerConfig.setOpenMode( OpenMode.CREATE_OR_APPEND );
+        indexWriter = new IndexWriter( indexDirectory, writerConfig );
 
-            for (LibraryInfoType msgItem : msgElement.getValue().getLibraryInfo()) {
-                itemList.add( RepositoryUtils.createRepositoryItem( repositoryManager, msgItem ) );
-            }
-            return itemList;
-        }
-    }
-
-    /**
-     * Unmarshalls and returns the <code>SubscriptionTarget</code>s from the given message.
-     * 
-     * @param messageContent the raw message content to unmarshall
-     * @return SubscriptionTarget
-     * @throws JAXBException thrown if an error occurs during unmarshalling
-     * @throws IOException thrown if the message content is unreadable
-     */
-    @SuppressWarnings("unchecked")
-    private SubscriptionTarget unmarshallSubscriptionTarget(String messageContent) throws JAXBException, IOException {
-        try (Reader reader = new StringReader( messageContent )) {
-            JAXBContext jaxbContext = RepositoryJaxbContext.getExtContext();
-            Unmarshaller u = jaxbContext.createUnmarshaller();
-            JAXBElement<SubscriptionTarget> msgElement = (JAXBElement<SubscriptionTarget>) u.unmarshal( reader );
-
-            return msgElement.getValue();
-        }
-    }
-
-    /**
-     * Sends a JMS message to the OTM repository as notification that an indexing job has been committed.
-     */
-    private void sendCommitNotifiation() {
         jmsTemplate.send( new MessageCreator() {
             public Message createMessage(Session session) throws JMSException {
                 TextMessage msg = session.createTextMessage();

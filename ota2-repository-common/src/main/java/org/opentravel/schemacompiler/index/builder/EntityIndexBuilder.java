@@ -49,6 +49,7 @@ import org.opentravel.schemacompiler.model.TLEquivalent;
 import org.opentravel.schemacompiler.model.TLExample;
 import org.opentravel.schemacompiler.model.TLExtension;
 import org.opentravel.schemacompiler.model.TLFacet;
+import org.opentravel.schemacompiler.model.TLFacetOwner;
 import org.opentravel.schemacompiler.model.TLFacetType;
 import org.opentravel.schemacompiler.model.TLIndicator;
 import org.opentravel.schemacompiler.model.TLLibrary;
@@ -105,7 +106,7 @@ public class EntityIndexBuilder<T extends NamedEntity> extends IndexBuilder<T> {
         TLLibrary owningLibrary = (TLLibrary) sourceObject.getOwningLibrary();
 
         try {
-            log.info( "Indexing Model Entity: " + sourceObject.getLocalName() );
+            log.debug( "Indexing Model Entity: " + sourceObject.getLocalName() );
 
             // Recursively gather keywords and references
             ModelNavigator.navigate( sourceObject, new KeywordAndReferenceVisitor() );
@@ -302,7 +303,9 @@ public class EntityIndexBuilder<T extends NamedEntity> extends IndexBuilder<T> {
             TLContextualFacet facet = (TLContextualFacet) entity;
             NamedEntity facetOwner = facet.getOwningEntity();
 
-            ownerKeys.add( IndexingUtils.getIdentityKey( facetOwner ) );
+            if (facetOwner != null) {
+                ownerKeys.add( IndexingUtils.getIdentityKey( facetOwner ) );
+            }
             entity = facetOwner;
         }
         return ownerKeys;
@@ -710,10 +713,15 @@ public class EntityIndexBuilder<T extends NamedEntity> extends IndexBuilder<T> {
             // reassemble the contextual facet structure(s) when the owner's content is retrieved from the
             // search index.
             if (facet == getSourceObject()) {
+                TLFacetOwner facetOwner = facet.getOwningEntity();
+
                 facet.setFacetNamespace( facet.getOwningLibrary().getNamespace() );
-                extendsEntityKey = IndexingUtils.getIdentityKey( facet.getOwningEntity(), true );
-                addEntityReference( facet.getOwningEntity() );
-                addReferenceIdentity( facet.getOwningEntity() );
+
+                if (facetOwner != null) {
+                    extendsEntityKey = IndexingUtils.getIdentityKey( facetOwner, true );
+                    addEntityReference( facetOwner );
+                    addReferenceIdentity( facetOwner );
+                }
             }
             return true;
         }
