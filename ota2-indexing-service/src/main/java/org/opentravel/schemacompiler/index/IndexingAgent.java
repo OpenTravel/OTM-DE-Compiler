@@ -407,12 +407,17 @@ public class IndexingAgent {
      * @throws IOException thrown if the index writer cannot be committed or refreshed
      */
     private void commitAndNotify() throws IOException {
-        indexWriter.commit();
-        indexWriter.close();
+        try (IndexWriter writer = indexWriter) {
+            writer.commit();
 
-        writerConfig = new IndexWriterConfig( new StandardAnalyzer() );
-        writerConfig.setOpenMode( OpenMode.CREATE_OR_APPEND );
-        indexWriter = new IndexWriter( indexDirectory, writerConfig );
+        } catch (Exception e) {
+            log.error( "Error committing index writer", e );
+
+        } finally {
+            writerConfig = new IndexWriterConfig( new StandardAnalyzer() );
+            writerConfig.setOpenMode( OpenMode.CREATE_OR_APPEND );
+            indexWriter = new IndexWriter( indexDirectory, writerConfig );
+        }
 
         jmsTemplate.send( new MessageCreator() {
             public Message createMessage(Session session) throws JMSException {
