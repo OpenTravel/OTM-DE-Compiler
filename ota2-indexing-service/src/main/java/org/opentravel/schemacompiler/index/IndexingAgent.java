@@ -247,6 +247,9 @@ public class IndexingAgent {
 
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
+
+        } finally {
+            running = false;
         }
     }
 
@@ -259,7 +262,7 @@ public class IndexingAgent {
 
         while (!shutdownRequested) {
             // Continue processing batch jobs until no more exist
-            while (jobManager.nextIndexingJob()) {
+            while (!shutdownRequested && jobManager.nextIndexingJob()) {
                 try {
                     switch (jobManager.currentJobType()) {
                         case CREATE:
@@ -285,8 +288,10 @@ public class IndexingAgent {
 
             // Pause briefly before checking for new files
             try {
-                Thread.sleep( waitDelay );
-                waitDelay = 1000L;
+                if (!shutdownRequested) {
+                    Thread.sleep( waitDelay );
+                    waitDelay = 1000L;
+                }
 
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
@@ -422,8 +427,25 @@ public class IndexingAgent {
     /**
      * Requests a shutdown of this indexing agent.
      */
-    public void shutdown() {
+    public void shutdown(boolean waitUntilStopped) {
         shutdownRequested = true;
+
+        if (waitUntilStopped) {
+            // Wait for up to 30 seconds for the background threads to stop
+            for (int i = 0; i < 30; i++) {
+                if (running) {
+                    try {
+                        Thread.sleep( 1000L );
+
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+
+                } else {
+                    break;
+                }
+            }
+        }
     }
 
     /**

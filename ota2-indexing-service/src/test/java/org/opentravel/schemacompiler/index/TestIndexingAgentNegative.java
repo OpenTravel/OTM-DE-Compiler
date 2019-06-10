@@ -76,6 +76,7 @@ public class TestIndexingAgentNegative extends AbstractIndexingServiceTest {
                 agent.startListening();
 
             } finally {
+                agent.shutdown( false );
                 agent.closeIndexWriter();
             }
         }
@@ -92,6 +93,7 @@ public class TestIndexingAgentNegative extends AbstractIndexingServiceTest {
                 agent.startListening();
 
             } finally {
+                agent.shutdown( false );
                 agent.closeIndexWriter();
             }
         }
