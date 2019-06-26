@@ -16,6 +16,7 @@
 
 package org.opentravel.schemacompiler.ic;
 
+import org.opentravel.schemacompiler.codegen.util.ResourceCodegenUtils;
 import org.opentravel.schemacompiler.event.ModelEvent;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.BuiltInLibrary;
@@ -24,8 +25,10 @@ import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLActionRequest;
 import org.opentravel.schemacompiler.model.TLActionResponse;
 import org.opentravel.schemacompiler.model.TLAttribute;
+import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLExtension;
+import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLInclude;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLMemberField;
@@ -576,6 +579,19 @@ public abstract class ImportManagementIntegrityChecker<E extends ModelEvent<S>, 
         public boolean visitActionFacet(TLActionFacet facet) {
             if (facet.getBasePayload() != null) {
                 addReferencedLibrary( facet.getBasePayload().getOwningLibrary() );
+            }
+            if (facet.getReferenceFacetName() != null) {
+                TLResource resource = facet.getOwningResource();
+                TLBusinessObject referencedBO = (resource == null) ? null : resource.getBusinessObjectRef();
+
+                if (referencedBO != null) {
+                    TLFacet referencedFacet =
+                        ResourceCodegenUtils.getReferencedFacet( referencedBO, facet.getReferenceFacetName() );
+
+                    if (referencedFacet != null) {
+                        addReferencedLibrary( referencedFacet.getOwningLibrary() );
+                    }
+                }
             }
             return true;
         }

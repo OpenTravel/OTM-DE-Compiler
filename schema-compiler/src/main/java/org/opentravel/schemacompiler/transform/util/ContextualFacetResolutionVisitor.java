@@ -110,6 +110,7 @@ class ContextualFacetResolutionVisitor extends ModelElementVisitorAdapter {
 
         if ((facet.getOwningEntity() == null) && (facet.getOwningEntityName() != null)) {
             // Attempt to resolve the facet using its 'owningEntityName' field
+            symbolResolver.setPrefixResolver( new LibraryPrefixResolver( facet.getOwningLibrary() ) );
             Object ref = symbolResolver.resolveEntity( facet.getOwningEntityName() );
             TLFacetType facetType = facet.getFacetType();
 
