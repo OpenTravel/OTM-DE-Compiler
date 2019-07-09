@@ -513,6 +513,7 @@ public class DependencyNavigator extends AbstractNavigator<NamedEntity> {
         PropertyCodegenUtils.getInheritedAttributes( facet ).forEach( this::navigateAttribute );
         PropertyCodegenUtils.getInheritedProperties( facet ).forEach( this::navigateElement );
         PropertyCodegenUtils.getInheritedIndicators( facet ).forEach( this::navigateIndicator );
+        navigateDependency( PropertyCodegenUtils.getSoapHeaderType( facet ) );
         navigateDependency( facet.getOwningEntity() );
     }
 

@@ -719,6 +719,7 @@ public class SchemaDependencyNavigator extends AbstractNavigator<NamedEntity> {
         for (TLIndicator indicator : PropertyCodegenUtils.getInheritedIndicators( facet )) {
             navigateIndicator( indicator );
         }
+        navigateDependency( PropertyCodegenUtils.getSoapHeaderType( facet ) );
     }
 
     /**

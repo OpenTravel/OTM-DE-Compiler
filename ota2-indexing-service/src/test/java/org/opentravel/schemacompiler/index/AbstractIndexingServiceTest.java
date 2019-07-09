@@ -17,6 +17,8 @@
 package org.opentravel.schemacompiler.index;
 
 import org.apache.commons.lang.SystemUtils;
+import org.junit.Rule;
+import org.junit.rules.TestName;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
 import org.opentravel.schemacompiler.util.RepositoryJaxbContext;
 
@@ -32,10 +34,14 @@ public abstract class AbstractIndexingServiceTest {
 
     protected static RepositoryManager repositoryManager;
 
-    public static void setupEnvironment() throws Exception {
+    @Rule
+    public final TestName testName = new TestName();
+
+    public void setupEnvironment() throws Exception {
         File testResourcesFolder = new File( System.getProperty( "user.dir" ), "/src/test/resources" );
         File repositoryFolder = new File( testResourcesFolder, "/repo-snapshots/versions-repository" );
-        File searchIndexFolder = new File( System.getProperty( "user.dir" ), "/target/test-output/search-index" );
+        File searchIndexFolder = new File( System.getProperty( "user.dir" ),
+            "/target/test-output/search-index/" + testName.getMethodName() );
         File amqDataFolder = new File( System.getProperty( "user.dir" ), "/target/test-output/amq-data" );
         File configFolder = new File( System.getProperty( "user.dir" ), "/target/test-output/config" );
         File indexPropsFile = new File( configFolder, "indexing-service.properties" );

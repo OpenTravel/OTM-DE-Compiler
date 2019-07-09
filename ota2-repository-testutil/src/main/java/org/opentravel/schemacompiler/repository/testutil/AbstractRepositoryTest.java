@@ -51,7 +51,7 @@ public abstract class AbstractRepositoryTest {
     protected static ThreadLocal<JettyTestServer> jettyServer = new ThreadLocal<>();
     protected static ThreadLocal<LdapTestServer> ldapServer = new ThreadLocal<>();
     protected static ThreadLocal<GreenMail> smtpServer = new ThreadLocal<>();
-    protected static ThreadLocal<File> wipFolder = new ThreadLocal<>();
+    protected static ThreadLocal<File> wipFolder = new ThreadLocal<>(); // Provides access to local test files
     protected static ThreadLocal<TLModel> model = new ThreadLocal<>();
 
     /**

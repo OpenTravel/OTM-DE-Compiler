@@ -30,6 +30,8 @@ import org.opentravel.schemacompiler.model.TLAttributeType;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLCoreObject;
+import org.opentravel.schemacompiler.model.TLEquivalent;
+import org.opentravel.schemacompiler.model.TLEquivalentOwner;
 import org.opentravel.schemacompiler.model.TLExtensionPointFacet;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLFacetOwner;
@@ -78,6 +80,11 @@ public class PropertyCodegenUtils {
      * created with a 'maxOccurs' value of "unbounded".
      */
     public static final int MAX_OCCURS_UNBOUNDED_THRESHOLD = 5000;
+
+    /**
+     * Constant used for equivalent properties or types to indicate their use as SOAP header elements.
+     */
+    public static final String SOAP_HEADER_EQUIV = "SOAP_HEADER";
 
     /**
      * Returns true if a global element declaration is to be generated for the given entity.
@@ -608,6 +615,9 @@ public class PropertyCodegenUtils {
         Collections.reverse( localProperties );
 
         for (TLProperty property : localProperties) {
+            if (isSoapHeaderProperty( property )) {
+                continue;
+            }
             if (property.isReference()) {
                 propertyList.add( 0, property );
 
@@ -660,6 +670,91 @@ public class PropertyCodegenUtils {
                 propertyList.add( 0, property );
             }
         }
+    }
+
+    /**
+     * If the given operation facet contains a SOAP header property, the assigned type of that property will be returned
+     * as the type to assigned as the SOAP header element in generated WSDL documents. If no SOAP header property is
+     * defined, this method will return null. If multiple SOAP header properties are defined, the first one in the
+     * sequence will be returned.
+     * 
+     * @param operationFacet the operation facet for which to return the SOAP header element type
+     * @return NamedEntity
+     */
+    public static NamedEntity getSoapHeaderType(TLFacet operationFacet) {
+        NamedEntity soapHeader = null;
+
+        for (TLProperty property : operationFacet.getElements()) {
+            if (isSoapHeaderProperty( property )) {
+                soapHeader = property.getType();
+                break;
+            }
+        }
+        return soapHeader;
+    }
+
+    /**
+     * Returns true if the given model property is configured to be a SOAP header element. SOAP header elements have the
+     * following characteristics:
+     * <ul>
+     * <li>The owning facet of the element is of the type <code>REQUEST</code>, <code>RESPONSE</code> or
+     * <code>NOTIFICATION</code>.</li>
+     * <li>The property's type is a complex property with a global element name (e.g. core, choice, or business
+     * object).</li>
+     * <li>Either the property or the type assigned to the property contains an equivalent string value of
+     * "SOAP_HEADER".</li>
+     * </ul>
+     * 
+     * @param property the property to check for a SOAP header element configuration
+     * @return boolean
+     */
+    protected static boolean isSoapHeaderProperty(TLProperty property) {
+        boolean result = false;
+
+        if (property.getOwner() instanceof TLFacet) {
+            TLFacetType[] soapFacetTypes =
+                new TLFacetType[] {TLFacetType.REQUEST, TLFacetType.RESPONSE, TLFacetType.NOTIFICATION};
+            TLFacet owner = (TLFacet) property.getOwner();
+            boolean hasGlobalElementName =
+                (property.getType() != null) && (XsdCodegenUtils.getGlobalElementName( property.getType() ) != null);
+            boolean isOperationFacet = false;
+
+            for (TLFacetType facetType : soapFacetTypes) {
+                isOperationFacet |= (facetType == owner.getFacetType());
+            }
+
+            if (isOperationFacet && hasGlobalElementName) {
+                result = hasSoapHeaderEquiv( property );
+
+                if (!result && (property.getType() instanceof TLEquivalentOwner)) {
+                    result = hasSoapHeaderEquiv( (TLEquivalentOwner) property.getType() );
+                }
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Returns true if the given model property or its assigned type contains an equivalent string value of
+     * "SOAP_HEADER".
+     * 
+     * @param equivOwner
+     * @return boolean
+     */
+    private static boolean hasSoapHeaderEquiv(TLEquivalentOwner equivOwner) {
+        boolean result = false;
+
+        if (equivOwner != null) {
+            for (TLEquivalent equiv : equivOwner.getEquivalents()) {
+                String equivValue = equiv.getDescription();
+
+                if ((equivValue != null) && equivValue.equals( SOAP_HEADER_EQUIV )) {
+                    result = true;
+                    break;
+                }
+            }
+        }
+        return result;
     }
 
     /**

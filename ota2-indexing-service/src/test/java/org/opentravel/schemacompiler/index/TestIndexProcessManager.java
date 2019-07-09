@@ -19,7 +19,7 @@ package org.opentravel.schemacompiler.index;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.concurrent.TimeUnit;
@@ -29,8 +29,8 @@ import java.util.concurrent.TimeUnit;
  */
 public class TestIndexProcessManager extends AbstractIndexingServiceTest {
 
-    @BeforeClass
-    public static void setup() throws Exception {
+    @Before
+    public void setup() throws Exception {
         setupEnvironment();
     }
 

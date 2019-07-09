@@ -19,9 +19,11 @@ package org.opentravel.schemacompiler.codegen.wsdl;
 import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerContext;
 import org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts;
 import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
+import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
 import org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegate;
 import org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegateFactory;
+import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.OperationType;
 import org.opentravel.schemacompiler.model.TLDocumentation;
 import org.opentravel.schemacompiler.model.TLFacet;
@@ -81,6 +83,7 @@ public class TLOperationCodegenTransformer extends AbstractWsdlTransformer<TLOpe
         TMessage message = null;
 
         if ((opFacet != null) && facetDelegate.hasContent()) {
+            NamedEntity soapHeader = PropertyCodegenUtils.getSoapHeaderType( opFacet );
             TPart part = new TPart();
 
             part.setName( "body" );
@@ -90,9 +93,19 @@ public class TLOperationCodegenTransformer extends AbstractWsdlTransformer<TLOpe
             message.setName( getMessageName( opFacet ) );
             message.getPart().add( part );
 
-            if (wsdlBindings != null) {
+            if (soapHeader != null) {
+                // If a SOAP header element has been specified in the model, it overrides the message
+                // header that would otherwise be supplied from the binding style.
+                TPart headerPart = new TPart();
+
+                headerPart.setName( "header" );
+                headerPart.setElement( XsdCodegenUtils.getGlobalElementName( soapHeader ) );
+                message.getPart().add( 0, headerPart );
+
+            } else if (wsdlBindings != null) {
                 wsdlBindings.addMessageParts( message );
             }
+
             if (opFacet.getDocumentation() != null) {
                 ObjectTransformer<TLDocumentation,TDocumentation,CodeGenerationTransformerContext> docTransformer =
                     getTransformerFactory().getTransformer( TLDocumentation.class, TDocumentation.class );

@@ -20,8 +20,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
 import org.apache.activemq.broker.BrokerService;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.LibraryInfoListType;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.ObjectFactory;
@@ -47,13 +47,13 @@ import javax.xml.bind.Marshaller;
  */
 public class TestIndexingAgent extends AbstractIndexingServiceTest {
 
-    private static FileSystemXmlApplicationContext context;
-    private static BrokerService amqBroker;
-    private static IndexingAgent indexAgent;
-    private static JmsTemplate jmsService;
+    private FileSystemXmlApplicationContext context;
+    private BrokerService amqBroker;
+    private IndexingAgent indexAgent;
+    private JmsTemplate jmsService;
 
-    @BeforeClass
-    public static void setup() throws Exception {
+    @Before
+    public void setup() throws Exception {
         setupEnvironment();
 
         String configFileLocation = System.getProperty( IndexProcessManager.MANAGER_CONFIG_SYSPROP );
@@ -86,8 +86,8 @@ public class TestIndexingAgent extends AbstractIndexingServiceTest {
         jmsService = (JmsTemplate) context.getBean( "indexingJmsService" );
     }
 
-    @AfterClass
-    public static void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         indexAgent.shutdown( true );
         indexAgent.closeIndexWriter();
         amqBroker.stop();
@@ -159,9 +159,28 @@ public class TestIndexingAgent extends AbstractIndexingServiceTest {
         } );
     }
 
-    @SuppressWarnings("squid:S2925")
-    private static synchronized void waitForCommitMessage() {
-        assertNotNull( jmsService.receiveSelected( IndexingConstants.SELECTOR_COMMITMSG ) );
+    @SuppressWarnings({"squid:S2925", "squid:S2276"})
+    private synchronized void waitForCommitMessage() {
+        Message message = null;
+
+        // Under some test conditions, it may take some time for the JMS message to propagate. For
+        // this reason, we will try up to three times to receive the message before failing.
+        for (int i = 0; i < 3; i++) {
+            message = jmsService.receiveSelected( IndexingConstants.SELECTOR_COMMITMSG );
+
+            if (message == null) {
+                try {
+                    Thread.sleep( 1000 );
+
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+
+            } else {
+                break;
+            }
+        }
+        assertNotNull( message );
     }
 
 }

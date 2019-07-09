@@ -19,7 +19,7 @@ package org.opentravel.schemacompiler.index;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.jms.core.JmsTemplate;
@@ -34,8 +34,8 @@ public class TestIndexingAgentNegative extends AbstractIndexingServiceTest {
 
     private static final Object threadLock = new Object();
 
-    @BeforeClass
-    public static void setup() throws Exception {
+    @Before
+    public void setup() throws Exception {
         setupEnvironment();
     }
 

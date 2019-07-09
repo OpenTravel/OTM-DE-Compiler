@@ -462,6 +462,9 @@
             </Documentation>
             <Equivalent context="test">RequestResponseOperation-equivalent</Equivalent>
             <Request>
+		        <Element name="SimpleCore" repeat="0" type="SimpleCore">
+		            <Equivalent context="test">SOAP_HEADER</Equivalent>
+		        </Element>
                 <Element name="SampleBusinessObjectQueryFindByAge"
                     repeat="0" type="SampleBusinessObject_Query_FindByAge"/>
                 <Element name="SampleRequest" repeat="0" type="SampleBusinessObject"/>
