@@ -16,7 +16,6 @@
 
 package org.opentravel.schemacompiler.repository.impl;
 
-import org.opentravel.ns.ota2.release_v01_00.CompileOptionType;
 import org.opentravel.ns.ota2.release_v01_00.ObjectFactory;
 import org.opentravel.ns.ota2.release_v01_00.PreferredFacetType;
 import org.opentravel.ns.ota2.release_v01_00.PrincipalMembersType;
@@ -30,7 +29,6 @@ import org.opentravel.schemacompiler.loader.LibraryLoaderException;
 import org.opentravel.schemacompiler.loader.LoaderConstants;
 import org.opentravel.schemacompiler.loader.impl.FileValidationSource;
 import org.opentravel.schemacompiler.repository.Release;
-import org.opentravel.schemacompiler.repository.ReleaseCompileOptions;
 import org.opentravel.schemacompiler.repository.ReleaseMember;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
@@ -54,7 +52,6 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
@@ -339,9 +336,6 @@ public class ReleaseFileUtils extends AbstractFileUtils {
         ReleaseIdentityType releaseId = new ReleaseIdentityType();
         PrincipalMembersType principalMembers = new PrincipalMembersType();
         ReferencedMembersType referencedMembers = new ReferencedMembersType();
-        ReleaseCompileOptions compilerOptions = release.getCompileOptions();
-        Map<String,String> optionProps =
-            (compilerOptions == null) ? new ReleaseCompileOptions().toProperties() : compilerOptions.toProperties();
         ReleaseType jaxbRelease = new ReleaseType();
 
         releaseId.setBaseNamespace( release.getBaseNamespace() );
@@ -363,19 +357,6 @@ public class ReleaseFileUtils extends AbstractFileUtils {
 
         for (ReleaseMember member : release.getReferencedMembers()) {
             referencedMembers.getReleaseMember().add( transformToJaxbReleaseMember( member ) );
-        }
-
-        for (Entry<String,String> entry : optionProps.entrySet()) {
-            String optionKey = entry.getKey();
-            String optionValue = entry.getValue();
-
-            if (optionValue != null) {
-                CompileOptionType jaxbOption = new CompileOptionType();
-
-                jaxbOption.setKey( optionKey );
-                jaxbOption.setValue( optionValue );
-                jaxbRelease.getCompileOption().add( jaxbOption );
-            }
         }
 
         for (QName ownerName : release.getPreferredFacets().keySet()) {
@@ -425,7 +406,6 @@ public class ReleaseFileUtils extends AbstractFileUtils {
      */
     private Release transformToOtmRelease(ReleaseType jaxbRelease) {
         ReleaseIdentityType releaseId = jaxbRelease.getReleaseIdentity();
-        Map<String,String> compileOptions = new HashMap<>();
         Map<QName,QName> preferredFacets = new HashMap<>();
         Release release = new Release();
 
@@ -448,13 +428,6 @@ public class ReleaseFileUtils extends AbstractFileUtils {
                 release.getReferencedMembers().add( transformToOtmReleaseMember( jaxbMember ) );
             }
         }
-
-        for (CompileOptionType jaxbOption : jaxbRelease.getCompileOption()) {
-            if ((jaxbOption.getKey() != null) && (jaxbOption.getValue() != null)) {
-                compileOptions.put( jaxbOption.getKey(), jaxbOption.getValue() );
-            }
-        }
-        release.setCompileOptions( new ReleaseCompileOptions( compileOptions ) );
 
         for (PreferredFacetType jaxbPf : jaxbRelease.getPreferredFacet()) {
             QName ownerName = new QName( jaxbPf.getOwnerNamespace(), jaxbPf.getOwnerName() );

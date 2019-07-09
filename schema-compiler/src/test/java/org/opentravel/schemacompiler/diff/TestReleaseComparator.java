@@ -32,7 +32,6 @@ import org.opentravel.ns.ota2.release_v01_00.ReleaseStatus;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.repository.Release;
-import org.opentravel.schemacompiler.repository.ReleaseCompileOptions;
 import org.opentravel.schemacompiler.repository.ReleaseManager;
 import org.opentravel.schemacompiler.repository.ReleaseMember;
 import org.opentravel.schemacompiler.repository.RemoteRepository;
@@ -109,7 +108,6 @@ public class TestReleaseComparator extends AbstractDiffTest {
         release.setName( releaseName );
         release.setVersion( releaseVersion );
         release.setStatus( ReleaseStatus.DRAFT );
-        release.setCompileOptions( new ReleaseCompileOptions() );
 
         for (TLLibrary library : model.getUserDefinedLibraries()) {
             RepositoryItemImpl item = new RepositoryItemImpl();

@@ -29,16 +29,13 @@ import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLLibraryStatus;
 import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.repository.testutil.RepositoryTestUtils;
-import org.opentravel.schemacompiler.task.CommonCompilerTaskOptions;
 import org.opentravel.schemacompiler.task.CompileAllCompilerTask;
-import org.opentravel.schemacompiler.task.CompileAllTaskOptions;
 import org.opentravel.schemacompiler.util.URLUtils;
 import org.opentravel.schemacompiler.validate.FindingType;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.net.URL;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -437,7 +434,6 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
         ValidationFindings findings = new ValidationFindings();
         Project project = projectManager.loadProject( projectFile, findings );
         ProjectItem projectItem = findProjectItem( project, "library_1_p2_2_0_0.otm" );
-        ReleaseCompileOptions compileOptions = new ReleaseCompileOptions();
 
         // Verify that the release loaded correctly
         if (findings.hasFinding( FindingType.ERROR )) {
@@ -457,8 +453,6 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
         releaseManager.getRelease().setDefaultEffectiveDate( commit.getEffectiveOn() );
         releaseManager.addPrincipalMember( projectItem );
         releaseManager.loadReleaseModel( releaseFindings );
-        compileOptions.applyTaskOptions( getReleaseCompileOptions() );
-        releaseManager.getRelease().setCompileOptions( compileOptions );
         releaseManager.saveRelease();
         validateRelease( releaseManager, releaseFindings, 1 );
 
@@ -939,80 +933,6 @@ public abstract class TestRepositoryFunctions extends RepositoryTestBase {
         if (DEBUG) {
             System.out.println( String.format( message, getClass().getSimpleName() ) );
         }
-    }
-
-    protected CompileAllTaskOptions getReleaseCompileOptions() {
-        return new CompileAllTaskOptions() {
-            public String getResourceBaseUrl() {
-                return "http://www.opentravel.org/resources";
-            }
-
-            public URL getServiceLibraryUrl() {
-                return null;
-            }
-
-            public String getServiceEndpointUrl() {
-                return "http://www.opentravel.org/services";
-            }
-
-            public boolean isSuppressOptionalFields() {
-                return false;
-            }
-
-            public boolean isGenerateMaxDetailsForExamples() {
-                return true;
-            }
-
-            public boolean isGenerateExamples() {
-                return true;
-            }
-
-            public Integer getExampleMaxRepeat() {
-                return 2;
-            }
-
-            public Integer getExampleMaxDepth() {
-                return 2;
-            }
-
-            public String getExampleContext() {
-                return null;
-            }
-
-            public String getOutputFolder() {
-                return null;
-            }
-
-            public String getCatalogLocation() {
-                return null;
-            }
-
-            public boolean isSuppressOtmExtensions() {
-                return false;
-            }
-
-            public boolean isCompileSwagger() {
-                return true;
-            }
-
-            public boolean isCompileServices() {
-                return true;
-            }
-
-            public boolean isCompileSchemas() {
-                return true;
-            }
-
-            public boolean isCompileJsonSchemas() {
-                return true;
-            }
-
-            public boolean isCompileHtml() {
-                return true;
-            }
-
-            public void applyTaskOptions(CommonCompilerTaskOptions taskOptions) {}
-        };
     }
 
 }

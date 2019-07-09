@@ -1093,9 +1093,6 @@ public class ReleaseManager {
                 clone.getReferencedMembers().add( cloneMember( member ) );
             }
 
-            if (release.getCompileOptions() != null) {
-                clone.setCompileOptions( new ReleaseCompileOptions( release.getCompileOptions().toProperties() ) );
-            }
             if (release.getPreferredFacets() != null) {
                 clone.setPreferredFacets( new HashMap<>( release.getPreferredFacets() ) );
             }

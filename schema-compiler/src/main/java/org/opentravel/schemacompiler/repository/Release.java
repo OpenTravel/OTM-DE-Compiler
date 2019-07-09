@@ -49,7 +49,6 @@ public class Release {
     private List<ReleaseMember> principalMembers = new ArrayList<>();
     private List<ReleaseMember> referencedMembers = new ArrayList<>();
     private Date defaultEffectiveDate;
-    private ReleaseCompileOptions compileOptions = new ReleaseCompileOptions();
     private Map<QName,QName> preferredFacets = new HashMap<>();
 
     /**
@@ -216,24 +215,6 @@ public class Release {
      */
     public void setDefaultEffectiveDate(Date defaultEffectiveDate) {
         this.defaultEffectiveDate = defaultEffectiveDate;
-    }
-
-    /**
-     * Returns the compiler options for the release.
-     *
-     * @return ReleaseCompileOptions
-     */
-    public ReleaseCompileOptions getCompileOptions() {
-        return compileOptions;
-    }
-
-    /**
-     * Assigns the compiler options for the release.
-     *
-     * @param compileOptions the compiler options to assign
-     */
-    public void setCompileOptions(ReleaseCompileOptions compileOptions) {
-        this.compileOptions = compileOptions;
     }
 
     /**

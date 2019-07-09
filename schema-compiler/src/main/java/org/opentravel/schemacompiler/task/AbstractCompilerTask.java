@@ -25,7 +25,6 @@ import org.opentravel.schemacompiler.codegen.CodeGeneratorFactory;
 import org.opentravel.schemacompiler.codegen.impl.LibraryFilenameBuilder;
 import org.opentravel.schemacompiler.codegen.util.ResourceCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
-import org.opentravel.schemacompiler.ioc.CompilerExtensionRegistry;
 import org.opentravel.schemacompiler.loader.LibraryInputSource;
 import org.opentravel.schemacompiler.loader.LibraryModelLoader;
 import org.opentravel.schemacompiler.loader.impl.CatalogLibraryNamespaceResolver;
@@ -225,9 +224,6 @@ public abstract class AbstractCompilerTask implements CommonCompilerTaskOptions 
                 }
             }
         }
-        CompilerExtensionRegistry
-            .setActiveExtension( releaseManager.getRelease().getCompileOptions().getBindingStyle() );
-        applyTaskOptions( releaseManager.getRelease().getCompileOptions() );
         setOutputFolder( targetFolder );
         return compileOutput( userDefinedLibraries, legacySchemas );
     }
