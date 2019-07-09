@@ -608,6 +608,7 @@ public class PropertyCodegenUtils {
     private static void addLocalProperties(TLFacet facet, List<TLProperty> propertyList,
         Set<NamedEntity> complexInheritanceRoots, Map<String,Set<NamedEntity>> simpleInheritanceRoots) {
         List<TLProperty> localProperties = new ArrayList<>( facet.getElements() );
+        Set<NamedEntity> localInheritanceRoots = new HashSet<>();
 
         // We are traversing upward in the inheritance hierarchy, so we must pre-pend
         // properties onto the list in the reverse order of their declarations in order
@@ -622,7 +623,8 @@ public class PropertyCodegenUtils {
                 propertyList.add( 0, property );
 
             } else {
-                addLocalProperty( property, propertyList, complexInheritanceRoots, simpleInheritanceRoots );
+                addLocalProperty( property, propertyList, complexInheritanceRoots, localInheritanceRoots,
+                    simpleInheritanceRoots );
             }
         }
     }
@@ -633,11 +635,14 @@ public class PropertyCodegenUtils {
      * 
      * @param property the property to be added (if it meets the required conditions)
      * @param propertyList the list of inherited properties being constructed
-     * @param complexInheritanceRoots collection of complex substitution group properties discovered so far
+     * @param complexInheritanceRoots collection of all inherited complex substitution group properties discovered so
+     *        far
+     * @param localInheritanceRoots collection of substitution group properties discovered in the current local facet
      * @param simpleInheritanceRoots map of simple inheritance root properties discovered so far
      */
     private static void addLocalProperty(TLProperty property, List<TLProperty> propertyList,
-        Set<NamedEntity> complexInheritanceRoots, Map<String,Set<NamedEntity>> simpleInheritanceRoots) {
+        Set<NamedEntity> complexInheritanceRoots, Set<NamedEntity> localInheritanceRoots,
+        Map<String,Set<NamedEntity>> simpleInheritanceRoots) {
         TLPropertyType propertyType = resolvePropertyType( property.getType() );
 
         if (PropertyCodegenUtils.hasGlobalElement( propertyType )) {
@@ -646,9 +651,15 @@ public class PropertyCodegenUtils {
             // Properties whose types are members of an inheritance hierarchy should be
             // skipped if they were eclipsed by lower-level properties of the owner's
             // hierarchy
-            if ((inheritanceRoot == null) || !complexInheritanceRoots.contains( inheritanceRoot )) {
+            if ((inheritanceRoot == null) || localInheritanceRoots.contains( inheritanceRoot )
+                || !complexInheritanceRoots.contains( inheritanceRoot )) {
+                // If the property is already defined locally, it is a duplicate element
+                // that needs to be included. If the property is a duplicate in the inheritance
+                // set, but does not occur locally, it is eclipsed by the property that was
+                // previously discovered.
                 if (inheritanceRoot != null) {
                     complexInheritanceRoots.add( inheritanceRoot );
+                    localInheritanceRoots.add( inheritanceRoot );
                 }
                 propertyList.add( 0, property );
             }
