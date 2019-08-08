@@ -53,7 +53,18 @@
 		<servlet-name>console</servlet-name>
 		<url-pattern>/console/*</url-pattern>
 	</servlet-mapping>
-	
+
+	<filter>
+		<filter-name>BasicAuthFilter</filter-name>
+		<filter-class>org.opentravel.schemacompiler.repository.BasicAuthFilter</filter-class>
+	</filter>
+
+	<filter-mapping>
+		<filter-name>BasicAuthFilter</filter-name>
+		<url-pattern>/console/*</url-pattern>
+		<servlet-name>console</servlet-name>
+	</filter-mapping>
+
 	<welcome-file-list>
 		<welcome-file>console/index.html</welcome-file>
 	</welcome-file-list>

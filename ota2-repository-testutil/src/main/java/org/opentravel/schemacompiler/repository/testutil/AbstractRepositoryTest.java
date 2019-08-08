@@ -43,8 +43,8 @@ public abstract class AbstractRepositoryTest {
     private static final String TEST_WORKSPACE_LOCATION = "/target/test-workspace/";
     private static final String USER_DIR = "user.dir";
 
-    private static final String TESTUSER_ID = "testuser";
-    private static final String TESTUSER_CREDENTIAL = "password";
+    protected static final String TESTUSER_ID = "testuser";
+    protected static final String TESTUSER_CREDENTIAL = "password";
 
     protected static ThreadLocal<RepositoryManager> repositoryManager = new ThreadLocal<>();
     protected static ThreadLocal<Repository> testRepository = new ThreadLocal<>();

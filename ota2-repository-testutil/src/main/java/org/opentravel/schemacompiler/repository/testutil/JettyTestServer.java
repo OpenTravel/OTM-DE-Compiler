@@ -49,9 +49,12 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.servlet.DispatcherType;
+import javax.servlet.Filter;
 import javax.servlet.Servlet;
 import javax.servlet.jsp.JspFactory;
 
@@ -68,6 +71,7 @@ public class JettyTestServer {
     @SuppressWarnings("squid:S1075")
     private static final String SEARCH_INDEX_PATH = "/search-index";
     private static final String REPOSITORY_SERVLET_CLASS = "org.opentravel.schemacompiler.repository.RepositoryServlet";
+    private static final String AUTH_FILTER_CLASS = "org.opentravel.schemacompiler.repository.BasicAuthFilter";
     private static final String USER_DIR = "user.dir";
 
     private static Log log = LogFactory.getLog( JettyTestServer.class );
@@ -169,16 +173,21 @@ public class JettyTestServer {
      * @param context the servlet context to be configured
      * @throws IOException thrown if there was a problem scanning for or loading a TLD
      * @throws SAXException thrown if there was a problem parsing a TLD
+     * @throws ClassNotFoundException thrown if the required servlet filter class is not defined on the local classpath
      */
-    private void configureConsoleSupport(ServletContextHandler context) throws IOException, SAXException {
+    @SuppressWarnings("unchecked")
+    private void configureConsoleSupport(ServletContextHandler context)
+        throws IOException, SAXException, ClassNotFoundException {
         File targetTemp = new File( System.getProperty( USER_DIR ), "target/jsp-temp" );
         ServletHolder holderDefault = new ServletHolder( "default", new DefaultServlet() );
         ServletHolder holderJsp = new ServletHolder( "jsp", new JspServlet() );
+        Class<? extends Filter> authFilterClass = (Class<? extends Filter>) Class.forName( AUTH_FILTER_CLASS );
         TldScanner scanner = new TldScanner( context.getServletContext(), true, false, true );
         DispatcherServlet mvcServlet = new DispatcherServlet();
 
         mvcServlet.setContextConfigLocation( "/WEB-INF/console-servlet.xml" );
         context.addServlet( new ServletHolder( "console", mvcServlet ), "/console/*" );
+        context.addFilter( authFilterClass, "/console/*", EnumSet.of( DispatcherType.REQUEST ) );
 
         targetTemp.mkdirs();
         context.setAttribute( "javax.servlet.context.tempdir", targetTemp );

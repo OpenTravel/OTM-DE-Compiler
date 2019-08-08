@@ -301,7 +301,7 @@ public class DefaultRepositorySecurityManager implements RepositorySecurityManag
      * @return String[]
      * @throws RepositorySecurityException thrown if the format of the authorization header is invalid
      */
-    private String[] getAuthorizationCredentials(String authorizationHeader) throws RepositorySecurityException {
+    public static String[] getAuthorizationCredentials(String authorizationHeader) throws RepositorySecurityException {
         if ((authorizationHeader != null) && authorizationHeader.startsWith( "Basic " )) {
             String credentials = new String( Base64.decodeBase64( authorizationHeader.substring( 6 ) ) );
             int colonIdx = credentials.indexOf( ':' );

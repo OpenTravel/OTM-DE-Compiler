@@ -62,8 +62,39 @@ public class LoginController extends BaseController {
     @PostMapping({"/", "/login.html", "/login.htm"})
     public String login(@RequestParam("userid") String userId, @RequestParam("password") String password,
         HttpSession session, Model model, RedirectAttributes redirectAttrs) {
+        String targetPage = REDIRECT_INDEX;
+
+        if (!authenticateUser( userId, password, session )) {
+            model.addAttribute( LOGIN_ERROR, true );
+            model.addAttribute( USER_ID, userId );
+            targetPage = new SearchController().defaultSearchPage( session, model );
+        }
+        return targetPage;
+    }
+
+    /**
+     * Returns true if a user has already been authenticated for the given session.
+     * 
+     * @param session the HTTP session to check for authentication
+     * @return boolean
+     */
+    public static boolean isAuthenticated(HttpSession session) {
+        return (session != null) && (session.getAttribute( USER ) != null);
+    }
+
+    /**
+     * Authenticates the given user credentials. If successful, the user's identity will be associated with the HTTP
+     * session provided and true will be returned. Otherwise, this method will return false.
+     * 
+     * @param userId the user ID to authenticate
+     * @param password the user's password to be authenticated
+     * @param session the HTTP session with which the authenticated user will be associated
+     * @return boolean
+     */
+    public static boolean authenticateUser(String userId, String password, HttpSession session) {
         RepositorySecurityManager securityManager = RepositoryComponentFactory.getDefault().getSecurityManager();
         UserPrincipal user = null;
+        boolean result = false;
 
         if ((userId != null) && (userId.length() > 0) && (password != null) && (password.length() > 0)) {
             try {
@@ -77,13 +108,9 @@ public class LoginController extends BaseController {
         if ((user != null) && !user.getUserId().equals( UserPrincipal.ANONYMOUS_USER_ID )) {
             session.setAttribute( USER, user );
             session.setAttribute( ADMIN_AUTHORIZED, securityManager.isAdministrator( user ) );
-            return REDIRECT_INDEX;
-
-        } else { // authentication failed
-            model.addAttribute( LOGIN_ERROR, true );
-            model.addAttribute( USER_ID, userId );
-            return new SearchController().defaultSearchPage( session, model );
+            result = true;
         }
+        return result;
     }
 
     /**
