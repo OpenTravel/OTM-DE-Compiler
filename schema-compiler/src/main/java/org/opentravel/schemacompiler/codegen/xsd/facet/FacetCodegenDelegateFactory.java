@@ -28,6 +28,7 @@ import org.opentravel.schemacompiler.model.TLFacetType;
 import org.opentravel.schemacompiler.model.TLListFacet;
 import org.opentravel.schemacompiler.model.TLOperation;
 import org.opentravel.schemacompiler.model.TLSimpleFacet;
+import org.opentravel.schemacompiler.util.SchemaCompilerRuntimeException;
 
 /**
  * Factory used to determine which <code>FacetCodegenDelegate</code> should be used to generate artifacts for a
@@ -61,6 +62,11 @@ public class FacetCodegenDelegateFactory {
     public <F extends TLAbstractFacet> FacetCodegenDelegate<F> getDelegate(F facetInstance) {
         TLFacetOwner facetOwner = facetInstance.getOwningEntity();
         FacetCodegenDelegate<F> delegate = null;
+
+        if (facetInstance.getFacetType() == null) {
+            throw new SchemaCompilerRuntimeException(
+                "Facet type not specified for facet: " + facetInstance.getLocalName() );
+        }
 
         if (facetOwner instanceof TLBusinessObject) {
             delegate = getBusinessObjectFacet( facetInstance );
