@@ -41,10 +41,18 @@ public class MajorVersionEntityGroup implements Comparable<MajorVersionEntityGro
      * @param versionScheme the version scheme to be applied for all members of this group
      */
     public MajorVersionEntityGroup(String majorVersionNamespace, VersionScheme versionScheme) {
-        this.baseNamespace = versionScheme.getBaseNamespace( majorVersionNamespace );
-        this.majorVersion = versionScheme.getVersionIdentifier( majorVersionNamespace );
-        this.majorVersionOrdinal = getMajorVersionOrdinal( majorVersion );
-        this.majorVersionNamespace = majorVersionNamespace;
+        if (versionScheme.isValidNamespace( majorVersionNamespace )) {
+            this.baseNamespace = versionScheme.getBaseNamespace( majorVersionNamespace );
+            this.majorVersion = versionScheme.getVersionIdentifier( majorVersionNamespace );
+            this.majorVersionOrdinal = getMajorVersionOrdinal( majorVersion );
+            this.majorVersionNamespace = majorVersionNamespace;
+
+        } else {
+            this.baseNamespace = majorVersionNamespace;
+            this.majorVersion = "0";
+            this.majorVersionOrdinal = 0;
+            this.majorVersionNamespace = majorVersionNamespace;
+        }
     }
 
     /**
