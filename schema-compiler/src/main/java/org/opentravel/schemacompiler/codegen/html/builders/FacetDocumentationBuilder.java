@@ -152,8 +152,10 @@ public class FacetDocumentationBuilder extends AttributeOwnerDocumentationBuilde
 
             while (ext != null) {
                 TLFacet extFacet = FacetCodegenUtils.getFacetOfType( ext, TLFacetType.SUMMARY );
-
-                if (extFacet.declaresContent()) {
+                // 11/15/2019 dmh - added null check to prevent NPE
+                if (extFacet == null)
+                    ext = null;
+                else if (extFacet.declaresContent()) {
                     superFacet = extFacet;
                     ext = null;
                 } else {

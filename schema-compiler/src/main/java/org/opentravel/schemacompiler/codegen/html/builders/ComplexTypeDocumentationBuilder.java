@@ -50,7 +50,8 @@ public abstract class ComplexTypeDocumentationBuilder<T extends TLFacetOwner & T
     }
 
     public List<String> getAliases() {
-        return Collections.unmodifiableList( aliases );
+        // 11/15/2019 dmh - added null test
+        return Collections.unmodifiableList( aliases != null ? aliases : new ArrayList<>() );
     }
 
 
