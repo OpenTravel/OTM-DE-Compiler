@@ -22,7 +22,14 @@ import static org.junit.Assert.assertNotNull;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.lang.management.ManagementFactory;
+import java.rmi.registry.LocateRegistry;
 import java.util.concurrent.TimeUnit;
+
+import javax.management.MBeanServer;
+import javax.management.remote.JMXConnectorServer;
+import javax.management.remote.JMXConnectorServerFactory;
+import javax.management.remote.JMXServiceURL;
 
 /**
  * Verifies the functions of the <code>IndexProcessManager</code> class.
@@ -60,7 +67,36 @@ public class TestIndexProcessManager extends AbstractIndexingServiceTest {
         assertNotNull( IndexProcessManager.getAgentProcess() );
         assertFalse( agentProcess == IndexProcessManager.getAgentProcess() );
 
-        // Gracefully shut down the process manager
+        // Gracefully shut down the process manager using the MBean hook
+        new IndexingManagerStats().shutdown();
+        pmThread.join( 5000 );
+    }
+
+    @Test
+    public void testRemoteProcessShutdown() throws Exception {
+        JMXServiceURL jmxUrl = new JMXServiceURL( "service:jmx:rmi:///jndi/rmi://localhost:12001/jmxrmi" );
+        MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+        JMXConnectorServer jmxServer;
+
+        // Start a JMX server that will allow us to call the shutdown hook as a remote service
+        LocateRegistry.createRegistry( 12001 );
+        jmxServer = JMXConnectorServerFactory.newJMXConnectorServer( jmxUrl, null, mbs );
+        jmxServer.start();
+
+        // Launch the Indexing Manager process
+        Thread pmThread = new Thread( () -> {
+            IndexProcessManager.main( new String[0] );
+        } );
+
+        // Start the process manager and wait for everything to be up and running
+        IndexProcessManager.debugMode = true;
+        pmThread.start();
+
+        synchronized (IndexProcessManager.class) {
+            IndexProcessManager.class.wait( 5000 ); // wait for up to five seconds
+        }
+
+        // Shutdown the service using the command-line utility that invokes the remote JMX service
         ShutdownIndexingService.main( new String[0] );
         pmThread.join( 5000 );
     }

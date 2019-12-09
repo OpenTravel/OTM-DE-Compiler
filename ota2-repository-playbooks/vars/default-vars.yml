@@ -17,7 +17,8 @@
 base_dir: /opt/otm-repository
 tomcat_port: "8080"
 tomcat_dir: "{{base_dir}}/tomcat"
-indexing_jmx_port: "1099"
+manager_jmx_port: "11098"
+agent_jmx_port: "11099"
 indexing_activemq_port: "61616"
 indexsvc_dir: "{{base_dir}}/ota2-indexing-service"
 svnrepo_dir: "{{base_dir}}/otm/otm_svnrepo"

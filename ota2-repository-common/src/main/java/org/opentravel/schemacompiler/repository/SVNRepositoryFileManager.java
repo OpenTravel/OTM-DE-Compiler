@@ -18,6 +18,7 @@ package org.opentravel.schemacompiler.repository;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.opentravel.schemacompiler.jmx.OTMRepositoryStats;
 import org.opentravel.schemacompiler.util.FileUtils;
 import org.tmatesoft.svn.core.SVNCancelException;
 import org.tmatesoft.svn.core.SVNDepth;
@@ -190,8 +191,10 @@ public class SVNRepositoryFileManager extends RepositoryFileManager {
                 false );
 
             log.info( "Done with OTA2.0 repository initialization.: " + repositoryLocation.getAbsolutePath() );
+            OTMRepositoryStats.getInstance().setSvnServiceAvailable( true );
 
         } catch (SVNException e) {
+            OTMRepositoryStats.getInstance().setSvnUserConfigOk( false );
             throw new RepositoryException( "Error during repository file system initialization: " + e.getMessage(), e );
         }
     }
@@ -221,15 +224,18 @@ public class SVNRepositoryFileManager extends RepositoryFileManager {
                     credentialsProps.load( is );
                     userId = credentialsProps.getProperty( "svn.userid" );
                     password = credentialsProps.getProperty( "svn.password" );
+                    OTMRepositoryStats.getInstance().setSvnUserConfigOk( true );
 
                 } catch (IOException e) {
                     log.warn( "SVN credentials file unreadable (using default credentials): "
                         + svnCredentialsFile.getAbsolutePath() );
+                    OTMRepositoryStats.getInstance().setSvnUserConfigOk( false );
                 }
 
             } else {
                 log.warn( "SVN credentials file not found (using default credentials): "
                     + svnCredentialsFile.getAbsolutePath() );
+                OTMRepositoryStats.getInstance().setSvnUserConfigOk( false );
             }
         }
 

@@ -38,8 +38,8 @@ public class ShutdownIndexingService {
      */
     public static void main(String[] args) {
         try {
-            ObjectName name = new ObjectName( IndexProcessManager.MBEAN_NAME );
-            JMXServiceURL jmxUrl = new JMXServiceURL( IndexProcessManager.getJmxServerUrl() );
+            ObjectName name = new ObjectName( IndexingManagerStats.MBEAN_NAME );
+            JMXServiceURL jmxUrl = new JMXServiceURL( getJmxServerUrl() );
             JMXConnector jmxc;
 
             log.info( "Shutting down index process manager..." );
@@ -50,6 +50,15 @@ public class ShutdownIndexingService {
         } catch (Exception e) {
             log.error( "Error attempting to shut down indexing service.", e );
         }
+    }
+
+    /**
+     * Returns the local host URL where the JMX server can be accessed.
+     * 
+     * @return String
+     */
+    public static String getJmxServerUrl() {
+        return "service:jmx:rmi:///jndi/rmi://localhost:" + IndexProcessManager.getJmxPort() + "/jmxrmi";
     }
 
 }

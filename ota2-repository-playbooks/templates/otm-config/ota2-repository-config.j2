@@ -11,6 +11,10 @@
 		<constructor-arg value="{{otmrepo_dir}}" />
 	</bean>
 	
+	<bean id="svnRepositoryLocation" class="java.io.File" scope="singleton">
+		<constructor-arg value="{{svnrepo_dir}}" />
+	</bean>
+	
 	<bean id="searchIndexLocation" class="java.io.File" scope="singleton">
 		<constructor-arg value="{{searchindex_dir}}" />
 	</bean>

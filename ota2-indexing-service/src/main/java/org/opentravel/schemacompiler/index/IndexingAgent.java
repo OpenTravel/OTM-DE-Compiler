@@ -39,6 +39,7 @@ import org.springframework.jms.core.MessageCreator;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
 import java.util.List;
 
 import javax.jms.Connection;
@@ -46,6 +47,12 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.Session;
 import javax.jms.TextMessage;
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.MBeanRegistrationException;
+import javax.management.MBeanServer;
+import javax.management.MalformedObjectNameException;
+import javax.management.NotCompliantMBeanException;
+import javax.management.ObjectName;
 
 /**
  * Main entry point for the agent that handles indexing requests in response to messages received from the remote
@@ -171,6 +178,29 @@ public class IndexingAgent {
     }
 
     /**
+     * Registers the MBeans that enable monitoring for the agent process.
+     * 
+     * @throws IOException thrown if the JMX service cannot be launched
+     */
+    private void configureMonitoring() throws IOException {
+        try {
+            MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+            ObjectName name = new ObjectName( IndexingAgentStats.MBEAN_NAME );
+
+            if (!mbs.isRegistered( name )) {
+                IndexingAgentStats agentStats = IndexingAgentStats.getInstance();
+
+                agentStats.setSearchIndexLocation( searchIndexLocation );
+                mbs.registerMBean( agentStats, name );
+            }
+
+        } catch (MalformedObjectNameException | InstanceAlreadyExistsException | MBeanRegistrationException
+            | NotCompliantMBeanException e) {
+            throw new IOException( e );
+        }
+    }
+
+    /**
      * Returns the <code>JmsTemplate</code> being used by this service for messaging (intended for testing purposes
      * only).
      * 
@@ -207,11 +237,13 @@ public class IndexingAgent {
         Thread jobThread = new Thread( this::watchForIndexingJobs, "Job Indexing Thread" );
         boolean initialStartup = true;
 
+        configureMonitoring();
         checkJmsAvailable();
         jobThread.start();
         running = true;
 
         log.info( "Indexing agent started for location: " + searchIndexLocation.getAbsolutePath() );
+        IndexingAgentStats.getInstance().setAvailable( true );
 
         while (!shutdownRequested) {
             try {
@@ -240,6 +272,7 @@ public class IndexingAgent {
                 }
             }
         }
+        IndexingAgentStats.getInstance().setAvailable( false );
 
         // Wait for up to 30s the background indexing job thread to complete
         try {
@@ -361,6 +394,7 @@ public class IndexingAgent {
         if (!deleteIndex) {
             factory.getFacetService().getIndexBuilder().performIndexingAction();
         }
+        IndexingAgentStats.getInstance().libraryIndexed();
     }
 
     /**

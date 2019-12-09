@@ -155,6 +155,10 @@
         src: "{{base_dir}}/{{tomcat_archive}}"
         dest: "{{tomcat_dir}}"
         state: link
+    - name: Create setenv.sh file to enable remote monitoring via JMX
+      template:
+        src: "templates/otm-config/setenv.j2"
+        dest: "{{tomcat_dir}}/bin/setenv.sh"
     - name: Modify shell script permissions to allow execution
       shell: "chmod 754 {{tomcat_dir}}/bin/*.sh"
       args:
@@ -205,6 +209,13 @@
       unarchive:
         src: "{{controller_temp_dir}}/ota2-indexing-service.zip"
         dest: "{{indexsvc_dir}}/.."
+    - name: Copy ota2-indexing-service startup script
+      template:
+        src: "templates/indexing-config/{{item.src}}"
+        dest: "{{indexsvc_dir}}/{{item.dest}}"
+        mode: 0755
+      with_items:
+      - { src: startup.j2, dest: startup.sh }
     - name: Copy ota2-indexing-service configuration files
       template:
         src: "templates/indexing-config/{{item.src}}"

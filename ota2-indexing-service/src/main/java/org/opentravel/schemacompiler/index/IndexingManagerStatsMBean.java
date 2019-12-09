@@ -16,12 +16,33 @@
 
 package org.opentravel.schemacompiler.index;
 
+import org.opentravel.schemacompiler.jmx.OTMBasicStatsMBean;
+
 /**
- * MBean interface for the <code>IndexProcessManager</code>.
- * 
- * @author S. Livezey
+ * MBean interface for monitoring and management of the <code>IndexProcessManager</code> process.
  */
-public interface IndexProcessManagerMBean {
+public interface IndexingManagerStatsMBean extends OTMBasicStatsMBean {
+
+    /**
+     * Returns true when the indexing manager process is available.
+     * 
+     * @return boolean
+     */
+    public boolean isAvailable();
+
+    /**
+     * Returns the number of minutes since the last indexing agent process was started.
+     * 
+     * @return long
+     */
+    public long getMinutesSinceLastAgentStartup();
+
+    /**
+     * Returns the number of indexing agent restarts that have occurred within the last 15 minutes.
+     * 
+     * @return int
+     */
+    public int getRecentAgentRestartCount();
 
     /**
      * JMX hook to shutdown the <code>IndexProcessManager</code> and any associated indexing agent child processes.

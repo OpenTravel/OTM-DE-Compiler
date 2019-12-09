@@ -12,6 +12,11 @@
 		<constructor-arg value="/target/test-workspace/#{systemProperties['test.class']}/test-repository" />
 	</bean>
 	
+	<bean id="svnRepositoryLocation" class="java.io.File" scope="singleton">
+		<constructor-arg value="#{systemProperties['user.dir']}" />
+		<constructor-arg value="/target/test-workspace/#{systemProperties['test.class']}/svn-repository" />
+	</bean>
+	
 	<bean id="searchIndexLocation" class="java.io.File" scope="singleton">
 		<constructor-arg value="#{systemProperties['user.dir']}" />
 		<constructor-arg value="/target/test-workspace/#{systemProperties['test.class']}/search-index" />

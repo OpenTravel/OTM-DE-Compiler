@@ -22,11 +22,15 @@ import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
 import org.opentravel.schemacompiler.index.FreeTextSearchServiceFactory;
+import org.opentravel.schemacompiler.jmx.OTMRepositoryStats;
 import org.opentravel.schemacompiler.notification.NotificationServiceFactory;
 import org.opentravel.schemacompiler.subscription.SubscriptionManager;
 
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
 
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
 import javax.servlet.ServletException;
 
 /**
@@ -71,6 +75,8 @@ public class RepositoryServlet extends ServletContainer {
             sManager.startNotificationListener();
         }
         NotificationServiceFactory.startup();
+        initializeJmxMonitoring();
+        OTMRepositoryStats.getInstance().setRepositoryAvailable( true );
     }
 
     /**
@@ -98,6 +104,27 @@ public class RepositoryServlet extends ServletContainer {
 
         // Shut down the notification service
         NotificationServiceFactory.shutdown();
+        OTMRepositoryStats.getInstance().setRepositoryAvailable( false );
+    }
+
+    /**
+     * Register the <code>OTMRepositoryStats</code> MBean so the repository can be monitored via JMX.
+     */
+    private void initializeJmxMonitoring() {
+        try {
+            MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+            RepositoryComponentFactory rcf = RepositoryComponentFactory.getDefault();
+            ObjectName repoStatsName = new ObjectName( OTMRepositoryStats.MBEAN_NAME );
+            OTMRepositoryStats repoStats = OTMRepositoryStats.getInstance();
+
+            repoStats.setRepositoryLocation( rcf.getRepositoryLocation() );
+            repoStats.setSearchIndexLocation( rcf.getSearchIndexLocation() );
+            repoStats.setSvnServerLocation( rcf.getSvnRepositoryLocation() );
+            mbs.registerMBean( repoStats, repoStatsName );
+
+        } catch (Exception e) {
+            log.warn( "Error registering OTMRepositoryStats MBean.", e );
+        }
     }
 
 }

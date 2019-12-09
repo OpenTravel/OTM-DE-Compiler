@@ -55,7 +55,7 @@ public abstract class AbstractIndexingServiceTest {
         try (Writer out = new FileWriter( indexPropsFile )) {
             indexProps.put( "activemq.connector.port", "62626" );
             indexProps.put( "activemq.data", amqDataFolder.getAbsolutePath() );
-            indexProps.put( "org.opentravel.index.manager.jmx.port", "1199" );
+            indexProps.put( "org.opentravel.index.manager.jmx.port", "12001" );
             indexProps.put( "org.opentravel.index.agent.repositoryLocation", repositoryFolder.getAbsolutePath() );
             indexProps.put( "org.opentravel.index.agent.searchIndexLocation", searchIndexFolder.getAbsolutePath() );
             indexProps.put( "org.opentravel.index.agent.jvmOpts", "-Xms256M -Xmx1024M -XX:MaxPermSize=256M" );

@@ -39,6 +39,7 @@ public class RepositoryComponentFactory {
 
     private static final String REPOSITORY_LOCATION_KEY = "repositoryLocation";
     private static final String SEARCH_INDEX_LOCATION_KEY = "searchIndexLocation";
+    private static final String SVN_REPOSITORY_LOCATION_KEY = "svnRepositoryLocation";
     private static final String REPOSITORY_MANAGER_KEY = "repositoryManager";
     private static final String SECURITY_MANAGER_KEY = "securityManager";
     private static final String AUTHENTICATION_PROVIDER_KEY = "authenticationProvider";
@@ -131,6 +132,24 @@ public class RepositoryComponentFactory {
      */
     public File getSearchIndexLocation() {
         return (File) appContext.getBean( SEARCH_INDEX_LOCATION_KEY );
+    }
+
+    /**
+     * Returns the root folder location of the Subversion server repository as defined in the service configuration
+     * file.
+     * 
+     * @return File
+     */
+    public File getSvnRepositoryLocation() {
+        File svnLocation = null;
+
+        try {
+            svnLocation = (File) appContext.getBean( SVN_REPOSITORY_LOCATION_KEY );
+
+        } catch (NoSuchBeanDefinitionException e) {
+            // Ignore error and return null
+        }
+        return svnLocation;
     }
 
     /**

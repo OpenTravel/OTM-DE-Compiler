@@ -30,7 +30,6 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.lang.ProcessBuilder.Redirect;
 import java.lang.management.ManagementFactory;
-import java.rmi.registry.LocateRegistry;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -41,10 +40,6 @@ import javax.management.MBeanServer;
 import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
-import javax.management.StandardMBean;
-import javax.management.remote.JMXConnectorServer;
-import javax.management.remote.JMXConnectorServerFactory;
-import javax.management.remote.JMXServiceURL;
 
 
 /**
@@ -58,8 +53,6 @@ public class IndexProcessManager {
 
     public static final int FATAL_EXIT_CODE = 69; // service unavailable exit code
 
-    public static final String MBEAN_NAME = "org.opentravel.mbeans:type=IndexProcessManagerMBean";
-
     public static final String MANAGER_CONFIG_SYSPROP = "ota2.index.manager.config";
     public static final String MANAGER_JMXPORT_BEANID = "jmxPort";
     public static final String AGENT_CONFIG_SYSPROP = "ota2.index.agent.config";
@@ -70,13 +63,12 @@ public class IndexProcessManager {
 
     private static Log log = LogFactory.getLog( IndexProcessManager.class );
 
-    private static int jmxPort = -1;
     private static BrokerService amqBroker;
-    private static JMXConnectorServer jmxServer;
     private static boolean shutdownRequested = false;
     private static Thread launcherThread;
     private static AgentLauncher launcher;
     private static String agentJvmOpts;
+    private static int jmxPort = -1;
     private static boolean running;
 
     /**
@@ -89,18 +81,16 @@ public class IndexProcessManager {
             running = false;
             initializeContext();
             startActiveMQBroker();
-            startJMXServer();
+            configureMonitoring();
             running = true;
             log.info( "Indexing process manager started." );
 
             launcher = new AgentLauncher();
             launcherThread = new Thread( launcher );
             shutdownRequested = false;
-            launcherThread.start();
 
-            while (launcher.getAgentProcess() != null) {
-                sleep1();
-            }
+            launcherThread.start();
+            launcherThread.join();
 
         } catch (Exception e) {
             log.error( "Error launching index process manager.", e );
@@ -111,23 +101,11 @@ public class IndexProcessManager {
     }
 
     /**
-     * Causes the current thread to sleep for one second unless interrupted.
-     */
-    private static void sleep1() {
-        try {
-            Thread.sleep( 1000 );
-
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-    }
-
-    /**
      * Returns the port number where the local host JMX server is running.
      * 
      * @return int
      */
-    public static synchronized int getJmxPort() {
+    protected static synchronized int getJmxPort() {
         if (jmxPort < 0) {
             try {
                 initializeContext();
@@ -138,15 +116,6 @@ public class IndexProcessManager {
             }
         }
         return jmxPort;
-    }
-
-    /**
-     * Returns the local host URL where the JMX server can be accessed.
-     * 
-     * @return String
-     */
-    public static String getJmxServerUrl() {
-        return "service:jmx:rmi:///jndi/rmi://localhost:" + getJmxPort() + "/jmxrmi";
     }
 
     /**
@@ -189,7 +158,6 @@ public class IndexProcessManager {
                 launcherThread.interrupt();
                 amqBroker.stop();
                 amqBroker.waitUntilStopped();
-                jmxServer.stop();
                 log.info( "Indexing process manager shut down." );
 
             } catch (Exception e) {
@@ -242,21 +210,18 @@ public class IndexProcessManager {
     }
 
     /**
-     * Starts the JMX server that will expose the shutdown hook for this manager.
+     * Configures the MBean used to monitor the server process and exposes the shutdown hook for this manager.
      * 
      * @throws IOException thrown if the JMX service cannot be launched
      */
-    private static void startJMXServer() throws IOException {
+    private static void configureMonitoring() throws IOException {
         try {
-            JMXServiceURL jmxUrl = new JMXServiceURL( getJmxServerUrl() );
             MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-            ObjectName name = new ObjectName( MBEAN_NAME );
+            ObjectName name = new ObjectName( IndexingManagerStats.MBEAN_NAME );
 
-            mbs.registerMBean( new ShutdownHook(), name );
-            LocateRegistry.createRegistry( getJmxPort() );
-            jmxServer = JMXConnectorServerFactory.newJMXConnectorServer( jmxUrl, null, mbs );
-            jmxServer.start();
-            log.info( "JMX server started at " + jmxUrl.toString() );
+            if (!mbs.isRegistered( name )) {
+                mbs.registerMBean( IndexingManagerStats.getInstance(), name );
+            }
 
         } catch (MalformedObjectNameException | InstanceAlreadyExistsException | MBeanRegistrationException
             | NotCompliantMBeanException e) {
@@ -279,9 +244,14 @@ public class IndexProcessManager {
         public void run() {
             try {
                 boolean agentFatalError = false;
+                boolean initialLaunch = true;
+
+                IndexingManagerStats.getInstance().setAvailable( true );
 
                 while (!shutdownRequested) {
                     agentProcess = launchJavaProcess( IndexingAgent.class );
+                    IndexingManagerStats.getInstance().agentStarted( !initialLaunch );
+                    initialLaunch = false;
 
                     // Notify all waiting threads when startup is complete
                     synchronized (IndexProcessManager.class) {
@@ -310,6 +280,9 @@ public class IndexProcessManager {
             } catch (InterruptedException e) {
                 log.info( "Indexing agent shut down." );
                 Thread.currentThread().interrupt();
+
+            } finally {
+                IndexingManagerStats.getInstance().setAvailable( false );
             }
         }
 
@@ -342,6 +315,7 @@ public class IndexProcessManager {
                 System.getProperty( "java.home" ) + File.separatorChar + "bin" + File.separatorChar + "java";
             String agentConfigLocation = System.getProperty( AGENT_CONFIG_SYSPROP );
             String log4jConfig = getAgentLog4jConfiguration();
+            List<String> jmxConfig = getAgentJmxConfiguration();
             String oomeOption = getJvmOptionForOutOfMemoryErrors();
             String classpath = System.getProperty( "java.class.path" );
 
@@ -359,6 +333,10 @@ public class IndexProcessManager {
                 agentConfigLocation = "\"" + agentConfigLocation + "\"";
                 log4jConfig = "\"" + log4jConfig + "\"";
                 classpath = "\"" + classpath + "\"";
+
+                for (int i = 0; i < jmxConfig.size(); i++) {
+                    jmxConfig.set( i, "\"" + jmxConfig.get( i ) + "\"" );
+                }
             }
 
             // Build the list of parameters for the executable command
@@ -372,6 +350,7 @@ public class IndexProcessManager {
             command.add( oomeOption );
             command.add( agentConfigLocation );
             command.add( log4jConfig );
+            command.addAll( jmxConfig );
             command.add( "-cp" );
             command.add( classpath );
             command.add( mainClass.getName() );
@@ -445,6 +424,26 @@ public class IndexProcessManager {
         }
 
         /**
+         * Returns the command line system properties to configure remote monitoring via JMX for the indexing agent
+         * process.
+         * 
+         * @return List&lt;String&gt;
+         */
+        private static List<String> getAgentJmxConfiguration() {
+            String agentJmxPort = System.getProperty( "ota2.index.agent.jmxport" );
+            List<String> configProps = new ArrayList<>();
+
+            if (agentJmxPort != null) {
+                configProps.add( "-Dcom.sun.management.jmxremote" );
+                configProps.add( "-Dcom.sun.management.jmxremote.port=" + agentJmxPort );
+                configProps.add( "-Dcom.sun.management.jmxremote.rmi.port=" + agentJmxPort );
+                configProps.add( "-Dcom.sun.management.jmxremote.ssl=false" );
+                configProps.add( "-Dcom.sun.management.jmxremote.authenticate=false" );
+            }
+            return configProps;
+        }
+
+        /**
          * Returns the handle to the indexing agent process.
          *
          * @return Process
@@ -455,27 +454,4 @@ public class IndexProcessManager {
 
     }
 
-    /**
-     * MBean implementation of the <code>IndexProcessManagerMBean</code> interface.
-     */
-    private static class ShutdownHook extends StandardMBean implements IndexProcessManagerMBean {
-
-        /**
-         * Default constructor.
-         */
-        public ShutdownHook() {
-            super( IndexProcessManagerMBean.class, true );
-        }
-
-        /**
-         * @see org.opentravel.schemacompiler.index.IndexProcessManagerMBean#shutdown()
-         */
-        @Override
-        public void shutdown() {
-            log.info( "Shutdown request received" );
-            IndexProcessManager.shutdown();
-            log.info( "Shutdown complete" );
-        }
-
-    }
 }
