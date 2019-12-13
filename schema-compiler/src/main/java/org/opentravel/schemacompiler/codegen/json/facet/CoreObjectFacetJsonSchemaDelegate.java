@@ -62,7 +62,7 @@ public class CoreObjectFacetJsonSchemaDelegate extends TLFacetJsonSchemaDelegate
                         roleAttr.setName( "role" );
                     }
                     roleAttr.setSchema( new JsonSchemaReference(
-                        jsonUtils.getSchemaReferencePath( owner.getRoleEnumeration(), owner ) ) );
+                        jsonUtils.getSchemaReferencePath( owner.getRoleEnumeration(), owner ) + "_Base" ) );
                     definitions.add( roleAttr );
                 }
                 owner = ownerExtension;
