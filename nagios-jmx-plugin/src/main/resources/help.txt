@@ -1,0 +1,45 @@
+Usage: check_jmx -U <service_url> -O <object_name> -A <attribute_name>
+    [-K <compound_key>] [-w <warn_threshold>] [-c <crit_threshold>]
+    [-o <operation_name>] [--username <username>] [--password <password>]
+    [-u <units>] [-v] [-h]
+
+Options are:
+
+-h
+    Help page, this page.
+	
+-U 
+    JMX URL; for example: "service:jmx:rmi://<host>:<port>/jndi/rmi://<host>:<port>/jmxrmi"
+	
+-O 
+    Object name to be checked, for example, "java.lang:type=Memory"
+    
+-A
+    Attribute name
+	
+-K 
+    Attribute key; use when attribute is a composite
+	
+-v
+    verbose
+
+-w 
+    Warning threshold value/range. Has to correspond to type of object retrieved, but
+    can be a regular expression for String return values. 
+
+-c
+    Critical threshold value/range. Has to correspond to type of object retrieved, but
+    can be a regular expression for String return values.
+
+-o
+    Operation to invoke on MBean after querying value. Useful to
+    reset any statistics or counter.
+
+-u
+    Units. One of B, KB, MB, TB, s, us, ms, or c for a continuous counter.
+	
+--username
+    Username, if JMX access is restricted; for example "monitorRole"
+	
+--password
+    Password

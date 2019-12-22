@@ -1,0 +1,197 @@
+---
+#
+# Copyright (C) 2014 OpenTravel Alliance (info@opentravel.org)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#         http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+- name: --> Install and Configure Nagios-Core Server for OTM Repository Monitoring
+  hosts: all
+  vars_files:
+    - vars/default-vars.yml
+    - "{{inventory_dir}}/vars/{{inventory_hostname}}-vars.yml"
+    - vars/otm-repository-vars.yml
+  tasks:
+  - name: --> Check for Existing Nagios-Core installation
+    stat: 
+      path: "/usr/local/nagios"
+    register: nagios_status
+  
+  - name: --> Exit if Nagios-Core is already installed
+    block:
+    - debug:
+        msg: "Nagios-Core appears to be installed already - Exiting..."
+    - meta: end_play
+    when: nagios_status.stat.exists == true
+  
+  - name: --> Download Artifacts to Controller
+    block:
+    - name: Creating local temp directory
+      file:
+        path: "{{controller_temp_dir}}"
+        state: directory
+      delegate_to: localhost
+    - name: Download artifacts that will need to be uploaded later
+      get_url:
+        url: "{{item.url}}"
+        dest: "{{controller_temp_dir}}/{{item.file}}"
+        validate_certs: false
+      with_items:
+        - { url: "{{nagioscore_download_url}}", file: "{{nagioscore_archive}}.tar.gz" }
+        - { url: "{{nagiosplugins_download_url}}", file: "{{nagiosplugins_archive}}.tar.gz" }
+        - { url: "{{nagiosnrpe_download_url}}", file: "{{nagiosnrpe_archive}}.tar.gz" }
+        - { url: "{{nagiosnrpe_download_url}}", file: "{{nagiosnrpe_archive}}.tar.gz" }
+        - { url: "{{jmxplugin_download_url}}", file: "{{jmxplugin_archive}}.zip" }
+      delegate_to: localhost
+  
+  - name: --> Install Required Packages
+    block:
+    - name: Setup OS-specific configuration (Debian)
+      package:
+        name:
+          - autoconf
+          - gcc
+          - libc6
+          - make
+          - wget
+          - unzip
+          - apache2
+          - apache2-utils
+          - php
+          - libgd-dev
+          - iptables-persistent
+        state: latest
+      when: ansible_distribution == 'Debian'
+    - name: Setup OS-specific configuration (Ubuntu)
+      package:
+        name:
+          - autoconf
+          - gcc
+          - libc6
+          - make
+          - wget
+          - unzip
+          - apache2
+          - php
+          - libapache2-mod-php7.2
+          - libgd-dev
+        state: latest
+      when: ansible_distribution == 'Ubuntu'
+    - name: Setup OS-specific configuration (CentOS or RHEL)
+      package:
+        name:
+          - gcc
+          - glibc
+          - glibc-common
+          - wget
+          - unzip
+          - httpd
+          - php
+          - gd
+          - gd-devel
+          - perl
+          - postfix
+        state: latest
+      when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
+
+  - name: --> Install Nagios-Core Server
+    block:
+    - name: Upload Nagios-Core server archive to remote host
+      unarchive:
+        src: "{{controller_temp_dir}}/{{nagioscore_archive}}.tar.gz"
+        dest: "/tmp"
+    - name: Perform installation (Debian/Ubuntu)
+      shell: |
+        ./configure --with-httpd-conf=/etc/apache2/sites-enabled
+        make all
+        make install-groups-users
+        usermod -a -G nagios www-data
+        make install
+        make install-daemoninit
+        make install-commandmode
+        make install-config
+        make install-webconf
+        a2enmod rewrite
+        a2enmod cgi
+        htpasswd -b -c /usr/local/nagios/etc/htpasswd.users nagiosadmin admin
+      args:
+        chdir: "/tmp/{{nagioscore_archive}}"
+      when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+    - name: Perform installation (CentOS/RHEL)
+      shell: |
+        ./configure
+        make all
+        make install-groups-users
+        usermod -a -G nagios apache
+        make install
+        make install-daemoninit
+        systemctl enable httpd.service
+        make install-commandmode
+        make install-config
+        make install-webconf
+        htpasswd -b -c /usr/local/nagios/etc/htpasswd.users nagiosadmin admin
+      args:
+        chdir: "/tmp/{{nagioscore_archive}}"
+      when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
+
+  - name: Install the Nagios check_jmx plugin
+    block:
+    - name: Upload check_jmx plugin archive to remote host
+      unarchive:
+        src: "{{controller_temp_dir}}/{{jmxplugin_archive}}.zip"
+        dest: "/tmp"
+    - name: Copy plugin files to the Nagios installation
+      shell: |
+        cp /tmp/{{jmxplugin_archive}}/check_jmx* /usr/local/nagios/libexec
+        perl -pi -e 's/\r\n/\n/g' /usr/local/nagios/libexec/check_jmx
+        chmod 755 /usr/local/nagios/libexec/check_jmx*
+  - name: --> Configure Firewall Rules
+    block:
+    - name: Perform firewall configuration (Debian)
+      shell: |
+        iptables -I INPUT -p tcp --destination-port 80 -j ACCEPT
+      when: ansible_distribution == 'Debian'
+    - name: Perform firewall configuration (Ubuntu)
+      shell: |
+        ufw allow Apache
+        ufw reload
+      when: ansible_distribution == 'Ubuntu'
+    - name: Perform firewall configuration (CentOS/RHEL)
+      shell: |
+        firewall-cmd --zone=public --add-port=80/tcp --permanent
+        firewall-cmd --reload
+      when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
+  
+  - name: --> Restart Apache and Nagios Services
+    block:
+      - name: Restart the httpd service (CentOS/RHEL)
+        service:
+          name: httpd
+          state: restarted
+        when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
+      - name: Restart the apache2 service (CentOS/RHEL)
+        service:
+          name: apache2
+          state: restarted
+        when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+      - name: Start the nagios service
+        service:
+          name: nagios
+          state: started
+      - name: Create an empty index.html file for monitoring purposes
+        file:
+          path: "/var/www/html/index.html"
+          state: touch
+  
+  - import_tasks: subtasks/setup-nagios-plugins.yml
+  - import_tasks: subtasks/setup-nagios-monitoring.yml
+  

@@ -1,0 +1,4 @@
+Usage: check_jmx -U <service_url> -O <object_name> -A <attribute_name>
+    [-K <compound_key>] [-w <warn_threshold>] [-c <crit_threshold>]
+    [-o <operation_name>] [--username <username>] [--password <password>]
+    [-u <units>] [-v] [-h]

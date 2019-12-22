@@ -14,6 +14,7 @@ deploy:
   file:
   - ota2-repository-service/target/ota2-repository-service.war
   - ota2-indexing-service/target/ota2-indexing-service.zip
+  - nagios-jmx-plugin/target/nagios-jmx-plugin.zip
   skip_cleanup: true
   on:
     repo: OpenTravel/OTM-DE-Compiler

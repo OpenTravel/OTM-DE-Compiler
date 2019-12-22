@@ -1,0 +1,138 @@
+---
+#
+# Copyright (C) 2014 OpenTravel Alliance (info@opentravel.org)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#         http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+- name: --> Install Nagios-Plugin Package Dependencies
+  block:
+    - name: Setup OS-specific configuration (Debian)
+      package:
+        name:
+          - autoconf
+          - gcc
+          - libc6
+          - libmcrypt-dev
+          - make
+          - libssl-dev
+          - wget
+          - bc
+          - gawk
+          - dc
+          - build-essential
+          - snmp
+          - libnet-snmp-perl
+          - gettext
+        state: latest
+      when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+    - name: Setup OS-specific configuration (CentOS)
+      package:
+        name:
+          - gcc
+          - glibc
+          - glibc-common
+          - make
+          - gettext
+          - automake
+          - autoconf
+          - wget
+          - openssl-devel
+          - net-snmp
+          - net-snmp-utils
+          - epel-release
+          - xinetd
+        state: latest
+      when: ansible_distribution == 'CentOS'
+    - name: Setup OS-specific configuration (RHEL)
+      package:
+        name:
+          - gcc
+          - glibc
+          - glibc-common
+          - make
+          - gettext
+          - automake
+          - autoconf
+          - wget
+          - openssl-devel
+          - net-snmp
+          - net-snmp-utils
+          - xinetd
+          - perl-Net-SNMP
+        state: latest
+      when: ansible_distribution == 'RedHat'
+    - name: Enable and restart the xinetd service (CentOS/RHEL)
+      block:
+      - name: Enable the xinetd service (CentOS/RHEL)
+        shell: |
+          systemctl enable xinetd
+      - name: Restart the xinetd service (CentOS/RHEL)
+        service:
+          name: xinetd
+          state: restarted
+      when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
+    - name: Upload Nagios-Plugins archive to remote host
+      unarchive:
+        src: "{{controller_temp_dir}}/{{nagiosplugins_archive}}.tar.gz"
+        dest: "/tmp"
+    - name: Install Nagios-Plugins
+      shell: |
+        ./configure
+        make
+        make install
+      args:
+        chdir: "/tmp/{{nagiosplugins_archive}}"
+    - name: Upload Nagios-NRPE archive to remote host
+      unarchive:
+        src: "{{controller_temp_dir}}/{{nagiosnrpe_archive}}.tar.gz"
+        dest: "/tmp"
+    # TODO: CHANGE the 'echo' command to a lineinfile task for ansible ******
+    - name: Install Nagios-NRPE
+      shell: |
+        ./configure --enable-command-args
+        make all
+        make install-groups-users
+        make install
+        make install-plugin
+        make install-daemon
+        make install-config
+        make install-inetd
+        make install-init
+        echo 'nrpe    {{nagios_nrpe_port}}/tcp' >> /etc/services
+        systemctl enable nrpe
+      args:
+        chdir: "/tmp/{{nagiosnrpe_archive}}"
+    - name: Configure the NRPE service with required commands for remote monitoring
+      template:
+        src: "templates/nagios/nrpe.j2"
+        dest: "/usr/local/nagios/etc/nrpe.cfg"
+        mode: 0644
+    - name: Perform firewall configuration (Debian)
+      shell: |
+        iptables -I INPUT -p tcp --destination-port 5666 -j ACCEPT
+      when: ansible_distribution == 'Debian'
+    - name: Perform firewall configuration (Ubuntu)
+      shell: |
+        ufw allow {{nagios_nrpe_port}}/tcp
+        ufw reload
+      when: ansible_distribution == 'Ubuntu'
+    - name: Perform firewall configuration (CentOS/RHEL)
+      shell: |
+        firewall-cmd --zone=public --add-port={{nagios_nrpe_port}}/tcp --permanent
+        firewall-cmd --reload
+      when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
+    - name: Start the NRPE service
+      service:
+        name: nrpe
+        state: restarted
+      

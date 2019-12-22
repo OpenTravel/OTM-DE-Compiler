@@ -15,14 +15,7 @@
 # limitations under the License.
 #
 - name: --> Configure Apache Web Server Proxy for OTM Repository
-  hosts: all
-  vars_files:
-    - vars/default-vars.yml
-    - "{{inventory_dir}}/vars/{{inventory_hostname}}-vars.yml"
-    - vars/otm-repository-vars.yml
-  tasks:
-  - debug:
-      var: ansible_distribution
+  block:
   - name: Setup OS-specific configuration (Debian)
     set_fact:
       package_name: apache2

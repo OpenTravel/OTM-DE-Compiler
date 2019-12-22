@@ -1,0 +1,100 @@
+Nagios Server Installation:
+---------------------------
+CentOS 7
+> yum install -y gcc glibc glibc-common wget unzip httpd php gd gd-devel perl postfix
+> cd /tmp
+> wget -O https://github.com/NagiosEnterprises/nagioscore/releases/download/nagios-4.4.5/nagios-4.4.5.tar.gz
+> tar xzf nagios-4.4.5.tar.gz
+> cd /tmp/nagioscore-nagios-4.4.5
+> ./configure
+> make all
+> make install-groups-users
+> usermod -a -G nagios apache
+> make install
+> make install-daemoninit
+> systemctl enable httpd.service
+> make install-commandmode
+> make install-config
+> make install-webconf
+*> firewall-cmd --zone=public --add-port=80/tcp --permanent
+*> firewall-cmd --reload
+> htpasswd -b -c /usr/local/nagios/etc/htpasswd.users nagiosadmin admin
+*> systemctl start httpd.service
+*> systemctl start nagios.service
+
+
+RHEL 7
+> yum install -y gcc glibc glibc-common wget unzip httpd php gd gd-devel perl postfix
+> cd /tmp
+> wget -O https://github.com/NagiosEnterprises/nagioscore/releases/download/nagios-4.4.5/nagios-4.4.5.tar.gz
+> tar xzf nagios-4.4.5.tar.gz
+> cd /tmp/nagioscore-nagios-4.4.5
+> ./configure
+> make all
+> make install-groups-users
+> usermod -a -G nagios apache
+> make install
+> make install-daemoninit
+> systemctl enable httpd.service
+> make install-commandmode
+> make install-config
+> make install-webconf
+*> firewall-cmd --zone=public --add-port=80/tcp --permanent
+*> firewall-cmd --reload
+> htpasswd -b -c /usr/local/nagios/etc/htpasswd.users nagiosadmin admin
+*> systemctl start httpd.service
+*> systemctl start nagios.service
+
+
+Debian 9
+*> dpkg -l selinux*
+> apt-get update
+*> apt-get install -y autoconf gcc libc6 make wget unzip apache2 apache2-utils php libgd-dev
+> cd /tmp
+> wget -O https://github.com/NagiosEnterprises/nagioscore/releases/download/nagios-4.4.5/nagios-4.4.5.tar.gz
+> tar xzf nagios-4.4.5.tar.gz
+> cd /tmp/nagioscore-nagios-4.4.5
+> ./configure --with-httpd-conf=/etc/apache2/sites-enabled
+> make all
+> make install-groups-users
+> usermod -a -G nagios www-data
+> make install
+> make install-daemoninit
+> make install-commandmode
+> make install-config
+> make install-webconf
+> a2enmod rewrite
+> a2enmod cgi
+> iptables -I INPUT -p tcp --destination-port 80 -j ACCEPT
+> apt-get install -y iptables-persistent
+> htpasswd -b -c /usr/local/nagios/etc/htpasswd.users nagiosadmin admin
+> systemctl restart apache2.service
+> systemctl start nagios.service
+
+
+Ubuntu 19
+> apt-get update
+*> apt-get install -y autoconf gcc libc6 make wget unzip apache2 php libapache2-mod-php7.2 libgd-dev
+> cd /tmp
+> wget -O https://github.com/NagiosEnterprises/nagioscore/releases/download/nagios-4.4.5/nagios-4.4.5.tar.gz
+> tar xzf nagios-4.4.5.tar.gz
+> cd /tmp/nagioscore-nagios-4.4.5
+> ./configure --with-httpd-conf=/etc/apache2/sites-enabled
+> make all
+> make install-groups-users
+> usermod -a -G nagios www-data
+> make install
+> make install-daemoninit
+> make install-commandmode
+> make install-config
+> make install-webconf
+> a2enmod rewrite
+> a2enmod cgi
+> ufw allow Apache
+> ufw reload
+> htpasswd -b -c /usr/local/nagios/etc/htpasswd.users nagiosadmin admin
+> systemctl restart apache2.service
+> systemctl start nagios.service
+> 
+
+

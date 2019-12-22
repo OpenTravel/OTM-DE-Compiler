@@ -37,6 +37,8 @@
         - { url: "{{tomcat_download_url}}", file: "{{tomcat_archive}}.zip" }
         - { url: "{{repo_service_download_url}}", file: "ROOT.war" }
         - { url: "{{index_service_download_url}}", file: "ota2-indexing-service.zip" }
+        - { url: "{{nagiosplugins_download_url}}", file: "{{nagiosplugins_archive}}.tar.gz" }
+        - { url: "{{nagiosnrpe_download_url}}", file: "{{nagiosnrpe_archive}}.tar.gz" }
       delegate_to: localhost
   
   - name: --> Create Base Folder Structure
@@ -79,6 +81,10 @@
       stat: 
         path: "/etc/init.d"
       register: initd_status
+    - name: Check for existence of the Nagios plugins
+      stat: 
+        path: "/usr/local/nagios"
+      register: nagios_status
     
   - debug:
       msg: The Subversion repository appears to already be created (skipping)
@@ -236,6 +242,15 @@
       when: initd_status.stat.exists == true
     when: indexing_status.stat.exists == false
     
+  - debug:
+      msg: Nagios plugins appear to already be installed (skipping)
+    when: nagios_status.stat.exists == true
+  - name: --> Install the Nagios-Plugins and NRPE Service
+    block:
+    - import_tasks: subtasks/setup-nagios-plugins.yml
+    when: nagios_status.stat.exists == false
+    
+  - import_tasks: subtasks/setup-httpd-proxy.yml
   - import_tasks: subtasks/start-indexing.yml
   - import_tasks: subtasks/start-tomcat.yml
   - import_tasks: subtasks/cleanup.yml

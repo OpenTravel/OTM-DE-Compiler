@@ -20,6 +20,7 @@
 		<module>ota2-repository-service</module>
 		<module>ota2-repository-plugin</module>
 		<module>ota2-indexing-service</module>
+		<module>nagios-jmx-plugin</module>
 		<!--module>ota2-repository-reporting</module -->
 		<module>test-aggregate</module>
 	</modules>
@@ -73,6 +74,7 @@
 		<swagger.parser.version>1.0.41</swagger.parser.version>
 		<guava.version>23.1-jre</guava.version>
 		<velocity.version>1.7</velocity.version>
+		<commons-lang3.version>3.5</commons-lang3.version>
 
 		<!-- Plugin Versions -->
 		<compiler.plugin.version>3.8.0</compiler.plugin.version>
@@ -183,6 +185,7 @@
 				<artifactId>maven-checkstyle-plugin</artifactId>
 				<configuration>
 					<configLocation>${checkstyle.config}</configLocation>
+					<skip>${skipTests}</skip>
 				</configuration>
 				<executions>
 					<execution>
@@ -225,6 +228,7 @@
 						<exclude>**/*.properties</exclude>
 						<exclude>**/*.sql</exclude>
 						<exclude>**/*.jrxml</exclude>
+						<exclude>**/check_jmx</exclude>
 						<exclude>src/test/resources/**</exclude>
 						<exclude>src/main/resources/**</exclude>
 					</excludes>
@@ -635,6 +639,11 @@
 				<groupId>org.apache.velocity</groupId>
 				<artifactId>velocity</artifactId>
 				<version>${velocity.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-lang3</artifactId>
+				<version>${commons-lang3.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
