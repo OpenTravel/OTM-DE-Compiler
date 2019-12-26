@@ -21,6 +21,8 @@
     - "{{inventory_dir}}/vars/{{inventory_hostname}}-vars.yml"
     - vars/otm-repository-vars.yml
   tasks:
+  - import_tasks: subtasks/discover-system-facts.yml
+  
   - name: --> Check for Existing Nagios-Core installation
     stat: 
       path: "/usr/local/nagios"
@@ -55,6 +57,44 @@
   
   - name: --> Install Required Packages
     block:
+    - name: Setup OS-specific configuration (CentOS)
+      package:
+        name:
+          - gcc
+          - glibc
+          - glibc-common
+          - wget
+          - unzip
+          - httpd
+          - php
+          - gd
+          - gd-devel
+          - perl
+          - postfix
+          - java-1.8.0-openjdk-devel
+        state: latest
+      when: os_is_centos
+    - name: Setup OS-specific configuration (RHEL)
+      block:
+      - name: Enable optional server packages (RHEL)
+        command: "subscription-manager repos --enable rhel-{{os_major_version}}-server-optional-rpms"
+      - name: Setup OS-specific configuration (RHEL)  
+        package:
+          name:
+            - gcc
+            - glibc
+            - glibc-common
+            - wget
+            - unzip
+            - httpd
+            - php
+            - gd
+            - gd-devel
+            - perl
+            - postfix
+            - java-1.8.0-openjdk-devel
+          state: latest
+      when: os_is_rhel
     - name: Setup OS-specific configuration (Debian)
       package:
         name:
@@ -69,8 +109,9 @@
           - php
           - libgd-dev
           - iptables-persistent
+          - openjdk-8-jdk
         state: latest
-      when: ansible_distribution == 'Debian'
+      when: os_is_debian
     - name: Setup OS-specific configuration (Ubuntu)
       package:
         name:
@@ -82,26 +123,11 @@
           - unzip
           - apache2
           - php
-          - libapache2-mod-php7.2
+          - libapache2-mod-php
           - libgd-dev
+          - openjdk-8-jdk
         state: latest
-      when: ansible_distribution == 'Ubuntu'
-    - name: Setup OS-specific configuration (CentOS or RHEL)
-      package:
-        name:
-          - gcc
-          - glibc
-          - glibc-common
-          - wget
-          - unzip
-          - httpd
-          - php
-          - gd
-          - gd-devel
-          - perl
-          - postfix
-        state: latest
-      when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
+      when: os_is_ubuntu
 
   - name: --> Install Nagios-Core Server
     block:
@@ -125,7 +151,7 @@
         htpasswd -b -c /usr/local/nagios/etc/htpasswd.users nagiosadmin admin
       args:
         chdir: "/tmp/{{nagioscore_archive}}"
-      when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+      when: os_is_debian or os_is_ubuntu
     - name: Perform installation (CentOS/RHEL)
       shell: |
         ./configure
@@ -134,14 +160,13 @@
         usermod -a -G nagios apache
         make install
         make install-daemoninit
-        systemctl enable httpd.service
         make install-commandmode
         make install-config
         make install-webconf
         htpasswd -b -c /usr/local/nagios/etc/htpasswd.users nagiosadmin admin
       args:
         chdir: "/tmp/{{nagioscore_archive}}"
-      when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
+      when: os_is_centos or os_is_rhel
 
   - name: Install the Nagios check_jmx plugin
     block:
@@ -154,38 +179,49 @@
         cp /tmp/{{jmxplugin_archive}}/check_jmx* /usr/local/nagios/libexec
         perl -pi -e 's/\r\n/\n/g' /usr/local/nagios/libexec/check_jmx
         chmod 755 /usr/local/nagios/libexec/check_jmx*
+        
   - name: --> Configure Firewall Rules
     block:
-    - name: Perform firewall configuration (Debian)
-      shell: |
-        iptables -I INPUT -p tcp --destination-port 80 -j ACCEPT
-      when: ansible_distribution == 'Debian'
-    - name: Perform firewall configuration (Ubuntu)
-      shell: |
-        ufw allow Apache
-        ufw reload
-      when: ansible_distribution == 'Ubuntu'
-    - name: Perform firewall configuration (CentOS/RHEL)
-      shell: |
-        firewall-cmd --zone=public --add-port=80/tcp --permanent
-        firewall-cmd --reload
-      when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
+    - name: Perform firewall configuration (firewalld)
+      firewalld:
+        port: 80/tcp
+        permanent: yes
+        immediate: true
+        state: enabled
+      when: firewalld_installed
+    - name: Perform firewall configuration (ufw)
+      ufw:
+        rule: allow
+        name: Apache
+        state: enabled
+      when: ufw_installed
+    - name: Perform firewall configuration (iptables)
+      iptables:
+        chain: INPUT
+        protocol: tcp
+        destination_port: "80"
+        jump: ACCEPT
+        action: insert
+      when: iptables_installed
   
   - name: --> Restart Apache and Nagios Services
     block:
       - name: Restart the httpd service (CentOS/RHEL)
         service:
           name: httpd
+          enabled: yes
           state: restarted
-        when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
+        when: os_is_centos or os_is_rhel
       - name: Restart the apache2 service (CentOS/RHEL)
         service:
           name: apache2
+          enabled: yes
           state: restarted
-        when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+        when: os_is_debian or os_is_ubuntu
       - name: Start the nagios service
         service:
           name: nagios
+          enabled: yes
           state: started
       - name: Create an empty index.html file for monitoring purposes
         file:

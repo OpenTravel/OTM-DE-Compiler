@@ -16,6 +16,27 @@
 #
 - name: --> Install Nagios-Plugin Package Dependencies
   block:
+    - name: Install EPEL release (RHEL)
+      block:
+      - name: Download EPEL release to the controller
+        get_url:
+          url: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{os_major_version}}.noarch.rpm"
+          dest: "{{controller_temp_dir}}/epel-release-latest-{{os_major_version}}.noarch.rpm"
+          validate_certs: false
+        delegate_to: localhost
+      - name: Upload EPEL to the remote host
+        copy:
+          src: "{{controller_temp_dir}}/epel-release-latest-{{os_major_version}}.noarch.rpm"
+          dest: "/tmp/epel-release-latest-{{os_major_version}}.noarch.rpm"
+      - name: Install the EPEL release
+        shell: |
+          rpm -ihv epel-release-latest-{{os_major_version}}.noarch.rpm
+          subscription-manager repos --enable=rhel-{{os_major_version}}-server-optional-rpms
+        args:
+          chdir: "/tmp"
+          warn: no
+      when: os_is_rhel
+      
     - name: Setup OS-specific configuration (Debian)
       package:
         name:
@@ -34,7 +55,7 @@
           - libnet-snmp-perl
           - gettext
         state: latest
-      when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+      when: os_is_debian or os_is_ubuntu
     - name: Setup OS-specific configuration (CentOS)
       package:
         name:
@@ -52,7 +73,7 @@
           - epel-release
           - xinetd
         state: latest
-      when: ansible_distribution == 'CentOS'
+      when: os_is_centos
     - name: Setup OS-specific configuration (RHEL)
       package:
         name:
@@ -70,21 +91,20 @@
           - xinetd
           - perl-Net-SNMP
         state: latest
-      when: ansible_distribution == 'RedHat'
+      when: os_is_rhel
+    
     - name: Enable and restart the xinetd service (CentOS/RHEL)
-      block:
-      - name: Enable the xinetd service (CentOS/RHEL)
-        shell: |
-          systemctl enable xinetd
-      - name: Restart the xinetd service (CentOS/RHEL)
-        service:
-          name: xinetd
-          state: restarted
-      when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
+      service:
+        name: xinetd
+        enabled: yes
+        state: restarted
+      when: os_is_centos or os_is_rhel
+    
     - name: Upload Nagios-Plugins archive to remote host
       unarchive:
         src: "{{controller_temp_dir}}/{{nagiosplugins_archive}}.tar.gz"
         dest: "/tmp"
+    
     - name: Install Nagios-Plugins
       shell: |
         ./configure
@@ -92,11 +112,12 @@
         make install
       args:
         chdir: "/tmp/{{nagiosplugins_archive}}"
+    
     - name: Upload Nagios-NRPE archive to remote host
       unarchive:
         src: "{{controller_temp_dir}}/{{nagiosnrpe_archive}}.tar.gz"
         dest: "/tmp"
-    # TODO: CHANGE the 'echo' command to a lineinfile task for ansible ******
+    
     - name: Install Nagios-NRPE
       shell: |
         ./configure --enable-command-args
@@ -108,31 +129,49 @@
         make install-config
         make install-inetd
         make install-init
-        echo 'nrpe    {{nagios_nrpe_port}}/tcp' >> /etc/services
-        systemctl enable nrpe
       args:
         chdir: "/tmp/{{nagiosnrpe_archive}}"
+    
+    - name: Add NRPE to the /etc/services file
+      lineinfile:
+        dest: /etc/services
+        line: "nrpe    {{nagios_nrpe_port}}/tcp"
+        state: present
+    
     - name: Configure the NRPE service with required commands for remote monitoring
       template:
         src: "templates/nagios/nrpe.j2"
         dest: "/usr/local/nagios/etc/nrpe.cfg"
         mode: 0644
-    - name: Perform firewall configuration (Debian)
-      shell: |
-        iptables -I INPUT -p tcp --destination-port 5666 -j ACCEPT
-      when: ansible_distribution == 'Debian'
-    - name: Perform firewall configuration (Ubuntu)
-      shell: |
-        ufw allow {{nagios_nrpe_port}}/tcp
-        ufw reload
-      when: ansible_distribution == 'Ubuntu'
-    - name: Perform firewall configuration (CentOS/RHEL)
-      shell: |
-        firewall-cmd --zone=public --add-port={{nagios_nrpe_port}}/tcp --permanent
-        firewall-cmd --reload
-      when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
+    
+    - name: --> Configure Firewall Rules
+      block:
+      - name: Perform firewall configuration (firewalld)
+        firewalld:
+          port: 5666/tcp
+          permanent: yes
+          immediate: true
+          state: enabled
+        when: firewalld_installed
+      - name: Perform firewall configuration (ufw)
+        ufw:
+          rule: allow
+          port: "5666"
+          proto: tcp
+          state: enabled
+        when: ufw_installed
+      - name: Perform firewall configuration (iptables)
+        iptables:
+          chain: INPUT
+          protocol: tcp
+          destination_port: "5666"
+          jump: ACCEPT
+          action: insert
+        when: iptables_installed
+      
     - name: Start the NRPE service
       service:
         name: nrpe
+        enabled: yes
         state: restarted
       

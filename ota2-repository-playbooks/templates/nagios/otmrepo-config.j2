@@ -95,7 +95,7 @@ define service {
     use                     otm-service
     host_name               {{item}}
     service_description     Repository Available
-    check_command           check_otmrepo_available!11097
+    check_command           check_otmrepo_available!{{otm_repositories[item].tomcat_jmx_port}}
     servicegroups           repo_services
 }
 
@@ -103,7 +103,7 @@ define service {
     use                     otm-service
     host_name               {{item}}
     service_description     SVN Repository Available
-    check_command           check_svnrepo_available!11097
+    check_command           check_svnrepo_available!{{otm_repositories[item].tomcat_jmx_port}}
     servicegroups           repo_services
 }
 
@@ -111,7 +111,7 @@ define service {
     use                     otm-service
     host_name               {{item}}
     service_description     SVN Configuration Ok
-    check_command           check_otmrepo_svnconfig!11097
+    check_command           check_otmrepo_svnconfig!{{otm_repositories[item].tomcat_jmx_port}}
     servicegroups           repo_services
 }
 
@@ -119,7 +119,7 @@ define service {
     use                     otm-service
     host_name               {{item}}
     service_description     Repository CPU Utilization
-    check_command           check_otmrepo_cpu!11097
+    check_command           check_otmrepo_cpu!{{otm_repositories[item].tomcat_jmx_port}}
     servicegroups           repo_services
 }
 
@@ -127,7 +127,7 @@ define service {
     use                     otm-service
     host_name               {{item}}
     service_description     Repository Memory Utilization
-    check_command           check_otmrepo_memory!11097
+    check_command           check_otmrepo_memory!{{otm_repositories[item].tomcat_jmx_port}}
     servicegroups           repo_services
 }
 
@@ -135,7 +135,7 @@ define service {
     use                     otm-service
     host_name               {{item}}
     service_description     Repository Disk Utilization
-    check_command           check_otmrepo_disk!11097
+    check_command           check_otmrepo_disk!{{otm_repositories[item].tomcat_jmx_port}}
     servicegroups           repo_services
 }
 
@@ -143,15 +143,15 @@ define service {
     use                     otm-service
     host_name               {{item}}
     service_description     Index Mgr Available
-    check_command           check_indexmgr_available!11098
-    servicegroups           repo_services
+    check_command           check_indexmgr_available!{{otm_repositories[item].manager_jmx_port}}
+    servicegroups           indexmgr_services
 }
 
 define service {
     use                     otm-service
     host_name               {{item}}
     service_description     Index Mgr Memory Utilization
-    check_command           check_indexmgr_memory!11098
+    check_command           check_indexmgr_memory!{{otm_repositories[item].manager_jmx_port}}
     servicegroups           indexmgr_services
 }
 
@@ -159,7 +159,7 @@ define service {
     use                     otm-service
     host_name               {{item}}
     service_description     Index Mgr Last Agent Startup
-    check_command           check_indexmgr_lastagentstart!11098
+    check_command           check_indexmgr_lastagentstart!{{otm_repositories[item].manager_jmx_port}}
     servicegroups           indexmgr_services
 }
 
@@ -167,7 +167,7 @@ define service {
     use                     otm-service
     host_name               {{item}}
     service_description     Index Mgr Recent Agent Restarts
-    check_command           check_indexmgr_recentagentrestarts!11098
+    check_command           check_indexmgr_recentagentrestarts!{{otm_repositories[item].manager_jmx_port}}
     servicegroups           indexmgr_services
 }
 
@@ -175,15 +175,15 @@ define service {
     use                     otm-service
     host_name               {{item}}
     service_description     Index Agent Available
-    check_command           check_indexagent_available!11099
-    servicegroups           repo_services
+    check_command           check_indexagent_available!{{otm_repositories[item].agent_jmx_port}}
+    servicegroups           indexagent_services
 }
 
 define service {
     use                     otm-service
     host_name               {{item}}
     service_description     Index Agent Memory Utilization
-    check_command           check_indexagent_memory!11099
+    check_command           check_indexagent_memory!{{otm_repositories[item].agent_jmx_port}}
     servicegroups           indexagent_services
 }
 
@@ -191,6 +191,6 @@ define service {
     use                     otm-service
     host_name               {{item}}
     service_description     Index Agent Item Count
-    check_command           check_indexagent_itemcount!11099
+    check_command           check_indexagent_itemcount!{{otm_repositories[item].agent_jmx_port}}
     servicegroups           indexagent_services
 }

@@ -17,6 +17,7 @@
 - name: --> Configure Nagios Server to Monitor OTM Repositories
   hosts: all
   vars_files:
+    - vars/default-vars.yml
     - "{{inventory_dir}}/vars/{{inventory_hostname}}-vars.yml"
   tasks:
   - import_tasks: subtasks/setup-nagios-monitoring.yml

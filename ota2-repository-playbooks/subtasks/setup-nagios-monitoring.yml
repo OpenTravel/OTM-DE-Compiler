@@ -16,39 +16,58 @@
 #
 - name: --> Setup Nagios monitoring for OTM repositiories
   block:
-    - name: Prepare list of all OTM repository host names to be monitored
-      set_fact:
-        otm_group_members: "{{ otm_repositories | join(',') }}"
-    - name: Create OTM repository group configuration
-      template:
-        src: "templates/nagios/otmrepo-group.j2"
-        dest: "/usr/local/nagios/etc/objects/otm-repositories.cfg"
-        mode: 0644
-    - name: Create a host/service configuration file for each OTM repository server
-      template:
-        src: "templates/nagios/otmrepo-config.j2"
-        dest: "/usr/local/nagios/etc/objects/otm-{{item}}.cfg"
-        mode: 0644
-      with_items: "{{otm_repositories}}"
-    - name: Update the nagios.cfg file
-      block:
-        - name: Delete all existing OTM configuration file references
-          lineinfile:
-            dest: /usr/local/nagios/etc/nagios.cfg
-            line: "^cfg_file=/usr/local/nagios/etc/objects/otm-*"
-            state: absent
-        - name: Add the OTM Repositories group file reference
-          lineinfile:
-            dest: /usr/local/nagios/etc/nagios.cfg
-            line: "cfg_file=/usr/local/nagios/etc/objects/otm-repositories.cfg"
-            state: present
-        - name: Add a reference to each OTM repository configuration file
-          lineinfile:
-            dest: /usr/local/nagios/etc/nagios.cfg
-            line: "cfg_file=/usr/local/nagios/etc/objects/otm-{{item}}.cfg"
-            state: present
-          with_items: "{{otm_repositories}}"
-    - name: Restart the nagios service
-      service:
-        name: nagios
-        state: restarted
+  - name: Prepare list of all OTM repository host names to be monitored
+    set_fact:
+      otm_group_members: "{{ otm_repositories | join(',') }}"
+  
+  - name: Assign default values for monitoring ports (if not explicitly assigned)
+    block:
+    - set_fact:
+        otm_repositories: "{{ otm_repositories|combine({item.key: {'tomcat_jmx_port': tomcat_jmx_port}}, recursive=True) }}"
+      when: item.value|selectattr("tomcat_jmx_port", "defined")|list|length == 0
+      with_dict: "{{otm_repositories}}"
+    - set_fact:
+        otm_repositories: "{{ otm_repositories|combine({item.key: {'manager_jmx_port': manager_jmx_port}}, recursive=True) }}"
+      when: item.value|selectattr("manager_jmx_port", "defined")|list|length == 0
+      with_dict: "{{otm_repositories}}"
+    - set_fact:
+        otm_repositories: "{{ otm_repositories|combine({item.key: {'agent_jmx_port': agent_jmx_port}}, recursive=True) }}"
+      when: item.value|selectattr("agent_jmx_port", "defined")|list|length == 0
+      with_dict: "{{otm_repositories}}"
+    
+  - name: Create OTM repository group configuration
+    template:
+      src: "templates/nagios/otmrepo-group.j2"
+      dest: "/usr/local/nagios/etc/objects/otm-repositories.cfg"
+      mode: 0644
+
+  - name: Create a host/service configuration file for each OTM repository server
+    template:
+      src: "templates/nagios/otmrepo-config.j2"
+      dest: "/usr/local/nagios/etc/objects/otm-{{item}}.cfg"
+      mode: 0644
+    with_items: "{{otm_repositories}}"
+
+  - name: Update the nagios.cfg file
+    block:
+      - name: Delete all existing OTM configuration file references
+        lineinfile:
+          dest: /usr/local/nagios/etc/nagios.cfg
+          line: "^cfg_file=/usr/local/nagios/etc/objects/otm-*"
+          state: absent
+      - name: Add the OTM Repositories group file reference
+        lineinfile:
+          dest: /usr/local/nagios/etc/nagios.cfg
+          line: "cfg_file=/usr/local/nagios/etc/objects/otm-repositories.cfg"
+          state: present
+      - name: Add a reference to each OTM repository configuration file
+        lineinfile:
+          dest: /usr/local/nagios/etc/nagios.cfg
+          line: "cfg_file=/usr/local/nagios/etc/objects/otm-{{item}}.cfg"
+          state: present
+        with_items: "{{otm_repositories}}"
+
+  - name: Restart the nagios service
+    service:
+      name: nagios
+      state: restarted

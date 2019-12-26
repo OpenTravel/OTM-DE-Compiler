@@ -1,0 +1,52 @@
+---
+#
+# Copyright (C) 2014 OpenTravel Alliance (info@opentravel.org)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#         http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+- name: --> Discover Additional System Facts
+  block:
+  - name: Check for existence of the systemd service manager
+    stat: 
+      path: "/lib/systemd/system"
+    register: systemd_status
+  - name: Check for existence of the init.d service manager
+    stat:
+      path: "/etc/init.d"
+    register: initd_status
+  - name: Check for existence of the firewalld manager
+    stat:
+      path: "/lib/firewalld"
+    register: firewalld_status
+  - name: Check for existence of the UFW firewall manager
+    stat:
+      path: "/etc/default/ufw"
+    register: ufw_status
+  - name: Check for existence of the iptables firewall manager
+    stat:
+      path: "/etc/sysconfig/iptables-config"
+    register: iptables_status
+  
+  - name: Configure additional remote system facts
+    set_fact:
+      os_is_centos: "{{ansible_distribution == 'CentOS'}}"
+      os_is_rhel: "{{ansible_distribution == 'RedHat'}}"
+      os_is_debian: "{{ansible_distribution == 'Debian'}}"
+      os_is_ubuntu: "{{ansible_distribution == 'Ubuntu'}}"
+      os_major_version: "{{ansible_distribution_major_version}}"
+      systemd_installed: "{{systemd_status.stat.exists}}"
+      initd_installed: "{{initd_status.stat.exists and not(systemd_status.stat.exists)}}"
+      firewalld_installed: "{{firewalld_status.stat.exists}}"
+      ufw_installed: "{{ufw_status.stat.exists}}"
+      iptables_installed: "{{iptables_status.stat.exists and not(firewalld_status.stat.exists or ufw_status.stat.exists)}}"
+      

@@ -21,6 +21,8 @@
     - "{{inventory_dir}}/vars/{{inventory_hostname}}-vars.yml"
     - vars/otm-repository-vars.yml
   tasks:
+  - import_tasks: subtasks/discover-system-facts.yml
+  
   - name: --> Download Artifacts to Controller
     block:
     - name: Creating local temp directory
@@ -73,14 +75,6 @@
       stat: 
         path: "{{indexsvc_dir}}/conf/indexing-service.properties"
       register: indexing_status
-    - name: Check for existence of the systemd service manager
-      stat: 
-        path: "/lib/systemd/system"
-      register: systemd_status
-    - name: Check for existence of the init.d service manager
-      stat: 
-        path: "/etc/init.d"
-      register: initd_status
     - name: Check for existence of the Nagios plugins
       stat: 
         path: "/usr/local/nagios"
@@ -140,17 +134,17 @@
     - block:
       - name: Ensure Java 1.8 package is available (Ubuntu only)
         command: "add-apt-repository -y ppa:openjdk-r/ppa"
-        when: ansible_distribution == 'Ubuntu'
+        when: os_is_ubuntu
       - name: Make sure Java 1.8 is installed (Debian or Ubuntu)
         package:
           name: openjdk-8-jdk
           state: latest
-        when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+        when: os_is_debian or os_is_ubuntu
       - name: Make sure Java 1.8 is installed (CentOS or RHEL)
         package:
           name: java-1.8.0-openjdk-devel
           state: latest
-        when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
+        when: os_is_centos or os_is_rhel
       when: java_status.stdout is not search("1.8")
     - name: Upload Tomcat distribution to remote host
       unarchive:
@@ -197,13 +191,13 @@
         src: "templates/otm-config/ota2-tomcat-systemd.j2"
         dest: "/lib/systemd/system/ota2-tomcat.service"
         mode: 0644
-      when: systemd_status.stat.exists == true
+      when: systemd_installed
     - name: Install the OTM Repository tomcat init.d service
       template:
         src: "templates/otm-config/ota2-tomcat-initd.j2"
         dest: "/etc/init.d/ota2-tomcat"
         mode: 0755
-      when: initd_status.stat.exists == true
+      when: initd_installed
     when: tomcat_status.stat.exists == false
     
   - debug:
@@ -233,13 +227,13 @@
         src: "templates/indexing-config/ota2-indexing-systemd.j2"
         dest: "/lib/systemd/system/ota2-indexing.service"
         mode: 0644
-      when: systemd_status.stat.exists == true
+      when: systemd_installed
     - name: Install the ota2-indexing init.d service
       template:
         src: "templates/indexing-config/ota2-indexing-initd.j2"
         dest: "/etc/init.d/ota2-indexing"
         mode: 0755
-      when: initd_status.stat.exists == true
+      when: initd_installed
     when: indexing_status.stat.exists == false
     
   - debug:
@@ -250,6 +244,43 @@
     - import_tasks: subtasks/setup-nagios-plugins.yml
     when: nagios_status.stat.exists == false
     
+  - name: --> Configure Firewall Rules
+    block:
+    - name: Perform firewall configuration (firewalld)
+      firewalld:
+        port: "{{item}}"
+        permanent: yes
+        immediate: true
+        state: enabled
+      with_items:
+        - "{{tomcat_jmx_port}}/tcp"
+        - "{{manager_jmx_port}}/tcp"
+        - "{{agent_jmx_port}}/tcp"
+      when: firewalld_installed
+    - name: Perform firewall configuration (ufw)
+      ufw:
+        rule: allow
+        port: "{{item}}"
+        proto: tcp
+        state: enabled
+      with_items:
+        - "{{tomcat_jmx_port}}"
+        - "{{manager_jmx_port}}"
+        - "{{agent_jmx_port}}"
+      when: ufw_installed
+    - name: Perform firewall configuration (iptables)
+      iptables:
+        chain: INPUT
+        protocol: tcp
+        destination_port: "{{item}}"
+        jump: ACCEPT
+        action: insert
+      with_items:
+        - "{{tomcat_jmx_port}}"
+        - "{{manager_jmx_port}}"
+        - "{{agent_jmx_port}}"
+      when: iptables_installed
+      
   - import_tasks: subtasks/setup-httpd-proxy.yml
   - import_tasks: subtasks/start-indexing.yml
   - import_tasks: subtasks/start-tomcat.yml

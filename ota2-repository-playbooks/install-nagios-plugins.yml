@@ -20,6 +20,8 @@
     - vars/default-vars.yml
     - vars/otm-repository-vars.yml
   tasks:
+  - import_tasks: subtasks/discover-system-facts.yml
+  
   - name: --> Check for Existing Nagios-Core installation
     stat: 
       path: "/usr/local/nagios"

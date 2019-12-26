@@ -21,27 +21,61 @@
       package_name: apache2
       conf_directory: /etc/apache2/conf-enabled
       modules_directory: /usr/lib/apache2/modules
-    when: ansible_distribution == 'Debian'
+    when: os_is_debian
+  
   - name: Setup OS-specific configuration (Ubuntu)
     set_fact:
       package_name: apache2
       conf_directory: /etc/apache2/conf-enabled
       modules_directory: /lib/apache2/modules
-    when: ansible_distribution == 'Ubuntu'
+    when: os_is_ubuntu
+  
   - name: Setup OS-specific configuration (CentOS or RHEL)
     set_fact:
       package_name: httpd
       conf_directory: /etc/httpd/conf.d
       modules_directory: /etc/httpd/modules
-    when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
+    when: os_is_centos or os_is_rhel
+  
   - name: Install the apache2/httpd package
     package:
       name: "{{package_name}}"
       state: latest
+  
   - name: Install the configuration file for the OTM repository proxy
     template:
       src: "templates/proxy-config/otm-proxy.j2"
       dest: "{{conf_directory}}/otm-proxy.conf"
+  
+  - name: --> Configure Firewall Rules
+    block:
+    - name: Perform firewall configuration (firewalld)
+      firewalld:
+        port: 80/tcp
+        permanent: yes
+        immediate: true
+        state: enabled
+      when: firewalld_installed
+    - name: Perform firewall configuration (ufw)
+      ufw:
+        rule: allow
+        port: "80"
+        proto: tcp
+        state: enabled
+      when: ufw_installed
+    - name: Perform firewall configuration (iptables)
+      iptables:
+        chain: INPUT
+        protocol: tcp
+        destination_port: "80"
+        jump: ACCEPT
+        action: insert
+      when: iptables_installed
+  
+  - name: Enable httpd service to open outbound connections (CentOS/RHEL)
+    command: /usr/sbin/setsebool -P httpd_can_network_connect 1
+    when: os_is_centos or os_is_rhel
+    
   - name: Restart the apache2 service
     service:
       name: "{{package_name}}"
