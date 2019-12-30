@@ -36,6 +36,10 @@
     stat:
       path: "/etc/sysconfig/iptables-config"
     register: iptables_status
+  - name: Check for existence of SELinux
+    stat:
+      path: "/etc/selinux/config"
+    register: selinux_status
   
   - name: Configure additional remote system facts
     set_fact:
@@ -49,4 +53,5 @@
       firewalld_installed: "{{firewalld_status.stat.exists}}"
       ufw_installed: "{{ufw_status.stat.exists}}"
       iptables_installed: "{{iptables_status.stat.exists and not(firewalld_status.stat.exists or ufw_status.stat.exists)}}"
+      selinux_installed: "{{selinux_status.stat.exists}}"
       

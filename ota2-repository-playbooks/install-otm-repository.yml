@@ -15,12 +15,12 @@
 # limitations under the License.
 #
 - name: --> Install and Configure OTM Repository Server
-  hosts: all
+  hosts: "{{ target | default('localhost') }}"
   vars_files:
     - vars/default-vars.yml
-    - "{{inventory_dir}}/vars/{{inventory_hostname}}-vars.yml"
     - vars/otm-repository-vars.yml
   tasks:
+  - import_tasks: subtasks/validate.yml
   - import_tasks: subtasks/discover-system-facts.yml
   
   - name: --> Download Artifacts to Controller

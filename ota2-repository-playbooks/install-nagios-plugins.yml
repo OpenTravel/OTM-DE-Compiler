@@ -15,11 +15,12 @@
 # limitations under the License.
 #
 - name: --> Install and Configure Nagios-Plugins and NRPE on an OTM Repository Server
-  hosts: all
+  hosts: "{{ target | default('localhost') }}"
   vars_files:
     - vars/default-vars.yml
     - vars/otm-repository-vars.yml
   tasks:
+  - import_tasks: subtasks/validate.yml
   - import_tasks: subtasks/discover-system-facts.yml
   
   - name: --> Check for Existing Nagios-Core installation

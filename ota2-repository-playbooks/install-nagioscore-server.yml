@@ -15,12 +15,12 @@
 # limitations under the License.
 #
 - name: --> Install and Configure Nagios-Core Server for OTM Repository Monitoring
-  hosts: all
+  hosts: "{{ target | default('localhost') }}"
   vars_files:
     - vars/default-vars.yml
-    - "{{inventory_dir}}/vars/{{inventory_hostname}}-vars.yml"
     - vars/otm-repository-vars.yml
   tasks:
+  - import_tasks: subtasks/validate.yml
   - import_tasks: subtasks/discover-system-facts.yml
   
   - name: --> Check for Existing Nagios-Core installation
@@ -128,6 +128,10 @@
           - openjdk-8-jdk
         state: latest
       when: os_is_ubuntu
+    - name: Disable SELinux (if necessary)
+      selinux:
+        state: disabled
+      when: selinux_installed
 
   - name: --> Install Nagios-Core Server
     block:

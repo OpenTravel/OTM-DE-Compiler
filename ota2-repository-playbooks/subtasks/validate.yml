@@ -14,14 +14,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-- name: --> Shutdown OTM Repository Server
-  hosts: "{{ target | default('localhost') }}"
-  vars_files:
-    - vars/default-vars.yml
-    - vars/otm-repository-vars.yml
-  tasks:
-  - import_tasks: subtasks/validate.yml
-  - import_tasks: subtasks/shutdown-tomcat.yml
-  - import_tasks: subtasks/shutdown-indexing.yml
-  - import_tasks: subtasks/shutdown-svn.yml
-  
+- name: Validate that the 'target' host parameter is present
+  fail:
+    msg: "Variable 'target' not specified.  Expecting: --extra-vars='target=<host/group>'"
+  when: (target is not defined) or (target == "")
+  delegate_to: localhost
+    

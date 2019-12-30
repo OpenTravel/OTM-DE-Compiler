@@ -50,10 +50,15 @@
 
   - name: Update the nagios.cfg file
     block:
+      - name: Remove localhost monitoring configuration
+        lineinfile:
+          dest: /usr/local/nagios/etc/nagios.cfg
+          line: "cfg_file=/usr/local/nagios/etc/objects/localhost.cfg"
+          state: absent
       - name: Delete all existing OTM configuration file references
         lineinfile:
           dest: /usr/local/nagios/etc/nagios.cfg
-          line: "^cfg_file=/usr/local/nagios/etc/objects/otm-*"
+          regexp: "^cfg_file=/usr/local/nagios/etc/objects/otm-(.*)"
           state: absent
       - name: Add the OTM Repositories group file reference
         lineinfile:

@@ -21,15 +21,15 @@
 # Usage: > ansible-playbook "-e target_host=<inventory-hostname> backup_archive=<archive-file>" restore-otm-repository.yml
 #
 - name: --> Restore OTM Repository Data from Backup
-  hosts: "{{target_host}}"
+  hosts: "{{ target | default('localhost') }}"
   vars_files:
     - vars/default-vars.yml
-    - "{{inventory_dir}}/vars/{{inventory_hostname}}-vars.yml"
     - vars/otm-repository-vars.yml
   vars:
     backup_timestamp: "{{ansible_date_time.year}}{{ansible_date_time.month}}{{ansible_date_time.day}}{{ansible_date_time.hour}}{{ansible_date_time.minute}}"
     svn_url: "svn://localhost:{{svn_port}}"
   tasks:
+  - import_tasks: subtasks/validate.yml
   - import_tasks: subtasks/shutdown-tomcat.yml
   - import_tasks: subtasks/shutdown-indexing.yml
   
