@@ -38,12 +38,10 @@ public final class SchemaDependency {
     private static final String NOTIF_PAYLOAD = "NOTIF_PAYLOAD";
     private static final String MESSAGE_FAULT = "MESSAGE_FAULT";
     private static final String EXTENSION_POINT = "EXTENSION_POINT";
-    private static final String EXTENSION_POINT_SUMMARY = "EXTENSION_POINT_SUMMARY";
     private static final String EXTENSION_POINT_DETAIL = "EXTENSION_POINT_DETAIL";
     private static final String EXTENSION_POINT_CUSTOM = "EXTENSION_POINT_CUSTOM";
     private static final String EXTENSION_POINT_QUERY = "EXTENSION_POINT_QUERY";
     private static final String EXTENSION_POINT_UPDATE = "EXTENSION_POINT_UPDATE";
-    private static final String EXTENSION_POINT_SHARED = "EXTENSION_POINT_SHARED";
     private static final String EXTENSION_POINT_CHOICE = "EXTENSION_POINT_CHOICE";
 
     private String id;
@@ -123,15 +121,6 @@ public final class SchemaDependency {
     }
 
     /**
-     * Returns the schema dependency for the "ExtensionPoint_Summary" element.
-     * 
-     * @return SchemaDependency
-     */
-    public static SchemaDependency getExtensionPointSummaryElement() {
-        return getDependency( EXTENSION_POINT_SUMMARY );
-    }
-
-    /**
      * Returns the schema dependency for the "ExtensionPoint_Detail" element.
      * 
      * @return SchemaDependency
@@ -165,15 +154,6 @@ public final class SchemaDependency {
      */
     public static SchemaDependency getExtensionPointUpdateElement() {
         return getDependency( EXTENSION_POINT_UPDATE );
-    }
-
-    /**
-     * Returns the schema dependency for the "ExtensionPoint_Shared" element.
-     * 
-     * @return SchemaDependency
-     */
-    public static SchemaDependency getExtensionPointSharedElement() {
-        return getDependency( EXTENSION_POINT_SHARED );
     }
 
     /**

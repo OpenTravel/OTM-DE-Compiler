@@ -76,8 +76,15 @@ public class ChoiceObjectChoiceFacetCodegenDelegate extends ChoiceObjectFacetCod
         QName extensionPointQName;
 
         if (facetOwner instanceof TLChoiceObject) {
-            SchemaDependency extensionPoint = SchemaDependency.getExtensionPointElement();
+            TLChoiceObject co = (TLChoiceObject) facetOwner;
+            SchemaDependency extensionPoint;
 
+            if (declaresOrInheritsFacetContent( co.getSharedFacet() )) {
+                extensionPoint = SchemaDependency.getExtensionPointChoiceElement();
+
+            } else {
+                extensionPoint = SchemaDependency.getExtensionPointElement();
+            }
             extensionPointQName = extensionPoint.toQName();
             addCompileTimeDependency( extensionPoint );
 

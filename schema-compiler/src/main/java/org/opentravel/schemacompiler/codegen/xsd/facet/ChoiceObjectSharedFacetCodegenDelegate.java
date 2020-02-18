@@ -112,7 +112,7 @@ public class ChoiceObjectSharedFacetCodegenDelegate extends ChoiceObjectFacetCod
         // the shared facet from the choice facet extension points.
         for (TLFacet descendantFacet : choiceObject.getChoiceFacets()) {
             if (declaresOrInheritsFacetContent( descendantFacet )) {
-                extensionPoint = SchemaDependency.getExtensionPointSharedElement();
+                extensionPoint = SchemaDependency.getExtensionPointElement();
                 break;
             }
         }

@@ -87,7 +87,7 @@ public class CoreObjectSummaryFacetCodegenDelegate extends CoreObjectFacetCodege
         QName extensionPointQName;
 
         if (declaresOrInheritsFacetContent( core.getDetailFacet() )) {
-            extensionPoint = SchemaDependency.getExtensionPointSummaryElement();
+            extensionPoint = SchemaDependency.getExtensionPointElement();
 
         } else {
             extensionPoint = SchemaDependency.getExtensionPointElement();

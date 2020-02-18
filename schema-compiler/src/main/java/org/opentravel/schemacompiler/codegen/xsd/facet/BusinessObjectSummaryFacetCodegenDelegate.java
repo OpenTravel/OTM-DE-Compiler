@@ -86,7 +86,7 @@ public class BusinessObjectSummaryFacetCodegenDelegate extends BusinessObjectFac
         // points.
         for (TLFacet descendantFacet : descendantFacets) {
             if (declaresOrInheritsFacetContent( descendantFacet )) {
-                extensionPoint = SchemaDependency.getExtensionPointSummaryElement();
+                extensionPoint = SchemaDependency.getExtensionPointElement();
                 break;
             }
         }
