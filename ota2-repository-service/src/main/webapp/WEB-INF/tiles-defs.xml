@@ -128,6 +128,11 @@
 		<put-attribute name="pageTitle" value="Change Repository Name" />
 		<put-attribute name="body" value="/WEB-INF/console/adminChangeRepositoryName.jsp" />
 	</definition>
+	<definition name="adminChangeRepositoryImage" extends="baseLayout">
+		<put-attribute name="title" value="OTA2.0 Repository - Change Repository Banner Image" />
+		<put-attribute name="pageTitle" value="Change Repository Banner Image" />
+		<put-attribute name="body" value="/WEB-INF/console/adminChangeRepositoryImage.jsp" />
+	</definition>
 	<definition name="adminManageRootNamespaces" extends="baseLayout">
 		<put-attribute name="title" value="OTA2.0 Repository - Manage Root Namespaces" />
 		<put-attribute name="pageTitle" value="Manage Root Namespaces" />

@@ -18,9 +18,11 @@ package org.opentravel.schemacompiler.console;
 
 import org.opentravel.schemacompiler.repository.RepositoryComponentFactory;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
+import org.opentravel.schemacompiler.repository.RepositoryMetadataResource;
 import org.opentravel.schemacompiler.security.RepositorySecurityManager;
 import org.opentravel.schemacompiler.security.UserPrincipal;
 import org.opentravel.schemacompiler.security.impl.FileAuthenticationProvider;
+import org.opentravel.schemacompiler.util.RepositoryLogoImage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.Model;
 
@@ -37,6 +39,7 @@ public abstract class BaseController {
     private static final String STATUS_MESSAGE = "statusMessage";
     private static final String ERROR_MESSAGE = "errorMessage";
 
+    private RepositoryMetadataResource repositoryMetadataResource;
     private RepositoryManager repositoryManager;
     private RepositorySecurityManager securityManager;
     @Autowired
@@ -48,6 +51,7 @@ public abstract class BaseController {
     public BaseController() {
         RepositoryComponentFactory componentFactory = RepositoryComponentFactory.getDefault();
 
+        this.repositoryMetadataResource = new RepositoryMetadataResource( componentFactory.getRepositoryLocation() );
         this.repositoryManager = componentFactory.getRepositoryManager();
         this.securityManager = componentFactory.getSecurityManager();
     }
@@ -85,6 +89,8 @@ public abstract class BaseController {
             model.addAttribute( STATUS_MESSAGE, servletRequest.getParameter( STATUS_MESSAGE ) );
         }
         model.addAttribute( "isLocalUserManagement", isLocalUserManagement() );
+        model.addAttribute( "repositoryTitle", repositoryMetadataResource.getResource().getDisplayName() );
+        model.addAttribute( "repositoryLogo", RepositoryLogoImage.getDefault().getLogoUrl() );
         return (targetPage == null) ? "homePage" : targetPage;
     }
 

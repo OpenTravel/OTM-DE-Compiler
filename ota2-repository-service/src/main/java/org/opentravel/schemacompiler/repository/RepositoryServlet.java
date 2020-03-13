@@ -25,6 +25,7 @@ import org.opentravel.schemacompiler.index.FreeTextSearchServiceFactory;
 import org.opentravel.schemacompiler.jmx.OTMRepositoryStats;
 import org.opentravel.schemacompiler.notification.NotificationServiceFactory;
 import org.opentravel.schemacompiler.subscription.SubscriptionManager;
+import org.opentravel.schemacompiler.util.RepositoryLogoImage;
 
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
@@ -77,6 +78,7 @@ public class RepositoryServlet extends ServletContainer {
         NotificationServiceFactory.startup();
         initializeJmxMonitoring();
         OTMRepositoryStats.getInstance().setRepositoryAvailable( true );
+        new RepositoryLogoImage( RepositoryComponentFactory.getDefault().getRepositoryLocation() );
     }
 
     /**

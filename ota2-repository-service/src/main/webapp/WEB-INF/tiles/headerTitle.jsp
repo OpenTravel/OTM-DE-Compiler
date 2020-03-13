@@ -15,4 +15,4 @@
     limitations under the License.
 
 --%>
-<a href="${pageContext.request.contextPath}/console/index.html"><img src="${pageContext.request.contextPath}/images/ota_logo.png" alt="OTA2.0 Repository" style="vertical-align:middle"/> &nbsp; OTA2.0 Repository</a>
+<a href="${pageContext.request.contextPath}/console/index.html"><img src="${pageContext.request.contextPath}${repositoryLogo}" alt="OTA2.0 Repository" style="vertical-align:middle" width="256" height="64" /> &nbsp; ${repositoryTitle}</a>

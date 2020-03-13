@@ -25,8 +25,10 @@ import org.opentravel.schemacompiler.index.FreeTextSearchServiceFactory;
 import org.opentravel.schemacompiler.model.TLLibraryStatus;
 import org.opentravel.schemacompiler.repository.RepositoryComponentFactory;
 import org.opentravel.schemacompiler.repository.RepositoryException;
+import org.opentravel.schemacompiler.repository.RepositoryFileManager;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
+import org.opentravel.schemacompiler.repository.impl.ProjectFileUtils;
 import org.opentravel.schemacompiler.repository.impl.RepositoryUtils;
 import org.opentravel.schemacompiler.security.AuthenticationProvider;
 import org.opentravel.schemacompiler.security.AuthorizationResource;
@@ -35,14 +37,20 @@ import org.opentravel.schemacompiler.security.RepositorySecurityManager;
 import org.opentravel.schemacompiler.security.UserGroup;
 import org.opentravel.schemacompiler.security.UserPrincipal;
 import org.opentravel.schemacompiler.security.impl.SecurityFileUtils;
+import org.opentravel.schemacompiler.util.FileUtils;
+import org.opentravel.schemacompiler.util.RepositoryLogoImage;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -65,8 +73,12 @@ public class AdminController extends BaseController {
     private static final String FIRST_NAME = "firstName";
     private static final String LAST_NAME = "lastName";
     private static final String USER_ID = "userId";
+    private static final String JAVA_IO_TMPDIR = "java.io.tmpdir";
+    private static final String CUSTOM_BANNER = "CUSTOM";
+    private static final String DEFAULT_BANNER = "DEFAULT";
     private static final String RI_DOES_NOT_EXIST = "The requested repository item does not exist.";
     private static final String REDIRECT_LIBRARY_INFO = "redirect:/console/libraryInfo.html";
+    private static final String REDIRECT_ADMIN_HOME = "redirect:/console/adminHome.html";
     private static final String REDIRECT_ADMIN_USERS = "redirect:/console/adminUsers.html";
     private static final String REDIRECT_ADMIN_GROUPS = "redirect:/console/adminGroups.html";
 
@@ -136,7 +148,7 @@ public class AdminController extends BaseController {
             try {
                 repositoryManager.updateLocalRepositoryIdentity( repositoryId, displayName );
                 setStatusMessage( "Repository display name updated successfully.", redirectAttrs );
-                targetPage = "redirect:/console/adminHome.html";
+                targetPage = REDIRECT_ADMIN_HOME;
 
             } catch (RepositoryException e) {
                 setErrorMessage( "Error updating the repository's display name (see server log for details).", model );
@@ -151,6 +163,177 @@ public class AdminController extends BaseController {
             targetPage = applyCommonValues( session, model, "adminChangeRepositoryName" );
         }
         return targetPage;
+    }
+
+    /**
+     * Called by the Spring MVC controller to display and edit the display image for the repository.
+     * 
+     * @param session the HTTP session that contains information about an authenticated user
+     * @param model the model context to be used when rendering the page view
+     * @param redirectAttrs request attributes for the redirect in the case of success or an unauthorized user
+     * @return String
+     */
+    @RequestMapping({"/adminChangeRepositoryImage.html", "/adminChangeRepositoryImage.htm"})
+    public String adminChangeRepositoryImage(@RequestParam(value = "bannerType", required = false) String bannerType,
+        @RequestParam(value = "bannerImageFile", required = false) MultipartFile bannerImageFile,
+        @RequestParam(value = "tempLogoFile", required = false) String tempLogoFile,
+        @RequestParam(value = "saveChanges", required = false) boolean saveChanges,
+        @RequestParam(value = "cancelChanges", required = false) boolean cancelChanges, HttpSession session,
+        Model model, RedirectAttributes redirectAttrs) {
+        RepositoryLogoImage logoImage = RepositoryLogoImage.getDefault();
+        boolean useTempLogo = ((tempLogoFile != null) && (tempLogoFile.length() > 0));
+        String targetPage = null;
+
+        if ((bannerImageFile != null) && (bannerImageFile.getSize() > 0)) {
+            File logoFile =
+                new File( System.getProperty( JAVA_IO_TMPDIR ), '/' + bannerImageFile.getOriginalFilename() );
+
+            try (OutputStream out = new FileOutputStream( logoFile )) {
+                out.write( bannerImageFile.getBytes() );
+                model.addAttribute( "tempLogoFile", bannerImageFile.getOriginalFilename() );
+                useTempLogo = true;
+
+            } catch (IOException e) {
+                useTempLogo = false;
+            }
+        }
+
+        if (bannerType == null) {
+            bannerType = (logoImage.getLogoFile() == null) ? DEFAULT_BANNER : CUSTOM_BANNER;
+        }
+        model.addAttribute( "defaultBanner", (bannerType.equals( DEFAULT_BANNER ) ? "checked" : "") );
+        model.addAttribute( "customBanner", (bannerType.equals( CUSTOM_BANNER ) ? "checked" : "") );
+        model.addAttribute( "useTempLogo", useTempLogo );
+
+        if (saveChanges) {
+            saveRepositoryImageUpdates( logoImage, bannerType, useTempLogo, tempLogoFile );
+            deleteTempLogo( tempLogoFile );
+            targetPage = applyCommonValues( session, model, REDIRECT_ADMIN_HOME );
+
+        } else if (cancelChanges) {
+            deleteTempLogo( tempLogoFile );
+            targetPage = applyCommonValues( session, model, REDIRECT_ADMIN_HOME );
+
+        } else {
+            targetPage = applyCommonValues( session, model, "adminChangeRepositoryImage" );
+        }
+        return targetPage;
+    }
+
+    /**
+     * Saves user updates to the repository image banner settings.
+     * 
+     * @param logoImage the repository logo image singleton instance
+     * @param bannerType the type of banner that should be used (default or custom)
+     * @param useTempLogo flag indicating whether a temporary banner image has been uploaded
+     * @param tempLogoFile the name of the temporary banner image file (if one has been uploaded)
+     */
+    private void saveRepositoryImageUpdates(RepositoryLogoImage logoImage, String bannerType, boolean useTempLogo,
+        String tempLogoFile) {
+        RepositoryFileManager fileManager = getRepositoryManager().getFileManager();
+        File existingLogoFile = logoImage.getLogoFile();
+        boolean success = false;
+
+        try {
+            fileManager.startChangeSet();
+            success = updateRepositoryImageFile( bannerType, existingLogoFile, useTempLogo, tempLogoFile, fileManager );
+
+        } catch (RepositoryException | IOException e) {
+            log.error( "Error saving custom repository banner image.", e );
+
+        } finally {
+            try {
+                if (success) {
+                    fileManager.commitChangeSet();
+                } else {
+                    fileManager.rollbackChangeSet();
+                }
+
+            } catch (Exception e) {
+                log.error( "Error rolling back the active change set.", e );
+            }
+            logoImage.invalidate();
+        }
+    }
+
+    /**
+     * Copies and/or deletes the repository image file(s) as specified by the user input.
+     * 
+     * @param bannerType the type of banner that should be used (default or custom)
+     * @param existingLogoFile the existing custom banner image for the repository
+     * @param useTempLogo flag indicating whether a temporary banner image has been uploaded
+     * @param tempLogoFile the name of the temporary banner image file (if one has been uploaded)
+     * @param fileManager the repository file manager used to persist changes
+     * @return boolean
+     * @throws RepositoryException thrown if the changes cannot be persisted to the repository
+     * @throws IOException thrown if an error occurs while copying or deleting the image file(s)
+     */
+    private boolean updateRepositoryImageFile(String bannerType, File existingLogoFile, boolean useTempLogo,
+        String tempLogoFile, RepositoryFileManager fileManager) throws RepositoryException, IOException {
+        boolean success = false;
+
+        if (bannerType.equals( DEFAULT_BANNER )) {
+            // When the default logo has been selected, action is only required if the original setting used a
+            // custom logo
+            if ((existingLogoFile != null) && existingLogoFile.exists()) {
+                fileManager.addToChangeSet( existingLogoFile );
+                FileUtils.delete( existingLogoFile );
+                success = true;
+            }
+
+        } else {
+            // When a custom logo is selected, action is required if the default logo was previously selected or a
+            // different custom logo was specified
+            if (useTempLogo) {
+                File tempFile = new File( System.getProperty( JAVA_IO_TMPDIR ), '/' + tempLogoFile );
+                File newLogoFile = getCustomLogoFile( tempLogoFile );
+
+                if (tempFile.exists() && (newLogoFile != null)) {
+                    if (existingLogoFile != null) {
+                        // Delete the existing custom logo
+                        FileUtils.delete( existingLogoFile );
+                    }
+                    new ProjectFileUtils().copyFile( tempFile, newLogoFile );
+                    fileManager.addToChangeSet( newLogoFile );
+                    success = true;
+                }
+            }
+        }
+        return success;
+    }
+
+    /**
+     * Returns a file handle where the custom logo should be stored in the repository's persistent file system.
+     * 
+     * @param tempLogoFilename the name of the temporary logo file
+     * @return File
+     */
+    private File getCustomLogoFile(String tempLogoFilename) {
+        File logoFile = null;
+
+        if (tempLogoFilename != null) {
+            int dotIdx = tempLogoFilename.indexOf( '.' );
+            String suffix = (dotIdx < 0) ? ".dat" : tempLogoFilename.substring( dotIdx );
+            String filename = "custom_logo" + suffix;
+
+            logoFile = new File( getRepositoryManager().getRepositoryLocation(), filename );
+        }
+        return logoFile;
+    }
+
+    /**
+     * Deletes the temporary logo file if one exists.
+     * 
+     * @param tempLogoFilename the filename of the temporary logo in the system temp directory
+     */
+    private void deleteTempLogo(String tempLogoFilename) {
+        if ((tempLogoFilename != null) && (tempLogoFilename.length() > 0)) {
+            File logoFile = new File( System.getProperty( JAVA_IO_TMPDIR ), '/' + tempLogoFilename );
+
+            if (logoFile.exists()) {
+                FileUtils.delete( logoFile );
+            }
+        }
     }
 
     /**
@@ -996,7 +1179,7 @@ public class AdminController extends BaseController {
                 model.addAttribute( "confirmReindexing", confirmReindexing );
             }
         }
-        return success ? "redirect:/console/adminHome.html" : applyCommonValues( session, model, "adminSearchIndex" );
+        return success ? REDIRECT_ADMIN_HOME : applyCommonValues( session, model, "adminSearchIndex" );
     }
 
     /**

@@ -26,6 +26,7 @@
 		<init-param>
 			<param-name>jersey.config.server.provider.classnames</param-name>
 			<param-value>
+				org.opentravel.schemacompiler.repository.CustomLogoResource,
 				org.opentravel.schemacompiler.repository.RepositoryContentResource,
 				org.opentravel.schemacompiler.providers.JAXBContextResolver,
 				org.opentravel.schemacompiler.providers.RepositoryServiceExceptionMapper$RepositoryExceptionMapper,

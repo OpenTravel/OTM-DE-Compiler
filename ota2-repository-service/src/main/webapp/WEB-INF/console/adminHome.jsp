@@ -20,6 +20,9 @@
 	<li><h3><a href="${pageContext.request.contextPath}/console/adminChangeRepositoryName.html">Change Repository Name</a></h3></li>
 </ul>
 <ul>
+	<li><h3><a href="${pageContext.request.contextPath}/console/adminChangeRepositoryImage.html">Change Repository Banner Image</a></h3></li>
+</ul>
+<ul>
 	<li><h3><a href="${pageContext.request.contextPath}/console/adminManageRootNamespaces.html">Manage Root Namespaces</a></h3></li>
 </ul>
 <ul>

@@ -26,11 +26,15 @@ import org.opentravel.schemacompiler.repository.RepositoryItem;
 
 import com.gargoylesoftware.htmlunit.CollectingAlertHandler;
 import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.html.HtmlElement;
+import com.gargoylesoftware.htmlunit.html.HtmlFileInput;
 import com.gargoylesoftware.htmlunit.html.HtmlForm;
 import com.gargoylesoftware.htmlunit.html.HtmlInput;
 import com.gargoylesoftware.htmlunit.html.HtmlOption;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.HtmlSelect;
+
+import java.io.File;
 
 /**
  * Verifies the functions of the <code>AdminController</code> class by invoking the web console using a headless
@@ -68,6 +72,62 @@ public class TestAdminController extends AbstractConsoleTest {
             displayName.setValueAttribute( "Updated Repository Name" );
             page = form.getInputByValue( "Update" ).click();
             assertTrue( page.asText().contains( "updated successfully" ) );
+        }
+    }
+
+    @Test
+    public void testChangeRepositoryImage() throws Exception {
+        File customLogo = new File( System.getProperty( "user.dir" ), "/src/test/resources/test_logo.png" );
+        File tempLogo = new File( System.getProperty( "java.io.tmpdir" ), "/test_logo.png" );
+        File managedLogo =
+            new File( repositoryManager.get().getRepositoryLocation(), "../test-repository/custom_logo.png" );
+
+        try (WebClient client = newWebClient( true )) {
+            String pageUrl = jettyServer.get().getRepositoryUrl( "/console/adminChangeRepositoryImage.html" );
+            HtmlPage page = client.getPage( pageUrl );
+            HtmlForm form = (HtmlForm) page.getElementById( "changeImageForm" );
+            HtmlFileInput fileInput = (HtmlFileInput) form.getInputByName( "bannerImageFile" );
+            HtmlElement fakeSubmitButton = (HtmlElement) page.createElement( "button" );
+
+            // Start a change and then cancel...
+            fileInput.setValueAttribute( customLogo.getAbsolutePath() );
+            assertTrue( tempLogo.exists() );
+            page = fakeSubmitButton.click();
+            form = (HtmlForm) page.getElementById( "changeImageForm" );
+
+            fileInput.setValueAttribute( customLogo.getAbsolutePath() );
+            assertTrue( tempLogo.exists() );
+            page = fakeSubmitButton.click();
+            form = (HtmlForm) page.getElementById( "changeImageForm" );
+
+            page = form.getInputByValue( "Cancel" ).click();
+            assertTrue( page.asXml().contains( "/ota_logo.png" ) );
+            assertTrue( !managedLogo.exists() );
+
+            // Select a custom banner image for the repository...
+            page = client.getPage( pageUrl );
+            form = (HtmlForm) page.getElementById( "changeImageForm" );
+            fileInput = (HtmlFileInput) form.getInputByName( "bannerImageFile" );
+            fakeSubmitButton = (HtmlElement) page.createElement( "button" );
+            fakeSubmitButton.setAttribute( "type", "submit" );
+            form.appendChild( fakeSubmitButton );
+
+            fileInput.setValueAttribute( customLogo.getAbsolutePath() );
+            assertTrue( tempLogo.exists() );
+            page = fakeSubmitButton.click();
+            form = (HtmlForm) page.getElementById( "changeImageForm" );
+
+            page = form.getInputByValue( "Save Changes" ).click();
+            assertTrue( page.asXml().contains( "/service/customLogo" ) );
+            assertTrue( managedLogo.exists() );
+
+            // Revert back to the default banner image...
+            page = client.getPage( pageUrl );
+            form = (HtmlForm) page.getElementById( "changeImageForm" );
+            form.getInputByValue( "DEFAULT" ).click();
+            page = form.getInputByValue( "Save Changes" ).click();
+            assertTrue( page.asXml().contains( "/ota_logo.png" ) );
+            assertFalse( managedLogo.exists() );
         }
     }
 
