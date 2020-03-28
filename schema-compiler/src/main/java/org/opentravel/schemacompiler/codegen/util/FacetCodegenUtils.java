@@ -35,6 +35,9 @@ import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.model.TLOperation;
 import org.opentravel.schemacompiler.model.TLResource;
+import org.opentravel.schemacompiler.version.MinorVersionHelper;
+import org.opentravel.schemacompiler.version.VersionSchemeException;
+import org.opentravel.schemacompiler.version.Versioned;
 import org.opentravel.schemacompiler.visitor.ModelElementVisitor;
 import org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter;
 import org.opentravel.schemacompiler.visitor.ModelNavigator;
@@ -841,6 +844,8 @@ public class FacetCodegenUtils {
     private static void findNonLocalGhostFacets(TLFacetOwner owner, TLLibrary originalLibrary,
         List<TLContextualFacet> nonLocalFacets, Map<TLFacetOwner,List<TLFacetOwner>> extensionRegistry,
         Set<TLFacetOwner> visitedOwners) {
+        List<TLFacetOwner> laterMinorVersions = getLaterMinorVersions( owner );
+
         if (!visitedOwners.contains( owner )) {
             List<TLFacetOwner> extendingOwners = extensionRegistry.get( owner );
 
@@ -848,9 +853,15 @@ public class FacetCodegenUtils {
 
             if (extendingOwners != null) {
                 for (TLFacetOwner extendingOwner : extendingOwners) {
-                    findNonLocalGhostFacets( extendingOwner, originalLibrary, nonLocalFacets );
-                    findNonLocalGhostFacets( extendingOwner, originalLibrary, nonLocalFacets, extensionRegistry,
-                        visitedOwners );
+                    // Ghost facets inherited from earlier minor versions must be excluded because they are guranteed
+                    // to have the same name and will be located in the same library as the original facet. This will
+                    // cause a name collision, so the safest course of action is to exclude them. In the future, we
+                    // may want to revisit this to determine if a better solution is possible.
+                    if (!laterMinorVersions.contains( extendingOwner )) {
+                        findNonLocalGhostFacets( extendingOwner, originalLibrary, nonLocalFacets );
+                        findNonLocalGhostFacets( extendingOwner, originalLibrary, nonLocalFacets, extensionRegistry,
+                            visitedOwners );
+                    }
                 }
             }
         }
@@ -881,6 +892,29 @@ public class FacetCodegenUtils {
                 findNonLocalGhostFacets( ghostFacet, originalLibrary, nonLocalFacets );
             }
         }
+    }
+
+    /**
+     * Returns the later minor version of the facet owner if it is a <code>Versioned</code> entity. If the facet owner
+     * is not versioned, an empty list will be returned.
+     * 
+     * @return List&lt;TLFacetOwner&gt;
+     */
+    private static List<TLFacetOwner> getLaterMinorVersions(TLFacetOwner owner) {
+        MinorVersionHelper versionHelper = new MinorVersionHelper();
+        List<TLFacetOwner> laterMinorVersions = new ArrayList<>();
+
+        if (owner instanceof Versioned) {
+            try {
+                List<Versioned> lmvList = versionHelper.getLaterMinorVersions( (Versioned) owner );
+
+                lmvList.forEach( v -> laterMinorVersions.add( (TLFacetOwner) v ) );
+
+            } catch (VersionSchemeException e) {
+                // Ignore and allow the list of later minor versions to remain empty
+            }
+        }
+        return laterMinorVersions;
     }
 
     /**
