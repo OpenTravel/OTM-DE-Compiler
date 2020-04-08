@@ -35,6 +35,7 @@ import org.opentravel.schemacompiler.model.TLContextualFacet;
 import org.opentravel.schemacompiler.model.TLDocumentation;
 import org.opentravel.schemacompiler.model.TLDocumentationOwner;
 import org.opentravel.schemacompiler.model.TLFacet;
+import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLMemberFieldOwner;
 import org.opentravel.schemacompiler.transform.ObjectTransformer;
 import org.opentravel.schemacompiler.transform.TransformerFactory;
@@ -123,19 +124,20 @@ public abstract class AbstractJsonSchemaTransformer<S, T> extends AbstractCodege
      * Recursively generates schema artifacts for all contextual facets in the given list.
      * 
      * @param facetList the list of contextual facets
-     * @param isGhostFacets flag indicating whether the list of facets is comprised of ghosts
+     * @param sourceLibrary the library that owns the business object for which contextual facet artifacts will be
+     *        generated
      * @param delegateFactory the facet code generation delegate factory
      * @param artifacts the container for all generated schema artifacts
      */
-    protected void generateContextualFacetArtifacts(List<TLContextualFacet> facetList, boolean isGhostFacets,
+    protected void generateContextualFacetArtifacts(List<TLContextualFacet> facetList, TLLibrary sourceLibrary,
         FacetJsonSchemaDelegateFactory delegateFactory, CorrelatedCodegenArtifacts artifacts) {
         for (TLContextualFacet facet : facetList) {
-            if (isGhostFacets || facet.isLocalFacet()) {
+            if (facet.getOwningLibrary() == sourceLibrary) {
                 List<TLContextualFacet> ghostFacets = FacetCodegenUtils.findGhostFacets( facet, facet.getFacetType() );
 
-                generateFacetArtifacts( delegateFactory.getDelegate( facet ), artifacts, isGhostFacets );
-                generateContextualFacetArtifacts( facet.getChildFacets(), false, delegateFactory, artifacts );
-                generateContextualFacetArtifacts( ghostFacets, true, delegateFactory, artifacts );
+                generateFacetArtifacts( delegateFactory.getDelegate( facet ), artifacts );
+                generateContextualFacetArtifacts( facet.getChildFacets(), sourceLibrary, delegateFactory, artifacts );
+                generateContextualFacetArtifacts( ghostFacets, sourceLibrary, delegateFactory, artifacts );
             }
         }
     }
@@ -150,8 +152,8 @@ public abstract class AbstractJsonSchemaTransformer<S, T> extends AbstractCodege
      *        filter status
      */
     protected void generateFacetArtifacts(FacetJsonSchemaDelegate<? extends TLFacet> facetDelegate,
-        CorrelatedCodegenArtifacts artifacts, boolean forceGeneration) {
-        CodeGenerationFilter filter = forceGeneration ? null : getCodegenFilter();
+        CorrelatedCodegenArtifacts artifacts) {
+        CodeGenerationFilter filter = getCodegenFilter();
 
         if ((filter == null) || filter.processEntity( facetDelegate.getSourceFacet() )) {
             artifacts.addAllArtifacts( facetDelegate.generateArtifacts() );

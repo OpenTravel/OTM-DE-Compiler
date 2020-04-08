@@ -80,10 +80,12 @@ public class TLActionFacetJsonCodegenTransformer extends AbstractJsonSchemaTrans
     private CodegenArtifacts generateCoreObjectWrapper(TLActionFacet source, TLCoreObject wrapper) {
         CodegenArtifacts artifacts = new CodegenArtifacts();
 
+        setMemberFieldOwner( source );
         artifacts.addAllArtifacts(
             getDelegate( source, wrapper.getSummaryFacet() ).generateArtifacts().getConsolidatedArtifacts() );
         artifacts.addAllArtifacts(
             getDelegate( source, wrapper.getDetailFacet() ).generateArtifacts().getConsolidatedArtifacts() );
+        setMemberFieldOwner( null );
         return artifacts;
     }
 
@@ -97,11 +99,13 @@ public class TLActionFacetJsonCodegenTransformer extends AbstractJsonSchemaTrans
     private CodegenArtifacts generateChoiceObjectWrapper(TLActionFacet source, TLChoiceObject wrapper) {
         CodegenArtifacts artifacts = new CodegenArtifacts();
 
+        setMemberFieldOwner( source );
         artifacts.addAllArtifacts(
             getDelegate( source, wrapper.getSharedFacet() ).generateArtifacts().getConsolidatedArtifacts() );
         generateContextualFacetArtifacts( source, wrapper.getChoiceFacets(), artifacts );
         generateContextualFacetArtifacts( source, FacetCodegenUtils.findGhostFacets( wrapper, TLFacetType.CHOICE ),
             artifacts );
+        setMemberFieldOwner( null );
         return artifacts;
     }
 

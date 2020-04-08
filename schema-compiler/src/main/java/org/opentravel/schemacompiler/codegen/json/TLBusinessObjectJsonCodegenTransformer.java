@@ -22,6 +22,7 @@ import org.opentravel.schemacompiler.codegen.json.facet.FacetJsonSchemaDelegateF
 import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
 import org.opentravel.schemacompiler.model.TLBusinessObject;
 import org.opentravel.schemacompiler.model.TLFacetType;
+import org.opentravel.schemacompiler.model.TLLibrary;
 
 /**
  * Performs the translation from <code>TLBusinessObject</code> objects to the JSON schema elements used to produce the
@@ -37,20 +38,21 @@ public class TLBusinessObjectJsonCodegenTransformer
     public CodegenArtifacts transform(TLBusinessObject source) {
         FacetJsonSchemaDelegateFactory delegateFactory = new FacetJsonSchemaDelegateFactory( context );
         CorrelatedCodegenArtifacts artifacts = new CorrelatedCodegenArtifacts();
+        TLLibrary sourceLibrary = (TLLibrary) source.getOwningLibrary();
 
-        generateFacetArtifacts( delegateFactory.getDelegate( source.getIdFacet() ), artifacts, false );
-        generateFacetArtifacts( delegateFactory.getDelegate( source.getSummaryFacet() ), artifacts, false );
-        generateFacetArtifacts( delegateFactory.getDelegate( source.getDetailFacet() ), artifacts, false );
+        generateFacetArtifacts( delegateFactory.getDelegate( source.getIdFacet() ), artifacts );
+        generateFacetArtifacts( delegateFactory.getDelegate( source.getSummaryFacet() ), artifacts );
+        generateFacetArtifacts( delegateFactory.getDelegate( source.getDetailFacet() ), artifacts );
 
-        generateContextualFacetArtifacts( source.getCustomFacets(), false, delegateFactory, artifacts );
-        generateContextualFacetArtifacts( FacetCodegenUtils.findGhostFacets( source, TLFacetType.CUSTOM ), true,
+        generateContextualFacetArtifacts( source.getCustomFacets(), sourceLibrary, delegateFactory, artifacts );
+        generateContextualFacetArtifacts( FacetCodegenUtils.findGhostFacets( source, TLFacetType.CUSTOM ),
+            sourceLibrary, delegateFactory, artifacts );
+        generateContextualFacetArtifacts( source.getQueryFacets(), sourceLibrary, delegateFactory, artifacts );
+        generateContextualFacetArtifacts( FacetCodegenUtils.findGhostFacets( source, TLFacetType.QUERY ), sourceLibrary,
             delegateFactory, artifacts );
-        generateContextualFacetArtifacts( source.getQueryFacets(), false, delegateFactory, artifacts );
-        generateContextualFacetArtifacts( FacetCodegenUtils.findGhostFacets( source, TLFacetType.QUERY ), true,
-            delegateFactory, artifacts );
-        generateContextualFacetArtifacts( source.getUpdateFacets(), false, delegateFactory, artifacts );
-        generateContextualFacetArtifacts( FacetCodegenUtils.findGhostFacets( source, TLFacetType.UPDATE ), true,
-            delegateFactory, artifacts );
+        generateContextualFacetArtifacts( source.getUpdateFacets(), sourceLibrary, delegateFactory, artifacts );
+        generateContextualFacetArtifacts( FacetCodegenUtils.findGhostFacets( source, TLFacetType.UPDATE ),
+            sourceLibrary, delegateFactory, artifacts );
 
         return artifacts.getConsolidatedArtifacts();
     }

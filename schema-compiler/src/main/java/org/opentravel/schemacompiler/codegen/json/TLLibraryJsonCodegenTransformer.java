@@ -91,11 +91,15 @@ public class TLLibraryJsonCodegenTransformer extends AbstractJsonSchemaTransform
                 if (artifacts != null) {
                     for (JsonSchemaNamedReference memberDef : artifacts
                         .getArtifactsOfType( JsonSchemaNamedReference.class )) {
+                        JsonSchemaReference globalDef = new JsonSchemaReference();
+
+                        globalDef.setSchemaPath( JsonSchemaCodegenUtils.DEFINITIONS_PATH + memberDef.getName() );
+                        globalDefs.add( globalDef );
                         schema.getDefinitions().add( memberDef );
                     }
-                    for (JsonSchemaReference globalDef : artifacts.getArtifactsOfType( JsonSchemaReference.class )) {
-                        globalDefs.add( globalDef );
-                    }
+                    // for (JsonSchemaReference globalDef : artifacts.getArtifactsOfType( JsonSchemaReference.class )) {
+                    // globalDefs.add( globalDef );
+                    // }
                 }
             }
         }
@@ -126,11 +130,15 @@ public class TLLibraryJsonCodegenTransformer extends AbstractJsonSchemaTransform
             if (artifacts != null) {
                 for (JsonSchemaNamedReference memberDef : artifacts
                     .getArtifactsOfType( JsonSchemaNamedReference.class )) {
+                    JsonSchemaReference globalDef = new JsonSchemaReference();
+
+                    globalDef.setSchemaPath( JsonSchemaCodegenUtils.DEFINITIONS_PATH + memberDef.getName() );
+                    globalDefs.add( globalDef );
                     schema.getDefinitions().add( memberDef );
                 }
-                for (JsonSchemaReference globalDef : artifacts.getArtifactsOfType( JsonSchemaReference.class )) {
-                    globalDefs.add( globalDef );
-                }
+                // for (JsonSchemaReference globalDef : artifacts.getArtifactsOfType( JsonSchemaReference.class )) {
+                // globalDefs.add( globalDef );
+                // }
             }
         }
     }

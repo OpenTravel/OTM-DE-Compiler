@@ -29,6 +29,7 @@ import org.opentravel.schemacompiler.codegen.swagger.model.SwaggerOperation;
 import org.opentravel.schemacompiler.codegen.swagger.model.SwaggerOtmResource;
 import org.opentravel.schemacompiler.codegen.swagger.model.SwaggerPathItem;
 import org.opentravel.schemacompiler.codegen.swagger.model.SwaggerScheme;
+import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.ResourceCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.ResourceCodegenUtils.URLComponents;
 import org.opentravel.schemacompiler.model.LibraryMember;
@@ -223,7 +224,7 @@ public class TLResourceSwaggerTransformer extends AbstractSwaggerCodegenTransfor
                 continue;
             }
 
-            for (LibraryMember member : library.getNamedMembers()) {
+            for (LibraryMember member : getLibraryMembers( library )) {
                 if (member instanceof TLResource) {
                     for (TLActionFacet actionFacet : ((TLResource) member).getActionFacets()) {
                         transformEntity( actionFacet, definitions );
@@ -235,6 +236,21 @@ public class TLResourceSwaggerTransformer extends AbstractSwaggerCodegenTransfor
             }
         }
         return definitions;
+    }
+
+    /**
+     * Returns a list of all library members. This includes declared members as well as any non-local ghost facets that
+     * might exist for the library.
+     * 
+     * @param library the library for which to return the list of all members
+     * @return List&lt;LibraryMember&gt;
+     */
+    private List<LibraryMember> getLibraryMembers(TLLibrary library) {
+        List<LibraryMember> allMembers = new ArrayList<>();
+
+        allMembers.addAll( library.getNamedMembers() );
+        allMembers.addAll( FacetCodegenUtils.findNonLocalGhostFacets( library ) );
+        return allMembers;
     }
 
     /**

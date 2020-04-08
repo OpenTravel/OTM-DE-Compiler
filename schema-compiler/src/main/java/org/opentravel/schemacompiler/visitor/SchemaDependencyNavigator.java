@@ -17,6 +17,7 @@
 package org.opentravel.schemacompiler.visitor;
 
 import org.opentravel.schemacompiler.codegen.util.AliasCodegenUtils;
+import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.ResourceCodegenUtils;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
@@ -245,6 +246,8 @@ public class SchemaDependencyNavigator extends AbstractNavigator<NamedEntity> {
 
             navigateFacet( choiceObject.getSharedFacet(), sharedAlias );
             choiceObject.getChoiceFacets().forEach( f -> navigateCtxFacet( f, alias ) );
+            FacetCodegenUtils.findGhostFacets( choiceObject, TLFacetType.CHOICE )
+                .forEach( f -> navigateCtxFacet( f, alias ) );
         }
     }
 
@@ -305,8 +308,14 @@ public class SchemaDependencyNavigator extends AbstractNavigator<NamedEntity> {
             navigateFacet( businessObject.getDetailFacet(), detailAlias );
 
             businessObject.getCustomFacets().forEach( f -> navigateCtxFacet( f, alias ) );
+            FacetCodegenUtils.findGhostFacets( businessObject, TLFacetType.CUSTOM )
+                .forEach( f -> navigateCtxFacet( f, alias ) );
             businessObject.getQueryFacets().forEach( f -> navigateCtxFacet( f, alias ) );
+            FacetCodegenUtils.findGhostFacets( businessObject, TLFacetType.QUERY )
+                .forEach( f -> navigateCtxFacet( f, alias ) );
             businessObject.getUpdateFacets().forEach( f -> navigateCtxFacet( f, alias ) );
+            FacetCodegenUtils.findGhostFacets( businessObject, TLFacetType.UPDATE )
+                .forEach( f -> navigateCtxFacet( f, alias ) );
         }
     }
 
@@ -322,6 +331,9 @@ public class SchemaDependencyNavigator extends AbstractNavigator<NamedEntity> {
             : AliasCodegenUtils.getFacetAlias( ownerAlias, facet.getFacetType(), facet.getName() );
 
         navigateContextualFacet( facet, facetAlias );
+        facet.getChildFacets().forEach( f -> navigateCtxFacet( f, facetAlias ) );
+        FacetCodegenUtils.findGhostFacets( facet, facet.getFacetType() )
+            .forEach( f -> navigateCtxFacet( f, facetAlias ) );
     }
 
     /**

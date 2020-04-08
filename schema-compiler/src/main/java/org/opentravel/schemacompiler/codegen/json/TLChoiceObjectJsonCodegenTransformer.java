@@ -22,6 +22,7 @@ import org.opentravel.schemacompiler.codegen.json.facet.FacetJsonSchemaDelegateF
 import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
 import org.opentravel.schemacompiler.model.TLChoiceObject;
 import org.opentravel.schemacompiler.model.TLFacetType;
+import org.opentravel.schemacompiler.model.TLLibrary;
 
 /**
  * Performs the translation from <code>TLChoiceObject</code> objects to the JSON schema elements used to produce the
@@ -37,12 +38,13 @@ public class TLChoiceObjectJsonCodegenTransformer
     public CodegenArtifacts transform(TLChoiceObject source) {
         FacetJsonSchemaDelegateFactory delegateFactory = new FacetJsonSchemaDelegateFactory( context );
         CorrelatedCodegenArtifacts artifacts = new CorrelatedCodegenArtifacts();
+        TLLibrary sourceLibrary = (TLLibrary) source.getOwningLibrary();
 
-        generateFacetArtifacts( delegateFactory.getDelegate( source.getSharedFacet() ), artifacts, false );
+        generateFacetArtifacts( delegateFactory.getDelegate( source.getSharedFacet() ), artifacts );
 
-        generateContextualFacetArtifacts( source.getChoiceFacets(), false, delegateFactory, artifacts );
-        generateContextualFacetArtifacts( FacetCodegenUtils.findGhostFacets( source, TLFacetType.CHOICE ), true,
-            delegateFactory, artifacts );
+        generateContextualFacetArtifacts( source.getChoiceFacets(), sourceLibrary, delegateFactory, artifacts );
+        generateContextualFacetArtifacts( FacetCodegenUtils.findGhostFacets( source, TLFacetType.CHOICE ),
+            sourceLibrary, delegateFactory, artifacts );
 
         return artifacts.getConsolidatedArtifacts();
     }

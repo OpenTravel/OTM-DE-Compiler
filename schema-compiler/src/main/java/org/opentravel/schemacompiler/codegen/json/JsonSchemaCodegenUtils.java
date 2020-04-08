@@ -73,8 +73,9 @@ import javax.xml.namespace.QName;
  */
 public class JsonSchemaCodegenUtils {
 
+    public static final String DEFINITIONS_PATH = "#/definitions/";
+
     private static final String DESCRIPTION = "description";
-    private static final String DEFINITIONS_PATH = "#/definitions/";
 
     public static final String JSON_SCHEMA_FILENAME_EXT = "schema.json";
 
@@ -342,9 +343,7 @@ public class JsonSchemaCodegenUtils {
             if (referencingEntity != null) {
                 filenameBuilder = (CodeGenerationFilenameBuilder<AbstractLibrary>) codeGenerator.getFilenameBuilder();
             } else {
-                filenameBuilder = new LibraryTrimmedFilenameBuilder( null ); // swagger
-                                                                             // reference
-                                                                             // scenario
+                filenameBuilder = new LibraryTrimmedFilenameBuilder( null ); // swagger reference scenario
             }
 
             if (referencedEntity.getOwningLibrary() instanceof BuiltInLibrary) {

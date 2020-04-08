@@ -45,8 +45,8 @@ public class TLCoreObjectJsonCodegenTransformer extends AbstractJsonSchemaTransf
         FacetJsonSchemaDelegateFactory delegateFactory = new FacetJsonSchemaDelegateFactory( context );
         CorrelatedCodegenArtifacts artifacts = new CorrelatedCodegenArtifacts();
 
-        generateFacetArtifacts( delegateFactory.getDelegate( source.getSummaryFacet() ), artifacts, false );
-        generateFacetArtifacts( delegateFactory.getDelegate( source.getDetailFacet() ), artifacts, false );
+        generateFacetArtifacts( delegateFactory.getDelegate( source.getSummaryFacet() ), artifacts );
+        generateFacetArtifacts( delegateFactory.getDelegate( source.getDetailFacet() ), artifacts );
 
         if (!source.getRoleEnumeration().getRoles().isEmpty()) {
             artifacts.addArtifact( roleEnum, createRoleEnumerationComplexType( source ) );
@@ -70,7 +70,7 @@ public class TLCoreObjectJsonCodegenTransformer extends AbstractJsonSchemaTransf
         roleEnum.setName( definitionName );
         roleEnum.setSchema( new JsonSchemaReference( schema ) );
         schema.getProperties().add( new JsonSchemaNamedReference( "value",
-            new JsonSchemaReference( "#/definitions/" + definitionName + "_Open" ) ) );
+            new JsonSchemaReference( JsonSchemaCodegenUtils.DEFINITIONS_PATH + definitionName + "_Open" ) ) );
         schema.getProperties().add( new JsonSchemaNamedReference( "extension",
             new JsonSchemaReference( SimpleTypeInfo.ENUM_EXTENSION_SCHEMA ) ) );
         return roleEnum;

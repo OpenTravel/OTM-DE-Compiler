@@ -20,6 +20,7 @@ import org.opentravel.schemacompiler.codegen.CodeGenerationFilter;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.BuiltInLibrary;
 import org.opentravel.schemacompiler.model.LibraryElement;
+import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.XSDLibrary;
 
 import java.io.PrintStream;
@@ -33,9 +34,10 @@ import java.util.Set;
  */
 public class DefaultCodeGenerationFilter implements CodeGenerationFilter {
 
-    private Set<AbstractLibrary> allowedLibraries = new HashSet<>();
-    private Set<XSDLibrary> extensionLibraries = new HashSet<>();
-    private Set<LibraryElement> allowedEntities = new HashSet<>();
+    private Set<LibraryMetaInfo> allowedLibraries = new HashSet<>();
+    private Set<LibraryMetaInfo> extensionLibraries = new HashSet<>();
+    private Set<EntityMetaInfo> allowedEntities = new HashSet<>();
+    private Set<LibraryElement> allowedElements = new HashSet<>();
 
     /**
      * Adds the given library to the list of libraries that will be allowed by this filter.
@@ -43,8 +45,12 @@ public class DefaultCodeGenerationFilter implements CodeGenerationFilter {
      * @param library the library to allow
      */
     public void addProcessedLibrary(AbstractLibrary library) {
-        if ((library != null) && !allowedLibraries.contains( library )) {
-            allowedLibraries.add( library );
+        if (library != null) {
+            LibraryMetaInfo libraryInfo = new LibraryMetaInfo( library );
+
+            if (!allowedLibraries.contains( libraryInfo )) {
+                allowedLibraries.add( libraryInfo );
+            }
         }
     }
 
@@ -54,8 +60,12 @@ public class DefaultCodeGenerationFilter implements CodeGenerationFilter {
      * @param legacySchema the legacy schema for which an extension will be required
      */
     public void addExtensionLibrary(XSDLibrary legacySchema) {
-        if ((legacySchema != null) && !extensionLibraries.contains( legacySchema )) {
-            extensionLibraries.add( legacySchema );
+        if (legacySchema != null) {
+            LibraryMetaInfo libraryInfo = new LibraryMetaInfo( legacySchema );
+
+            if (!extensionLibraries.contains( libraryInfo )) {
+                extensionLibraries.add( libraryInfo );
+            }
         }
     }
 
@@ -65,8 +75,17 @@ public class DefaultCodeGenerationFilter implements CodeGenerationFilter {
      * @param entity the library element to allow
      */
     public void addProcessedElement(LibraryElement entity) {
-        if ((entity != null) && !allowedEntities.contains( entity )) {
-            allowedEntities.add( entity );
+        if (entity != null) {
+            if (entity instanceof NamedEntity) {
+                EntityMetaInfo entityInfo = new EntityMetaInfo( (NamedEntity) entity );
+
+                if (!allowedEntities.contains( entityInfo )) {
+                    allowedEntities.add( entityInfo );
+                }
+
+            } else {
+                allowedElements.add( entity );
+            }
         }
     }
 
@@ -75,7 +94,7 @@ public class DefaultCodeGenerationFilter implements CodeGenerationFilter {
      */
     @Override
     public boolean processLibrary(AbstractLibrary library) {
-        return allowedLibraries.contains( library );
+        return (library == null) ? false : allowedLibraries.contains( new LibraryMetaInfo( library ) );
     }
 
     /**
@@ -83,7 +102,7 @@ public class DefaultCodeGenerationFilter implements CodeGenerationFilter {
      */
     @Override
     public boolean processExtendedLibrary(XSDLibrary legacySchema) {
-        return extensionLibraries.contains( legacySchema );
+        return (legacySchema == null) ? false : extensionLibraries.contains( new LibraryMetaInfo( legacySchema ) );
     }
 
     /**
@@ -91,7 +110,14 @@ public class DefaultCodeGenerationFilter implements CodeGenerationFilter {
      */
     @Override
     public boolean processEntity(LibraryElement entity) {
-        return allowedEntities.contains( entity );
+        boolean result;
+
+        if (entity instanceof NamedEntity) {
+            result = allowedEntities.contains( new EntityMetaInfo( (NamedEntity) entity ) );
+        } else {
+            result = allowedElements.contains( entity );
+        }
+        return result;
     }
 
     /**
@@ -118,12 +144,137 @@ public class DefaultCodeGenerationFilter implements CodeGenerationFilter {
     public void display(PrintStream out) {
         out.println( "CODE GENERATION FILTER:" );
 
-        for (AbstractLibrary l : allowedLibraries) {
+        for (LibraryMetaInfo l : allowedLibraries) {
             out.println( "  LIBRARY: " + l.getName() + " / " + l.getNamespace() );
         }
-        for (LibraryElement e : allowedEntities) {
+        for (EntityMetaInfo e : allowedEntities) {
+            out.println( "  ENTITY : " + e.getIdentity() );
+        }
+        for (LibraryElement e : allowedElements) {
             out.println( "  ENTITY : " + e.getValidationIdentity() );
         }
+    }
+
+    /**
+     * Provides a means of determining whether a library has been added to the filter without performing an
+     * instance-level equality check.
+     */
+    private static class LibraryMetaInfo {
+
+        private Class<?> libraryClass;
+        private String namespace;
+        private String name;
+
+        /**
+         * Constructor that creates a meta-info record for the given library.
+         * 
+         * @param library the library for which to create a meta-info record
+         */
+        public LibraryMetaInfo(AbstractLibrary library) {
+            libraryClass = library.getClass();
+            namespace = library.getNamespace();
+            name = library.getName();
+        }
+
+        /**
+         * Returns the namespace of the library.
+         * 
+         * @return String
+         */
+        public String getNamespace() {
+            return namespace;
+        }
+
+        /**
+         * Returns the name of the library.
+         * 
+         * @return String
+         */
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            boolean isEqual = false;
+
+            if (obj instanceof LibraryMetaInfo) {
+                LibraryMetaInfo other = (LibraryMetaInfo) obj;
+
+                isEqual = this.libraryClass.equals( other.libraryClass ) && isEqual( this.namespace, other.namespace )
+                    && isEqual( this.name, other.name );
+            }
+            return isEqual;
+        }
+
+        @Override
+        public int hashCode() {
+            return namespace.hashCode();
+        }
+
+    }
+
+    /**
+     * Provides a means of determining whether a <code>NamedEntity</code> has been added to the filter without
+     * performing an instance-level equality check.
+     */
+    private static class EntityMetaInfo {
+
+        private Class<?> entityClass;
+        private String namespace;
+        private String localName;
+        private String identity;
+
+        /**
+         * Constructor that creates a meta-info record for the given library.
+         * 
+         * @param library the library for which to create a meta-info record
+         */
+        public EntityMetaInfo(NamedEntity entity) {
+            entityClass = entity.getClass();
+            namespace = entity.getNamespace();
+            localName = entity.getLocalName();
+            identity = entity.getValidationIdentity();
+        }
+
+        /**
+         * Returns an identity name for the entity.
+         * 
+         * @return String
+         */
+        public String getIdentity() {
+            return identity;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            boolean isEqual = false;
+
+            if (obj instanceof EntityMetaInfo) {
+                EntityMetaInfo other = (EntityMetaInfo) obj;
+
+                isEqual = this.entityClass.equals( other.entityClass ) && isEqual( this.namespace, other.namespace )
+                    && isEqual( this.localName, other.localName );
+            }
+            return isEqual;
+        }
+
+        @Override
+        public int hashCode() {
+            return namespace.hashCode();
+        }
+
+    }
+
+    /**
+     * Determines the equality of two strings, including null checks.
+     * 
+     * @param str1 the first string to be compared
+     * @param str2 the second string to be compared
+     * @return boolean
+     */
+    private static boolean isEqual(String str1, String str2) {
+        return (str1 == null) ? (str2 == null) : str1.equals( str2 );
     }
 
 }

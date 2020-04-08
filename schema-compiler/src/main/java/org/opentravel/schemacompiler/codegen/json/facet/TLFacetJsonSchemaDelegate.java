@@ -23,6 +23,7 @@ import org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts;
 import org.opentravel.schemacompiler.codegen.impl.CorrelatedCodegenArtifacts;
 import org.opentravel.schemacompiler.codegen.impl.DocumentationFinder;
 import org.opentravel.schemacompiler.codegen.json.AbstractJsonSchemaTransformer;
+import org.opentravel.schemacompiler.codegen.json.JsonSchemaCodegenUtils;
 import org.opentravel.schemacompiler.codegen.json.model.JsonDocumentation;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchema;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaNamedReference;
@@ -245,9 +246,8 @@ public class TLFacetJsonSchemaDelegate extends FacetJsonSchemaDelegate<TLFacet> 
         ObjectTransformer<TLIndicator,JsonSchemaNamedReference,CodeGenerationTransformerContext> indicatorTransformer =
             getTransformerFactory().getTransformer( TLIndicator.class, JsonSchemaNamedReference.class );
         List<JsonSchemaNamedReference> definitions = new ArrayList<>();
-        CodeGenerationTransformerContext transformContext = getTransformerFactory().getContext();
 
-        transformContext.setContextCacheEntry( AbstractJsonSchemaTransformer.MEMBER_FIELD_OWNER_KEY, getSourceFacet() );
+        setMemberFieldOwner( getSourceFacet() );
 
         for (TLMemberField<?> field : getMemberFields()) {
             if (field instanceof TLAttribute) {
@@ -261,8 +261,7 @@ public class TLFacetJsonSchemaDelegate extends FacetJsonSchemaDelegate<TLFacet> 
                 definitions.add( indicatorTransformer.transform( (TLIndicator) field ) );
             }
         }
-
-        transformContext.setContextCacheEntry( AbstractJsonSchemaTransformer.MEMBER_FIELD_OWNER_KEY, null );
+        setMemberFieldOwner( null );
 
         return definitions;
     }
@@ -345,11 +344,11 @@ public class TLFacetJsonSchemaDelegate extends FacetJsonSchemaDelegate<TLFacet> 
                         dependency.getSchemaDeclaration().getFilename( CodeGeneratorFactory.JSON_SCHEMA_TARGET_FORMAT );
 
                     if ((referencedFilename != null) && !isLocalNameReferencesEnabled()) {
-                        schemaPath =
-                            builtInLocation + referencedFilename + "#/definitions/" + dependency.getLocalName();
+                        schemaPath = builtInLocation + referencedFilename + JsonSchemaCodegenUtils.DEFINITIONS_PATH
+                            + dependency.getLocalName();
                         addCompileTimeDependency( dependency );
                     } else {
-                        schemaPath = "#/definitions/" + dependency.getLocalName();
+                        schemaPath = JsonSchemaCodegenUtils.DEFINITIONS_PATH + dependency.getLocalName();
                     }
                 }
             }
@@ -400,6 +399,21 @@ public class TLFacetJsonSchemaDelegate extends FacetJsonSchemaDelegate<TLFacet> 
      */
     protected final List<TLIndicator> getIndicators() {
         return ((TLFacetCodegenDelegate) xsdDelegateFactory.getDelegate( getSourceFacet() )).getIndicators();
+    }
+
+    /**
+     * Assigns the given entity as the current member field owner if an owner is not already assigned.
+     * 
+     * @param fieldOwner the entity to assign as the owner of all contained fields
+     */
+    protected void setMemberFieldOwner(NamedEntity fieldOwner) {
+        CodeGenerationTransformerContext transformContext = getTransformerFactory().getContext();
+        Object existingOwner =
+            transformContext.getContextCacheEntry( AbstractJsonSchemaTransformer.MEMBER_FIELD_OWNER_KEY );
+
+        if ((fieldOwner == null) || (existingOwner == null)) {
+            transformContext.setContextCacheEntry( AbstractJsonSchemaTransformer.MEMBER_FIELD_OWNER_KEY, fieldOwner );
+        }
     }
 
 }
