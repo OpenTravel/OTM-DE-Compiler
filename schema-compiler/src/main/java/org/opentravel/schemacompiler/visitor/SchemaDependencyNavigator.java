@@ -17,6 +17,7 @@
 package org.opentravel.schemacompiler.visitor;
 
 import org.opentravel.schemacompiler.codegen.util.AliasCodegenUtils;
+import org.opentravel.schemacompiler.codegen.util.ExtensionPointRegistry;
 import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.ResourceCodegenUtils;
@@ -52,6 +53,7 @@ import org.opentravel.schemacompiler.model.TLOpenEnumeration;
 import org.opentravel.schemacompiler.model.TLOperation;
 import org.opentravel.schemacompiler.model.TLParamGroup;
 import org.opentravel.schemacompiler.model.TLParameter;
+import org.opentravel.schemacompiler.model.TLPatchableFacet;
 import org.opentravel.schemacompiler.model.TLProperty;
 import org.opentravel.schemacompiler.model.TLReferenceType;
 import org.opentravel.schemacompiler.model.TLResource;
@@ -78,6 +80,8 @@ import java.util.List;
  */
 public class SchemaDependencyNavigator extends AbstractNavigator<NamedEntity> {
 
+    private ExtensionPointRegistry epfRegistry;
+
     /**
      * Default constructor.
      */
@@ -100,8 +104,10 @@ public class SchemaDependencyNavigator extends AbstractNavigator<NamedEntity> {
      * @param visitor the visitor to be notified when dependencies are encountered
      */
     public static void navigate(AbstractLibrary library, ModelElementVisitor visitor) {
-        new SchemaDependencyNavigator( visitor ).navigateLibrary( library );
+        SchemaDependencyNavigator navigator = new SchemaDependencyNavigator( visitor );
 
+        navigator.epfRegistry = new ExtensionPointRegistry( library.getOwningModel() );
+        navigator.navigateLibrary( library );
     }
 
     /**
@@ -112,7 +118,10 @@ public class SchemaDependencyNavigator extends AbstractNavigator<NamedEntity> {
      * @param visitor the visitor to be notified when dependencies are encountered
      */
     public static void navigate(NamedEntity target, ModelElementVisitor visitor) {
-        new SchemaDependencyNavigator( visitor ).navigate( target );
+        SchemaDependencyNavigator navigator = new SchemaDependencyNavigator( visitor );
+
+        navigator.epfRegistry = new ExtensionPointRegistry( target.getOwningModel() );
+        navigator.navigate( target );
     }
 
     /**
@@ -120,6 +129,9 @@ public class SchemaDependencyNavigator extends AbstractNavigator<NamedEntity> {
      */
     @Override
     public void navigate(NamedEntity target) {
+        if ((target != null) && (epfRegistry == null)) {
+            epfRegistry = new ExtensionPointRegistry( target.getOwningModel() );
+        }
         navigateDependency( target );
     }
 
@@ -131,6 +143,10 @@ public class SchemaDependencyNavigator extends AbstractNavigator<NamedEntity> {
     public void navigateLibrary(AbstractLibrary library) {
         List<LibraryMember> libraryMembers = new ArrayList<>( library.getNamedMembers() );
 
+        if ((library != null) && (epfRegistry == null)) {
+            epfRegistry = new ExtensionPointRegistry( library.getOwningModel() );
+        }
+
         for (NamedEntity libraryMember : libraryMembers) {
             if (library instanceof TLLibrary) {
                 visitor.visitUserDefinedLibrary( (TLLibrary) library );
@@ -141,7 +157,7 @@ public class SchemaDependencyNavigator extends AbstractNavigator<NamedEntity> {
             } else if (library instanceof BuiltInLibrary) {
                 visitor.visitBuiltInLibrary( (BuiltInLibrary) library );
             }
-            navigate( libraryMember );
+            navigateDependency( libraryMember );
         }
     }
 
@@ -412,6 +428,18 @@ public class SchemaDependencyNavigator extends AbstractNavigator<NamedEntity> {
     }
 
     /**
+     * Identifies and navigates any <code>TLExtensionPointFacet</code> entities that are associated with the given
+     * facet.
+     * 
+     * @param facet the facet for which to navigate associated extension point facets
+     */
+    private void navigateExtensionPointFacets(TLPatchableFacet facet) {
+        if (epfRegistry != null) {
+            epfRegistry.getExtensionPoints( facet ).forEach( this::navigateExtensionPointFacet );
+        }
+    }
+
+    /**
      * Called when a <code>TLExtensionPointFacet</code> instance is encountered during model navigation.
      * 
      * @param extensionPointFacet the extension point facet entity to visit and navigate
@@ -590,6 +618,7 @@ public class SchemaDependencyNavigator extends AbstractNavigator<NamedEntity> {
             TLFacetType facetType = facet.getFacetType();
 
             navigateFacetMembers( facet );
+            navigateExtensionPointFacets( facet );
 
             if (facetOwner instanceof TLCoreObject) {
                 TLCoreObject core = (TLCoreObject) facetOwner;
@@ -692,6 +721,7 @@ public class SchemaDependencyNavigator extends AbstractNavigator<NamedEntity> {
             return;
         }
         navigateFacetMembers( facet );
+        navigateExtensionPointFacets( facet );
 
         if (facetOwner instanceof TLContextualFacet) {
             if (alias != null) {
@@ -969,6 +999,10 @@ public class SchemaDependencyNavigator extends AbstractNavigator<NamedEntity> {
      * @param entity the entity whose dependencies to navigate
      */
     public void navigateDependency(NamedEntity entity) {
+        if ((entity != null) && (epfRegistry == null)) {
+            epfRegistry = new ExtensionPointRegistry( entity.getOwningModel() );
+        }
+
         if (navigateEntityFunction.canApply( entity )) {
             navigateEntityFunction.apply( entity, null );
         }

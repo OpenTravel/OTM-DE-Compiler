@@ -16,14 +16,25 @@
     <Context applicationContext="default-applicationContext" context="default"/>
     <Comments>Facets Resource Test Library</Comments>
     
-    <Resource name="FacetResource" businessObjectRef="b:ExtFacetTestBO" basePath="/" abstract="false" firstClass="true">
-        <ParamGroup name="IDParameters" idGroup="true" facetName="b:ExtFacetTestBO_ID">
+    <Resource name="FacetResource" businessObjectRef="b:FacetTestBO" basePath="/" abstract="false" firstClass="true">
+        <ParamGroup name="IDParameters" idGroup="true" facetName="b:FacetTestBO_ID">
         	<Parameter fieldName="uid" location="Path" />
         </ParamGroup>
         <ActionFacet label="ObjectOnly" referenceType="Required" />
         <Action actionId="Get" common="false">
         	<ActionRequest httpMethod="GET" pathTemplate="/samples/{uid}" paramGroup="IDParameters" />
         	<ActionResponse statusCodes="200" payloadType="FacetResource_ObjectOnly" mimeTypes="APPLICATION_XML APPLICATION_JSON" />
+        </Action>
+   	</Resource>
+   	
+    <Resource name="ExtFacetResource" businessObjectRef="b:ExtFacetTestBO" basePath="/" abstract="false" firstClass="true">
+        <ParamGroup name="IDParameters" idGroup="true" facetName="b:ExtFacetTestBO_ID">
+        	<Parameter fieldName="uid" location="Path" />
+        </ParamGroup>
+        <ActionFacet label="ObjectOnly" referenceType="Required" />
+        <Action actionId="Get" common="false">
+        	<ActionRequest httpMethod="GET" pathTemplate="/samples/{uid}" paramGroup="IDParameters" />
+        	<ActionResponse statusCodes="200" payloadType="ExtFacetResource_ObjectOnly" mimeTypes="APPLICATION_XML APPLICATION_JSON" />
         </Action>
    	</Resource>
    	

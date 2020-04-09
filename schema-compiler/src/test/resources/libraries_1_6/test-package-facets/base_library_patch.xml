@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Library xmlns="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_06"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_06 ../../../../main/resources/ota2-context/schemas/OTA2_LibraryModel_v1.6.0.xsd">
+    
+    <VersionScheme>OTA2</VersionScheme>
+    <Status>Draft</Status>
+    <Namespace>http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/test-package-facets/base/v1_0_1</Namespace>
+    <Prefix>b-010001</Prefix>
+    <Name>base_library</Name>
+    <Import namespace="http://www.w3.org/2001/XMLSchema" prefix="xsd"/>
+    <Import namespace="http://www.opentravel.org/OTM/Common/v0" prefix="ota"/>
+    <Import fileHints="base_library.xml"
+        namespace="http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/test-package-facets/base/v1" prefix="b"/>
+    <Context applicationContext="default-applicationContext" context="default"/>
+    <Comments>Base Facet Test Library</Comments>
+    
+    <ExtensionPointFacet>
+        <Attribute name="extChoiceAttribute101" type="xsd:string"/>
+        <Extension extends="b:FacetTestChoice_ChoiceF1"/>
+    </ExtensionPointFacet>
+    
+    <ExtensionPointFacet>
+        <Attribute name="extCustomAttribute101" type="xsd:string"/>
+        <Extension extends="b:FacetTestBO_CustomF1"/>
+    </ExtensionPointFacet>
+    
+    <ExtensionPointFacet>
+        <Attribute name="extQueryAttribute101" type="xsd:string"/>
+        <Extension extends="b:FacetTestBO_Query_QueryF1"/>
+    </ExtensionPointFacet>
+    
+    <ExtensionPointFacet>
+        <Attribute name="extUpdateAttribute101" type="xsd:string"/>
+        <Extension extends="b:FacetTestBO_Update_UpdateF1"/>
+    </ExtensionPointFacet>
+    
+</Library>

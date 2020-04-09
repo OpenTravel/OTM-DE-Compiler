@@ -16,6 +16,9 @@
         <otp:FileLocation>facets2_library.xml</otp:FileLocation>
     </otp:UnmanagedProjectItem>
     <otp:UnmanagedProjectItem>
+        <otp:FileLocation>base_library_patch.xml</otp:FileLocation>
+    </otp:UnmanagedProjectItem>
+    <otp:UnmanagedProjectItem>
         <otp:FileLocation>facet_refs_library.xml</otp:FileLocation>
     </otp:UnmanagedProjectItem>
 </otp:Project>

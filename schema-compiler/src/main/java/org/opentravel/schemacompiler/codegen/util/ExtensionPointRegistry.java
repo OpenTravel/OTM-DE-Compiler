@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package org.opentravel.schemacompiler.codegen.example;
+package org.opentravel.schemacompiler.codegen.util;
 
-import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
 import org.opentravel.schemacompiler.codegen.xsd.facet.FacetCodegenDelegateFactory;
 import org.opentravel.schemacompiler.codegen.xsd.facet.TLFacetCodegenDelegate;
 import org.opentravel.schemacompiler.model.NamedEntity;
@@ -34,6 +33,7 @@ import org.opentravel.schemacompiler.version.VersionSchemeException;
 import org.opentravel.schemacompiler.version.Versioned;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
@@ -70,6 +70,18 @@ public class ExtensionPointRegistry {
     }
 
     /**
+     * Returns the list of extension point facets directly associated with the given facet.
+     * 
+     * @param facet the facet for which to retrieve associated extension points
+     * @return List&lt;TLExtensionPointFacet&gt;
+     */
+    public List<TLExtensionPointFacet> getExtensionPoints(TLPatchableFacet facet) {
+        List<TLExtensionPointFacet> epfList = registryMap.get( facet );
+
+        return (epfList == null) ? Collections.emptyList() : epfList;
+    }
+
+    /**
      * Returns the extension points from the model that reference the given entity facet. The resulting map is indexed
      * by the facet-type to which each <code>TLExtensionPointFacet</code> is associated. The lists of extension point
      * facets include those items that reference extended entities of the facet's owner.
@@ -77,7 +89,7 @@ public class ExtensionPointRegistry {
      * @param facet the facet for which to return extension points
      * @return Map&lt;TLFacetType,List&lt;TLExtensionPointFacet&gt;&gt;
      */
-    public Map<TLFacetType,List<TLExtensionPointFacet>> getExtensionPoints(TLPatchableFacet facet) {
+    public Map<TLFacetType,List<TLExtensionPointFacet>> getAllExtensionPoints(TLPatchableFacet facet) {
         Map<TLFacetType,List<TLExtensionPointFacet>> result = new EnumMap<>( TLFacetType.class );
         MinorVersionHelper versionHelper = new MinorVersionHelper();
 

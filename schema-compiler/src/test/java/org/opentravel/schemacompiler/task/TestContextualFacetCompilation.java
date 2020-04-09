@@ -168,8 +168,10 @@ public class TestContextualFacetCompilation {
             new File( SchemaCompilerTestUtils.getBaseLibraryLocation() + "/test-package-facets/project_resource.otp" );
         File targetFolder =
             new File( System.getProperty( "user.dir" ) + "/target/codegen-output/testResourceFacetCompilation" );
-        File swaggerFile = new File(
+        File baseSwaggerFile = new File(
             targetFolder + "/swagger/facets_resource_library_FacetResource/FacetResource_1_0_0.defs.swagger" );
+        File extSwaggerFile = new File(
+            targetFolder + "/swagger/facets_resource_library_ExtFacetResource/ExtFacetResource_1_0_0.defs.swagger" );
         CompileAllCompilerTask compilerTask = TaskFactory.getTask( CompileAllCompilerTask.class );
         ValidationFindings findings;
 
@@ -182,17 +184,38 @@ public class TestContextualFacetCompilation {
 
         SchemaCompilerTestUtils.printFindings( findings );
         assertFalse( findings.hasFinding( FindingType.ERROR ) );
-        assertTrue( swaggerFile.exists() );
+        assertTrue( baseSwaggerFile.exists() );
+        assertTrue( extSwaggerFile.exists() );
         CodeGeneratorTestAssertions.validateGeneratedFiles( compilerTask.getGeneratedFiles() );
 
         // Validate that the non-local ghost facets exist in the definitions section of the swagger document
-        JsonNode swaggerNode = JsonLoader.fromFile( swaggerFile );
-        JsonNode defsNode = swaggerNode.get( "definitions" );
+        JsonNode baseSwaggerNode = JsonLoader.fromFile( baseSwaggerFile );
+        JsonNode extSwaggerNode = JsonLoader.fromFile( extSwaggerFile );
+        JsonNode baseDefsNode = baseSwaggerNode.get( "definitions" );
+        JsonNode extDefsNode = extSwaggerNode.get( "definitions" );
 
-        assertFalse( defsNode.has( "ExtFacetTestChoiceChoiceF2ChoiceF2A" ) );
-        assertTrue( defsNode.has( "ExtFacetTestBOCustomF2CustomF2A" ) );
-        assertTrue( defsNode.has( "ExtFacetTestBOQueryQueryF2QueryF2A" ) );
-        assertTrue( defsNode.has( "ExtFacetTestBOUpdateUpdateF2UpdateF2A" ) );
+        // Ensure all of the contextual ghost facets were generated for the extended business object
+        assertFalse( extDefsNode.has( "ExtFacetTestChoiceChoiceF1" ) );
+        assertTrue( extDefsNode.has( "ExtFacetTestBOCustomF1" ) );
+        assertTrue( extDefsNode.has( "ExtFacetTestBOQueryQueryF1" ) );
+        assertTrue( extDefsNode.has( "ExtFacetTestBOUpdateUpdateF1" ) );
+        assertFalse( extDefsNode.has( "ExtFacetTestChoiceChoiceF1ChoiceF1A" ) );
+        assertTrue( extDefsNode.has( "ExtFacetTestBOCustomF1CustomF1A" ) );
+        assertTrue( extDefsNode.has( "ExtFacetTestBOQueryQueryF1QueryF1A" ) );
+        assertTrue( extDefsNode.has( "ExtFacetTestBOUpdateUpdateF1UpdateF1A" ) );
+        assertFalse( extDefsNode.has( "ExtFacetTestChoiceChoiceF2ChoiceF2A" ) );
+        assertTrue( extDefsNode.has( "ExtFacetTestBOCustomF2CustomF2A" ) );
+        assertTrue( extDefsNode.has( "ExtFacetTestBOQueryQueryF2QueryF2A" ) );
+        assertTrue( extDefsNode.has( "ExtFacetTestBOUpdateUpdateF2UpdateF2A" ) );
+        assertFalse( extDefsNode.has( "ExtFacetTestChoiceChoiceF2ChoiceF2B" ) );
+        assertTrue( extDefsNode.has( "ExtFacetTestBOCustomF2CustomF2B" ) );
+        assertTrue( extDefsNode.has( "ExtFacetTestBOQueryQueryF2QueryF2B" ) );
+        assertTrue( extDefsNode.has( "ExtFacetTestBOUpdateUpdateF2UpdateF2B" ) );
+
+        // Ensure all extension point facet types were generated for the base business object
+        assertTrue( baseDefsNode.has( "ExtensionPoint_FacetTestBO_CustomF1" ) );
+        assertTrue( baseDefsNode.has( "ExtensionPoint_FacetTestBO_Query_QueryF1" ) );
+        assertTrue( baseDefsNode.has( "ExtensionPoint_FacetTestBO_Update_UpdateF1" ) );
     }
 
     private void assertContainsFacets(List<TLContextualFacet> facetList, String... localNames) {

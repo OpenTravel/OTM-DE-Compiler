@@ -18,6 +18,7 @@ package org.opentravel.schemacompiler.codegen.example;
 
 import org.opentravel.schemacompiler.codegen.example.ExampleGeneratorOptions.DetailLevel;
 import org.opentravel.schemacompiler.codegen.util.AliasCodegenUtils;
+import org.opentravel.schemacompiler.codegen.util.ExtensionPointRegistry;
 import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.ResourceCodegenUtils;
@@ -613,7 +614,7 @@ public class ExampleNavigator {
      */
     protected void navigateFacetMembers(TLFacet facet) {
         Map<TLFacetType,List<TLExtensionPointFacet>> facetExtensionsByType =
-            extensionPointRegistry.getExtensionPoints( facet );
+            extensionPointRegistry.getAllExtensionPoints( facet );
         Set<TLFacetType> processedExtensionPointTypes = new HashSet<>();
         String previousFacetIdentity = null;
 
