@@ -209,7 +209,7 @@ public class DefaultCodeGenerationFilter implements CodeGenerationFilter {
 
         @Override
         public int hashCode() {
-            return namespace.hashCode();
+            return (namespace == null) ? 0 : namespace.hashCode();
         }
 
     }
@@ -261,7 +261,7 @@ public class DefaultCodeGenerationFilter implements CodeGenerationFilter {
 
         @Override
         public int hashCode() {
-            return namespace.hashCode();
+            return (namespace == null) ? 0 : namespace.hashCode();
         }
 
     }
