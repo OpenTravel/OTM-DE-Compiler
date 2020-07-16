@@ -78,19 +78,31 @@ public class TLFacetJsonSchemaDelegate extends FacetJsonSchemaDelegate<TLFacet> 
 
         if (hasContent()) {
             JsonSchemaNamedReference facetDef = createDefinition();
+            JsonSchemaNamedReference nonSubFacetDef =
+                hasNonSubstitutableElement() ? createDefinition( null, true ) : null;
             TLFacet sourceFacet = getSourceFacet();
 
             if (facetDef != null) {
                 artifacts.addArtifact( sourceFacet, facetDef );
                 artifacts.addArtifact( sourceFacet, createGlobalElement( null, facetDef.getName() ) );
             }
+            if (nonSubFacetDef != null) {
+                artifacts.addArtifact( sourceFacet, nonSubFacetDef );
+                artifacts.addArtifact( sourceFacet, createGlobalElement( null, nonSubFacetDef.getName() ) );
+            }
 
             for (TLAlias alias : sourceFacet.getAliases()) {
                 JsonSchemaNamedReference aliasDef = createDefinition( alias );
+                JsonSchemaNamedReference nonSubAliasDef =
+                    hasNonSubstitutableElement() ? createDefinition( alias, true ) : null;
 
                 if (aliasDef != null) {
                     artifacts.addArtifact( alias, aliasDef );
                     artifacts.addArtifact( alias, createGlobalElement( alias, aliasDef.getName() ) );
+                }
+                if (nonSubAliasDef != null) {
+                    artifacts.addArtifact( alias, nonSubAliasDef );
+                    artifacts.addArtifact( alias, createGlobalElement( alias, nonSubAliasDef.getName() ) );
                 }
             }
         }
@@ -104,6 +116,17 @@ public class TLFacetJsonSchemaDelegate extends FacetJsonSchemaDelegate<TLFacet> 
      * @return JsonSchemaNamedReference
      */
     protected JsonSchemaNamedReference createDefinition(TLAlias alias) {
+        return createDefinition( alias, false );
+    }
+
+    /**
+     * Creates the JSON definiton for the facet or the alias if one is specified.
+     * 
+     * @param alias the facet alias for which to generate a definition
+     * @param useNonSubstitutableName flag indicating whether the definition's non-substitutable name should be used
+     * @return JsonSchemaNamedReference
+     */
+    protected JsonSchemaNamedReference createDefinition(TLAlias alias, boolean useNonSubstitutableName) {
         TLFacet sourceFacet = getSourceFacet();
         TLFacet baseFacet = getLocalBaseFacet();
         SchemaDependency baseFacetDependency = getLocalBaseFacetDependency();
@@ -111,7 +134,12 @@ public class TLFacetJsonSchemaDelegate extends FacetJsonSchemaDelegate<TLFacet> 
         JsonSchema localFacetSchema = new JsonSchema();
         JsonSchema facetSchema;
 
-        definition.setName( getDefinitionName( (alias != null) ? alias : sourceFacet ) );
+        if (useNonSubstitutableName) {
+            definition.setName( getNonSubstitableElementName( alias ) );
+
+        } else {
+            definition.setName( getDefinitionName( (alias != null) ? alias : sourceFacet ) );
+        }
 
         if (baseFacet != null) {
             TLAlias baseAlias = (alias == null) ? null : AliasCodegenUtils.getOwnerAlias( alias );
