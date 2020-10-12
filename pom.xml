@@ -63,7 +63,7 @@
 		<servlet.api.version>2.5</servlet.api.version>
 		<jsp.api.version>2.1</jsp.api.version>
 		<slf4j.version>1.7.10</slf4j.version>
-		<junit.version>4.12</junit.version>
+		<junit.version>4.13.1</junit.version>
 		<htmlunit.version>2.35.0</htmlunit.version>
 		<xercesimpl.version>2.12.0</xercesimpl.version>
 		<mockito.version>2.23.4</mockito.version>
