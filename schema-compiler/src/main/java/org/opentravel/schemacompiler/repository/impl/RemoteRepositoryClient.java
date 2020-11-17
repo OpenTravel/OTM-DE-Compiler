@@ -146,6 +146,7 @@ public class RemoteRepositoryClient implements RemoteRepository {
         RemoteRepositoryUtils.SERVICE_CONTEXT + "/entity-where-extended";
     private static final String HISTORICAL_CONTENT_ENDPOINT =
         RemoteRepositoryUtils.SERVICE_CONTEXT + "/historical-content";
+    private static final String CHECK_ADMINISTRATOR_ENDPOINT = RemoteRepositoryUtils.SERVICE_CONTEXT + "/check-admin";
 
     private static Log log = LogFactory.getLog( RemoteRepositoryClient.class );
     protected static ObjectFactory objectFactory = new ObjectFactory();
@@ -1704,6 +1705,27 @@ public class RemoteRepositoryClient implements RemoteRepository {
         if (item.getRepository() != this) {
             throw new IllegalArgumentException( "The repository item is not a member of this repository." );
         }
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.repository.RemoteRepository#isAdministrator()
+     */
+    @Override
+    public boolean isAdministrator() throws RepositoryException {
+        boolean isAdministrator = false;
+        try {
+            HttpGet request = newGetRequest( CHECK_ADMINISTRATOR_ENDPOINT );
+
+            remoteUtils.executeWithAuthentication( request );
+            isAdministrator = true;
+
+        } catch (RepositoryException e) {
+            // No action - admin check will return false
+
+        } catch (IOException e) {
+            throw new RepositoryException( REPOSITORY_UNAVAILABLE, e );
+        }
+        return isAdministrator;
     }
 
     /**

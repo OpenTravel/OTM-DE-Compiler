@@ -17,6 +17,7 @@
 package org.opentravel.schemacompiler.repository;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -121,6 +122,11 @@ public class TestRemoteRepositoryFunctions extends TestRepositoryFunctions {
         CloseableHttpResponse ret =
             doGet( ((RemoteRepository) testRepository.get()).getEndpointUrl() + "/service/user-authorization" );
         assertEquals( Response.Status.UNAUTHORIZED.getStatusCode(), ret.getStatusLine().getStatusCode() );
+    }
+
+    @Test
+    public void testCheckAdministrator() throws RepositoryException, ClientProtocolException, IOException {
+        assertTrue( ((RemoteRepository) testRepository.get()).isAdministrator() );
     }
 
     private CloseableHttpResponse doGet(String url) throws ClientProtocolException, IOException {

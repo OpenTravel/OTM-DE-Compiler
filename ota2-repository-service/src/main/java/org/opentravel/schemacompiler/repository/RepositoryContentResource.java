@@ -1426,6 +1426,30 @@ public class RepositoryContentResource {
     }
 
     /**
+     * Returns a success (200) response if the user has administrator permissions for this repository. If the user is
+     * not an administrator a not-authorized (401) status is returned.
+     * 
+     * @param authorizationHeader the header value that contains the encoded Basic Auth credentials
+     * @return Response
+     * @throws RepositoryException thrown if the request cannot be processed
+     */
+    @GET
+    @Path("check-admin")
+    public Response checkAdministrator(@HeaderParam("Authorization") String authorizationHeader)
+        throws RepositoryException {
+        UserPrincipal user = securityManager.authenticateUser( authorizationHeader );
+        Response.Status status;
+
+        if (securityManager.isAdministrator( user )) {
+            status = Response.Status.OK;
+
+        } else {
+            status = Response.Status.UNAUTHORIZED;
+        }
+        return Response.status( status ).build();
+    }
+
+    /**
      * Returns the list of items locked by the calling user. If the request is anonymous, this method will always return
      * an empty list.
      * 

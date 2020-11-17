@@ -102,4 +102,12 @@ public interface RemoteRepository extends Repository {
      */
     public boolean downloadContent(RepositoryItem item, boolean forceUpdate) throws RepositoryException;
 
+    /**
+     * Returns true if the current user has administrator permissions for the remote repository.
+     * 
+     * @return boolean
+     * @throws RepositoryException thrown if the remote repository cannot be accessed
+     */
+    public boolean isAdministrator() throws RepositoryException;
+
 }
