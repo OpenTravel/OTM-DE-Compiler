@@ -316,6 +316,7 @@ public class IndexProcessManager {
             String agentConfigLocation = System.getProperty( AGENT_CONFIG_SYSPROP );
             String log4jConfig = getAgentLog4jConfiguration();
             List<String> jmxConfig = getAgentJmxConfiguration();
+            List<String> proxyConfig = getAgentProxyConfiguration();
             String oomeOption = getJvmOptionForOutOfMemoryErrors();
             String classpath = System.getProperty( "java.class.path" );
 
@@ -351,6 +352,7 @@ public class IndexProcessManager {
             command.add( agentConfigLocation );
             command.add( log4jConfig );
             command.addAll( jmxConfig );
+            command.addAll( proxyConfig );
             command.add( "-cp" );
             command.add( classpath );
             command.add( mainClass.getName() );
@@ -441,6 +443,43 @@ public class IndexProcessManager {
                 configProps.add( "-Dcom.sun.management.jmxremote.authenticate=false" );
             }
             return configProps;
+        }
+
+        /**
+         * Returns the command line system properties to configure the proxy settings (if any) of the indexing agent.
+         * 
+         * @return List&lt;String&gt;
+         */
+        private static List<String> getAgentProxyConfiguration() {
+            List<String> proxyConfigs = new ArrayList<>();
+            String[] proxySysProps = new String[] {"http.proxyHost", "http.proxyPort", "https.proxyHost",
+                "https.proxyPort", "http.nonProxyHosts"};
+
+            for (String sysProp : proxySysProps) {
+                String agentConfigProp = getLocalSystemPropertyConfiguration( sysProp );
+
+                if (agentConfigProp != null) {
+                    proxyConfigs.add( agentConfigProp );
+                }
+            }
+            return proxyConfigs;
+        }
+
+        /**
+         * Returns a command line system property setting based on the value from the local JVM settings. If the
+         * specified system property is not configured for the local JVM, this method will return null.
+         * 
+         * @param systemProperty the system property for which to return a command-line configuration
+         * @return String
+         */
+        private static String getLocalSystemPropertyConfiguration(String systemProperty) {
+            String propertyValue = System.getProperty( systemProperty );
+            String propertyConfig = null;
+
+            if (propertyValue != null) {
+                propertyConfig = String.format( "-D%s=%s", systemProperty, propertyValue );
+            }
+            return propertyConfig;
         }
 
         /**
