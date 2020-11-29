@@ -168,10 +168,10 @@ public class TestContextualFacetCompilation {
             new File( SchemaCompilerTestUtils.getBaseLibraryLocation() + "/test-package-facets/project_resource.otp" );
         File targetFolder =
             new File( System.getProperty( "user.dir" ) + "/target/codegen-output/testResourceFacetCompilation" );
-        File baseSwaggerFile = new File(
-            targetFolder + "/swagger/facets_resource_library_FacetResource/FacetResource_1_0_0.defs.swagger" );
+        File baseSwaggerFile =
+            new File( targetFolder + "/swagger/facets_resource_library_FacetResource/FacetResource_1.defs.swagger" );
         File extSwaggerFile = new File(
-            targetFolder + "/swagger/facets_resource_library_ExtFacetResource/ExtFacetResource_1_0_0.defs.swagger" );
+            targetFolder + "/swagger/facets_resource_library_ExtFacetResource/ExtFacetResource_1.defs.swagger" );
         CompileAllCompilerTask compilerTask = TaskFactory.getTask( CompileAllCompilerTask.class );
         ValidationFindings findings;
 

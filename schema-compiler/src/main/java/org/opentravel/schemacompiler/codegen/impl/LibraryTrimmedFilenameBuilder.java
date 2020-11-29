@@ -48,20 +48,23 @@ public class LibraryTrimmedFilenameBuilder implements CodeGenerationFilenameBuil
      */
     @Override
     public String buildFilename(AbstractLibrary item, String fileExtension) {
-        String fileExt = ((fileExtension == null) || (fileExtension.length() == 0)) ? "" : ("." + fileExtension);
         String filename;
 
         if (item instanceof TLLibrary) {
+            String libraryFilename = libraryFilenameBuilder.buildFilename( item, fileExtension );
+            String libraryFilenameBase = (fileExtension == null) ? libraryFilename
+                : libraryFilename.substring( 0, libraryFilename.length() - fileExtension.length() - 1 );
+            String fileExt = ((fileExtension == null) || (fileExtension.length() == 0)) ? "" : ("." + fileExtension);
+
             if (memberFilename != null) {
-                filename = memberFilename + "_Trim_" + libraryFilenameBuilder.buildFilename( item, "" );
+                filename = memberFilename + "_Trim_" + libraryFilenameBase;
             } else {
-                filename = libraryFilenameBuilder.buildFilename( item, "" ) + "_Trim";
+                filename = libraryFilenameBase + "_Trim";
             }
+            filename += fileExt;
+
         } else {
             filename = item.getName();
-        }
-        if (!filename.toLowerCase().endsWith( fileExt )) {
-            filename += fileExt;
         }
         return filename;
     }

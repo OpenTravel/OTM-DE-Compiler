@@ -19,14 +19,13 @@ package org.opentravel.schemacompiler.model;
 import org.opentravel.schemacompiler.event.ModelEvent;
 import org.opentravel.schemacompiler.event.ModelEventBuilder;
 import org.opentravel.schemacompiler.event.ModelEventType;
-import org.opentravel.schemacompiler.version.Versioned;
 
 /**
  * Facet definition for REST resources.
  * 
  * @author S. Livezey
  */
-public class TLActionFacet extends TLModelElement implements NamedEntity, Versioned, TLDocumentationOwner {
+public class TLActionFacet extends TLModelElement implements NamedEntity, TLDocumentationOwner {
 
     private String name;
     private TLResource owningResource;
@@ -114,48 +113,6 @@ public class TLActionFacet extends TLModelElement implements NamedEntity, Versio
             identity.append( name );
         }
         return identity.toString();
-    }
-
-    /**
-     * @see org.opentravel.schemacompiler.version.Versioned#getVersion()
-     */
-    @Override
-    public String getVersion() {
-        return (owningResource == null) ? null : owningResource.getVersion();
-    }
-
-    /**
-     * @see org.opentravel.schemacompiler.version.Versioned#getVersionScheme()
-     */
-    @Override
-    public String getVersionScheme() {
-        return (owningResource == null) ? null : owningResource.getVersionScheme();
-    }
-
-    /**
-     * @see org.opentravel.schemacompiler.version.Versioned#getBaseNamespace()
-     */
-    @Override
-    public String getBaseNamespace() {
-        return (owningResource == null) ? null : owningResource.getBaseNamespace();
-    }
-
-    /**
-     * @see org.opentravel.schemacompiler.version.Versioned#isLaterVersion(org.opentravel.schemacompiler.version.Versioned)
-     */
-    @Override
-    public boolean isLaterVersion(Versioned otherVersionedItem) {
-        boolean result = false;
-
-        if (otherVersionedItem instanceof TLActionFacet) {
-            TLActionFacet otherFacet = ((TLActionFacet) otherVersionedItem);
-            TLResource otherResource = otherFacet.getOwningResource();
-
-            if (otherFacet.getName().equals( name ) && (otherResource != null) && (owningResource != null)) {
-                result = owningResource.isLaterVersion( otherResource );
-            }
-        }
-        return result;
     }
 
     /**

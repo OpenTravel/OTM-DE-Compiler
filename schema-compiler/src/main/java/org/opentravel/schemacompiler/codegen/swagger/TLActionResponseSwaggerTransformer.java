@@ -60,7 +60,8 @@ public class TLActionResponseSwaggerTransformer
      * @return SwaggerResponse
      */
     private SwaggerResponse createResponse(TLActionResponse source, Integer statusCode) {
-        NamedEntity payloadType = ResourceCodegenUtils.getPayloadType( source.getPayloadType() );
+        NamedEntity payloadType =
+            getLatestMinorVersion( ResourceCodegenUtils.getPayloadType( source.getPayloadType() ) );
         SwaggerResponse response = new SwaggerResponse();
 
         response.setDefaultResponse( (statusCode == null) );

@@ -158,7 +158,8 @@ public class TLActionSwaggerTransformer extends AbstractSwaggerCodegenTransforme
      * @return SwaggerParameter
      */
     private SwaggerParameter createBodyParameter(TLActionRequest request) {
-        NamedEntity payloadType = ResourceCodegenUtils.getPayloadType( request.getPayloadType() );
+        NamedEntity payloadType =
+            getLatestMinorVersion( ResourceCodegenUtils.getPayloadType( request.getPayloadType() ) );
         SwaggerParameter param = null;
 
         if (payloadType != null) {

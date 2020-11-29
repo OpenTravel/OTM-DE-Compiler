@@ -49,10 +49,10 @@ public class TestResourceFilenameBuilders {
         }
 
         Assert.assertEquals( 4, resourceFilenames.size() );
-        Assert.assertTrue( resourceFilenames.contains( "ResourceA_0_0_0.swagger" ) );
-        Assert.assertTrue( resourceFilenames.contains( "ResourceA_1_0_0.swagger" ) );
-        Assert.assertTrue( resourceFilenames.contains( "ResourceB_0_0_0.swagger" ) );
-        Assert.assertTrue( resourceFilenames.contains( "ResourceX_0_0_0.swagger" ) );
+        Assert.assertTrue( resourceFilenames.contains( "ResourceA_0.swagger" ) );
+        Assert.assertTrue( resourceFilenames.contains( "ResourceA_1.swagger" ) );
+        Assert.assertTrue( resourceFilenames.contains( "ResourceB_0.swagger" ) );
+        Assert.assertTrue( resourceFilenames.contains( "ResourceX_0.swagger" ) );
     }
 
     @Test
@@ -68,10 +68,10 @@ public class TestResourceFilenameBuilders {
         }
 
         Assert.assertEquals( 4, resourceFilenames.size() );
-        Assert.assertTrue( resourceFilenames.contains( "ResourceA_0_0_0.swagger" ) );
-        Assert.assertTrue( resourceFilenames.contains( "ResourceA_1_0_0.swagger" ) );
-        Assert.assertTrue( resourceFilenames.contains( "ResourceB_0_0_0.swagger" ) );
-        Assert.assertTrue( resourceFilenames.contains( "ResourceX_0_0_0.swagger" ) );
+        Assert.assertTrue( resourceFilenames.contains( "ResourceA_0.swagger" ) );
+        Assert.assertTrue( resourceFilenames.contains( "ResourceA_1.swagger" ) );
+        Assert.assertTrue( resourceFilenames.contains( "ResourceB_0.swagger" ) );
+        Assert.assertTrue( resourceFilenames.contains( "ResourceX_0.swagger" ) );
     }
 
     @Test
@@ -87,10 +87,10 @@ public class TestResourceFilenameBuilders {
         }
 
         Assert.assertEquals( 4, resourceFilenames.size() );
-        Assert.assertTrue( resourceFilenames.contains( "ResourceA_ns1_0_0_0.swagger" ) );
-        Assert.assertTrue( resourceFilenames.contains( "ResourceA_1_0_0.swagger" ) );
-        Assert.assertTrue( resourceFilenames.contains( "ResourceB_0_0_0.swagger" ) );
-        Assert.assertTrue( resourceFilenames.contains( "ResourceA_ns2_0_0_0.swagger" ) );
+        Assert.assertTrue( resourceFilenames.contains( "ResourceA_ns1_0.swagger" ) );
+        Assert.assertTrue( resourceFilenames.contains( "ResourceA_1.swagger" ) );
+        Assert.assertTrue( resourceFilenames.contains( "ResourceB_0.swagger" ) );
+        Assert.assertTrue( resourceFilenames.contains( "ResourceA_ns2_0.swagger" ) );
     }
 
     private TLModel createTestModel(boolean includeDuplicateLibraryNames, boolean includeDuplicateResourceNames)

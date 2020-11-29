@@ -77,7 +77,7 @@ public class TestVersionChain extends AbstractVersionHelperTests {
         List<VersionChain<Versioned>> entityChains = chainFactory.getEntityChains();
         VersionChain<Versioned> chain;
 
-        assertEquals( 43, entityChains.size() );
+        assertEquals( 35, entityChains.size() );
         assertEquals( 2, (chain = entityChains.get( 0 )).getVersions().size() );
         assertEquals( BASE_NS, chain.getBaseNS() );
         assertEquals( "LaterMinorVersionBO", chain.getName() );
@@ -95,7 +95,7 @@ public class TestVersionChain extends AbstractVersionHelperTests {
         Versioned entity;
 
         assertEquals( 1, entityGroups.size() );
-        assertEquals( 43, (group = entityGroups.first()).getMemberNames().size() );
+        assertEquals( 35, (group = entityGroups.first()).getMemberNames().size() );
         assertEquals( BASE_NS, group.getBaseNamespace() );
         assertEquals( NS_VERSION_1, group.getMajorVersionNamespace() );
         assertEquals( "1.0.0", group.getMajorVersion() );

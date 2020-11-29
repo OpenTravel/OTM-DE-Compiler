@@ -31,7 +31,6 @@ import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.BuiltInLibrary;
 import org.opentravel.schemacompiler.model.LibraryElement;
 import org.opentravel.schemacompiler.model.LibraryMember;
-import org.opentravel.schemacompiler.model.TLModelElement;
 import org.opentravel.schemacompiler.model.XSDLibrary;
 import org.opentravel.schemacompiler.transform.ObjectTransformer;
 import org.opentravel.schemacompiler.transform.TransformerFactory;
@@ -59,7 +58,7 @@ import java.util.List;
  * 
  * @param <S> the source type for which output content will be generated
  */
-public abstract class AbstractJsonSchemaCodeGenerator<S extends TLModelElement> extends AbstractCodeGenerator<S> {
+public abstract class AbstractJsonSchemaCodeGenerator<S extends AbstractLibrary> extends AbstractCodeGenerator<S> {
 
     private static final String LINE_SEPARATOR = System.getProperty( "line.separator" );
 

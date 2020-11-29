@@ -17,6 +17,7 @@
 package org.opentravel.schemacompiler.codegen.impl;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerationFilter;
+import org.opentravel.schemacompiler.codegen.json.JsonSchemaCodegenUtils;
 import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
 import org.opentravel.schemacompiler.ioc.SchemaDeclaration;
 import org.opentravel.schemacompiler.ioc.SchemaDependency;
@@ -52,8 +53,8 @@ import org.opentravel.schemacompiler.model.XSDComplexType;
 import org.opentravel.schemacompiler.model.XSDElement;
 import org.opentravel.schemacompiler.model.XSDLibrary;
 import org.opentravel.schemacompiler.model.XSDSimpleType;
+import org.opentravel.schemacompiler.version.Versioned;
 import org.opentravel.schemacompiler.visitor.AbstractNavigator;
-import org.opentravel.schemacompiler.visitor.DependencyNavigator;
 import org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter;
 import org.opentravel.schemacompiler.visitor.SchemaDependencyNavigator;
 import org.springframework.context.ApplicationContext;
@@ -76,6 +77,7 @@ public class DependencyFilterBuilder {
     private AbstractNavigator<NamedEntity> navigator = new SchemaDependencyNavigator( visitor );
     private boolean includeExtendedLegacySchemas = false;
     private boolean includeEntityExtensions = false;
+    private boolean latestMinorVersionDependencies = false;
 
     /**
      * Default constructor.
@@ -118,7 +120,7 @@ public class DependencyFilterBuilder {
      * @param navigator the navigator instance to assign
      * @return DependencyFilterBuilder
      */
-    public DependencyFilterBuilder setNavigator(DependencyNavigator navigator) {
+    public DependencyFilterBuilder setNavigator(AbstractNavigator<NamedEntity> navigator) {
         navigator.setVisitor( visitor );
         this.navigator = navigator;
         return this;
@@ -151,12 +153,32 @@ public class DependencyFilterBuilder {
     }
 
     /**
+     * When tracking dependencies for JSON schemas and Swagger/OpenAPI specifications, each dependency refrence should
+     * be resolved as the latest minor version of the reference.
+     * 
+     * @param latestMinorVersionDependencies flag indicating whether to treat all dependencies as latest minor version
+     *        references
+     * @return DependencyFilterBuilder
+     */
+    public DependencyFilterBuilder setLatestMinorVersionDependencies(boolean latestMinorVersionDependencies) {
+        this.latestMinorVersionDependencies = latestMinorVersionDependencies;
+
+        if (navigator instanceof SchemaDependencyNavigator) {
+            setNavigator( new SchemaDependencyNavigator( latestMinorVersionDependencies ) );
+        }
+        return this;
+    }
+
+    /**
      * Adds an additional library member for which the dependency filter will be generated.
      * 
      * @param libraryMember the library member for which filters will be generated
      * @return DependencyFilterBuilder
      */
     public DependencyFilterBuilder addLibraryMember(NamedEntity libraryMember) {
+        if (latestMinorVersionDependencies && (libraryMember instanceof Versioned)) {
+            libraryMember = JsonSchemaCodegenUtils.getLatestMinorVersion( (Versioned) libraryMember );
+        }
         navigator.navigate( libraryMember );
         return this;
     }
@@ -168,6 +190,9 @@ public class DependencyFilterBuilder {
      * @return DependencyFilterBuilder
      */
     public DependencyFilterBuilder addLibrary(AbstractLibrary library) {
+        if (latestMinorVersionDependencies) {
+            library = JsonSchemaCodegenUtils.getLatestMinorVersion( library );
+        }
         navigator.navigateLibrary( library );
         return this;
     }
@@ -247,6 +272,30 @@ public class DependencyFilterBuilder {
         }
 
         /**
+         * Adds the given library to the list of libraries that will be allowed by the filter.
+         * 
+         * @param library the library to allow
+         */
+        public void addProcessedLibrary(AbstractLibrary library) {
+            if (latestMinorVersionDependencies) {
+                library = JsonSchemaCodegenUtils.getLatestMinorVersion( library );
+            }
+            filter.addProcessedLibrary( library );
+        }
+
+        /**
+         * Adds the given library element to the list of entities that will be allowed by the filter.
+         * 
+         * @param entity the library element to allow
+         */
+        public void addProcessedElement(LibraryElement entity) {
+            if (latestMinorVersionDependencies && (entity instanceof Versioned)) {
+                entity = JsonSchemaCodegenUtils.getLatestMinorVersion( (Versioned) entity );
+            }
+            filter.addProcessedElement( entity );
+        }
+
+        /**
          * Internal visitor method that adds the given library element and it's owning library to the filter that is
          * being populated.
          * 
@@ -259,10 +308,10 @@ public class DependencyFilterBuilder {
                 List<BuiltInLibrary> builtInDependencies = new ArrayList<>();
 
                 findBuiltInDependencies( (BuiltInLibrary) library, builtInDependencies );
-                builtInDependencies.forEach( d -> filter.addProcessedLibrary( d ) );
+                builtInDependencies.forEach( d -> addProcessedLibrary( d ) );
             }
-            filter.addProcessedLibrary( library );
-            filter.addProcessedElement( entity );
+            addProcessedLibrary( library );
+            addProcessedElement( entity );
         }
 
         /**
@@ -270,7 +319,7 @@ public class DependencyFilterBuilder {
          */
         @Override
         public boolean visitLegacySchemaLibrary(XSDLibrary library) {
-            filter.addProcessedLibrary( library );
+            addProcessedLibrary( library );
             return includeExtendedLegacySchemas;
         }
 
@@ -279,7 +328,7 @@ public class DependencyFilterBuilder {
          */
         @Override
         public boolean visitUserDefinedLibrary(TLLibrary library) {
-            filter.addProcessedLibrary( library );
+            addProcessedLibrary( library );
             return true;
         }
 
@@ -458,7 +507,7 @@ public class DependencyFilterBuilder {
                         // dependency
                         // on the extension schema instead of the legacy schema itself.
                         filter.addExtensionLibrary( (XSDLibrary) propertyType.getOwningLibrary() );
-                        filter.addProcessedElement( propertyType );
+                        addProcessedElement( propertyType );
                         navigateChildren = false;
                     }
                 }

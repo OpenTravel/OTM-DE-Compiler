@@ -471,7 +471,7 @@ public class TestMajorVersionHelper extends AbstractVersionHelperTests {
 
         // Verify the total number of elements to make sure nothing
         // exists, except for the items we just tested.
-        assertEquals( 35,
+        assertEquals( 36,
             newMajorVersionLibrary.getNamedMembers().size() - newMajorVersionLibrary.getContextualFacetTypes().size() );
         assertEquals( 4, newMajorVersionLibrary.getService().getOperations().size() );
     }

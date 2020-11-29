@@ -17,6 +17,7 @@
 package org.opentravel.schemacompiler.codegen.impl;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerationFilenameBuilder;
+import org.opentravel.schemacompiler.codegen.json.JsonSchemaCodegenUtils;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.model.TLResource;
@@ -47,14 +48,14 @@ public class ResourceFilenameBuilder implements CodeGenerationFilenameBuilder<TL
             if (baseFilenameMap == null) {
                 TLModel model = (resource == null) ? null : resource.getOwningModel();
 
-                baseFilenameMap = initBaseFilenames( model );
+                baseFilenameMap = initBaseFilenames( model, fileExtension );
             }
         }
         String fileExt = (fileExtension.length() == 0) ? "" : ("." + fileExtension);
         String filename = baseFilenameMap.get( resource );
 
         if (filename == null) {
-            filename = new FilenameDetails( resource ).getFilename();
+            filename = new FilenameDetails( resource, fileExtension ).getFilename();
         }
         if (!filename.toLowerCase().endsWith( fileExt )) {
             filename += fileExt;
@@ -66,13 +67,14 @@ public class ResourceFilenameBuilder implements CodeGenerationFilenameBuilder<TL
      * Initializes the filenames that should be used for each resource in the model.
      * 
      * @param model the model that contains all resources to which names should be assigned
+     * @param fileExtension the file extension that indicates the type of file being created
      * @return Map&lt;TLResource,String&gt;
      */
-    private Map<TLResource,String> initBaseFilenames(TLModel model) {
+    private Map<TLResource,String> initBaseFilenames(TLModel model, String fileExtension) {
         Map<TLResource,String> filenameMap = new HashMap<>();
 
         if (model != null) {
-            Set<FilenameDetails> filenameDetails = buildFilenameDetails( model );
+            Set<FilenameDetails> filenameDetails = buildFilenameDetails( model, fileExtension );
 
             // Check for conflicts and continue attempting to resolve until no
             // more conflicts exist, or no further options are available.
@@ -141,15 +143,18 @@ public class ResourceFilenameBuilder implements CodeGenerationFilenameBuilder<TL
      * Builds a set that contains filename information for all resources in the given model.
      * 
      * @param model the model for which to create filename details
+     * @param fileExtension the file extension that indicates the type of file being created
      * @return Set&lt;FilenameDetails&gt;
      */
-    private Set<FilenameDetails> buildFilenameDetails(TLModel model) {
+    private Set<FilenameDetails> buildFilenameDetails(TLModel model, String fileExtension) {
         Set<FilenameDetails> filenameDetails;
         filenameDetails = new HashSet<>();
 
         for (TLLibrary library : model.getUserDefinedLibraries()) {
             for (TLResource resource : library.getResourceTypes()) {
-                filenameDetails.add( new FilenameDetails( resource ) );
+                if (JsonSchemaCodegenUtils.isLatestMinorVersion( resource )) {
+                    filenameDetails.add( new FilenameDetails( resource, fileExtension ) );
+                }
             }
         }
         return filenameDetails;
@@ -169,13 +174,15 @@ public class ResourceFilenameBuilder implements CodeGenerationFilenameBuilder<TL
          * Constructor that assigns the initial values for each component of the filename details.
          * 
          * @param resource the resource to which a filename will be assigned
+         * @param fileExtension the file extension that indicates the type of file being created
          */
-        public FilenameDetails(TLResource resource) {
+        public FilenameDetails(TLResource resource, String fileExtension) {
             String baseNS = resource.getBaseNamespace();
 
             this.setResource( resource );
             this.setResourceFilename( resource.getName() );
-            this.setVersionSuffix( "_" + resource.getVersion().replaceAll( "\\.", "_" ) );
+            this.setVersionSuffix(
+                "_" + LibraryFilenameBuilder.getLibraryFilenameVersion( resource.getOwningLibrary(), fileExtension ) );
 
             if (baseNS.endsWith( "/" )) {
                 baseNS = baseNS.substring( 0, baseNS.length() - 1 );

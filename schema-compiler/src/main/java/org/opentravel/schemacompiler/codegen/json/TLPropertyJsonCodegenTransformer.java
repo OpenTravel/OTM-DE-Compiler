@@ -63,13 +63,14 @@ public class TLPropertyJsonCodegenTransformer
     private JsonSchemaNamedReference transformValueProperty(TLProperty source) {
         JsonSchemaNamedReference jsonProperty = new JsonSchemaNamedReference();
         JsonSchemaReference schemaRef = new JsonSchemaReference();
-        TLPropertyType propertyType = PropertyCodegenUtils.resolvePropertyType( source.getType() );
+        TLPropertyType propertyType =
+            getLatestMinorVersion( PropertyCodegenUtils.resolvePropertyType( source.getType() ) );
 
         if (!PropertyCodegenUtils.hasGlobalElement( propertyType )) {
             // If the element's name has not been specified, use the name of its
             // assigned type
             if ((source.getName() == null) || (source.getName().length() == 0)) {
-                jsonProperty.setName( source.getType().getLocalName() );
+                jsonProperty.setName( propertyType.getLocalName() );
             } else {
                 jsonProperty.setName( source.getName() );
             }

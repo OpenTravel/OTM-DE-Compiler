@@ -54,7 +54,7 @@ public class TLLibraryJsonCodegenTransformer extends AbstractJsonSchemaTransform
         schema.setLibraryInfo( jsonUtils.getLibraryInfo( source ) );
 
         // Add entries for each non-service term declaration
-        for (LibraryMember member : source.getNamedMembers()) {
+        for (LibraryMember member : JsonSchemaCodegenUtils.getLatestMinorVersionMembers( source )) {
             transformLibraryMember( member, filter, schema, globalDefs );
         }
 

@@ -67,7 +67,7 @@ public class LibraryMemberTrimmedFilenameBuilder<M extends LibraryMember> implem
         if (library instanceof TLLibrary) {
             if (includeVersionInfo) {
                 filename = memberFilename + "_Trim_" + library.getName() + "_"
-                    + ((TLLibrary) library).getVersion().replaceAll( "\\.", "_" );
+                    + LibraryFilenameBuilder.getLibraryFilenameVersion( (TLLibrary) library, fileExtension );
             } else {
                 filename = memberFilename;
             }

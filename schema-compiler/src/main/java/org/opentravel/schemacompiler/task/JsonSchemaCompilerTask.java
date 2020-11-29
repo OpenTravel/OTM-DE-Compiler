@@ -19,6 +19,7 @@ package org.opentravel.schemacompiler.task;
 import org.opentravel.schemacompiler.codegen.CodeGenerationContext;
 import org.opentravel.schemacompiler.codegen.CodeGenerationFilter;
 import org.opentravel.schemacompiler.codegen.CodeGeneratorFactory;
+import org.opentravel.schemacompiler.codegen.impl.DependencyFilterBuilder;
 import org.opentravel.schemacompiler.codegen.impl.LibraryFilenameBuilder;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.TLLibrary;
@@ -61,7 +62,12 @@ public class JsonSchemaCompilerTask extends AbstractSchemaCompilerTask {
     protected void generateOutput(Collection<TLLibrary> userDefinedLibraries, Collection<XSDLibrary> legacySchemas)
         throws SchemaCompilerException {
         CodeGenerationContext context = createContext();
-        CodeGenerationFilter filter = null;
+        DependencyFilterBuilder filterBuilder = new DependencyFilterBuilder().setLatestMinorVersionDependencies( true );
+        CodeGenerationFilter filter;
+
+        userDefinedLibraries.forEach( l -> filterBuilder.addLibrary( l ) );
+        legacySchemas.forEach( l -> filterBuilder.addLibrary( l ) );
+        filter = filterBuilder.buildFilter();
 
         compileJsonSchemas( userDefinedLibraries, legacySchemas, context, null, filter );
 

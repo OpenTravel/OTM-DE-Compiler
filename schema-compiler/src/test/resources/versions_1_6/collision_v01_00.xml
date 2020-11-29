@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Library xmlns="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_06"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.OpenTravel.org/ns/OTA2/LibraryModel_v01_06 ../../../main/resources/ota2-context/schemas/OTA2_LibraryModel_v1.6.0.xsd">
+    
+    <VersionScheme>OTA2</VersionScheme>
+    <Status>Draft</Status>
+    <Namespace>http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/collision-test/v01</Namespace>
+    <Prefix>col-01</Prefix>
+    <Name>collision</Name>
+    <Import namespace="http://www.w3.org/2001/XMLSchema" prefix="xsd"/>
+    <Import namespace="http://www.opentravel.org/OTM/Common/v0" prefix="ota"/>
+    <Import namespace="http://www.OpenTravel.org/ns/OTA2/SchemaCompiler/version-test/v01" prefix="lib-01"/>
+    <Comments>Collision Library</Comments>
+    
+    <Simple name="LookupSimple" type="xsd:string" pattern="[A-Za-z]*" />
+    
+    <Enumeration_Closed name="LookupClosedEnum">
+        <Value literal="a1" />
+        <Value literal="b1" />
+        <Value literal="c1" />
+    </Enumeration_Closed>
+    
+    <Enumeration_Open name="LookupOpenEnum">
+        <Value literal="a1" />
+        <Value literal="b1" />
+        <Value literal="c1" />
+    </Enumeration_Open>
+    
+    <ValueWithAttrs name="LookupVWA" type="xsd:string">
+        <Attribute mandatory="false" name="vwaAttribute1" type="xsd:string"/>
+    </ValueWithAttrs>
+    
+    <CoreObject name="LookupCore" notExtendable="false">
+        <Aliases/>
+        <Simple type="ota:Empty"/>
+        <Summary>
+            <Element name="Element1" repeat="0" type="LookupVWA"/>
+        </Summary>
+        <Detail/>
+        <Roles/>
+    </CoreObject>
+    
+    <CoreObject name="ReferenceTestCore" notExtendable="false">
+        <Aliases/>
+        <Simple type="ota:Empty"/>
+        <Summary>
+            <Element name="LookupSimple" repeat="0" type="LookupSimple"/>
+            <Element name="LookupClosedEnum" repeat="0" type="LookupClosedEnum"/>
+            <Element name="LookupOpenEnum" repeat="0" type="LookupOpenEnum"/>
+            <Element name="LookupVWA" repeat="0" type="LookupVWA"/>
+            <Element name="LookupCore" repeat="0" type="LookupCore"/>
+            <Element name="LookupChoice" repeat="0" type="LookupChoice"/>
+            <Element name="LookupBO" repeat="0" type="LookupBO"/>
+        </Summary>
+        <Detail/>
+        <Roles/>
+    </CoreObject>
+    
+    <ChoiceObject name="LookupChoice" notExtendable="false">
+        <Aliases/>
+        <Shared>
+            <Element name="sharedElement1" repeat="0" type="xsd:string"/>
+        </Shared>
+    </ChoiceObject>
+    
+	<ContextualFacet name="ChoiceA" type="Choice" facetOwner="LookupChoice">
+        <Element name="choiceAElement1" repeat="0" type="xsd:string"/>
+	</ContextualFacet>
+	
+	<ContextualFacet name="ChoiceB" type="Choice" facetOwner="LookupChoice">
+        <Element name="choiceBElement1" repeat="0" type="xsd:string"/>
+	</ContextualFacet>
+	
+	<ContextualFacet name="SubChoice1" type="Choice" facetOwner="LookupChoice_ChoiceB">
+        <Element name="subChoiceB1Element1" repeat="0" type="xsd:string"/>
+	</ContextualFacet>
+	
+    <BusinessObject name="LookupBO" notExtendable="false">
+        <Aliases/>
+        <ID>
+            <Element name="uid" repeat="1" type="xsd:string"/>
+        </ID>
+        <Summary>
+            <Element name="ReferenceTestCore" repeat="0" type="ReferenceTestCore"/>
+            <Element name="ReferenceTestCore" repeat="0" type="lib-01:ReferenceTestCore"/>
+        </Summary>
+        <Detail/>
+    </BusinessObject>
+    
+    <Resource name="LookupResource" businessObjectRef="LookupBO" basePath="/resources/LookupResource"
+    			abstract="false" firstClass="true">
+        <ParamGroup name="LookupParametersShared" idGroup="false" facetName="LookupBO_Summary">
+        	<Parameter fieldName="Element1" location="Path" />
+        </ParamGroup>
+        <ParamGroup name="LookupParameters10" idGroup="true" facetName="LookupBO_ID">
+        	<Parameter fieldName="uid" location="Path" />
+        </ParamGroup>
+        <ActionFacet label="LookupFacetShared" referenceType="Optional" />
+        <ActionFacet label="LookupFacet10" referenceType="Optional" />
+        <Action actionId="LookupAction10" common="false">
+        	<ActionRequest httpMethod="GET" pathTemplate="/Lookup10/{uid}" paramGroup="LookupParameters10" />
+        	<ActionResponse statusCodes="200" payloadType="LookupResource_LookupFacet10" mimeTypes="APPLICATION_XML APPLICATION_JSON" />
+        </Action>
+    </Resource>
+    
+</Library>

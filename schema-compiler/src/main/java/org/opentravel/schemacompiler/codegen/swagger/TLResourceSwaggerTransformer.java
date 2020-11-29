@@ -21,6 +21,7 @@ import org.opentravel.schemacompiler.codegen.CodeGenerationFilter;
 import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerContext;
 import org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts;
 import org.opentravel.schemacompiler.codegen.impl.QualifiedAction;
+import org.opentravel.schemacompiler.codegen.json.JsonSchemaCodegenUtils;
 import org.opentravel.schemacompiler.codegen.json.model.JsonLibraryInfo;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaNamedReference;
 import org.opentravel.schemacompiler.codegen.swagger.model.SwaggerDocument;
@@ -177,9 +178,6 @@ public class TLResourceSwaggerTransformer extends AbstractSwaggerCodegenTransfor
         if (versionParts.length >= 1) {
             suffix.append( "v" ).append( versionParts[0] );
         }
-        if (versionParts.length >= 2) {
-            suffix.append( "_" ).append( versionParts[1] );
-        }
         return suffix.toString();
     }
 
@@ -248,7 +246,7 @@ public class TLResourceSwaggerTransformer extends AbstractSwaggerCodegenTransfor
     private List<LibraryMember> getLibraryMembers(TLLibrary library) {
         List<LibraryMember> allMembers = new ArrayList<>();
 
-        allMembers.addAll( library.getNamedMembers() );
+        allMembers.addAll( JsonSchemaCodegenUtils.getLatestMinorVersionMembers( library ) );
         allMembers.addAll( FacetCodegenUtils.findNonLocalGhostFacets( library ) );
         return allMembers;
     }

@@ -16,6 +16,8 @@
 
 package org.opentravel.schemacompiler.codegen.json;
 
+import org.opentravel.schemacompiler.codegen.CodeGenerationContext;
+import org.opentravel.schemacompiler.codegen.CodeGenerationException;
 import org.opentravel.schemacompiler.codegen.CodeGenerationFilenameBuilder;
 import org.opentravel.schemacompiler.codegen.impl.LibraryFilenameBuilder;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
@@ -33,6 +35,15 @@ import org.opentravel.schemacompiler.model.TLLibrary;
  * </ul>
  */
 public class JsonSchemaUserLibraryCodeGenerator extends AbstractJsonSchemaCodeGenerator<TLLibrary> {
+
+    @Override
+    public void doGenerateOutput(TLLibrary source, CodeGenerationContext context) throws CodeGenerationException {
+        // Only generate a schema if the library is the latest minor version in its major version
+        // chain, or a patch of the latest minor version.
+        if (JsonSchemaCodegenUtils.isLatestMinorVersion( source )) {
+            super.doGenerateOutput( source, context );
+        }
+    }
 
     /**
      * @see org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator#getDefaultFilenameBuilder()

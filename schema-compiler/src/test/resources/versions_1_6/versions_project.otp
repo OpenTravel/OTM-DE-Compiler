@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<otp:Project xmlns="http://www.w3.org/2001/XMLSchema" xmlns:otp="http://www.OpenTravel.org/ns/OTA2/Project_v01_00"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.OpenTravel.org/ns/OTA2/Project_v01_00 ../../../main/resources/ota2-context/schemas/OTA2_Project_v1.0.0.xsd">
+    <otp:projectId>http://www.OpenTravel.org/projects/test/versions</otp:projectId>
+    <otp:name>Versions Test Project</otp:name>
+    <otp:description></otp:description>
+    <otp:UnmanagedProjectItem defaultItem="true">
+        <otp:FileLocation>library_v01_00.xml</otp:FileLocation>
+    </otp:UnmanagedProjectItem>
+    <otp:UnmanagedProjectItem defaultItem="true">
+        <otp:FileLocation>library_v01_00_01.xml</otp:FileLocation>
+    </otp:UnmanagedProjectItem>
+    <otp:UnmanagedProjectItem defaultItem="true">
+        <otp:FileLocation>library_v01_01.xml</otp:FileLocation>
+    </otp:UnmanagedProjectItem>
+    <otp:UnmanagedProjectItem defaultItem="true">
+        <otp:FileLocation>library_v01_02.xml</otp:FileLocation>
+    </otp:UnmanagedProjectItem>
+    <otp:UnmanagedProjectItem defaultItem="true">
+        <otp:FileLocation>library_v01_02_01.xml</otp:FileLocation>
+    </otp:UnmanagedProjectItem>
+    <otp:UnmanagedProjectItem defaultItem="true">
+        <otp:FileLocation>library_v01_02_02.xml</otp:FileLocation>
+    </otp:UnmanagedProjectItem>
+    <otp:UnmanagedProjectItem defaultItem="true">
+        <otp:FileLocation>collision_v01_00.xml</otp:FileLocation>
+    </otp:UnmanagedProjectItem>
+</otp:Project>

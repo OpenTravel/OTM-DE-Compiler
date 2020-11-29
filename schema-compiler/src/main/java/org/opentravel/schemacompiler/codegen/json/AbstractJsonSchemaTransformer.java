@@ -39,6 +39,7 @@ import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLMemberFieldOwner;
 import org.opentravel.schemacompiler.transform.ObjectTransformer;
 import org.opentravel.schemacompiler.transform.TransformerFactory;
+import org.opentravel.schemacompiler.version.Versioned;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -212,6 +213,23 @@ public abstract class AbstractJsonSchemaTransformer<S, T> extends AbstractCodege
             dependencies = Collections.emptySet();
         }
         return dependencies;
+    }
+
+    /**
+     * If the given entity is <code>Versioned</code> this method will return the latest minor version of that entity. If
+     * the entity is not versioned, the original entity will be returned.
+     * 
+     * @param entity the entity for which to return the latest minor version
+     * @return E
+     */
+    @SuppressWarnings("unchecked")
+    protected <E extends NamedEntity> E getLatestMinorVersion(E entity) {
+        E lmvEntity = entity;
+
+        if (entity instanceof Versioned) {
+            lmvEntity = (E) JsonSchemaCodegenUtils.getLatestMinorVersion( (Versioned) entity );
+        }
+        return lmvEntity;
     }
 
 }

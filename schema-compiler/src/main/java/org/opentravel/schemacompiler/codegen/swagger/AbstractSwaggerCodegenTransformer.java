@@ -23,10 +23,12 @@ import org.opentravel.schemacompiler.codegen.json.JsonSchemaCodegenUtils;
 import org.opentravel.schemacompiler.codegen.json.model.JsonDocumentation;
 import org.opentravel.schemacompiler.codegen.json.model.JsonDocumentationOwner;
 import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
+import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLDocumentation;
 import org.opentravel.schemacompiler.model.TLDocumentationOwner;
 import org.opentravel.schemacompiler.model.TLMimeType;
 import org.opentravel.schemacompiler.transform.ObjectTransformer;
+import org.opentravel.schemacompiler.version.Versioned;
 import org.springframework.context.ApplicationContext;
 
 import java.util.List;
@@ -95,6 +97,23 @@ public abstract class AbstractSwaggerCodegenTransformer<S, T> extends AbstractCo
             supported |= mimeTypes.contains( supportedType );
         }
         return supported;
+    }
+
+    /**
+     * If the given entity is <code>Versioned</code> this method will return the latest minor version of that entity. If
+     * the entity is not versioned, the original entity will be returned.
+     * 
+     * @param entity the entity for which to return the latest minor version
+     * @return E
+     */
+    @SuppressWarnings("unchecked")
+    protected <E extends NamedEntity> E getLatestMinorVersion(E entity) {
+        E lmvEntity = entity;
+
+        if (entity instanceof Versioned) {
+            lmvEntity = (E) JsonSchemaCodegenUtils.getLatestMinorVersion( (Versioned) entity );
+        }
+        return lmvEntity;
     }
 
 }

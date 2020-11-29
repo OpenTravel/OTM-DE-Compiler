@@ -123,7 +123,7 @@ public class TLValueWithAttributesJsonCodegenTransformer
         while (parentType instanceof TLValueWithAttributes) {
             parentType = ((TLValueWithAttributes) parentType).getParentType();
         }
-        return parentType;
+        return getLatestMinorVersion( parentType );
     }
 
 }

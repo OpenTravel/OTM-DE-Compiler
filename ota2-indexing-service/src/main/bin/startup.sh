@@ -27,6 +27,6 @@ JMX_CONFIG="-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=1
 #HTTPS_PROXY_HOST=proxy.example.com
 #HTTPS_PROXY_PORT=8443
 #NON_PROXY_HOSTS=localhost\|*.example.com
-#PROXY_SETTINGS=-Dhttp.proxyHost=$HTTP_PROXY_HOST -Dhttp.proxyPort=$HTTP_PROXY_PORT -Dhttps.proxyHost=$HTTPS_PROXY_HOST -Dhttps.proxyPort=$HTTPS_PROXY_PORT -Dhttp.nonProxyHosts=$NON_PROXY_HOSTS
+#PROXY_SETTINGS=-Dhttp.proxyHost=$HTTP_PROXY_HOST\ -Dhttp.proxyPort=$HTTP_PROXY_PORT\ -Dhttps.proxyHost=$HTTPS_PROXY_HOST\ -Dhttps.proxyPort=$HTTPS_PROXY_PORT\ -Dhttp.nonProxyHosts=$NON_PROXY_HOSTS
 
 java -Dota2.index.manager.config=$MANAGER_CONFIG -Dota2.index.agent.config=$AGENT_CONFIG -Dlog4j.configuration=file://$LOG4J_CONFIG $JMX_CONFIG $PROXY_SETTINGS -cp $JAVA_CLASSPATH org.opentravel.schemacompiler.index.IndexProcessManager "$@" &

@@ -37,7 +37,7 @@ public class TLServiceJsonCodegenTransformer extends AbstractJsonSchemaTransform
         CodegenArtifacts artifacts = new CodegenArtifacts();
 
         for (TLOperation operation : source.getOperations()) {
-            artifacts.addAllArtifacts( opTransformer.transform( operation ) );
+            artifacts.addAllArtifacts( opTransformer.transform( getLatestMinorVersion( operation ) ) );
         }
         return artifacts;
     }

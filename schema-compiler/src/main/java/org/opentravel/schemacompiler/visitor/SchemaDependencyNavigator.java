@@ -16,6 +16,7 @@
 
 package org.opentravel.schemacompiler.visitor;
 
+import org.opentravel.schemacompiler.codegen.json.JsonSchemaCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.AliasCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.ExtensionPointRegistry;
 import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
@@ -68,6 +69,7 @@ import org.opentravel.schemacompiler.model.XSDLibrary;
 import org.opentravel.schemacompiler.model.XSDSimpleType;
 import org.opentravel.schemacompiler.util.ClassSpecificAssignment;
 import org.opentravel.schemacompiler.util.URLUtils;
+import org.opentravel.schemacompiler.version.Versioned;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -81,11 +83,23 @@ import java.util.List;
 public class SchemaDependencyNavigator extends AbstractNavigator<NamedEntity> {
 
     private ExtensionPointRegistry epfRegistry;
+    private boolean latestMinorVersionDependencies;
 
     /**
      * Default constructor.
      */
-    public SchemaDependencyNavigator() {}
+    public SchemaDependencyNavigator() {
+        this( false );
+    }
+
+    /**
+     * Constructor that specifies whether dependencies should be followed as latest minor version references.
+     * 
+     * @param latestMinorVersionDependencies flag indicating how entity references should be treated during navingation
+     */
+    public SchemaDependencyNavigator(boolean latestMinorVersionDependencies) {
+        this.latestMinorVersionDependencies = latestMinorVersionDependencies;
+    }
 
     /**
      * Constructor that initializes the visitor to be notified when model elements are encountered during navigation.
@@ -142,6 +156,14 @@ public class SchemaDependencyNavigator extends AbstractNavigator<NamedEntity> {
      */
     public void navigateLibrary(AbstractLibrary library) {
         List<LibraryMember> libraryMembers = new ArrayList<>( library.getNamedMembers() );
+
+        if (latestMinorVersionDependencies && (library instanceof TLLibrary)) {
+            library = JsonSchemaCodegenUtils.getLatestMinorVersion( library );
+            libraryMembers.addAll( JsonSchemaCodegenUtils.getLatestMinorVersionMembers( (TLLibrary) library ) );
+
+        } else {
+            libraryMembers.addAll( library.getNamedMembers() );
+        }
 
         if ((library != null) && (epfRegistry == null)) {
             epfRegistry = new ExtensionPointRegistry( library.getOwningModel() );
@@ -421,7 +443,7 @@ public class SchemaDependencyNavigator extends AbstractNavigator<NamedEntity> {
             }
 
             for (TLActionResponse response : action.getResponses()) {
-                navigate( response.getPayloadType() );
+                navigateDependency( response.getPayloadType() );
             }
         }
         addVisitedNode( action );
@@ -771,7 +793,7 @@ public class SchemaDependencyNavigator extends AbstractNavigator<NamedEntity> {
      */
     protected void navigateActionFacet(TLActionFacet actionFacet) {
         if (canVisit( actionFacet ) && visitor.visitActionFacet( actionFacet )) {
-            NamedEntity basePayload = actionFacet.getBasePayload();
+            NamedEntity basePayload = getReference( actionFacet.getBasePayload() );
 
             if (basePayload != null) {
                 if (basePayload instanceof TLCoreObject) {
@@ -842,7 +864,8 @@ public class SchemaDependencyNavigator extends AbstractNavigator<NamedEntity> {
      */
     private void navigateBusinessObjectRef(TLBusinessObject boRef, TLActionFacet actionFacet) {
         if (boRef != null) {
-            TLFacet boFacet = ResourceCodegenUtils.getReferencedFacet( boRef, actionFacet.getReferenceFacetName() );
+            TLFacet boFacet =
+                ResourceCodegenUtils.getReferencedFacet( getReference( boRef ), actionFacet.getReferenceFacetName() );
 
             if (boFacet != null) {
                 if (boFacet instanceof TLContextualFacet) {
@@ -905,7 +928,7 @@ public class SchemaDependencyNavigator extends AbstractNavigator<NamedEntity> {
      * @param alias the alias entity to visit and navigate
      */
     protected void navigateAlias(TLAlias alias) {
-        TLAliasOwner owner = alias.getOwningEntity();
+        TLAliasOwner owner = getReference( alias.getOwningEntity() );
 
         if (owner instanceof TLCoreObject) {
             navigateCoreObject( (TLCoreObject) owner, alias );
@@ -999,6 +1022,8 @@ public class SchemaDependencyNavigator extends AbstractNavigator<NamedEntity> {
      * @param entity the entity whose dependencies to navigate
      */
     public void navigateDependency(NamedEntity entity) {
+        entity = getReference( entity );
+
         if ((entity != null) && (epfRegistry == null)) {
             epfRegistry = new ExtensionPointRegistry( entity.getOwningModel() );
         }
@@ -1006,6 +1031,23 @@ public class SchemaDependencyNavigator extends AbstractNavigator<NamedEntity> {
         if (navigateEntityFunction.canApply( entity )) {
             navigateEntityFunction.apply( entity, null );
         }
+    }
+
+    /**
+     * If the 'latestMinorVersionDependencies' option is set, returns the latest minor version of all entities.
+     * Otherwise the original entity passed to this method will be returned.
+     * 
+     * @param entity the entity to process and return
+     * @return E
+     */
+    @SuppressWarnings("unchecked")
+    protected <E extends NamedEntity> E getReference(E entity) {
+        E ref = entity;
+
+        if (latestMinorVersionDependencies && (entity instanceof Versioned)) {
+            ref = (E) JsonSchemaCodegenUtils.getLatestMinorVersion( (Versioned) entity );
+        }
+        return ref;
     }
 
 }

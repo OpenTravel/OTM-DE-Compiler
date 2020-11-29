@@ -19,7 +19,6 @@ package org.opentravel.schemacompiler.model;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
-import org.opentravel.schemacompiler.version.VersionSchemeFactory;
 
 /**
  * Verifies the functions of the <code>TLActionFacet</code> class.
@@ -33,11 +32,8 @@ public class TestTLActionFacet extends AbstractModelTest {
             addActionFacet( "ActionFacet", TLReferenceType.OPTIONAL, "Summary", 0, null, resource );
 
         assertEquals( library1.getNamespace(), actionFacet.getNamespace() );
-        assertEquals( library1.getBaseNamespace(), actionFacet.getBaseNamespace() );
         assertEquals( resource.getName() + "_" + actionFacet.getName(), actionFacet.getLocalName() );
-        assertEquals( library1.getVersion(), actionFacet.getVersion() );
         assertEquals( "TestLibrary1.otm : TestResource/ActionFacet", actionFacet.getValidationIdentity() );
-        assertEquals( VersionSchemeFactory.getInstance().getDefaultVersionScheme(), actionFacet.getVersionScheme() );
     }
 
     @Test

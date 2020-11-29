@@ -85,23 +85,29 @@ public class SwaggerCodeGenerator extends AbstractCodeGenerator<TLResource> {
      */
     @Override
     public void doGenerateOutput(TLResource source, CodeGenerationContext context) throws CodeGenerationException {
-        File outputFile = getOutputFile( source, context );
-        try (Writer out = new FileWriter( outputFile )) {
-            SwaggerDocument swaggerDoc = transformSourceObjectToSwaggerDocument( source, context );
-            JsonObject swaggerJson = swaggerDoc.toJson();
+        // TODO: It's not this easy...
+        // The latest minor version of the resource may not be in the latest minor version of the library. This
+        // will cause references to get messed up.
+        if (JsonSchemaCodegenUtils.isLatestMinorVersion( source )) {
+            File outputFile = getOutputFile( source, context );
 
-            if (isSingleFileEnabled( context )) {
-                addBuiltInDefinitions( swaggerJson );
+            try (Writer out = new FileWriter( outputFile )) {
+                SwaggerDocument swaggerDoc = transformSourceObjectToSwaggerDocument( source, context );
+                JsonObject swaggerJson = swaggerDoc.toJson();
+
+                if (isSingleFileEnabled( context )) {
+                    addBuiltInDefinitions( swaggerJson );
+                }
+                if (context.getBooleanValue( CodeGenerationContext.CK_SUPRESS_OTM_EXTENSIONS )) {
+                    JsonSchemaCodegenUtils.stripOtmExtensions( swaggerJson );
+                }
+
+                gson.toJson( swaggerJson, out );
+                addGeneratedFile( outputFile );
+
+            } catch (Exception e) {
+                throw new CodeGenerationException( e );
             }
-            if (context.getBooleanValue( CodeGenerationContext.CK_SUPRESS_OTM_EXTENSIONS )) {
-                JsonSchemaCodegenUtils.stripOtmExtensions( swaggerJson );
-            }
-
-            gson.toJson( swaggerJson, out );
-            addGeneratedFile( outputFile );
-
-        } catch (Exception e) {
-            throw new CodeGenerationException( e );
         }
     }
 

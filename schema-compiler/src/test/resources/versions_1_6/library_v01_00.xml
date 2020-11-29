@@ -83,6 +83,22 @@
         <Roles/>
     </CoreObject>
     
+    <CoreObject name="ReferenceTestCore" notExtendable="false">
+        <Aliases/>
+        <Simple type="ota:Empty"/>
+        <Summary>
+            <Element name="LookupSimple" repeat="0" type="LookupSimple"/>
+            <Element name="LookupClosedEnum" repeat="0" type="LookupClosedEnum"/>
+            <Element name="LookupOpenEnum" repeat="0" type="LookupOpenEnum"/>
+            <Element name="LookupVWA" repeat="0" type="LookupVWA"/>
+            <Element name="LookupCore" repeat="0" type="LookupCore"/>
+            <Element name="LookupChoice" repeat="0" type="LookupChoice"/>
+            <Element name="LookupBO" repeat="0" type="LookupBO"/>
+        </Summary>
+        <Detail/>
+        <Roles/>
+    </CoreObject>
+    
     <ChoiceObject name="LookupChoice" notExtendable="false">
         <Aliases/>
         <Shared>

@@ -44,7 +44,7 @@ public class TLAttributeJsonCodegenTransformer extends AbstractJsonSchemaTransfo
      */
     @Override
     public CodegenArtifacts transform(TLAttribute source) {
-        TLPropertyType attributeType = PropertyCodegenUtils.getAttributeType( source );
+        TLPropertyType attributeType = getLatestMinorVersion( PropertyCodegenUtils.getAttributeType( source ) );
         CodegenArtifacts artifacts = new CodegenArtifacts();
 
         if (!PropertyCodegenUtils.isEmptyStringType( attributeType )) {

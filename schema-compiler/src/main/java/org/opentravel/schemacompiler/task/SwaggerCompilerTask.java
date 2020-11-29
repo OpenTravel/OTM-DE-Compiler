@@ -94,10 +94,10 @@ public class SwaggerCompilerTask extends AbstractSchemaCompilerTask implements R
                     // service
                     compileXmlSchemas( userDefinedLibraries, legacySchemas, resourceContext,
                         new LibraryTrimmedFilenameBuilder( null ),
-                        createSchemaFilter( resource, TLMimeType.TEXT_XML, TLMimeType.APPLICATION_XML ) );
+                        createSchemaFilter( resource, false, TLMimeType.TEXT_XML, TLMimeType.APPLICATION_XML ) );
                     compileJsonSchemas( userDefinedLibraries, legacySchemas, resourceContext,
                         new LibraryTrimmedFilenameBuilder( null ),
-                        createSchemaFilter( resource, TLMimeType.TEXT_JSON, TLMimeType.APPLICATION_JSON ) );
+                        createSchemaFilter( resource, true, TLMimeType.TEXT_JSON, TLMimeType.APPLICATION_JSON ) );
 
                     // Generate EXAMPLE files if required; examples are only
                     // created for the operation
@@ -119,8 +119,8 @@ public class SwaggerCompilerTask extends AbstractSchemaCompilerTask implements R
                 resourceContext.setValue( CodeGenerationContext.CK_ENABLE_SINGLE_FILE_SWAGGER, "true" );
                 resourceContext.setValue( CodeGenerationContext.CK_OUTPUT_FOLDER,
                     getResourceOutputFolder( resource, modelContext, true ) );
-                swaggerGenerator
-                    .setFilter( createSchemaFilter( resource, TLMimeType.TEXT_JSON, TLMimeType.APPLICATION_JSON ) );
+                swaggerGenerator.setFilter(
+                    createSchemaFilter( resource, true, TLMimeType.TEXT_JSON, TLMimeType.APPLICATION_JSON ) );
                 addGeneratedFiles( swaggerGenerator.generateOutput( resource, resourceContext ) );
             }
         }
@@ -180,11 +180,14 @@ public class SwaggerCompilerTask extends AbstractSchemaCompilerTask implements R
      * Constructs a filter for the generation of XML and JSON schemas.
      * 
      * @param resource the resource for which to create a filter
+     * @param jsonSchema flag indicating if the filter will be used for JSON schema generation (false = XML)
      * @param contentTypes the MIME types for which to generate schemas
      * @return CodeGenerationFilter
      */
-    protected CodeGenerationFilter createSchemaFilter(TLResource resource, TLMimeType... contentTypes) {
-        DependencyFilterBuilder builder = new DependencyFilterBuilder().setIncludeExtendedLegacySchemas( true );
+    protected CodeGenerationFilter createSchemaFilter(TLResource resource, boolean jsonSchema,
+        TLMimeType... contentTypes) {
+        DependencyFilterBuilder builder = new DependencyFilterBuilder().setIncludeExtendedLegacySchemas( true )
+            .setLatestMinorVersionDependencies( jsonSchema );
 
         for (TLAction action : ResourceCodegenUtils.getInheritedActions( resource )) {
             if (action.isCommonAction()) {

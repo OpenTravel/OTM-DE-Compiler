@@ -92,7 +92,7 @@ public class TLParameterSwaggerTransformer
             }
 
             if (fieldType != null) {
-                schema = buildFieldSchema( fieldType );
+                schema = buildFieldSchema( getLatestMinorVersion( fieldType ) );
             }
         }
 

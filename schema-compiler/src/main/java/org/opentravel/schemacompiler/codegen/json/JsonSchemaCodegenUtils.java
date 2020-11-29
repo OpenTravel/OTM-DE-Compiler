@@ -18,6 +18,7 @@ package org.opentravel.schemacompiler.codegen.json;
 
 import org.opentravel.ns.ota2.appinfo_v01_00.OTA2Entity;
 import org.opentravel.schemacompiler.codegen.CodeGenerationContext;
+import org.opentravel.schemacompiler.codegen.CodeGenerationException;
 import org.opentravel.schemacompiler.codegen.CodeGenerationFilenameBuilder;
 import org.opentravel.schemacompiler.codegen.CodeGeneratorFactory;
 import org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator;
@@ -37,6 +38,7 @@ import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
 import org.opentravel.schemacompiler.ioc.SchemaDependency;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.BuiltInLibrary;
+import org.opentravel.schemacompiler.model.LibraryMember;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLAlias;
 import org.opentravel.schemacompiler.model.TLEquivalent;
@@ -53,6 +55,12 @@ import org.opentravel.schemacompiler.model.TLSimple;
 import org.opentravel.schemacompiler.util.SchemaCompilerInfo;
 import org.opentravel.schemacompiler.util.SimpleTypeInfo;
 import org.opentravel.schemacompiler.util.URLUtils;
+import org.opentravel.schemacompiler.version.MinorVersionHelper;
+import org.opentravel.schemacompiler.version.PatchVersionHelper;
+import org.opentravel.schemacompiler.version.VersionScheme;
+import org.opentravel.schemacompiler.version.VersionSchemeException;
+import org.opentravel.schemacompiler.version.VersionSchemeFactory;
+import org.opentravel.schemacompiler.version.Versioned;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -332,11 +340,14 @@ public class JsonSchemaCodegenUtils {
      */
     @SuppressWarnings("unchecked")
     public String getSchemaReferencePath(NamedEntity referencedEntity, NamedEntity referencingEntity) {
+        AbstractLibrary referencedLibrary =
+            (referencedEntity == null) ? null : getLatestMinorVersion( referencedEntity.getOwningLibrary() );
+        AbstractLibrary referencingLibrary =
+            (referencingEntity == null) ? null : getLatestMinorVersion( referencingEntity.getOwningLibrary() );
         JsonTypeNameBuilder typeNameBuilder = getTypeNameBuilder();
         StringBuilder referencePath = new StringBuilder();
 
-        if ((typeNameBuilder == null) && ((referencingEntity == null)
-            || (referencedEntity.getOwningLibrary() != referencingEntity.getOwningLibrary()))) {
+        if ((typeNameBuilder == null) && ((referencingEntity == null) || (referencedLibrary != referencingLibrary))) {
             AbstractCodeGenerator<?> codeGenerator = (AbstractCodeGenerator<?>) context.getCodeGenerator();
             CodeGenerationFilenameBuilder<AbstractLibrary> filenameBuilder;
 
@@ -351,8 +362,8 @@ public class JsonSchemaCodegenUtils {
 
                 referencePath.append( builtInLocation );
             }
-            referencePath.append( filenameBuilder.buildFilename( referencedEntity.getOwningLibrary(),
-                JsonSchemaCodegenUtils.JSON_SCHEMA_FILENAME_EXT ) );
+            referencePath
+                .append( buildLatestMinorVersionFilename( referencedEntity.getOwningLibrary(), filenameBuilder ) );
         }
         referencePath.append( DEFINITIONS_PATH );
 
@@ -362,6 +373,20 @@ public class JsonSchemaCodegenUtils {
             referencePath.append( JsonSchemaNamingUtils.getGlobalDefinitionName( referencedEntity ) );
         }
         return referencePath.toString();
+    }
+
+    /**
+     * Returns the filename of the library's latest minor version using the builder provided.
+     * 
+     * @param library the library whose latest minor version filename should be returned
+     * @param filenameBuilder the filename builder to use when constructing the filename
+     * @return String
+     */
+    private String buildLatestMinorVersionFilename(AbstractLibrary library,
+        CodeGenerationFilenameBuilder<AbstractLibrary> filenameBuilder) {
+        AbstractLibrary latestMinorVersion = getLatestMinorVersion( library );
+
+        return filenameBuilder.buildFilename( latestMinorVersion, JsonSchemaCodegenUtils.JSON_SCHEMA_FILENAME_EXT );
     }
 
     /**
@@ -433,6 +458,180 @@ public class JsonSchemaCodegenUtils {
      */
     private JsonTypeNameBuilder getTypeNameBuilder() {
         return (JsonTypeNameBuilder) context.getContextCacheEntry( JsonTypeNameBuilder.class.getSimpleName() );
+    }
+
+    /**
+     * Returns true if the given library is assigned to a patch version.
+     * 
+     * @param library the library to check for a patch version assignment
+     * @return boolean
+     */
+    public static boolean isPatchVersion(TLLibrary library) {
+        boolean isPatch = false;
+        try {
+            VersionScheme versionScheme =
+                VersionSchemeFactory.getInstance().getVersionScheme( library.getVersionScheme() );
+
+            isPatch = versionScheme.isPatchVersion( library.getNamespace() );
+
+        } catch (VersionSchemeException e) {
+            // No action - ignore error and return false
+        }
+        return isPatch;
+    }
+
+    /**
+     * Returns true if the given library is the latest in its minor version chain or a patch of the latest minor
+     * version.
+     * 
+     * @param library the library to check for being the latest minor version
+     * @return boolean
+     * @throws CodeGenerationException thrown if the library's version scheme is invalid
+     */
+    public static boolean isLatestMinorVersion(TLLibrary library) {
+        boolean isLMV = false;
+        try {
+            MinorVersionHelper mvHelper = new MinorVersionHelper();
+
+            if (!isPatchVersion( library )) {
+                isLMV = mvHelper.getLaterMinorVersions( library ).isEmpty();
+            }
+
+        } catch (VersionSchemeException e) {
+            // Ignore error and return false
+        }
+        return isLMV;
+    }
+
+    /**
+     * Returns true if the given entity is the latest minor version of its major version chain.
+     * 
+     * @param entity the entity for which to perform the latest minor version check
+     * @return boolean
+     * @throws CodeGenerationException thrown if the library's version scheme is invalid
+     */
+    public static boolean isLatestMinorVersion(Versioned entity) {
+        boolean isLMV = false;
+        try {
+            isLMV = new MinorVersionHelper().getLaterMinorVersions( entity ).isEmpty();
+
+        } catch (VersionSchemeException e) {
+            // Ignore error and return false
+        }
+        return isLMV;
+    }
+
+    /**
+     * Returns true if the given library is the latest in its minor version chain or a patch of the latest minor
+     * version.
+     * 
+     * @param library the library for which to return the latest minor version
+     * @return L
+     */
+    @SuppressWarnings("unchecked")
+    public static <L extends AbstractLibrary> L getLatestMinorVersion(L library) {
+        L lmvLibrary = library;
+        try {
+            if (library instanceof TLLibrary) {
+                TLLibrary lib = (TLLibrary) library;
+                MinorVersionHelper mvHelper = new MinorVersionHelper();
+                List<TLLibrary> laterMinorVersions;
+
+                if (isPatchVersion( lib )) {
+                    lib = mvHelper.getPriorMinorVersion( lib );
+                }
+                laterMinorVersions = mvHelper.getLaterMinorVersions( lib );
+
+                if (!laterMinorVersions.isEmpty()) {
+                    lmvLibrary = (L) laterMinorVersions.get( laterMinorVersions.size() - 1 );
+                }
+            }
+
+        } catch (VersionSchemeException e) {
+            // Ignore error and return the original library
+        }
+        return lmvLibrary;
+    }
+
+    /**
+     * Returns true if the given library is the latest in its minor version chain or a patch of the latest minor
+     * version.
+     * 
+     * @param library the library for which to return the latest minor version
+     * @return TLLibrary
+     */
+    public static <V extends Versioned> V getLatestMinorVersion(V entity) {
+        V lmvEntity = entity;
+        try {
+            MinorVersionHelper mvHelper = new MinorVersionHelper();
+            List<V> laterMinorVersions = mvHelper.getLaterMinorVersions( entity );
+
+            if (!laterMinorVersions.isEmpty()) {
+                lmvEntity = laterMinorVersions.get( laterMinorVersions.size() - 1 );
+            }
+
+        } catch (VersionSchemeException e) {
+            // Ignore error and return the original library
+        }
+        return lmvEntity;
+    }
+
+    /**
+     * Returns the latest minor version of each library member from the given library and all of its prior minor
+     * versions.
+     * 
+     * @param library the library from which to return its latest minor version members
+     * @return List&lt;LibraryMember&gt;
+     */
+    public static List<LibraryMember> getLatestMinorVersionMembers(TLLibrary library) {
+        List<LibraryMember> lmvMembers = new ArrayList<>();
+
+        if (!isPatchVersion( library )) {
+            MinorVersionHelper mvHelper = new MinorVersionHelper();
+            PatchVersionHelper patchHelper = new PatchVersionHelper();
+            TLLibrary lib = library;
+
+            // Collect members from the latest and all prior minor versions
+            while (lib != null) {
+                for (LibraryMember member : lib.getNamedMembers()) {
+                    try {
+                        if (member instanceof Versioned) {
+                            if (mvHelper.getLaterMinorVersions( (Versioned) member ).isEmpty()) {
+                                lmvMembers.add( member );
+                            }
+
+                        } else {
+                            lmvMembers.add( member );
+                        }
+
+                    } catch (VersionSchemeException e) {
+                        // Ignore error and assume the object is an LMV
+                        lmvMembers.add( member );
+                    }
+                }
+                try {
+                    lib = mvHelper.getPriorMinorVersion( lib );
+
+                } catch (VersionSchemeException e) {
+                    // Ignore error and break out of the loop
+                    lib = null;
+                }
+            }
+
+            // Collect members from all patch libraries of the latest minor version
+            try {
+                for (TLLibrary patchLib : patchHelper.getLaterPatchVersions( library )) {
+                    lmvMembers.addAll( patchLib.getNamedMembers() );
+                }
+
+            } catch (VersionSchemeException e) {
+                // Should never happen by the time we get to code generation (ignore and omit patch members)
+            }
+
+        } else {
+            lmvMembers.addAll( library.getNamedMembers() );
+        }
+        return lmvMembers;
     }
 
     /**

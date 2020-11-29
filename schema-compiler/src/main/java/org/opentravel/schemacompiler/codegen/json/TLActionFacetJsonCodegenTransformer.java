@@ -55,7 +55,7 @@ public class TLActionFacetJsonCodegenTransformer extends AbstractJsonSchemaTrans
         NamedEntity payloadType = ResourceCodegenUtils.getPayloadType( source );
 
         if (payloadType instanceof TLActionFacet) {
-            NamedEntity basePayload = source.getBasePayload();
+            NamedEntity basePayload = getLatestMinorVersion( source.getBasePayload() );
 
             if (basePayload instanceof TLCoreObject) {
                 artifacts.addAllArtifacts( generateCoreObjectWrapper( source, (TLCoreObject) basePayload ) );
@@ -143,6 +143,8 @@ public class TLActionFacetJsonCodegenTransformer extends AbstractJsonSchemaTrans
         TLProperty boElement = ResourceCodegenUtils.createBusinessObjectElement( source, null );
         JsonSchemaNamedReference definition = new JsonSchemaNamedReference();
         JsonSchema schema = new JsonSchema();
+
+        boElement.setType( getLatestMinorVersion( boElement.getType() ) );
 
         definition.setName( getDefinitionName( source ) );
         transformDocumentation( source, schema );
