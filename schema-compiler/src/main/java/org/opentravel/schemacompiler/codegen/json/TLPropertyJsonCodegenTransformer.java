@@ -77,9 +77,14 @@ public class TLPropertyJsonCodegenTransformer
 
         } else {
             // If the property references a type that defines a global element,
-            // use that
-            // element name for the JSON property name
-            jsonProperty.setName( JsonSchemaNamingUtils.getGlobalPropertyName( propertyType, false ) );
+            // use that element name for the JSON property name
+            JsonTypeNameBuilder tnBuilder = jsonUtils.getTypeNameBuilder();
+
+            if (tnBuilder != null) {
+                jsonProperty.setName( tnBuilder.getJsonTypeName( propertyType ) );
+            } else {
+                jsonProperty.setName( JsonSchemaNamingUtils.getGlobalPropertyName( propertyType, false ) );
+            }
         }
         setPropertyType( schemaRef, propertyType, source );
         jsonProperty.setSchema( schemaRef );

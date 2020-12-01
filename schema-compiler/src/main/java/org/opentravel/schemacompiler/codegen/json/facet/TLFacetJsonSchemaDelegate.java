@@ -24,6 +24,7 @@ import org.opentravel.schemacompiler.codegen.impl.CorrelatedCodegenArtifacts;
 import org.opentravel.schemacompiler.codegen.impl.DocumentationFinder;
 import org.opentravel.schemacompiler.codegen.json.AbstractJsonSchemaTransformer;
 import org.opentravel.schemacompiler.codegen.json.JsonSchemaCodegenUtils;
+import org.opentravel.schemacompiler.codegen.json.JsonTypeNameBuilder;
 import org.opentravel.schemacompiler.codegen.json.model.JsonDocumentation;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchema;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaNamedReference;
@@ -31,6 +32,7 @@ import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaReference;
 import org.opentravel.schemacompiler.codegen.json.model.JsonType;
 import org.opentravel.schemacompiler.codegen.util.AliasCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
+import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
 import org.opentravel.schemacompiler.codegen.xsd.facet.TLFacetCodegenDelegate;
 import org.opentravel.schemacompiler.ioc.SchemaDependency;
@@ -45,10 +47,14 @@ import org.opentravel.schemacompiler.model.TLIndicator;
 import org.opentravel.schemacompiler.model.TLMemberField;
 import org.opentravel.schemacompiler.model.TLMemberFieldOwner;
 import org.opentravel.schemacompiler.model.TLProperty;
+import org.opentravel.schemacompiler.model.TLPropertyType;
 import org.opentravel.schemacompiler.transform.ObjectTransformer;
+import org.opentravel.schemacompiler.version.Versioned;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.namespace.QName;
 
@@ -274,6 +280,8 @@ public class TLFacetJsonSchemaDelegate extends FacetJsonSchemaDelegate<TLFacet> 
         ObjectTransformer<TLIndicator,JsonSchemaNamedReference,CodeGenerationTransformerContext> indicatorTransformer =
             getTransformerFactory().getTransformer( TLIndicator.class, JsonSchemaNamedReference.class );
         List<JsonSchemaNamedReference> definitions = new ArrayList<>();
+        Map<String,List<DefinitionTypePair>> definitionMap = new HashMap<>();
+        boolean hasNameConflicts = false;
 
         setMemberFieldOwner( getSourceFacet() );
 
@@ -283,15 +291,90 @@ public class TLFacetJsonSchemaDelegate extends FacetJsonSchemaDelegate<TLFacet> 
                     .getArtifactsOfType( JsonSchemaNamedReference.class ) );
 
             } else if (field instanceof TLProperty) {
-                definitions.add( elementTransformer.transform( (TLProperty) field ) );
+                TLPropertyType propertyType =
+                    getLatestMinorVersion( PropertyCodegenUtils.resolvePropertyType( ((TLProperty) field).getType() ) );
+                JsonSchemaNamedReference definition = elementTransformer.transform( (TLProperty) field );
+                List<DefinitionTypePair> definitionTypeList =
+                    definitionMap.computeIfAbsent( definition.getName(), n -> new ArrayList<DefinitionTypePair>() );
+
+                definitions.add( definition );
+                definitionTypeList.add( new DefinitionTypePair( definition, propertyType ) );
+                hasNameConflicts |= (definitionTypeList.size() > 1);
 
             } else if (field instanceof TLIndicator) {
                 definitions.add( indicatorTransformer.transform( (TLIndicator) field ) );
             }
         }
+        if (hasNameConflicts) {
+            handleElementNameConflicts( definitionMap,
+                new JsonTypeNameBuilder( getSourceFacet().getOwningModel(), null ) );
+        }
         setMemberFieldOwner( null );
 
         return definitions;
+    }
+
+    /**
+     * Scans the map of field definitions and resolves any conflicts due to duplicate names.
+     * 
+     * @param definitionMap the map of field names to lists of field definitions
+     */
+    private void handleElementNameConflicts(Map<String,List<DefinitionTypePair>> definitionMap,
+        JsonTypeNameBuilder nameBuilder) {
+        Map<String,List<DefinitionTypePair>> secondPassMap = new HashMap<>();
+
+        // For the first pass, use the type name builder to deconflict the name collisions
+        for (List<DefinitionTypePair> definitionList : definitionMap.values()) {
+            if (definitionList.size() > 1) {
+                // Attempt to fix any name conflicts
+                for (DefinitionTypePair defType : definitionList) {
+                    defType.getJsonDefinition().setName( nameBuilder.getJsonTypeName( defType.getOtmType() ) );
+                }
+            }
+
+            // Add definitions to the second-pass list
+            for (DefinitionTypePair defType : definitionList) {
+                List<DefinitionTypePair> definitionTypeList = secondPassMap
+                    .computeIfAbsent( defType.getJsonDefinition().getName(), n -> new ArrayList<DefinitionTypePair>() );
+
+                definitionTypeList.add( defType );
+            }
+        }
+
+        // The second pass handles name collisions that occur when multiple elements have
+        // the same name. XML handles this through element ordering (with UPA violation detection), but
+        // JSON does not enforce element ordering so name conflicts can still occur.
+        for (List<DefinitionTypePair> definitionList : secondPassMap.values()) {
+            if (definitionList.size() > 1) {
+                int count = 1;
+
+                for (DefinitionTypePair defType : definitionList) {
+                    JsonSchemaNamedReference definition = defType.getJsonDefinition();
+
+                    if (count > 1) {
+                        definition.setName( definition.getName() + count );
+                    }
+                    count++;
+                }
+            }
+        }
+    }
+
+    /**
+     * If the given entity is <code>Versioned</code> this method will return the latest minor version of that entity. If
+     * the entity is not versioned, the original entity will be returned.
+     * 
+     * @param entity the entity for which to return the latest minor version
+     * @return E
+     */
+    @SuppressWarnings("unchecked")
+    private <E extends NamedEntity> E getLatestMinorVersion(E entity) {
+        E lmvEntity = entity;
+
+        if (entity instanceof Versioned) {
+            lmvEntity = (E) JsonSchemaCodegenUtils.getLatestMinorVersion( (Versioned) entity );
+        }
+        return lmvEntity;
     }
 
     /**
@@ -442,6 +525,46 @@ public class TLFacetJsonSchemaDelegate extends FacetJsonSchemaDelegate<TLFacet> 
         if ((fieldOwner == null) || (existingOwner == null)) {
             transformContext.setContextCacheEntry( AbstractJsonSchemaTransformer.MEMBER_FIELD_OWNER_KEY, fieldOwner );
         }
+    }
+
+    /**
+     * Maintains a pairing of the JSON definition to the original OTM type of the attribute/element from which the
+     * definition was created.
+     */
+    private static class DefinitionTypePair {
+
+        private JsonSchemaNamedReference jsonDefinition;
+        private TLPropertyType otmType;
+
+        /**
+         * Full constructor.
+         * 
+         * @param jsonDefinition the JSON field definition
+         * @param otmType the original type of the OTM attribute or element used to create the JSON definition
+         */
+        public DefinitionTypePair(JsonSchemaNamedReference jsonDefinition, TLPropertyType otmType) {
+            this.jsonDefinition = jsonDefinition;
+            this.otmType = otmType;
+        }
+
+        /**
+         * Returns the JSON field definition.
+         * 
+         * @return JsonSchemaNamedReference
+         */
+        public JsonSchemaNamedReference getJsonDefinition() {
+            return jsonDefinition;
+        }
+
+        /**
+         * Returns the original type of the OTM attribute or element used to create the JSON definition.
+         * 
+         * @return TLPropertyType
+         */
+        public TLPropertyType getOtmType() {
+            return otmType;
+        }
+
     }
 
 }

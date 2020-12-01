@@ -456,7 +456,7 @@ public class JsonSchemaCodegenUtils {
      * 
      * @return JsonTypeNameBuilder
      */
-    private JsonTypeNameBuilder getTypeNameBuilder() {
+    public JsonTypeNameBuilder getTypeNameBuilder() {
         return (JsonTypeNameBuilder) context.getContextCacheEntry( JsonTypeNameBuilder.class.getSimpleName() );
     }
 
