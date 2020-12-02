@@ -65,12 +65,21 @@ public class EnumCodegenUtils {
 
         if (enumEntity != null) {
             List<TLAbstractEnumeration> enumHierarchy = getInheritanceHierarchy( enumEntity );
+            Set<String> existingLiterals = new HashSet<>();
 
             for (TLAbstractEnumeration hierarchyEnum : enumHierarchy) {
+                Set<String> literals = new HashSet<>();
+
                 if (!includeDeclaredValues && (hierarchyEnum == enumEntity)) {
                     continue;
                 }
-                valueList.addAll( hierarchyEnum.getValues() );
+                for (TLEnumValue enumValue : hierarchyEnum.getValues()) {
+                    if (!existingLiterals.contains( enumValue.getLiteral() )) {
+                        literals.add( enumValue.getLiteral() );
+                        valueList.add( enumValue );
+                    }
+                }
+                existingLiterals.addAll( literals );
             }
         }
         return valueList;
@@ -95,7 +104,7 @@ public class EnumCodegenUtils {
                 break; // Break out of the loop in case of circular inheritance
             }
 
-            hierarchy.add( 0, entity );
+            hierarchy.add( entity );
             visitedEntityNames.add( entityName );
             entity = getExtendedEnum( entity );
         }

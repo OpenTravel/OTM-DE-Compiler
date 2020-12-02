@@ -16,13 +16,16 @@
 
 package org.opentravel.schemacompiler.validate.impl;
 
+import org.opentravel.schemacompiler.codegen.util.EnumCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.ResourceCodegenUtils;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.NamedEntity;
+import org.opentravel.schemacompiler.model.TLAbstractEnumeration;
 import org.opentravel.schemacompiler.model.TLActionFacet;
 import org.opentravel.schemacompiler.model.TLAttributeType;
 import org.opentravel.schemacompiler.model.TLContextualFacet;
+import org.opentravel.schemacompiler.model.TLEnumValue;
 import org.opentravel.schemacompiler.model.TLExampleOwner;
 import org.opentravel.schemacompiler.model.TLExtension;
 import org.opentravel.schemacompiler.model.TLExtensionOwner;
@@ -89,6 +92,7 @@ public abstract class TLValidatorBase<T extends Validatable> implements Validato
     public static final String ERROR_UNDECLARED_PATH_PARAM = "UNDECLARED_PATH_PARAM";
     public static final String ERROR_UNUSED_PATH_PARAM = "UNUSED_PATH_PARAM";
     public static final String ERROR_INVALID_PATH_TEMPLATE = "INVALID_PATH_TEMPLATE";
+    public static final String ERROR_MINOR_VERSION_ENUM_VALUE = "MINOR_VERSION_ENUM_VALUE";
     public static final String WARNING_EXAMPLE_FOR_EMPTY_TYPE = "EXAMPLE_FOR_EMPTY_TYPE";
     public static final String WARNING_DEPRECATED_DATETIME = "DEPRECATED_DATETIME";
 
@@ -691,6 +695,33 @@ public abstract class TLValidatorBase<T extends Validatable> implements Validato
             majorVersionNS = library.getNamespace();
         }
         return majorVersionNS;
+    }
+
+    /**
+     * The open or closed enumeration to validate. Although new enumerations are allowed to declare new enumerated
+     * values, the exception to this allowance is for minor version extensions. In those cases, new enumerated values
+     * are not allowed because they may introduce breaking changes into API and message consumers that were originally
+     * bound to an earlier minor version.
+     * 
+     * @param enumEntity the enumeration entity to validate
+     * @param builder the validation builder that will receive any validation errors that are detected
+     */
+    protected void validateEnumVersioningRules(TLAbstractEnumeration enumEntity, ValidationBuilder<?> builder) {
+        try {
+            TLAbstractEnumeration priorMinorVersion = new MinorVersionHelper().getVersionExtension( enumEntity );
+
+            if (priorMinorVersion != null) {
+                List<TLEnumValue> currentVersionValues = EnumCodegenUtils.getInheritedValues( enumEntity );
+                List<TLEnumValue> priorVersionValues = EnumCodegenUtils.getInheritedValues( priorMinorVersion );
+
+                if (currentVersionValues.size() > priorVersionValues.size()) {
+                    builder.addFinding( FindingType.ERROR, "values", ERROR_MINOR_VERSION_ENUM_VALUE );
+                }
+            }
+
+        } catch (VersionSchemeException e) {
+            // Ignore exception and do not report any validation findings
+        }
     }
 
     /**

@@ -49,6 +49,7 @@ public class TLClosedEnumerationCompileValidator extends TLClosedEnumerationBase
 
         checkSchemaNamingConflicts( target, builder );
         validateVersioningRules( target, builder );
+        validateEnumVersioningRules( target, builder );
 
         return builder.getFindings();
     }

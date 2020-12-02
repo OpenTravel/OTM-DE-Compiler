@@ -257,13 +257,13 @@ public class TestMajorVersionHelper extends AbstractVersionHelperTests {
 
         assertNotNull( lookupOpenEnum );
         assertNull( lookupOpenEnum.getExtension() );
-        assertEquals( 9, lookupOpenEnum.getValues().size() );
-        assertContainsValues( lookupOpenEnum, "a1", "b1", "c1", "a11", "b11", "c11", "a12", "b12", "c12" );
+        assertEquals( 3, lookupOpenEnum.getValues().size() );
+        assertContainsValues( lookupOpenEnum, "a1", "b1", "c1" );
 
         assertNotNull( lookupClosedEnum );
         assertNull( lookupClosedEnum.getExtension() );
-        assertEquals( 9, lookupClosedEnum.getValues().size() );
-        assertContainsValues( lookupClosedEnum, "a1", "b1", "c1", "a11", "b11", "c11", "a12", "b12", "c12" );
+        assertEquals( 3, lookupClosedEnum.getValues().size() );
+        assertContainsValues( lookupClosedEnum, "a1", "b1", "c1" );
 
         assertNotNull( lookupSimple );
         assertNotNull( lookupSimple.getParentType() );
@@ -338,13 +338,13 @@ public class TestMajorVersionHelper extends AbstractVersionHelperTests {
 
         assertNotNull( laterMinorVersionOpenEnum );
         assertNull( laterMinorVersionOpenEnum.getExtension() );
-        assertEquals( 6, laterMinorVersionOpenEnum.getValues().size() );
-        assertContainsValues( laterMinorVersionOpenEnum, "a1", "b1", "c1", "a12", "b12", "c12" );
+        assertEquals( 3, laterMinorVersionOpenEnum.getValues().size() );
+        assertContainsValues( laterMinorVersionOpenEnum, "a1", "b1", "c1" );
 
         assertNotNull( laterMinorVersionClosedEnum );
         assertNull( laterMinorVersionClosedEnum.getExtension() );
-        assertEquals( 6, laterMinorVersionClosedEnum.getValues().size() );
-        assertContainsValues( laterMinorVersionClosedEnum, "a1", "b1", "c1", "a12", "b12", "c12" );
+        assertEquals( 3, laterMinorVersionClosedEnum.getValues().size() );
+        assertContainsValues( laterMinorVersionClosedEnum, "a1", "b1", "c1" );
 
         assertNotNull( laterMinorVersionSimple );
         assertNotNull( laterMinorVersionSimple.getParentType() );
@@ -421,12 +421,12 @@ public class TestMajorVersionHelper extends AbstractVersionHelperTests {
         assertNotNull( minorVersionTestOpenEnum );
         assertNull( minorVersionTestOpenEnum.getExtension() );
         assertEquals( 3, minorVersionTestOpenEnum.getValues().size() );
-        assertContainsValues( minorVersionTestOpenEnum, "a11", "b11", "c11" );
+        assertContainsValues( minorVersionTestOpenEnum, "a1", "b1", "c1" );
 
         assertNotNull( minorVersionTestClosedEnum );
         assertNull( minorVersionTestClosedEnum.getExtension() );
         assertEquals( 3, minorVersionTestClosedEnum.getValues().size() );
-        assertContainsValues( minorVersionTestClosedEnum, "a11", "b11", "c11" );
+        assertContainsValues( minorVersionTestClosedEnum, "a1", "b1", "c1" );
 
         assertNotNull( minorVersionTestSimple );
         assertNotNull( minorVersionTestSimple.getParentType() );

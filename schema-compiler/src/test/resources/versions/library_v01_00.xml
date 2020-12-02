@@ -20,39 +20,111 @@
     <Simple name="LaterMinorVersionSimple" type="xsd:string" pattern="[A-Za-z]*" minLength="2" maxLength="5" />
     
     <Enumeration_Closed name="TestMajorVersionClosedEnum">
-        <Value literal="a1" />
-        <Value literal="b1" />
-        <Value literal="c1" />
+        <Value literal="a1">
+            <Documentation>
+                <Description>Value a1 - Declared in v1.0</Description>
+            </Documentation>
+        </Value>
+        <Value literal="b1">
+            <Documentation>
+                <Description>Value b1 - Declared in v1.0</Description>
+            </Documentation>
+        </Value>
+        <Value literal="c1">
+            <Documentation>
+                <Description>Value c1 - Declared in v1.0</Description>
+            </Documentation>
+        </Value>
     </Enumeration_Closed>
     
     <Enumeration_Closed name="LookupClosedEnum">
-        <Value literal="a1" />
-        <Value literal="b1" />
-        <Value literal="c1" />
+        <Value literal="a1">
+            <Documentation>
+                <Description>Value a1 - Declared in v1.0</Description>
+            </Documentation>
+        </Value>
+        <Value literal="b1">
+            <Documentation>
+                <Description>Value b1 - Declared in v1.0</Description>
+            </Documentation>
+        </Value>
+        <Value literal="c1">
+            <Documentation>
+                <Description>Value c1 - Declared in v1.0</Description>
+            </Documentation>
+        </Value>
     </Enumeration_Closed>
     
     <Enumeration_Closed name="LaterMinorVersionClosedEnum">
-        <Value literal="a1" />
-        <Value literal="b1" />
-        <Value literal="c1" />
+        <Value literal="a1">
+            <Documentation>
+                <Description>Value a1 - Declared in v1.0</Description>
+            </Documentation>
+        </Value>
+        <Value literal="b1">
+            <Documentation>
+                <Description>Value b1 - Declared in v1.0</Description>
+            </Documentation>
+        </Value>
+        <Value literal="c1">
+            <Documentation>
+                <Description>Value c1 - Declared in v1.0</Description>
+            </Documentation>
+        </Value>
     </Enumeration_Closed>
     
     <Enumeration_Open name="TestMajorVersionOpenEnum">
-        <Value literal="a1" />
-        <Value literal="b1" />
-        <Value literal="c1" />
+        <Value literal="a1">
+            <Documentation>
+                <Description>Value a1 - Declared in v1.0</Description>
+            </Documentation>
+        </Value>
+        <Value literal="b1">
+            <Documentation>
+                <Description>Value b1 - Declared in v1.0</Description>
+            </Documentation>
+        </Value>
+        <Value literal="c1">
+            <Documentation>
+                <Description>Value c1 - Declared in v1.0</Description>
+            </Documentation>
+        </Value>
     </Enumeration_Open>
     
     <Enumeration_Open name="LookupOpenEnum">
-        <Value literal="a1" />
-        <Value literal="b1" />
-        <Value literal="c1" />
+        <Value literal="a1">
+            <Documentation>
+                <Description>Value a1 - Declared in v1.0</Description>
+            </Documentation>
+        </Value>
+        <Value literal="b1">
+            <Documentation>
+                <Description>Value b1 - Declared in v1.0</Description>
+            </Documentation>
+        </Value>
+        <Value literal="c1">
+            <Documentation>
+                <Description>Value c1 - Declared in v1.0</Description>
+            </Documentation>
+        </Value>
     </Enumeration_Open>
     
     <Enumeration_Open name="LaterMinorVersionOpenEnum">
-        <Value literal="a1" />
-        <Value literal="b1" />
-        <Value literal="c1" />
+        <Value literal="a1">
+            <Documentation>
+                <Description>Value a1 - Declared in v1.0</Description>
+            </Documentation>
+        </Value>
+        <Value literal="b1">
+            <Documentation>
+                <Description>Value b1 - Declared in v1.0</Description>
+            </Documentation>
+        </Value>
+        <Value literal="c1">
+            <Documentation>
+                <Description>Value c1 - Declared in v1.0</Description>
+            </Documentation>
+        </Value>
     </Enumeration_Open>
     
     <ValueWithAttrs name="LookupVWA" type="xsd:string">

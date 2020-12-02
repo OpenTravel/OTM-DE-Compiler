@@ -49,6 +49,7 @@ public class TLOpenEnumerationCompileValidator extends TLOpenEnumerationBaseVali
 
         checkSchemaNamingConflicts( target, builder );
         validateVersioningRules( target, builder );
+        validateEnumVersioningRules( target, builder );
 
         // TODO: Extension cannot be a closed enum if the extended enum is a prior minor version
         return builder.getFindings();

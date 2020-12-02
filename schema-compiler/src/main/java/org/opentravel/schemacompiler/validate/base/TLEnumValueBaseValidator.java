@@ -31,8 +31,6 @@ import org.opentravel.schemacompiler.validate.impl.TLValidatorBase;
  */
 public class TLEnumValueBaseValidator extends TLValidatorBase<TLEnumValue> {
 
-    public static final String ERROR_DUPLICATE_ENUM_LITERAL = "DUPLICATE_ENUM_LITERAL";
-
     /**
      * @see org.opentravel.schemacompiler.validate.impl.TLValidatorBase#validateFields(org.opentravel.schemacompiler.validate.Validatable)
      */

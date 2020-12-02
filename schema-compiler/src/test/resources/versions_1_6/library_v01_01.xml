@@ -20,28 +20,76 @@
     
     <Enumeration_Closed name="LookupClosedEnum">
         <Extension extends="lib-01:LookupClosedEnum"/>
-        <Value literal="a11" />
-        <Value literal="b11" />
-        <Value literal="c11" />
+        <Value literal="a1">
+            <Documentation>
+                <Description>Value a1 - Declared in v1.1</Description>
+            </Documentation>
+        </Value>
+        <Value literal="b1">
+            <Documentation>
+                <Description>Value b1 - Declared in v1.1</Description>
+            </Documentation>
+        </Value>
+        <Value literal="c1">
+            <Documentation>
+                <Description>Value c1 - Declared in v1.1</Description>
+            </Documentation>
+        </Value>
     </Enumeration_Closed>
     
     <Enumeration_Closed name="MinorVersionTestClosedEnum">
-        <Value literal="a11" />
-        <Value literal="b11" />
-        <Value literal="c11" />
+        <Value literal="a1">
+            <Documentation>
+                <Description>Value a1 - Declared in v1.1</Description>
+            </Documentation>
+        </Value>
+        <Value literal="b1">
+            <Documentation>
+                <Description>Value b1 - Declared in v1.1</Description>
+            </Documentation>
+        </Value>
+        <Value literal="c1">
+            <Documentation>
+                <Description>Value c1 - Declared in v1.1</Description>
+            </Documentation>
+        </Value>
     </Enumeration_Closed>
     
     <Enumeration_Open name="LookupOpenEnum">
         <Extension extends="lib-01:LookupOpenEnum"/>
-        <Value literal="a11" />
-        <Value literal="b11" />
-        <Value literal="c11" />
+        <Value literal="a1">
+            <Documentation>
+                <Description>Value a1 - Declared in v1.1</Description>
+            </Documentation>
+        </Value>
+        <Value literal="b1">
+            <Documentation>
+                <Description>Value b1 - Declared in v1.1</Description>
+            </Documentation>
+        </Value>
+        <Value literal="c1">
+            <Documentation>
+                <Description>Value c1 - Declared in v1.1</Description>
+            </Documentation>
+        </Value>
     </Enumeration_Open>
     
     <Enumeration_Open name="MinorVersionTestOpenEnum">
-        <Value literal="a11" />
-        <Value literal="b11" />
-        <Value literal="c11" />
+        <Value literal="a1">
+            <Documentation>
+                <Description>Value a1 - Declared in v1.1</Description>
+            </Documentation>
+        </Value>
+        <Value literal="b1">
+            <Documentation>
+                <Description>Value b1 - Declared in v1.1</Description>
+            </Documentation>
+        </Value>
+        <Value literal="c1">
+            <Documentation>
+                <Description>Value c1 - Declared in v1.1</Description>
+            </Documentation>
+        </Value>
     </Enumeration_Open>
     
     <ValueWithAttrs name="LookupVWA" type="lib-01:LookupVWA">
