@@ -63,7 +63,7 @@ public class ExampleJsonBuilder extends ExampleBuilder<JsonNode> {
     public JsonNode buildTree() throws ValidationException, CodeGenerationException {
         validateModelElement();
         JSONExampleVisitor visitor = new JSONExampleVisitor( options.getExampleContext() );
-        ExampleNavigator.navigate( modelElement, visitor, options );
+        ExampleNavigator.navigate( modelElement, visitor, options, true );
         return visitor.getNode();
     }
 }

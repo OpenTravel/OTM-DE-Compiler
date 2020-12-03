@@ -17,6 +17,7 @@
 package org.opentravel.schemacompiler.codegen.example;
 
 import org.opentravel.schemacompiler.codegen.example.ExampleGeneratorOptions.DetailLevel;
+import org.opentravel.schemacompiler.codegen.json.JsonSchemaCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.AliasCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.ExtensionPointRegistry;
 import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
@@ -56,6 +57,7 @@ import org.opentravel.schemacompiler.model.TLValueWithAttributes;
 import org.opentravel.schemacompiler.model.XSDComplexType;
 import org.opentravel.schemacompiler.model.XSDElement;
 import org.opentravel.schemacompiler.model.XSDSimpleType;
+import org.opentravel.schemacompiler.version.Versioned;
 
 import java.util.ArrayList;
 import java.util.Deque;
@@ -83,6 +85,7 @@ public class ExampleNavigator {
     private Map<TLChoiceObject,List<TLFacet>> choiceFacetRotation = new HashMap<>();
     private ExampleGeneratorOptions options;
     private ExampleVisitor visitor;
+    private boolean navigateLatestMinorVersions = false;
 
     /**
      * Constructor that initializes the visitor to be notified when model elements are encountered during navigation.
@@ -90,10 +93,14 @@ public class ExampleNavigator {
      * @param visitor the visitor to be notified when model elements are encountered
      * @param options the options to use during example navigation
      * @param model the model which contains all of the entities to be navigated
+     * @param navigateLatestMinorVersions flag indicating whether navigation should follow the latest minor version of
+     *        all references (true) or the reference explicitly defined in the model (false)
      */
-    public ExampleNavigator(ExampleVisitor visitor, ExampleGeneratorOptions options, TLModel model) {
+    public ExampleNavigator(ExampleVisitor visitor, ExampleGeneratorOptions options, TLModel model,
+        boolean navigateLatestMinorVersions) {
         this.options = (options != null) ? options : new ExampleGeneratorOptions();
         this.visitor = visitor;
+        this.navigateLatestMinorVersions = navigateLatestMinorVersions;
         this.extensionPointRegistry = new ExtensionPointRegistry( model );
     }
 
@@ -104,9 +111,13 @@ public class ExampleNavigator {
      * @param target the model element whose dependencies should be navigated
      * @param visitor the visitor to be notified when model elements are encountered
      * @param options the options to use during example navigation
+     * @param navigateLatestMinorVersions flag indicating whether navigation should follow the latest minor version of
+     *        all references (true) or the reference explicitly defined in the model (false)
      */
-    public static void navigate(NamedEntity target, ExampleVisitor visitor, ExampleGeneratorOptions options) {
-        new ExampleNavigator( visitor, options, target.getOwningModel() ).navigateEntity( target );
+    public static void navigate(NamedEntity target, ExampleVisitor visitor, ExampleGeneratorOptions options,
+        boolean navigateLatestMinorVersions) {
+        new ExampleNavigator( visitor, options, target.getOwningModel(), navigateLatestMinorVersions )
+            .navigateEntity( target );
     }
 
     /**
@@ -115,6 +126,8 @@ public class ExampleNavigator {
      * @param target the named entity for which an example is to be generated
      */
     public void navigateEntity(NamedEntity target) {
+        target = getReference( target );
+
         if (target instanceof TLSimple) {
             navigateSimple( (TLSimple) target );
 
@@ -178,6 +191,7 @@ public class ExampleNavigator {
      */
     public void navigateValueWithAttributes(TLValueWithAttributes valueWithAttributes) {
         try {
+            valueWithAttributes = getReference( valueWithAttributes );
             incrementRecursionCount( valueWithAttributes );
 
             if (canVisit( valueWithAttributes )) {
@@ -203,6 +217,7 @@ public class ExampleNavigator {
      */
     public void navigateOpenEnumeration(TLOpenEnumeration enumeration) {
         try {
+            enumeration = getReference( enumeration );
             incrementRecursionCount( enumeration );
 
             if (canVisit( enumeration )) {
@@ -221,6 +236,7 @@ public class ExampleNavigator {
      */
     public void navigateRoleEnumeration(TLRoleEnumeration enumeration) {
         try {
+            enumeration = getReference( enumeration );
             incrementRecursionCount( enumeration );
 
             if (canVisit( enumeration )) {
@@ -248,6 +264,7 @@ public class ExampleNavigator {
      */
     public void navigateBusinessObject(TLBusinessObject businessObject) {
         try {
+            businessObject = getReference( businessObject );
             incrementRecursionCount( businessObject );
 
             if (canVisit( businessObject )) {
@@ -272,6 +289,7 @@ public class ExampleNavigator {
      */
     public void navigateCoreObject(TLCoreObject coreObject) {
         try {
+            coreObject = getReference( coreObject );
             incrementRecursionCount( coreObject );
 
             if (canVisit( coreObject )) {
@@ -296,6 +314,7 @@ public class ExampleNavigator {
      */
     public void navigateChoiceObject(TLChoiceObject choiceObject) {
         try {
+            choiceObject = getReference( choiceObject );
             incrementRecursionCount( choiceObject );
 
             if (canVisit( choiceObject )) {
@@ -348,7 +367,7 @@ public class ExampleNavigator {
      * @param facet the facet entity to visit and navigate
      */
     public void navigateFacet(TLFacet facet) {
-        TLFacet navFacet = facet;
+        TLFacet navFacet = getReference( facet );
 
         try {
             if (facet instanceof TLContextualFacet) {
@@ -378,6 +397,7 @@ public class ExampleNavigator {
      */
     public void navigateListFacet(TLListFacet listFacet) {
         try {
+            listFacet = getReference( listFacet );
             incrementRecursionCount( listFacet );
 
             if (canVisit( listFacet )) {
@@ -407,7 +427,7 @@ public class ExampleNavigator {
      * @param facet the simple facet entity to visit and navigate
      */
     public void navigateSimpleFacet(TLSimpleFacet facet) {
-        navigateSimpleType( facet );
+        navigateSimpleType( getReference( facet ) );
     }
 
     /**
@@ -416,7 +436,7 @@ public class ExampleNavigator {
      * @param actionFacet the action facet entity to visit and navigate
      */
     public void navigateActionFacet(TLActionFacet actionFacet) {
-        NamedEntity payloadType = ResourceCodegenUtils.getPayloadType( actionFacet );
+        NamedEntity payloadType = getReference( ResourceCodegenUtils.getPayloadType( actionFacet ) );
 
         if (payloadType instanceof TLCoreObject) {
             TLAbstractFacet exampleFacet = selectExampleFacet( ((TLCoreObject) payloadType).getSummaryFacet() );
@@ -437,7 +457,7 @@ public class ExampleNavigator {
                 incrementRecursionCount( actionFacet );
 
                 if (canVisit( actionFacet )) {
-                    NamedEntity basePayload = actionFacet.getBasePayload();
+                    NamedEntity basePayload = getReference( actionFacet.getBasePayload() );
                     TLFacet payloadFacet = null;
 
                     if (basePayload instanceof TLCoreObject) {
@@ -467,7 +487,7 @@ public class ExampleNavigator {
             // is displayed by the owning facet. To accomplish this, we will need to locate the
             // corresponding facet on the example facet (e.g. "CoreAlias" would correspond to
             // "CoreAliasDetail".
-            TLAliasOwner aliasOwner = alias.getOwningEntity();
+            TLAliasOwner aliasOwner = getReference( alias.getOwningEntity() );
             TLAbstractFacet exampleFacet = null;
 
             if (aliasOwner instanceof TLBusinessObject) {
@@ -602,7 +622,7 @@ public class ExampleNavigator {
      * @param simpleType the simple type to be navigated
      */
     protected void navigateSimpleType(TLAttributeType simpleType) {
-        visitor.visitSimpleType( simpleType );
+        visitor.visitSimpleType( getReference( simpleType ) );
     }
 
     /**
@@ -659,6 +679,8 @@ public class ExampleNavigator {
      */
     protected void navigateFacetMembers(TLActionFacet actionFacet, TLFacet payloadFacet) {
         TLProperty boProperty = ResourceCodegenUtils.createBusinessObjectElement( actionFacet, payloadFacet );
+
+        boProperty.setType( getReference( boProperty.getType() ) );
 
         if (boProperty != null) {
             navigateElement( boProperty );
@@ -816,7 +838,7 @@ public class ExampleNavigator {
         int maxRepeatCount = Math.max( 1, options.getMaxRepeat() );
         int repeatCount =
             (element.getRepeat() < 0) ? maxRepeatCount : Math.max( 1, Math.min( maxRepeatCount, element.getRepeat() ) );
-        TLPropertyType propertyType = element.getType();
+        TLPropertyType propertyType = getReference( element.getType() );
 
         // If the property type is a core object, select the appropriate level of detail
         // based on the navigation options
@@ -974,6 +996,33 @@ public class ExampleNavigator {
             choiceFacets.add( selectedChoice );
         }
         return selectedChoice;
+    }
+
+    /**
+     * If the 'navigateLatestMinorVersions' option is enabled this method will return the latest minor version of the
+     * given entity (assuming the entity is <code>Versioned</code>, or a facet of a versioned entity). If the entity is
+     * not versioned or the option is set to false, the original entity passed to this method will be returned.
+     * 
+     * @param entity the entity for which to return the latest minor version
+     * @return E
+     */
+    @SuppressWarnings("unchecked")
+    private <E extends NamedEntity> E getReference(E entity) {
+        E lmvEntity = entity;
+
+        if (navigateLatestMinorVersions) {
+            if (entity instanceof Versioned) {
+                lmvEntity = (E) JsonSchemaCodegenUtils.getLatestMinorVersion( (Versioned) entity );
+
+            } else if (entity instanceof TLFacet) {
+                TLFacet facet = (TLFacet) entity;
+                String facetName = FacetCodegenUtils.getFacetName( facet );
+                TLFacetOwner owner = getReference( facet.getOwningEntity() );
+
+                lmvEntity = (E) FacetCodegenUtils.getFacetOfType( owner, facet.getFacetType(), facetName );
+            }
+        }
+        return lmvEntity;
     }
 
     /**

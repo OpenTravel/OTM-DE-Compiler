@@ -18,8 +18,10 @@ package org.opentravel.schemacompiler.codegen.example;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerationContext;
 import org.opentravel.schemacompiler.codegen.CodeGenerationException;
+import org.opentravel.schemacompiler.codegen.json.JsonSchemaCodegenUtils;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLModelElement;
+import org.opentravel.schemacompiler.version.Versioned;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -60,15 +62,21 @@ public class JSONExampleCodeGenerator extends AbstractExampleCodeGenerator {
      */
     @Override
     public void doGenerateOutput(TLModelElement source, CodeGenerationContext context) throws CodeGenerationException {
-        File outputFile = getOutputFile( source, context );
-        try (OutputStream out = new FileOutputStream( outputFile );) {
-            ExampleJsonBuilder exampleBuilder = new ExampleJsonBuilder( getOptions( context ) );
-            exampleBuilder.setModelElement( (NamedEntity) source );
-            JsonNode node = exampleBuilder.buildTree();
-            getObjectMapper().writeValue( out, node );
-            addGeneratedFile( outputFile );
-        } catch (Exception e) {
-            throw new CodeGenerationException( e );
+        boolean canGenerate =
+            !(source instanceof Versioned) || JsonSchemaCodegenUtils.isLatestMinorVersion( (Versioned) source );
+
+        if (canGenerate) {
+            File outputFile = getOutputFile( source, context );
+
+            try (OutputStream out = new FileOutputStream( outputFile );) {
+                ExampleJsonBuilder exampleBuilder = new ExampleJsonBuilder( getOptions( context ) );
+                exampleBuilder.setModelElement( (NamedEntity) source );
+                JsonNode node = exampleBuilder.buildTree();
+                getObjectMapper().writeValue( out, node );
+                addGeneratedFile( outputFile );
+            } catch (Exception e) {
+                throw new CodeGenerationException( e );
+            }
         }
     }
 

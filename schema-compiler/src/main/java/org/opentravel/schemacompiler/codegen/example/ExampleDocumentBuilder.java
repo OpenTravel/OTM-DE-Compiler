@@ -127,7 +127,7 @@ public class ExampleDocumentBuilder extends ExampleBuilder<Document> {
         Document domDocument;
 
         validateModelElement();
-        ExampleNavigator.navigate( modelElement, visitor, options );
+        ExampleNavigator.navigate( modelElement, visitor, options, false );
         domDocument = visitor.getDocument();
 
         if (schemaLocationRequired()) {

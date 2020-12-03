@@ -17,6 +17,7 @@
 package org.opentravel.schemacompiler.codegen.impl;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerationFilenameBuilder;
+import org.opentravel.schemacompiler.codegen.example.JSONExampleCodeGenerator;
 import org.opentravel.schemacompiler.codegen.json.JsonSchemaCodegenUtils;
 import org.opentravel.schemacompiler.codegen.swagger.SwaggerCodeGenerator;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
@@ -85,7 +86,7 @@ public class LibraryFilenameBuilder<L extends AbstractLibrary> implements CodeGe
         if (library instanceof TLLibrary) {
             String libraryVersion = ((TLLibrary) library).getVersion();
 
-            if (isJsonSchema( fileExtension )) {
+            if (isJsonFile( fileExtension )) {
                 try {
                     VersionScheme versionScheme =
                         VersionSchemeFactory.getInstance().getVersionScheme( library.getVersionScheme() );
@@ -104,13 +105,15 @@ public class LibraryFilenameBuilder<L extends AbstractLibrary> implements CodeGe
     }
 
     /**
-     * Returns true if the given file extension is associated with a JSON schema file or Swagger/OpenAPI specification.
+     * Returns true if the given file extension is associated with a JSON schema or example file or a Swagger/OpenAPI
+     * specification.
      * 
      * @param fileExtension the file extension that indicates the type of file being created
      * @return boolean
      */
-    protected static boolean isJsonSchema(String fileExtension) {
+    protected static boolean isJsonFile(String fileExtension) {
         return (fileExtension != null) && (fileExtension.endsWith( JsonSchemaCodegenUtils.JSON_SCHEMA_FILENAME_EXT )
+            || fileExtension.endsWith( JSONExampleCodeGenerator.JSON_FILE_EXTENSION )
             || fileExtension.endsWith( SwaggerCodeGenerator.SWAGGER_FILENAME_EXT ));
     }
 
@@ -130,7 +133,7 @@ public class LibraryFilenameBuilder<L extends AbstractLibrary> implements CodeGe
             List<AbstractLibrary> allLibraries = new ArrayList<>();
 
             // Construct a list of all libraries
-            if (isJsonSchema( fileExtension )) {
+            if (isJsonFile( fileExtension )) {
                 for (AbstractLibrary library : model.getAllLibraries()) {
                     boolean includeLib = !(library instanceof TLLibrary)
                         || JsonSchemaCodegenUtils.isLatestMinorVersion( (TLLibrary) library );

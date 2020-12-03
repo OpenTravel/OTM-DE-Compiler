@@ -46,7 +46,7 @@ public class TestMinorVersionCompilation {
         compilerTask.setCompileServices( false );
         compilerTask.setCompileSwagger( true );
         compilerTask.setCompileHtml( false );
-        compilerTask.setGenerateExamples( false );
+        compilerTask.setGenerateExamples( true );
         compilerTask.setExampleMaxRepeat( 3 );
         compilerTask.setServiceEndpointUrl( "http://www.OpenTravel.org/services" );
         compilerTask.setResourceBaseUrl( "http://www.OpenTravel.org" );

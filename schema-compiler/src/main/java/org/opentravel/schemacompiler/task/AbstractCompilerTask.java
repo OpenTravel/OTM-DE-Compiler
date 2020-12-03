@@ -568,13 +568,13 @@ public abstract class AbstractCompilerTask implements CommonCompilerTaskOptions 
     }
 
     /**
-     * Generates EXAMPLE XML files for all elements of the given library.
+     * Generates example XML files for all elements of the given library.
      * 
-     * @param userDefinedLibraries the list of user-defined libraries for which to generate EXAMPLE XML files
+     * @param userDefinedLibraries the list of user-defined libraries for which to generate example XML files
      * @param context the code generation context to use for code generation
      * @param filenameBuilder the filename builder to use for schema location filename construction
-     * @param filter the filter used to identify specific artifacts for which EXAMPLE generation is required
-     * @param targetFormat indicates the output format of the generated EXAMPLE files (e.g. "XML" or "JSON")
+     * @param filter the filter used to identify specific artifacts for which example generation is required
+     * @param targetFormat indicates the output format of the generated example files (e.g. "XML" or "JSON")
      * @throws SchemaCompilerException thrown if an error occurs during artifact generation
      */
     protected void generateExampleArtifacts(Collection<TLLibrary> userDefinedLibraries, CodeGenerationContext context,
@@ -589,7 +589,7 @@ public abstract class AbstractCompilerTask implements CommonCompilerTaskOptions 
                 continue;
             }
 
-            // Generate EXAMPLE files for each member of the library
+            // Generate example files for each member of the library
             for (LibraryMember member : library.getNamedMembers()) {
                 if (processEntity( member, filter ) || (member instanceof TLDocumentationPatch)) {
                     continue;
