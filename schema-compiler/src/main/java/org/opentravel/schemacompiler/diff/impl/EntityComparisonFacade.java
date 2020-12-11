@@ -352,11 +352,7 @@ public class EntityComparisonFacade {
         this.name = entity.getName();
         this.facetNames = ModelCompareUtils.getFacetNames( entity );
         this.documentation = entity.getDocumentation();
-
-        // NOTE: Not including member fields here since this is only called in the event
-        // of non-local contextual facets. The member fields will be compared under
-        // the comparisons for the owning choice/business object.
-
+        entity.getMemberFields().forEach( f -> memberFields.add( (TLMemberField<TLMemberFieldOwner>) f ) );
     }
 
     /**
