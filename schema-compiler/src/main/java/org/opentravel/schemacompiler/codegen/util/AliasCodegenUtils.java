@@ -61,6 +61,7 @@ public class AliasCodegenUtils {
             TLAliasOwner owner = (TLAliasOwner) sourceFacet.getOwningEntity();
             String aliasSuffix = "_" + sourceFacet.getFacetType().getIdentityName( facetName );
 
+            // 12/3/2020 - Getting an NPE here. Earlier in the session i deleted an alias which may be the cause.
             if ((facetAlias.getName().endsWith( aliasSuffix )) && (owner instanceof TLAliasOwner)) {
                 for (TLAlias candidateAlias : owner.getAliases()) {
                     String derivedAlias = candidateAlias.getName() + aliasSuffix;
