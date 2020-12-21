@@ -680,9 +680,8 @@ public class ExampleNavigator {
     protected void navigateFacetMembers(TLActionFacet actionFacet, TLFacet payloadFacet) {
         TLProperty boProperty = ResourceCodegenUtils.createBusinessObjectElement( actionFacet, payloadFacet );
 
-        boProperty.setType( getReference( boProperty.getType() ) );
-
         if (boProperty != null) {
+            boProperty.setType( getReference( boProperty.getType() ) );
             navigateElement( boProperty );
         }
         if (payloadFacet != null) {
