@@ -680,6 +680,12 @@ public class PropertyCodegenUtils {
                 }
                 propertyList.add( 0, property );
             }
+
+        } else {
+            // Technically, this should not happen because 'propertyType' is null and therefore
+            // invalid. To ensure we are not arbitrarily dropping properties, we will go ahead
+            // and add it to the list.
+            propertyList.add( 0, property );
         }
     }
 
