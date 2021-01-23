@@ -1017,8 +1017,20 @@ public class ExampleNavigator {
                 TLFacet facet = (TLFacet) entity;
                 String facetName = FacetCodegenUtils.getFacetName( facet );
                 TLFacetOwner owner = getReference( facet.getOwningEntity() );
+                TLFacet resolvedFacet = FacetCodegenUtils.getFacetOfType( owner, facet.getFacetType(), facetName );
 
-                lmvEntity = (E) FacetCodegenUtils.getFacetOfType( owner, facet.getFacetType(), facetName );
+                if (resolvedFacet == null) {
+                    List<TLContextualFacet> ghostFacets =
+                        FacetCodegenUtils.findGhostFacets( owner, facet.getFacetType() );
+
+                    for (TLContextualFacet gf : ghostFacets) {
+                        if (gf.getName().equals( facetName )) {
+                            resolvedFacet = gf;
+                            break;
+                        }
+                    }
+                }
+                lmvEntity = (E) resolvedFacet;
             }
         }
         return lmvEntity;
