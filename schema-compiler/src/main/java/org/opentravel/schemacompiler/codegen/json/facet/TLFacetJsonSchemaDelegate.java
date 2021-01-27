@@ -151,7 +151,7 @@ public class TLFacetJsonSchemaDelegate extends FacetJsonSchemaDelegate<TLFacet> 
             TLAlias baseAlias = (alias == null) ? null : AliasCodegenUtils.getOwnerAlias( alias );
             NamedEntity baseType = (alias == null) ? baseFacet : baseAlias;
             JsonSchemaReference baseSchemaRef =
-                new JsonSchemaReference( jsonUtils.getSchemaReferencePath( baseType, sourceFacet ) );
+                new JsonSchemaReference( jsonUtils.getSchemaDefinitionPath( baseType, sourceFacet ) );
 
             facetSchema = new JsonSchema();
             facetSchema.getAllOf().add( baseSchemaRef );
@@ -231,7 +231,7 @@ public class TLFacetJsonSchemaDelegate extends FacetJsonSchemaDelegate<TLFacet> 
             globalDef.setRequired( true );
 
             globalDef.setSchema(
-                new JsonSchemaReference( jsonUtils.getSchemaReferencePath( getSourceFacet(), getSourceFacet() ) ) );
+                new JsonSchemaReference( jsonUtils.getSchemaDefinitionPath( getSourceFacet(), getSourceFacet() ) ) );
             globalDefSchema.getProperties().add( globalDef );
             globalElement = new JsonSchemaReference( globalDefSchema );
         }

@@ -26,8 +26,10 @@ import org.opentravel.schemacompiler.codegen.util.AliasCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.JsonSchemaNamingUtils;
 import org.opentravel.schemacompiler.codegen.util.PropertyCodegenUtils;
+import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLAbstractFacet;
 import org.opentravel.schemacompiler.model.TLAlias;
+import org.opentravel.schemacompiler.model.TLComplexTypeBase;
 import org.opentravel.schemacompiler.model.TLCoreObject;
 import org.opentravel.schemacompiler.model.TLFacet;
 import org.opentravel.schemacompiler.model.TLListFacet;
@@ -76,20 +78,42 @@ public class TLPropertyJsonCodegenTransformer
             }
 
         } else {
-            // If the property references a type that defines a global element,
-            // use that element name for the JSON property name
-            JsonTypeNameBuilder tnBuilder = jsonUtils.getTypeNameBuilder();
+            // If the property type is a top-level reference to a BO, Core, or Choice Object (or
+            // an alias of one), just use the local name of the entity as the JSON property name
+            if (isTopLevelReference( propertyType )) {
+                jsonProperty.setName( propertyType.getLocalName() );
 
-            if (tnBuilder != null) {
-                jsonProperty.setName( tnBuilder.getJsonTypeName( propertyType ) );
             } else {
-                jsonProperty.setName( JsonSchemaNamingUtils.getGlobalPropertyName( propertyType, false ) );
+                // If the property type is not a top-level reference, but it does define a global
+                // element, use that element name for the JSON property name
+                JsonTypeNameBuilder tnBuilder = jsonUtils.getTypeNameBuilder();
+
+                if (tnBuilder != null) {
+                    jsonProperty.setName( tnBuilder.getJsonReferenceName( propertyType ) );
+                } else {
+                    jsonProperty.setName( JsonSchemaNamingUtils.getGlobalReferenceName( propertyType ) );
+                }
             }
         }
         setPropertyType( schemaRef, propertyType, source );
         jsonProperty.setSchema( schemaRef );
         jsonProperty.setRequired( source.isMandatory() );
         return jsonProperty;
+    }
+
+    /**
+     * Returns true if the given property type is a BO, Core, or Choice Object (or an alias of one).
+     * 
+     * @param propertyType the property type to check
+     * @return boolean
+     */
+    private boolean isTopLevelReference(TLPropertyType propertyType) {
+        NamedEntity type = propertyType;
+
+        if (type instanceof TLAlias) {
+            type = ((TLAlias) type).getOwningEntity();
+        }
+        return (type instanceof TLComplexTypeBase);
     }
 
     /**
@@ -231,6 +255,7 @@ public class TLPropertyJsonCodegenTransformer
      * @param typeRef the JSON schema referece
      */
     private void setStandardPropertyType(TLPropertyType propertyType, JsonSchemaReference typeRef) {
+        // TODO: Need to account for non-substitutable property types
         TLPropertyType baseType = propertyType;
         TLAlias alias = null;
 

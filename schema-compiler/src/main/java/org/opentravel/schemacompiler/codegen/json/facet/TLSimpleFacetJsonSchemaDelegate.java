@@ -74,7 +74,7 @@ public class TLSimpleFacetJsonSchemaDelegate extends FacetJsonSchemaDelegate<TLS
             transformDocumentation( sourceFacet, schemaRef );
             schemaRef.getExampleItems().addAll( jsonUtils.getExampleInfo( sourceFacet ) );
             schemaRef.getEquivalentItems().addAll( jsonUtils.getEquivalentInfo( sourceFacet ) );
-            schemaRef.setSchemaPath( jsonUtils.getSchemaReferencePath( baseType, sourceFacet ) );
+            schemaRef.setSchemaPath( jsonUtils.getSchemaDefinitionPath( baseType, sourceFacet ) );
         }
         return definition;
     }

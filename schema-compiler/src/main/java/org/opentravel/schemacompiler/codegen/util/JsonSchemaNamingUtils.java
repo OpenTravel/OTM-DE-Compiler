@@ -39,7 +39,7 @@ public class JsonSchemaNamingUtils {
     private JsonSchemaNamingUtils() {}
 
     /**
-     * Returns the globally-accessible type name for the given entity in the XML schema output.
+     * Returns the globally-accessible type name for the given entity in the JSON schema output.
      * 
      * <p>
      * NOTE: In some cases (e.g. action facets of abstract resources), the resulting value may be null. This indicates
@@ -49,7 +49,7 @@ public class JsonSchemaNamingUtils {
      * @return String
      */
     public static String getGlobalDefinitionName(NamedEntity modelEntity) {
-        String definitionName = getGlobalElementName( modelEntity );
+        String definitionName = getGlobalElementName( modelEntity, false );
 
         if (definitionName == null) {
             definitionName = XsdCodegenUtils.getGlobalTypeName( modelEntity );
@@ -58,7 +58,7 @@ public class JsonSchemaNamingUtils {
     }
 
     /**
-     * Returns the globally-accessible type name for the given entity in the XML schema output.
+     * Returns the globally-accessible type name for the given entity in the JSON schema output.
      * 
      * <p>
      * NOTE: In some cases (e.g. action facets of abstract resources), the resulting value may be null. This indicates
@@ -69,7 +69,7 @@ public class JsonSchemaNamingUtils {
      * @return String
      */
     public static String getGlobalDefinitionName(NamedEntity modelEntity, TLProperty referencingProperty) {
-        String definitionName = getGlobalElementName( modelEntity );
+        String definitionName = getGlobalElementName( modelEntity, false );
 
         if (definitionName == null) {
             definitionName = XsdCodegenUtils.getGlobalTypeName( modelEntity, referencingProperty );
@@ -78,18 +78,39 @@ public class JsonSchemaNamingUtils {
     }
 
     /**
-     * Returns the global XML element name for the given entity or null if the entity does not have one.
+     * Returns the globally-accessible type name for the given entity in the JSON schema output.
+     * 
+     * <p>
+     * NOTE: In some cases (e.g. action facets of abstract resources), the resulting value may be null. This indicates
+     * that there is no global schema type name associated with the given model entity.
      * 
      * @param modelEntity the model entity for which to return the element name
      * @return String
      */
-    private static String getGlobalElementName(NamedEntity modelEntity) {
+    public static String getGlobalReferenceName(NamedEntity modelEntity) {
+        String definitionName = getGlobalElementName( modelEntity, true );
+
+        if (definitionName == null) {
+            definitionName = XsdCodegenUtils.getGlobalTypeName( modelEntity );
+        }
+        return definitionName;
+    }
+
+    /**
+     * Returns the global XML element name for the given entity or null if the entity does not have one.
+     * 
+     * @param modelEntity the model entity for which to return the element name
+     * @param useReferenceName flag indicating whether the name is to be used for naming a definition or a type
+     *        reference to a definition
+     * @return String
+     */
+    private static String getGlobalElementName(NamedEntity modelEntity, boolean useReferenceName) {
         QName elementName = null;
 
         if (modelEntity instanceof TLAlias) {
             TLAlias alias = (TLAlias) modelEntity;
 
-            elementName = getAliasGlobalElementName( alias );
+            elementName = getAliasGlobalElementName( alias, useReferenceName );
 
             // Last resort since all aliases must have a global element name
             if (elementName == null) {
@@ -97,17 +118,20 @@ public class JsonSchemaNamingUtils {
             }
 
         } else {
-            TLFacet entityFacet = null;
-
             if (modelEntity instanceof TLFacet) {
-                entityFacet = (TLFacet) modelEntity;
+                if (useReferenceName) {
+                    elementName = XsdCodegenUtils.getGlobalElementName( modelEntity );
+
+                } else {
+                    elementName = XsdCodegenUtils.getSubstitutableElementName( (TLFacet) modelEntity );
+                }
 
             } else {
-                entityFacet = getRootFacet( modelEntity );
-            }
+                TLFacet entityFacet = getRootFacet( modelEntity );
 
-            if (entityFacet != null) {
-                elementName = XsdCodegenUtils.getSubstitutableElementName( entityFacet );
+                if (entityFacet != null) {
+                    elementName = XsdCodegenUtils.getSubstitutableElementName( entityFacet );
+                }
             }
         }
         return (elementName == null) ? null : elementName.getLocalPart();
@@ -119,12 +143,17 @@ public class JsonSchemaNamingUtils {
      * @param alias the alias for which to return a global element name
      * @return QName
      */
-    private static QName getAliasGlobalElementName(TLAlias alias) {
+    private static QName getAliasGlobalElementName(TLAlias alias, boolean useReferenceName) {
         TLAliasOwner aliasOwner = alias.getOwningEntity();
         QName elementName = null;
 
         if (aliasOwner instanceof TLFacet) {
-            elementName = XsdCodegenUtils.getSubstitutableElementName( alias );
+            if (useReferenceName) {
+                elementName = XsdCodegenUtils.getGlobalElementName( alias );
+
+            } else {
+                elementName = XsdCodegenUtils.getSubstitutableElementName( alias );
+            }
 
         } else {
             TLFacet facet = getRootFacet( aliasOwner );

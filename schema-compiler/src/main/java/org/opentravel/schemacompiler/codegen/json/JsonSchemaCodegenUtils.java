@@ -338,8 +338,47 @@ public class JsonSchemaCodegenUtils {
      * @param referencingEntity the named entity which owns the reference
      * @return String
      */
-    @SuppressWarnings("unchecked")
+    public String getSchemaDefinitionPath(NamedEntity referencedEntity, NamedEntity referencingEntity) {
+        StringBuilder referencePath = buildSchemaPath( referencedEntity, referencingEntity );
+        JsonTypeNameBuilder typeNameBuilder = getTypeNameBuilder();
+
+        if (typeNameBuilder != null) {
+            referencePath.append( typeNameBuilder.getJsonTypeName( referencedEntity ) );
+        } else {
+            referencePath.append( JsonSchemaNamingUtils.getGlobalDefinitionName( referencedEntity ) );
+        }
+        return referencePath.toString();
+    }
+
+    /**
+     * Returns a relative path reference to the JSON schema definition of the given named entity.
+     * 
+     * @param referencedEntity the named entity for which to return a reference
+     * @param referencingEntity the named entity which owns the reference
+     * @return String
+     */
     public String getSchemaReferencePath(NamedEntity referencedEntity, NamedEntity referencingEntity) {
+        StringBuilder referencePath = buildSchemaPath( referencedEntity, referencingEntity );
+        JsonTypeNameBuilder typeNameBuilder = getTypeNameBuilder();
+
+        if (typeNameBuilder != null) {
+            referencePath.append( typeNameBuilder.getJsonReferenceName( referencedEntity ) );
+        } else {
+            referencePath.append( JsonSchemaNamingUtils.getGlobalReferenceName( referencedEntity ) );
+        }
+        return referencePath.toString();
+    }
+
+    /**
+     * Constructs the path to the given referenced entity. The string builder that is returned contains the path leading
+     * up to, but not including, the entity name itself.
+     * 
+     * @param referencedEntity the named entity for which to return a path
+     * @param referencingEntity the named entity which owns the reference
+     * @return StringBuilder
+     */
+    @SuppressWarnings("unchecked")
+    private StringBuilder buildSchemaPath(NamedEntity referencedEntity, NamedEntity referencingEntity) {
         AbstractLibrary referencedLibrary =
             (referencedEntity == null) ? null : getLatestMinorVersion( referencedEntity.getOwningLibrary() );
         AbstractLibrary referencingLibrary =
@@ -366,13 +405,7 @@ public class JsonSchemaCodegenUtils {
                 .append( buildLatestMinorVersionFilename( referencedEntity.getOwningLibrary(), filenameBuilder ) );
         }
         referencePath.append( DEFINITIONS_PATH );
-
-        if (typeNameBuilder != null) {
-            referencePath.append( typeNameBuilder.getJsonTypeName( referencedEntity ) );
-        } else {
-            referencePath.append( JsonSchemaNamingUtils.getGlobalDefinitionName( referencedEntity ) );
-        }
-        return referencePath.toString();
+        return referencePath;
     }
 
     /**

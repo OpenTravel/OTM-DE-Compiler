@@ -100,15 +100,40 @@ public class JsonTypeNameBuilder {
     public String getJsonTypeName(NamedEntity entity) {
         String typeName = JsonSchemaNamingUtils.getGlobalDefinitionName( entity );
 
-        if (localNameCollisions.contains( typeName )) {
+        return resolveTypeName( typeName, entity );
+    }
+
+    /**
+     * Returns a fully-qualified JSON reference name for the given entity.
+     * 
+     * @param entity the named entity for which to return a qualified type name
+     * @return String
+     */
+    public String getJsonReferenceName(NamedEntity entity) {
+        String typeName = JsonSchemaNamingUtils.getGlobalReferenceName( entity );
+
+        return resolveTypeName( typeName, entity );
+    }
+
+    /**
+     * Resolves the given type name by adding a prefix from the registry if a naming collision exists.
+     * 
+     * @param unresolvedTypeName the unresolved type name to process
+     * @param entity the named entity from which the type name was created
+     * @return String
+     */
+    public String resolveTypeName(String unresolvedTypeName, NamedEntity entity) {
+        String resolvedTypeName = unresolvedTypeName;
+
+        if (localNameCollisions.contains( unresolvedTypeName )) {
             String suffix = prefixRegistry.get( entity.getNamespace() );
 
             if (suffix == null) {
                 suffix = "unknown";
             }
-            typeName += "_" + suffix;
+            resolvedTypeName += "_" + suffix;
         }
-        return typeName;
+        return resolvedTypeName;
     }
 
 }
