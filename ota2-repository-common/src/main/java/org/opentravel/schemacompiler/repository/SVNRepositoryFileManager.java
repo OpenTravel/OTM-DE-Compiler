@@ -43,8 +43,11 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -291,11 +294,19 @@ public class SVNRepositoryFileManager extends RepositoryFileManager {
         SVNStatusClient statusClient = svnClient.getStatusClient();
         SVNWCClient wcClient = svnClient.getWCClient();
         Set<File> threadLocalChangeSet = svnChangeSet.get();
+        List<File> changeSetList = new ArrayList<>( changeSet );
 
+        changeSetList.sort( new Comparator<File>() {
+            public int compare(File f1, File f2) {
+                return f1.getAbsolutePath().compareTo( f2.getAbsolutePath() );
+            }
+        } );
         threadLocalChangeSet.clear();
+        log.info( "BUILDING SVN CHANGE SET:" );
 
-        for (File file : changeSet) {
+        for (File file : changeSetList) {
             try {
+                log.info( "  " + file.getAbsolutePath() );
                 statusClient.doStatus( file, SVNRevision.HEAD, SVNDepth.INFINITY, false, true, false, false,
                     new RepositorySVNStatusHandler(), null );
 
@@ -383,6 +394,16 @@ public class SVNRepositoryFileManager extends RepositoryFileManager {
                     log.info( "Adding New File to SVN Change Set: " + event.getFile().getAbsolutePath() );
                 }
                 svnChangeSet.get().add( event.getFile() );
+
+                // If this is a folder, sub-folders will not be added automatically so we have to
+                // explicitly add each subfolder and its contents to the change set.
+                if (event.getFile().isDirectory()) {
+                    for (File folderItem : event.getFile().listFiles()) {
+                        if (folderItem.isDirectory()) {
+                            addAllToChangeSet( folderItem );
+                        }
+                    }
+                }
             }
 
             if (event.getAction() == SVNEventAction.DELETE) {
@@ -390,6 +411,24 @@ public class SVNRepositoryFileManager extends RepositoryFileManager {
                     log.info( "Adding Deleted File to SVN Change Set: " + event.getFile().getAbsolutePath() );
                 }
                 svnChangeSet.get().add( event.getFile() );
+            }
+        }
+
+        /**
+         * Adds the given folder and all of its contents (recursively) to the current change set.
+         * 
+         * @param fileOrFolder the file or folder to add to the current change set
+         */
+        private void addAllToChangeSet(File fileOrFolder) {
+            if (log.isInfoEnabled()) {
+                log.info( "Adding New File to SVN Change Set: " + fileOrFolder.getAbsolutePath() );
+            }
+            svnChangeSet.get().add( fileOrFolder );
+
+            if (fileOrFolder.isDirectory()) {
+                for (File folderItem : fileOrFolder.listFiles()) {
+                    addAllToChangeSet( folderItem );
+                }
             }
         }
 

@@ -408,7 +408,7 @@ public abstract class RepositoryFileManager {
         File metadataFolder = metadataFile.getParentFile();
 
         if (!metadataFolder.exists()) {
-            metadataFolder.mkdirs();
+            createDirectory( metadataFolder );
         }
 
         if (libraryMetadata.getLastUpdated() != null) {
