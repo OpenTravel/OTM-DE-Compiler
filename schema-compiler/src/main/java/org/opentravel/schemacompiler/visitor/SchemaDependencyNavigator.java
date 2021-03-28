@@ -383,10 +383,10 @@ public class SchemaDependencyNavigator extends AbstractNavigator<NamedEntity> {
         if (canVisit( resource ) && visitor.visitResource( resource )) {
             navigateBusinessObject( resource.getBusinessObjectRef(), null );
 
-            for (TLActionFacet actionFacet : resource.getActionFacets()) {
+            for (TLActionFacet actionFacet : ResourceCodegenUtils.getInheritedActionFacets( resource )) {
                 navigateActionFacet( actionFacet );
             }
-            for (TLAction action : resource.getActions()) {
+            for (TLAction action : ResourceCodegenUtils.getInheritedActions( resource )) {
                 navigateAction( action );
             }
         }
@@ -864,8 +864,8 @@ public class SchemaDependencyNavigator extends AbstractNavigator<NamedEntity> {
      */
     private void navigateBusinessObjectRef(TLBusinessObject boRef, TLActionFacet actionFacet) {
         if (boRef != null) {
-            TLFacet boFacet =
-                ResourceCodegenUtils.getReferencedFacet( getReference( boRef ), actionFacet.getReferenceFacetName() );
+            TLBusinessObject boRef2 = getReference( boRef );
+            TLFacet boFacet = ResourceCodegenUtils.getReferencedFacet( boRef2, actionFacet.getReferenceFacetName() );
 
             if (boFacet != null) {
                 if (boFacet instanceof TLContextualFacet) {
@@ -876,7 +876,7 @@ public class SchemaDependencyNavigator extends AbstractNavigator<NamedEntity> {
                 }
 
             } else {
-                navigateBusinessObject( boRef, null );
+                navigateBusinessObject( boRef2, null );
             }
         }
     }
