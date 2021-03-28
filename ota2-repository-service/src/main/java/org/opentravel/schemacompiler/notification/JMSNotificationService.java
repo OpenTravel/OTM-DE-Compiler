@@ -52,6 +52,7 @@ public class JMSNotificationService implements NotificationService {
     private Deque<NotificationJob> jobQueue = new ArrayDeque<>();
     private boolean running = false;
     private boolean shutdownRequested = false;
+    private long shutdownTimeout = 5000;
     private Thread jobThread;
 
     /**
@@ -109,7 +110,7 @@ public class JMSNotificationService implements NotificationService {
         }
 
         try {
-            jobThread.join();
+            jobThread.join( shutdownTimeout );
 
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
@@ -123,6 +124,24 @@ public class JMSNotificationService implements NotificationService {
         if (jmsConnectionFactory instanceof CachingConnectionFactory) {
             ((CachingConnectionFactory) jmsConnectionFactory).destroy();
         }
+    }
+
+    /**
+     * Returns the wait time (in millis) for a graceful shutdown to occur.
+     *
+     * @return long
+     */
+    public long getShutdownTimeout() {
+        return shutdownTimeout;
+    }
+
+    /**
+     * Assigns the wait time (in millis) for a graceful shutdown to occur.
+     *
+     * @param shutdownTimeout the shutdown wait time (default is 5000ms)
+     */
+    public void setShutdownTimeout(long shutdownTimeout) {
+        this.shutdownTimeout = (shutdownTimeout < 0) ? 0 : shutdownTimeout;
     }
 
     /**
