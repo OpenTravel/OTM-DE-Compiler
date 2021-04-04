@@ -180,6 +180,7 @@ public class TestContextualFacetCompilation {
         compilerTask.setCompileJsonSchemas( true );
         compilerTask.setCompileServices( false );
         compilerTask.setCompileSwagger( true );
+        compilerTask.setCompileOpenApi( true );
         findings = compilerTask.compileOutput( projectFile );
 
         SchemaCompilerTestUtils.printFindings( findings );

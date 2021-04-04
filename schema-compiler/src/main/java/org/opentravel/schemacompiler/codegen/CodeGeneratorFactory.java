@@ -39,6 +39,7 @@ public final class CodeGeneratorFactory {
     public static final String JSON_SCHEMA_TARGET_FORMAT = "JSON_SCHEMA";
     public static final String JSON_TARGET_FORMAT = "JSON";
     public static final String SWAGGER_TARGET_FORMAT = "SWAGGER";
+    public static final String OPENAPI_TARGET_FORMAT = "OPENAPI";
 
     private static final String FACTORY_NAME = "codeGeneratorFactory";
     private static final Pattern whitespacePattern = Pattern.compile( "\\s+" );

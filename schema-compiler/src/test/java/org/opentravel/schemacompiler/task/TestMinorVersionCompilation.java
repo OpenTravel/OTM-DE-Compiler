@@ -45,6 +45,7 @@ public class TestMinorVersionCompilation {
         compilerTask.setCompileJsonSchemas( true );
         compilerTask.setCompileServices( false );
         compilerTask.setCompileSwagger( true );
+        compilerTask.setCompileOpenApi( true );
         compilerTask.setCompileHtml( false );
         compilerTask.setGenerateExamples( true );
         compilerTask.setExampleMaxRepeat( 3 );

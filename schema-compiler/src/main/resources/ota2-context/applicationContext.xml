@@ -1485,6 +1485,9 @@
 	<bean id="SwaggerCompilerTask" class="org.opentravel.schemacompiler.task.SwaggerCompilerTask" scope="prototype">
 		<property name="validationRuleSetId" value="defaultCompileValidationRules" />
 	</bean>
+	<bean id="OpenApiCompilerTask" class="org.opentravel.schemacompiler.task.OpenApiCompilerTask" scope="prototype">
+		<property name="validationRuleSetId" value="defaultCompileValidationRules" />
+	</bean>
 	<bean id="CompileAllCompilerTask" class="org.opentravel.schemacompiler.task.CompileAllCompilerTask" scope="prototype">
 		<property name="validationRuleSetId" value="defaultCompileValidationRules" />
 	</bean>
@@ -1549,6 +1552,11 @@
 					<property name="sourceType" value="org.opentravel.schemacompiler.model.TLResource" />
 					<property name="targetFormat" value="SWAGGER" />
 					<property name="codeGenerator" value="org.opentravel.schemacompiler.codegen.swagger.SwaggerCodeGenerator" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.codegen.CodeGeneratorMapping">
+					<property name="sourceType" value="org.opentravel.schemacompiler.model.TLResource" />
+					<property name="targetFormat" value="OPENAPI" />
+					<property name="codeGenerator" value="org.opentravel.schemacompiler.codegen.openapi.OpenApiCodeGenerator" />
 				</bean>
 				<bean class="org.opentravel.schemacompiler.codegen.CodeGeneratorMapping">
 					<property name="sourceType"	value="org.opentravel.schemacompiler.model.TLModel" />
@@ -1855,6 +1863,52 @@
 					<property name="target" value="org.opentravel.schemacompiler.codegen.json.model.JsonDocumentation" />
 					<property name="transformer" value="org.opentravel.schemacompiler.codegen.json.TLDocumentationJsonCodegenTransformer" />
 				</bean>
+			</set>
+		</property>
+	</bean>
+	
+	<!--
+	  Transform Factory: OpenAPI Code Generator
+	  
+	  Defines the object transformation mappings utilized by the OpenAPI code generator.  Each mapping associates
+	  the source and target object types with the transformer class that will be used to implement the conversion
+	  function.  All transformer classes must implement the 'org.opentravel.schemacompiler.transform.ObjectTransformer'
+	  interface.
+	  -->
+	<bean id="openApiCodeGeneratorTransformFactory" class="org.opentravel.schemacompiler.transform.TransformerFactory" scope="prototype">
+		<property name="transformerMappings" ref="openApiCodeGeneratorTransformers"/>
+	</bean>
+	
+	<bean id="openApiCodeGeneratorTransformers" parent="commonJsonCodeGeneratorTransformers" class="org.springframework.beans.factory.config.SetFactoryBean">
+		<property name="sourceSet">
+			<set merge="true">
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.schemacompiler.model.TLResource" />
+					<property name="target" value="org.opentravel.schemacompiler.codegen.openapi.model.OpenApiDocument" />
+					<property name="transformer" value="org.opentravel.schemacompiler.codegen.openapi.TLResourceOpenApiTransformer" />
+				</bean>
+				<!--
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.schemacompiler.codegen.impl.QualifiedAction" />
+					<property name="target" value="org.opentravel.schemacompiler.codegen.openapi.model.SwaggerOperation" />
+					<property name="transformer" value="org.opentravel.schemacompiler.codegen.openapi.TLActionSwaggerTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.schemacompiler.codegen.impl.QualifiedParameter" />
+					<property name="target" value="org.opentravel.schemacompiler.codegen.openapi.model.SwaggerParameter" />
+					<property name="transformer" value="org.opentravel.schemacompiler.codegen.openapi.TLParameterSwaggerTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.schemacompiler.model.TLActionResponse" />
+					<property name="target" value="org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts" />
+					<property name="transformer" value="org.opentravel.schemacompiler.codegen.openapi.TLActionResponseSwaggerTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.schemacompiler.model.TLDocumentation" />
+					<property name="target" value="org.opentravel.schemacompiler.codegen.json.model.JsonDocumentation" />
+					<property name="transformer" value="org.opentravel.schemacompiler.codegen.json.TLDocumentationJsonCodegenTransformer" />
+				</bean>
+				-->
 			</set>
 		</property>
 	</bean>

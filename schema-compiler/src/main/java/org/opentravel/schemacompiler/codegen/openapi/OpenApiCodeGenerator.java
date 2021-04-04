@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.opentravel.schemacompiler.codegen.swagger;
+package org.opentravel.schemacompiler.codegen.openapi;
 
 import org.opentravel.schemacompiler.codegen.CodeGenerationContext;
 import org.opentravel.schemacompiler.codegen.CodeGenerationException;
@@ -26,7 +26,7 @@ import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerConte
 import org.opentravel.schemacompiler.codegen.impl.ResourceFilenameBuilder;
 import org.opentravel.schemacompiler.codegen.json.JsonSchemaCodegenUtils;
 import org.opentravel.schemacompiler.codegen.json.JsonTypeNameBuilder;
-import org.opentravel.schemacompiler.codegen.swagger.model.SwaggerDocument;
+import org.opentravel.schemacompiler.codegen.openapi.model.OpenApiDocument;
 import org.opentravel.schemacompiler.codegen.util.ResourceCodegenUtils;
 import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
 import org.opentravel.schemacompiler.ioc.SchemaDeclarations;
@@ -51,20 +51,20 @@ import java.net.URL;
 import java.util.Map.Entry;
 
 /**
- * Code generator implementation used to generate Swagger documents from <code>TLResource</code> meta-model components.
+ * Code generator implementation used to generate OpenAPI documents from <code>TLResource</code> meta-model components.
  * 
  * <p>
  * The following context variable(s) are required when invoking this code generation module:
  * <ul>
- * <li><code>schemacompiler.OutputFolder</code> - the folder where generated Swagger files should be stored</li>
+ * <li><code>schemacompiler.OutputFolder</code> - the folder where generated OpenAPI files should be stored</li>
  * </ul>
  */
-public class SwaggerCodeGenerator extends AbstractCodeGenerator<TLResource> {
+public class OpenApiCodeGenerator extends AbstractCodeGenerator<TLResource> {
 
     private static final String DEFINITIONS = "definitions";
 
-    public static final String SWAGGER_FILENAME_EXT = "swagger";
-    public static final String SWAGGER_DEFS_FILENAME_EXT = "defs.swagger";
+    public static final String OPENAPI_FILENAME_EXT = "openapi";
+    public static final String OPENAPI_DEFS_FILENAME_EXT = "defs.openapi";
 
     private static Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
@@ -73,9 +73,9 @@ public class SwaggerCodeGenerator extends AbstractCodeGenerator<TLResource> {
     /**
      * Default constructor.
      */
-    public SwaggerCodeGenerator() {
+    public OpenApiCodeGenerator() {
         transformerFactory =
-            TransformerFactory.getInstance( SchemaCompilerApplicationContext.SWAGGER_CODEGEN_TRANSFORMER_FACTORY,
+            TransformerFactory.getInstance( SchemaCompilerApplicationContext.OPENAPI_CODEGEN_TRANSFORMER_FACTORY,
                 new CodeGenerationTransformerContext( this ) );
     }
 
@@ -89,17 +89,17 @@ public class SwaggerCodeGenerator extends AbstractCodeGenerator<TLResource> {
             File outputFile = getOutputFile( source, context );
 
             try (Writer out = new FileWriter( outputFile )) {
-                SwaggerDocument swaggerDoc = transformSourceObjectToSwaggerDocument( source, context );
-                JsonObject swaggerJson = swaggerDoc.toJson();
+                OpenApiDocument openapiDoc = transformSourceObjectToOpenApiDocument( source, context );
+                JsonObject openapiJson = openapiDoc.toJson();
 
                 if (isSingleFileEnabled( context )) {
-                    addBuiltInDefinitions( swaggerJson );
+                    addBuiltInDefinitions( openapiJson );
                 }
                 if (context.getBooleanValue( CodeGenerationContext.CK_SUPRESS_OTM_EXTENSIONS )) {
-                    JsonSchemaCodegenUtils.stripOtmExtensions( swaggerJson );
+                    JsonSchemaCodegenUtils.stripOtmExtensions( openapiJson );
                 }
 
-                gson.toJson( swaggerJson, out );
+                gson.toJson( openapiJson, out );
                 addGeneratedFile( outputFile );
 
             } catch (Exception e) {
@@ -109,18 +109,18 @@ public class SwaggerCodeGenerator extends AbstractCodeGenerator<TLResource> {
     }
 
     /**
-     * Performs the translation from meta-model element to a Swagger Document object that will be used to generate the
+     * Performs the translation from meta-model element to an OpenAPI Document object that will be used to generate the
      * output content.
      * 
      * @param source the resource instance to transform
      * @param context the code generation context
-     * @return SwaggerDocument
+     * @return OpenApiDocument
      * @throws CodeGenerationException thrown if an error occurs during object translation
      */
-    protected SwaggerDocument transformSourceObjectToSwaggerDocument(TLResource source, CodeGenerationContext context)
+    protected OpenApiDocument transformSourceObjectToOpenApiDocument(TLResource source, CodeGenerationContext context)
         throws CodeGenerationException {
-        ObjectTransformer<TLResource,SwaggerDocument,CodeGenerationTransformerContext> transformer =
-            getTransformerFactory( context ).getTransformer( source, SwaggerDocument.class );
+        ObjectTransformer<TLResource,OpenApiDocument,CodeGenerationTransformerContext> transformer =
+            getTransformerFactory( context ).getTransformer( source, OpenApiDocument.class );
 
         if (transformer != null) {
             if (isSingleFileEnabled( context )) {
@@ -150,20 +150,20 @@ public class SwaggerCodeGenerator extends AbstractCodeGenerator<TLResource> {
     private void addBuiltInDefinitions(JsonObject swaggerJson) throws CodeGenerationException {
         try (Reader reader = new InputStreamReader(
             SchemaDeclarations.OTM_COMMON_SCHEMA.getContent( CodeGeneratorFactory.JSON_SCHEMA_TARGET_FORMAT ) )) {
-            JsonObject swaggerDefs;
+            JsonObject openapiDefs;
 
             if (swaggerJson.has( DEFINITIONS )) {
-                swaggerDefs = swaggerJson.get( DEFINITIONS ).getAsJsonObject();
+                openapiDefs = swaggerJson.get( DEFINITIONS ).getAsJsonObject();
 
             } else {
-                swaggerDefs = new JsonObject();
-                swaggerJson.add( DEFINITIONS, swaggerDefs );
+                openapiDefs = new JsonObject();
+                swaggerJson.add( DEFINITIONS, openapiDefs );
             }
             JsonObject builtInSchema = new JsonParser().parse( reader ).getAsJsonObject();
             JsonObject builtInDefs = builtInSchema.get( DEFINITIONS ).getAsJsonObject();
 
             for (Entry<String,JsonElement> builtInDef : builtInDefs.entrySet()) {
-                swaggerDefs.add( builtInDef.getKey(), builtInDef.getValue() );
+                openapiDefs.add( builtInDef.getKey(), builtInDef.getValue() );
             }
 
         } catch (IOException e) {
@@ -205,7 +205,7 @@ public class SwaggerCodeGenerator extends AbstractCodeGenerator<TLResource> {
         URL libraryUrl = (library == null) ? null : library.getLibraryUrl();
         File outputFolder = getOutputFolder( context, libraryUrl );
         String filename = getFilenameBuilder().buildFilename( source,
-            isSingleFileEnabled( context ) ? SWAGGER_DEFS_FILENAME_EXT : SWAGGER_FILENAME_EXT );
+            isSingleFileEnabled( context ) ? OPENAPI_DEFS_FILENAME_EXT : OPENAPI_FILENAME_EXT );
 
         return new File( outputFolder, filename );
     }

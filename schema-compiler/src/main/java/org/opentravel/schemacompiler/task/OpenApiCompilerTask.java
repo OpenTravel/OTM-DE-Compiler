@@ -25,22 +25,22 @@ import org.opentravel.schemacompiler.util.SchemaCompilerException;
 import java.util.Collection;
 
 /**
- * Compiler task used to generate Swagger documents for the resources defined in a model, as well as the trimmed schemas
+ * Compiler task used to generate OpenAPI documents for the resources defined in a model, as well as the trimmed schemas
  * (XSD &amp; JSON) that contain the entities upon which those resources depend.
  */
-public class SwaggerCompilerTask extends AbstractRESTCompilerTask {
+public class OpenApiCompilerTask extends AbstractRESTCompilerTask {
 
     /**
      * Default constructor.
      */
-    public SwaggerCompilerTask() {}
+    public OpenApiCompilerTask() {}
 
     /**
      * Constructor that assigns the repository manager for this task instance.
      * 
      * @param repositoryManager the repository manager to use when retrieving managed content
      */
-    public SwaggerCompilerTask(RepositoryManager repositoryManager) {
+    public OpenApiCompilerTask(RepositoryManager repositoryManager) {
         super( repositoryManager );
     }
 
@@ -50,7 +50,7 @@ public class SwaggerCompilerTask extends AbstractRESTCompilerTask {
     @Override
     protected void generateOutput(Collection<TLLibrary> userDefinedLibraries, Collection<XSDLibrary> legacySchemas)
         throws SchemaCompilerException {
-        generateOutput( userDefinedLibraries, legacySchemas, CodeGeneratorFactory.SWAGGER_TARGET_FORMAT );
+        generateOutput( userDefinedLibraries, legacySchemas, CodeGeneratorFactory.OPENAPI_TARGET_FORMAT );
     }
 
 }

@@ -87,8 +87,8 @@ public class CodeGenerationContext {
     /** Context key indicating the sub-folder location to which legacy schemas should be generated. */
     public static final String CK_LEGACY_SCHEMA_FOLDER = "schemacompiler.legacy.folder";
 
-    /** Context key indicating that single-file Swagger document generation is enabled. */
-    public static final String CK_ENABLE_SINGLE_FILE_SWAGGER = "schemacompiler.swagger.singleFile";
+    /** Context key indicating that single-file Swagger/OpenAPI document generation is enabled. */
+    public static final String CK_ENABLE_SINGLE_FILE = "schemacompiler.swagger.singleFile";
 
     /** Context key indicating that OTM extensions should be suppressed in the generated swagger documents. */
     public static final String CK_SUPRESS_OTM_EXTENSIONS = "schemacompiler.swagger.supressOtmExtensions";
