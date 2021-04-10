@@ -402,7 +402,12 @@ public class JsonSchemaCodegenUtils {
             referencePath
                 .append( buildLatestMinorVersionFilename( referencedEntity.getOwningLibrary(), filenameBuilder ) );
         }
-        referencePath.append( getBaseDefinitionsPath( context ) );
+
+        if (referencePath.length() != 0) {
+            referencePath.append( "#/definitions/" );
+        } else {
+            referencePath.append( getBaseDefinitionsPath( context ) );
+        }
         return referencePath;
     }
 
@@ -429,16 +434,14 @@ public class JsonSchemaCodegenUtils {
      * @return String
      */
     public String getSchemaReferencePath(SchemaDependency schemaDependency, NamedEntity referencingEntity) {
-        JsonTypeNameBuilder typeNameBuilder = getTypeNameBuilder();
         String referencedFilename =
             schemaDependency.getSchemaDeclaration().getFilename( CodeGeneratorFactory.JSON_SCHEMA_TARGET_FORMAT );
         String referencePath = null;
 
-        if ((typeNameBuilder == null) && (referencedFilename != null)) {
-            String builtInLocation = XsdCodegenUtils.getBuiltInSchemaOutputLocation( context.getCodegenContext() );
+        if (referencedFilename != null) {
+            referencePath = XsdCodegenUtils.getBuiltInSchemaOutputLocation( context.getCodegenContext() )
+                + referencedFilename + "#/definitions/" + schemaDependency.getLocalName();
 
-            referencePath = builtInLocation + referencedFilename + getBaseDefinitionsPath( context )
-                + schemaDependency.getLocalName();
         } else {
             referencePath = getBaseDefinitionsPath( context ) + schemaDependency.getLocalName();
         }

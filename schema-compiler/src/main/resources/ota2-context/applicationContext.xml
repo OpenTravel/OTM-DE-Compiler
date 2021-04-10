@@ -1887,28 +1887,31 @@
 					<property name="target" value="org.opentravel.schemacompiler.codegen.openapi.model.OpenApiDocument" />
 					<property name="transformer" value="org.opentravel.schemacompiler.codegen.openapi.TLResourceOpenApiTransformer" />
 				</bean>
-				<!--
 				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
 					<property name="source" value="org.opentravel.schemacompiler.codegen.impl.QualifiedAction" />
-					<property name="target" value="org.opentravel.schemacompiler.codegen.openapi.model.SwaggerOperation" />
-					<property name="transformer" value="org.opentravel.schemacompiler.codegen.openapi.TLActionSwaggerTransformer" />
+					<property name="target" value="org.opentravel.schemacompiler.codegen.openapi.model.OpenApiOperation" />
+					<property name="transformer" value="org.opentravel.schemacompiler.codegen.openapi.TLActionOpenApiTransformer" />
 				</bean>
 				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
 					<property name="source" value="org.opentravel.schemacompiler.codegen.impl.QualifiedParameter" />
-					<property name="target" value="org.opentravel.schemacompiler.codegen.openapi.model.SwaggerParameter" />
-					<property name="transformer" value="org.opentravel.schemacompiler.codegen.openapi.TLParameterSwaggerTransformer" />
+					<property name="target" value="org.opentravel.schemacompiler.codegen.openapi.model.OpenApiParameter" />
+					<property name="transformer" value="org.opentravel.schemacompiler.codegen.openapi.TLParameterOpenApiTransformer" />
+				</bean>
+				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
+					<property name="source" value="org.opentravel.schemacompiler.model.TLActionRequest" />
+					<property name="target" value="org.opentravel.schemacompiler.codegen.openapi.model.OpenApiRequestBody" />
+					<property name="transformer" value="org.opentravel.schemacompiler.codegen.openapi.TLActionRequestOpenApiTransformer" />
 				</bean>
 				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
 					<property name="source" value="org.opentravel.schemacompiler.model.TLActionResponse" />
 					<property name="target" value="org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts" />
-					<property name="transformer" value="org.opentravel.schemacompiler.codegen.openapi.TLActionResponseSwaggerTransformer" />
+					<property name="transformer" value="org.opentravel.schemacompiler.codegen.openapi.TLActionResponseOpenApiTransformer" />
 				</bean>
 				<bean class="org.opentravel.schemacompiler.transform.TransformerMapping">
 					<property name="source" value="org.opentravel.schemacompiler.model.TLDocumentation" />
 					<property name="target" value="org.opentravel.schemacompiler.codegen.json.model.JsonDocumentation" />
 					<property name="transformer" value="org.opentravel.schemacompiler.codegen.json.TLDocumentationJsonCodegenTransformer" />
 				</bean>
-				-->
 			</set>
 		</property>
 	</bean>

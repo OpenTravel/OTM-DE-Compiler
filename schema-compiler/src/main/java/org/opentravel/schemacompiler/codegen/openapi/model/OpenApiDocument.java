@@ -19,7 +19,11 @@ package org.opentravel.schemacompiler.codegen.openapi.model;
 import org.opentravel.schemacompiler.codegen.json.model.JsonModelObject;
 import org.opentravel.schemacompiler.codegen.swagger.model.SwaggerInfo;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Class that defines the meta-model for an OpenAPI document.
@@ -31,6 +35,8 @@ public class OpenApiDocument implements JsonModelObject {
     private String specVersion = OPENAPI_SPEC_V3;
     private OpenApiOtmResource otmResource;
     private OpenApiInfo info;
+    private List<OpenApiServer> servers = new ArrayList<>();
+    private List<OpenApiPathItem> pathItems = new ArrayList<>();
     private OpenApiComponents components = new OpenApiComponents();
 
     /**
@@ -88,6 +94,24 @@ public class OpenApiDocument implements JsonModelObject {
     }
 
     /**
+     * Returns the value of the 'servers' field.
+     *
+     * @return List<OpenApiServer>
+     */
+    public List<OpenApiServer> getServers() {
+        return servers;
+    }
+
+    /**
+     * Returns the value of the 'pathItems' field.
+     *
+     * @return List<OpenApiPathItem>
+     */
+    public List<OpenApiPathItem> getPathItems() {
+        return pathItems;
+    }
+
+    /**
      * Returns the value of the 'components' field.
      *
      * @return OpenApiComponents
@@ -100,11 +124,24 @@ public class OpenApiDocument implements JsonModelObject {
      * @see org.opentravel.schemacompiler.codegen.json.model.JsonModelObject#toJson()
      */
     public JsonObject toJson() {
+        JsonObject pathsJson = new JsonObject();
         JsonObject json = new JsonObject();
 
         addProperty( json, "openapi", specVersion );
         addJsonProperty( json, "x-otm-resource", otmResource );
         addJsonProperty( json, "info", (info != null) ? info : new SwaggerInfo() );
+
+        if (!servers.isEmpty()) {
+            JsonArray serversJson = new JsonArray();
+
+            servers.forEach( s -> serversJson.add( s.toJson() ) );
+            json.add( "servers", serversJson );
+        }
+
+        for (OpenApiPathItem pathItem : pathItems) {
+            pathsJson.add( pathItem.getPathTemplate(), pathItem.toJson() );
+        }
+        json.add( "paths", pathsJson );
 
         if (!components.isEmpty()) {
             json.add( "components", components.toJson() );

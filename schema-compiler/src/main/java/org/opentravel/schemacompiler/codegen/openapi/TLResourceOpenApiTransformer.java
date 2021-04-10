@@ -20,23 +20,34 @@ import org.opentravel.schemacompiler.codegen.CodeGenerationContext;
 import org.opentravel.schemacompiler.codegen.CodeGenerationFilter;
 import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerContext;
 import org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts;
+import org.opentravel.schemacompiler.codegen.impl.QualifiedAction;
 import org.opentravel.schemacompiler.codegen.json.JsonSchemaCodegenUtils;
 import org.opentravel.schemacompiler.codegen.json.model.JsonLibraryInfo;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaNamedReference;
 import org.opentravel.schemacompiler.codegen.openapi.model.OpenApiDocument;
 import org.opentravel.schemacompiler.codegen.openapi.model.OpenApiInfo;
+import org.opentravel.schemacompiler.codegen.openapi.model.OpenApiOperation;
 import org.opentravel.schemacompiler.codegen.openapi.model.OpenApiOtmResource;
+import org.opentravel.schemacompiler.codegen.openapi.model.OpenApiPathItem;
+import org.opentravel.schemacompiler.codegen.openapi.model.OpenApiServer;
 import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
+import org.opentravel.schemacompiler.codegen.util.ResourceCodegenUtils;
 import org.opentravel.schemacompiler.model.LibraryMember;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLActionFacet;
+import org.opentravel.schemacompiler.model.TLActionRequest;
+import org.opentravel.schemacompiler.model.TLHttpMethod;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.model.TLResource;
 import org.opentravel.schemacompiler.transform.ObjectTransformer;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * Performs the translation from <code>TLResource</code> objects to the OpenAPI model objects used to produce the
@@ -52,6 +63,67 @@ public class TLResourceOpenApiTransformer extends AbstractOpenApiCodegenTransfor
         OpenApiDocument openapiDoc = new OpenApiDocument();
 
         buildInfo( source, openapiDoc );
+        buildServer( source, openapiDoc );
+
+        // Construct a map of operations indexed by path template and HTTP method
+        ObjectTransformer<QualifiedAction,OpenApiOperation,CodeGenerationTransformerContext> actionTransformer =
+            getTransformerFactory().getTransformer( QualifiedAction.class, OpenApiOperation.class );
+        Map<String,Map<TLHttpMethod,OpenApiOperation>> operationMap = new HashMap<>();
+        List<String> pathList = new ArrayList<>();
+
+        for (QualifiedAction qAction : ResourceCodegenUtils.getQualifiedActions( source )) {
+            if (qAction.getAction().isCommonAction()) {
+                continue;
+            }
+            TLActionRequest actionRequest = qAction.getActionRequest();
+            String pathTemplate = qAction.getPathTemplate();
+            TLHttpMethod httpMethod = actionRequest.getHttpMethod();
+            OpenApiOperation operation = actionTransformer.transform( qAction );
+            Map<TLHttpMethod,OpenApiOperation> methodMap = operationMap.get( pathTemplate );
+
+            if (methodMap == null) {
+                methodMap = new EnumMap<>( TLHttpMethod.class );
+                pathList.add( pathTemplate );
+                operationMap.put( pathTemplate, methodMap );
+            }
+            methodMap.put( httpMethod, operation );
+        }
+
+        // Use the 'operationMap' to construct the path items for the OpenAPI document
+        for (String pathTemplate : pathList) {
+            Map<TLHttpMethod,OpenApiOperation> methodMap = operationMap.get( pathTemplate );
+            OpenApiPathItem pathItem = new OpenApiPathItem();
+
+            for (Entry<TLHttpMethod,OpenApiOperation> entry : methodMap.entrySet()) {
+                switch (entry.getKey()) {
+                    case GET:
+                        pathItem.setGetOperation( entry.getValue() );
+                        break;
+                    case POST:
+                        pathItem.setPostOperation( entry.getValue() );
+                        break;
+                    case PUT:
+                        pathItem.setPutOperation( entry.getValue() );
+                        break;
+                    case DELETE:
+                        pathItem.setDeleteOperation( entry.getValue() );
+                        break;
+                    case HEAD:
+                        pathItem.setHeadOperation( entry.getValue() );
+                        break;
+                    case OPTIONS:
+                        pathItem.setOptionsOperation( entry.getValue() );
+                        break;
+                    case PATCH:
+                        pathItem.setPatchOperation( entry.getValue() );
+                        break;
+                    default:
+                        // No default action
+                }
+            }
+            pathItem.setPathTemplate( pathTemplate );
+            openapiDoc.getPathItems().add( pathItem );
+        }
 
         // If required, generate components for the OpenAPI document
         if (isSingleFileEnabled()) {
@@ -82,6 +154,44 @@ public class TLResourceOpenApiTransformer extends AbstractOpenApiCodegenTransfor
         info.setVersion( libraryInfo.getLibraryVersion() );
         transformDocumentation( source, info );
         openapiDoc.setInfo( info );
+    }
+
+    /**
+     * Creates the server URL for the OpenAPI document.
+     * 
+     * @param source the OTM resource supplying the API version number
+     * @param openapiDoc the OpenAPI document
+     */
+    private void buildServer(TLResource source, OpenApiDocument openapiDoc) {
+        String serverUrl = context.getCodegenContext().getValue( CodeGenerationContext.CK_RESOURCE_BASE_URL );
+        OpenApiServer server = new OpenApiServer();
+
+        if (serverUrl == null) {
+            serverUrl = "/";
+        }
+        if (!serverUrl.endsWith( "/" )) {
+            serverUrl += "/";
+        }
+        serverUrl += "{apiVersion}";
+        server.setUrl( serverUrl );
+        server.getVariables().put( "apiVersion", getApiVersion( source ) );
+        openapiDoc.getServers().add( server );
+    }
+
+    /**
+     * Returns the API version that will be appended to the server URL path of the OpenAPI document.
+     * 
+     * @param source the resource being transformed
+     * @return String
+     */
+    private String getApiVersion(TLResource source) {
+        String[] versionParts = source.getVersion().split( "\\." );
+        StringBuilder suffix = new StringBuilder();
+
+        if (versionParts.length >= 1) {
+            suffix.append( "v" ).append( versionParts[0] );
+        }
+        return suffix.toString();
     }
 
     /**

@@ -485,6 +485,7 @@ public class CodeGeneratorTestAssertions {
             }
 
         } catch (ResolutionException e) {
+            e.printStackTrace( System.out );
             throw new AssertionFailedError(
                 "Error resolving references in OpenAPI document: " + openapiFile.getName() );
 
