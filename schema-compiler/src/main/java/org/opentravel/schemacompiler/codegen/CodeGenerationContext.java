@@ -90,6 +90,12 @@ public class CodeGenerationContext {
     /** Context key indicating that single-file Swagger/OpenAPI document generation is enabled. */
     public static final String CK_ENABLE_SINGLE_FILE = "schemacompiler.swagger.singleFile";
 
+    /** Context key indicating the path to the definitions/components section of the Swagger/OpenAPI document. */
+    public static final String CK_BASE_DEFINITIONS_PATH = "schemacompiler.swagger.baseDefinitionsPath";
+
+    /** Context key indicating the format to use when generating discriminators in JSON schemas. */
+    public static final String CK_JSON_DISCRIMINATOR_FORMAT = "schemacompiler.json.discriminatorFormat";
+
     /** Context key indicating that OTM extensions should be suppressed in the generated swagger documents. */
     public static final String CK_SUPRESS_OTM_EXTENSIONS = "schemacompiler.swagger.supressOtmExtensions";
 

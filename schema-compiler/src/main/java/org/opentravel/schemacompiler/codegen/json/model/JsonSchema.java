@@ -17,6 +17,7 @@
 package org.opentravel.schemacompiler.codegen.json.model;
 
 import org.opentravel.schemacompiler.codegen.json.JsonSchemaCodegenUtils;
+import org.opentravel.schemacompiler.codegen.json.model.JsonDiscriminator.DiscriminatorFormat;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -47,7 +48,7 @@ public class JsonSchema implements JsonDocumentationOwner, JsonModelObject {
     private List<JsonSchemaNamedReference> properties = new ArrayList<>();
     private List<JsonSchemaNamedReference> patternProperties = new ArrayList<>();
     private JsonSchemaReference additionalProperties;
-    private String discriminator;
+    private JsonDiscriminator discriminator;
     private JsonType type;
     private Number multipleOf;
     private Number maximum;
@@ -252,9 +253,9 @@ public class JsonSchema implements JsonDocumentationOwner, JsonModelObject {
      * Returns the name of the property to be used to support polymorphism by specifying which sub-type schema
      * definition should be used to validate messages.
      *
-     * @return String
+     * @return JsonDiscriminator
      */
-    public String getDiscriminator() {
+    public JsonDiscriminator getDiscriminator() {
         return discriminator;
     }
 
@@ -264,7 +265,7 @@ public class JsonSchema implements JsonDocumentationOwner, JsonModelObject {
      *
      * @param discriminator the discriminator property name to assign
      */
-    public void setDiscriminator(String discriminator) {
+    public void setDiscriminator(JsonDiscriminator discriminator) {
         this.discriminator = discriminator;
     }
 
@@ -615,7 +616,6 @@ public class JsonSchema implements JsonDocumentationOwner, JsonModelObject {
         }
 
         propertiesToJson( jsonSchema );
-        addProperty( jsonSchema, "discriminator", discriminator );
         addJsonProperty( jsonSchema, "additionalProperties", additionalProperties );
 
         if (type != null) {
@@ -697,6 +697,16 @@ public class JsonSchema implements JsonDocumentationOwner, JsonModelObject {
                 requiredArray.add( propertyName );
             }
             jsonSchema.add( "required", requiredArray );
+        }
+        if (discriminator != null) {
+            if (discriminator.getFormat() == DiscriminatorFormat.OPENAPI) {
+                JsonObject discriminatorJson = new JsonObject();
+
+                addProperty( discriminatorJson, "propertyName", discriminator.getPropertyName() );
+                jsonSchema.add( "discriminator", discriminatorJson );
+            } else {
+                addProperty( jsonSchema, "discriminator", discriminator.getPropertyName() );
+            }
         }
     }
 

@@ -26,6 +26,7 @@ import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerConte
 import org.opentravel.schemacompiler.codegen.impl.ResourceFilenameBuilder;
 import org.opentravel.schemacompiler.codegen.json.JsonSchemaCodegenUtils;
 import org.opentravel.schemacompiler.codegen.json.JsonTypeNameBuilder;
+import org.opentravel.schemacompiler.codegen.json.model.JsonDiscriminator;
 import org.opentravel.schemacompiler.codegen.openapi.model.OpenApiDocument;
 import org.opentravel.schemacompiler.codegen.util.ResourceCodegenUtils;
 import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
@@ -61,7 +62,8 @@ import java.util.Map.Entry;
  */
 public class OpenApiCodeGenerator extends AbstractCodeGenerator<TLResource> {
 
-    private static final String DEFINITIONS = "definitions";
+    private static final String COMPONENTS = "components";
+    private static final String SCHEMAS = "schemas";
 
     public static final String OPENAPI_FILENAME_EXT = "openapi";
     public static final String OPENAPI_DEFS_FILENAME_EXT = "defs.openapi";
@@ -85,6 +87,10 @@ public class OpenApiCodeGenerator extends AbstractCodeGenerator<TLResource> {
      */
     @Override
     public void doGenerateOutput(TLResource source, CodeGenerationContext context) throws CodeGenerationException {
+        context.setValue( CodeGenerationContext.CK_BASE_DEFINITIONS_PATH, "#/components/schemas/" );
+        context.setValue( CodeGenerationContext.CK_JSON_DISCRIMINATOR_FORMAT,
+            JsonDiscriminator.DiscriminatorFormat.OPENAPI.toString() );
+
         if (JsonSchemaCodegenUtils.isLatestMinorVersion( source )) {
             File outputFile = getOutputFile( source, context );
 
@@ -141,33 +147,43 @@ public class OpenApiCodeGenerator extends AbstractCodeGenerator<TLResource> {
     }
 
     /**
-     * Adds all of the built-in type definitions to the given Swagger. This should only be done when single-file Swagger
+     * Adds all of the built-in type definitions to the given OpenAPI. This should only be done when single-file OpenAPI
      * generation is enabled.
      * 
-     * @param swaggerJson the JSON content of the Swagger document
+     * @param openapiJson the JSON content of the OpenAPI document
      * @throws CodeGenerationException thrown if an error occurs while processing the built-in types
      */
-    private void addBuiltInDefinitions(JsonObject swaggerJson) throws CodeGenerationException {
+    private void addBuiltInDefinitions(JsonObject openapiJson) throws CodeGenerationException {
         try (Reader reader = new InputStreamReader(
             SchemaDeclarations.OTM_COMMON_SCHEMA.getContent( CodeGeneratorFactory.JSON_SCHEMA_TARGET_FORMAT ) )) {
-            JsonObject openapiDefs;
+            JsonObject openapiComponents;
+            JsonObject openapiSchemas;
 
-            if (swaggerJson.has( DEFINITIONS )) {
-                openapiDefs = swaggerJson.get( DEFINITIONS ).getAsJsonObject();
+            if (openapiJson.has( COMPONENTS )) {
+                openapiComponents = openapiJson.get( COMPONENTS ).getAsJsonObject();
 
             } else {
-                openapiDefs = new JsonObject();
-                swaggerJson.add( DEFINITIONS, openapiDefs );
+                openapiComponents = new JsonObject();
+                openapiJson.add( COMPONENTS, openapiComponents );
             }
+
+            if (openapiComponents.has( SCHEMAS )) {
+                openapiSchemas = openapiComponents.get( SCHEMAS ).getAsJsonObject();
+
+            } else {
+                openapiSchemas = new JsonObject();
+                openapiComponents.add( SCHEMAS, openapiSchemas );
+            }
+
             JsonObject builtInSchema = new JsonParser().parse( reader ).getAsJsonObject();
-            JsonObject builtInDefs = builtInSchema.get( DEFINITIONS ).getAsJsonObject();
+            JsonObject builtInDefs = builtInSchema.get( "definitions" ).getAsJsonObject();
 
             for (Entry<String,JsonElement> builtInDef : builtInDefs.entrySet()) {
-                openapiDefs.add( builtInDef.getKey(), builtInDef.getValue() );
+                openapiSchemas.add( builtInDef.getKey(), builtInDef.getValue() );
             }
 
         } catch (IOException e) {
-            throw new CodeGenerationException( "Error loading JSON built-in definitons.", e );
+            throw new CodeGenerationException( "Error loading JSON built-in components.", e );
         }
     }
 

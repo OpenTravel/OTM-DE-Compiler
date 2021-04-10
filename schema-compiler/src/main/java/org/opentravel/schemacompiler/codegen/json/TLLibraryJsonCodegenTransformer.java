@@ -93,7 +93,8 @@ public class TLLibraryJsonCodegenTransformer extends AbstractJsonSchemaTransform
                         .getArtifactsOfType( JsonSchemaNamedReference.class )) {
                         JsonSchemaReference globalDef = new JsonSchemaReference();
 
-                        globalDef.setSchemaPath( JsonSchemaCodegenUtils.DEFINITIONS_PATH + memberDef.getName() );
+                        globalDef.setSchemaPath(
+                            JsonSchemaCodegenUtils.getBaseDefinitionsPath( context ) + memberDef.getName() );
                         globalDefs.add( globalDef );
                         schema.getDefinitions().add( memberDef );
                     }
@@ -132,7 +133,8 @@ public class TLLibraryJsonCodegenTransformer extends AbstractJsonSchemaTransform
                     .getArtifactsOfType( JsonSchemaNamedReference.class )) {
                     JsonSchemaReference globalDef = new JsonSchemaReference();
 
-                    globalDef.setSchemaPath( JsonSchemaCodegenUtils.DEFINITIONS_PATH + memberDef.getName() );
+                    globalDef.setSchemaPath(
+                        JsonSchemaCodegenUtils.getBaseDefinitionsPath( context ) + memberDef.getName() );
                     globalDefs.add( globalDef );
                     schema.getDefinitions().add( memberDef );
                 }

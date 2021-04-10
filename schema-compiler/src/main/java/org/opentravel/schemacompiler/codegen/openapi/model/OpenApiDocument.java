@@ -17,12 +17,9 @@
 package org.opentravel.schemacompiler.codegen.openapi.model;
 
 import org.opentravel.schemacompiler.codegen.json.model.JsonModelObject;
-import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaNamedReference;
+import org.opentravel.schemacompiler.codegen.swagger.model.SwaggerInfo;
 
 import com.google.gson.JsonObject;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Class that defines the meta-model for an OpenAPI document.
@@ -32,7 +29,9 @@ public class OpenApiDocument implements JsonModelObject {
     public static final String OPENAPI_SPEC_V3 = "3.0";
 
     private String specVersion = OPENAPI_SPEC_V3;
-    private List<JsonSchemaNamedReference> definitions = new ArrayList<>();
+    private OpenApiOtmResource otmResource;
+    private OpenApiInfo info;
+    private OpenApiComponents components = new OpenApiComponents();
 
     /**
      * Returns the value of the 'specVersion' field.
@@ -53,12 +52,48 @@ public class OpenApiDocument implements JsonModelObject {
     }
 
     /**
-     * Returns the value of the 'definitions' field.
+     * Returns the value of the 'otmResource' field.
      *
-     * @return List&lt;JsonSchemaNamedReference&gt;
+     * @return OpenApiOtmResource
      */
-    public List<JsonSchemaNamedReference> getDefinitions() {
-        return definitions;
+    public OpenApiOtmResource getOtmResource() {
+        return otmResource;
+    }
+
+    /**
+     * Assigns the value of the 'otmResource' field.
+     *
+     * @param otmResource the field value to assign
+     */
+    public void setOtmResource(OpenApiOtmResource otmResource) {
+        this.otmResource = otmResource;
+    }
+
+    /**
+     * Returns the value of the 'info' field.
+     *
+     * @return OpenApiInfo
+     */
+    public OpenApiInfo getInfo() {
+        return info;
+    }
+
+    /**
+     * Assigns the value of the 'info' field.
+     *
+     * @param info the field value to assign
+     */
+    public void setInfo(OpenApiInfo info) {
+        this.info = info;
+    }
+
+    /**
+     * Returns the value of the 'components' field.
+     *
+     * @return OpenApiComponents
+     */
+    public OpenApiComponents getComponents() {
+        return components;
     }
 
     /**
@@ -67,15 +102,13 @@ public class OpenApiDocument implements JsonModelObject {
     public JsonObject toJson() {
         JsonObject json = new JsonObject();
 
-        addProperty( json, "swagger", specVersion );
+        addProperty( json, "openapi", specVersion );
+        addJsonProperty( json, "x-otm-resource", otmResource );
+        addJsonProperty( json, "info", (info != null) ? info : new SwaggerInfo() );
 
-        if (!definitions.isEmpty()) {
-            JsonObject defsJson = new JsonObject();
-
-            addJsonProperties( defsJson, definitions );
-            json.add( "definitions", defsJson );
+        if (!components.isEmpty()) {
+            json.add( "components", components.toJson() );
         }
-
         return json;
     }
 

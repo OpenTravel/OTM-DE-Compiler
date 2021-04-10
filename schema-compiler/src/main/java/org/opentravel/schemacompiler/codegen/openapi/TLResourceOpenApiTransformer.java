@@ -21,8 +21,11 @@ import org.opentravel.schemacompiler.codegen.CodeGenerationFilter;
 import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerContext;
 import org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts;
 import org.opentravel.schemacompiler.codegen.json.JsonSchemaCodegenUtils;
+import org.opentravel.schemacompiler.codegen.json.model.JsonLibraryInfo;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaNamedReference;
 import org.opentravel.schemacompiler.codegen.openapi.model.OpenApiDocument;
+import org.opentravel.schemacompiler.codegen.openapi.model.OpenApiInfo;
+import org.opentravel.schemacompiler.codegen.openapi.model.OpenApiOtmResource;
 import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
 import org.opentravel.schemacompiler.model.LibraryMember;
 import org.opentravel.schemacompiler.model.NamedEntity;
@@ -48,14 +51,37 @@ public class TLResourceOpenApiTransformer extends AbstractOpenApiCodegenTransfor
     public OpenApiDocument transform(TLResource source) {
         OpenApiDocument openapiDoc = new OpenApiDocument();
 
-        // If required, generate definitions for the Swagger document
+        buildInfo( source, openapiDoc );
+
+        // If required, generate components for the OpenAPI document
         if (isSingleFileEnabled()) {
-            openapiDoc.getDefinitions().addAll( buildJsonDefinitions( source.getOwningModel() ) );
+            openapiDoc.getComponents().getSchemas().addAll( buildJsonComponents( source.getOwningModel() ) );
         }
 
         applyBindingStyle( openapiDoc );
 
         return openapiDoc;
+    }
+
+    /**
+     * Populates the info section of the OpenAPI document.
+     * 
+     * @param source the OTM resource supplying the info documentation
+     * @param openapiDoc the OpenAPI document
+     */
+    private void buildInfo(TLResource source, OpenApiDocument openapiDoc) {
+        JsonLibraryInfo libraryInfo = jsonUtils.getResourceInfo( source );
+        OpenApiOtmResource openapiResource = new OpenApiOtmResource();
+        OpenApiInfo info = new OpenApiInfo();
+
+        openapiResource.setNamespace( source.getNamespace() );
+        openapiResource.setLocalName( source.getLocalName() );
+        openapiDoc.setOtmResource( openapiResource );
+        info.setTitle( source.getName() );
+        info.setLibraryInfo( libraryInfo );
+        info.setVersion( libraryInfo.getLibraryVersion() );
+        transformDocumentation( source, info );
+        openapiDoc.setInfo( info );
     }
 
     /**
@@ -68,13 +94,13 @@ public class TLResourceOpenApiTransformer extends AbstractOpenApiCodegenTransfor
     }
 
     /**
-     * Builds the set of all definitions that should be included in the Swagger document. The definitions that are
+     * Builds the set of all components that should be included in the OpenAPI document. The components that are
      * included are based on the current code generation filter.
      * 
-     * @param model the model from which to generate JSON definitions
+     * @param model the model from which to generate JSON components
      * @return List&lt;JsonSchemaNamedReference&gt;
      */
-    private List<JsonSchemaNamedReference> buildJsonDefinitions(TLModel model) {
+    private List<JsonSchemaNamedReference> buildJsonComponents(TLModel model) {
         List<JsonSchemaNamedReference> definitions = new ArrayList<>();
         CodeGenerationFilter filter = context.getCodeGenerator().getFilter();
 
