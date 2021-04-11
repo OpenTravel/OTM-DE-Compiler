@@ -23,6 +23,7 @@ import org.opentravel.schemacompiler.codegen.CodeGeneratorFactory;
 import org.opentravel.schemacompiler.codegen.impl.AbstractCodeGenerator;
 import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerContext;
 import org.opentravel.schemacompiler.codegen.impl.DependencyFilterBuilder;
+import org.opentravel.schemacompiler.codegen.json.model.JsonDiscriminator;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchema;
 import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
 import org.opentravel.schemacompiler.ioc.SchemaDeclaration;
@@ -83,6 +84,10 @@ public abstract class AbstractJsonSchemaCodeGenerator<S extends AbstractLibrary>
     @Override
     public void doGenerateOutput(S source, CodeGenerationContext context) throws CodeGenerationException {
         File outputFile = getOutputFile( source, context );
+
+        context.setValue( CodeGenerationContext.CK_BASE_DEFINITIONS_PATH, "#/definitions/" );
+        context.setValue( CodeGenerationContext.CK_JSON_DISCRIMINATOR_FORMAT,
+            JsonDiscriminator.DiscriminatorFormat.OPENAPI.toString() );
 
         try (Writer out = new FileWriter( outputFile )) {
             JsonSchema jsonSchema = transformSourceObjectToJsonSchema( source, context );

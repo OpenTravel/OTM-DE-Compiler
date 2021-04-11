@@ -285,7 +285,7 @@ public class TLResourceSwaggerTransformer extends AbstractSwaggerCodegenTransfor
 
         if (cgContext != null) {
             result =
-                "true".equalsIgnoreCase( cgContext.getValue( CodeGenerationContext.CK_ENABLE_SINGLE_FILE_SWAGGER ) );
+                "true".equalsIgnoreCase( cgContext.getValue( CodeGenerationContext.CK_ENABLE_SINGLE_FILE ) );
         }
         return result;
     }

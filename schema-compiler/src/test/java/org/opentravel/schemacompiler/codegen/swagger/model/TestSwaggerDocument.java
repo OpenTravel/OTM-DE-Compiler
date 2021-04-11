@@ -117,9 +117,6 @@ public class TestSwaggerDocument {
         SwaggerInfo info = new SwaggerInfo();
         SwaggerContact contact = new SwaggerContact();
         SwaggerLicense license = new SwaggerLicense();
-        SwaggerSecurityScheme scheme = new SwaggerSecurityScheme();
-        SwaggerSecurityScope scope1 = new SwaggerSecurityScope();
-        SwaggerSecurityScope scope2 = new SwaggerSecurityScope();
 
         contact.setName( "John Doe" );
         contact.setEmail( "john.doe@opentravel.org" );
@@ -129,6 +126,17 @@ public class TestSwaggerDocument {
         license.setName( "TestLicense" );
         license.setUrl( "http://www.opentravel.org/test-license" );
         info.setLicense( license );
+
+        doc.setInfo( info );
+        doc.getSecuritySchemes().add( createSecurityScheme() );
+
+        return doc;
+    }
+
+    public static SwaggerSecurityScheme createSecurityScheme() {
+        SwaggerSecurityScheme scheme = new SwaggerSecurityScheme();
+        SwaggerSecurityScope scope1 = new SwaggerSecurityScope();
+        SwaggerSecurityScope scope2 = new SwaggerSecurityScope();
 
         scope1.setName( "scope1" );
         scope1.setDescription( "scope1 Description" );
@@ -145,10 +153,7 @@ public class TestSwaggerDocument {
         scheme.setTokenUrl( "http://www.testapp.com/tokens" );
         scheme.getScopes().add( scope1 );
         scheme.getScopes().add( scope2 );
-
-        doc.setInfo( info );
-        doc.getSecuritySchemes().add( scheme );
-
-        return doc;
+        return scheme;
     }
+
 }

@@ -26,6 +26,7 @@ import org.opentravel.schemacompiler.codegen.impl.CodeGenerationTransformerConte
 import org.opentravel.schemacompiler.codegen.impl.ResourceFilenameBuilder;
 import org.opentravel.schemacompiler.codegen.json.JsonSchemaCodegenUtils;
 import org.opentravel.schemacompiler.codegen.json.JsonTypeNameBuilder;
+import org.opentravel.schemacompiler.codegen.json.model.JsonDiscriminator;
 import org.opentravel.schemacompiler.codegen.swagger.model.SwaggerDocument;
 import org.opentravel.schemacompiler.codegen.util.ResourceCodegenUtils;
 import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
@@ -85,9 +86,10 @@ public class SwaggerCodeGenerator extends AbstractCodeGenerator<TLResource> {
      */
     @Override
     public void doGenerateOutput(TLResource source, CodeGenerationContext context) throws CodeGenerationException {
-        // TODO: It's not this easy...
-        // The latest minor version of the resource may not be in the latest minor version of the library. This
-        // will cause references to get messed up.
+        context.setValue( CodeGenerationContext.CK_BASE_DEFINITIONS_PATH, "#/definitions/" );
+        context.setValue( CodeGenerationContext.CK_JSON_DISCRIMINATOR_FORMAT,
+            JsonDiscriminator.DiscriminatorFormat.SWAGGER.toString() );
+
         if (JsonSchemaCodegenUtils.isLatestMinorVersion( source )) {
             File outputFile = getOutputFile( source, context );
 
@@ -220,7 +222,7 @@ public class SwaggerCodeGenerator extends AbstractCodeGenerator<TLResource> {
      * @return boolean
      */
     private boolean isSingleFileEnabled(CodeGenerationContext context) {
-        return "true".equalsIgnoreCase( context.getValue( CodeGenerationContext.CK_ENABLE_SINGLE_FILE_SWAGGER ) );
+        return "true".equalsIgnoreCase( context.getValue( CodeGenerationContext.CK_ENABLE_SINGLE_FILE ) );
     }
 
     /**

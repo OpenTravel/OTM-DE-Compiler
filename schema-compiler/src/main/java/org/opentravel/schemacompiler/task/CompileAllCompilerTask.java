@@ -38,6 +38,7 @@ public class CompileAllCompilerTask extends AbstractCompilerTask implements Comp
     private boolean compileJson = true;
     private boolean compileServices = true;
     private boolean compileSwagger = true;
+    private boolean compileOpenApi = true;
     private boolean compileHtml = true;
     private URL serviceLibraryUrl;
     private String serviceEndpointUrl;
@@ -120,6 +121,15 @@ public class CompileAllCompilerTask extends AbstractCompilerTask implements Comp
             swaggerTask.setOutputFolder( getSubtaskOutputFolder( compileAllContext, "swagger" ) );
             swaggerTask.generateOutput( userDefinedLibraries, legacySchemas );
             addGeneratedFiles( swaggerTask.getGeneratedFiles() );
+        }
+        if (compileOpenApi) {
+            OpenApiCompilerTask openapiTask = new OpenApiCompilerTask( repositoryManager );
+
+            openapiTask.applyTaskOptions( this );
+            openapiTask.getPrimaryLibraries().addAll( getPrimaryLibraries() );
+            openapiTask.setOutputFolder( getSubtaskOutputFolder( compileAllContext, "openapi" ) );
+            openapiTask.generateOutput( userDefinedLibraries, legacySchemas );
+            addGeneratedFiles( openapiTask.getGeneratedFiles() );
         }
 
         if (compileHtml) {
@@ -282,6 +292,23 @@ public class CompileAllCompilerTask extends AbstractCompilerTask implements Comp
      */
     public void setCompileSwagger(boolean compileSwagger) {
         this.compileSwagger = compileSwagger;
+    }
+
+    /**
+     * @see org.opentravel.schemacompiler.task.CompileAllTaskOptions#isCompileOpenApi()
+     */
+    @Override
+    public boolean isCompileOpenApi() {
+        return compileOpenApi;
+    }
+
+    /**
+     * Assigns the option flag indicating that OpenAPI documents should be generated.
+     * 
+     * @param compileOpenApi the task option value to assign
+     */
+    public void setCompileOpenApi(boolean compileOpenApi) {
+        this.compileOpenApi = compileOpenApi;
     }
 
     /**
