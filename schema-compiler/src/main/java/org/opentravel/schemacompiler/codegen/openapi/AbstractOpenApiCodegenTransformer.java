@@ -27,12 +27,9 @@ import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLDocumentation;
 import org.opentravel.schemacompiler.model.TLDocumentationOwner;
-import org.opentravel.schemacompiler.model.TLMimeType;
 import org.opentravel.schemacompiler.transform.ObjectTransformer;
 import org.opentravel.schemacompiler.version.Versioned;
 import org.springframework.context.ApplicationContext;
-
-import java.util.List;
 
 /**
  * Base class for all <code>ObjectTransformer</code> implementations that are part of the OpenAPI code generation
@@ -43,7 +40,7 @@ import java.util.List;
  */
 public abstract class AbstractOpenApiCodegenTransformer<S, T> extends AbstractCodegenTransformer<S,T> {
 
-    protected CodeGenerationSwaggerBindings swaggerBindings;
+    protected CodeGenerationOpenApiBindings openapiBindings;
     protected JsonSchemaCodegenUtils jsonUtils;
 
     /**
@@ -52,9 +49,16 @@ public abstract class AbstractOpenApiCodegenTransformer<S, T> extends AbstractCo
     public AbstractOpenApiCodegenTransformer() {
         ApplicationContext appContext = SchemaCompilerApplicationContext.getContext();
 
-        if (appContext.containsBean( SchemaCompilerApplicationContext.CODE_GENERATION_SWAGGER_BINDINGS )) {
-            swaggerBindings = (CodeGenerationSwaggerBindings) appContext
+        if (appContext.containsBean( SchemaCompilerApplicationContext.CODE_GENERATION_OPENAPI_BINDINGS )) {
+            openapiBindings = (CodeGenerationOpenApiBindings) appContext
+                .getBean( SchemaCompilerApplicationContext.CODE_GENERATION_OPENAPI_BINDINGS );
+
+        } else if (appContext.containsBean( SchemaCompilerApplicationContext.CODE_GENERATION_SWAGGER_BINDINGS )) {
+            CodeGenerationSwaggerBindings swaggerBindings = (CodeGenerationSwaggerBindings) appContext
                 .getBean( SchemaCompilerApplicationContext.CODE_GENERATION_SWAGGER_BINDINGS );
+
+            // If OpenAPI bindings are not provided, attempt to initialize using the Swagger bindings (if defined)
+            openapiBindings = new DefaultOpenApiBindings( swaggerBindings );
         }
     }
 
@@ -82,22 +86,6 @@ public abstract class AbstractOpenApiCodegenTransformer<S, T> extends AbstractCo
 
             targetSchema.setDocumentation( transformer.transform( doc ) );
         }
-    }
-
-    /**
-     * Returns true if the give list of MIME types contains at least one of the supported types.
-     * 
-     * @param mimeTypes the list of MIME types to check
-     * @param supportedTypes the array of supported MIME types
-     * @return boolean
-     */
-    protected boolean containsSupportedType(List<TLMimeType> mimeTypes, TLMimeType... supportedTypes) {
-        boolean supported = false;
-
-        for (TLMimeType supportedType : supportedTypes) {
-            supported |= mimeTypes.contains( supportedType );
-        }
-        return supported;
     }
 
     /**

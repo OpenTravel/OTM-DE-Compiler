@@ -21,6 +21,8 @@ import org.opentravel.schemacompiler.codegen.json.model.JsonContextualValue;
 import org.opentravel.schemacompiler.codegen.json.model.JsonDocumentation;
 import org.opentravel.schemacompiler.codegen.json.model.JsonDocumentationOwner;
 import org.opentravel.schemacompiler.codegen.json.model.JsonModelObject;
+import org.opentravel.schemacompiler.codegen.json.model.JsonSchema;
+import org.opentravel.schemacompiler.codegen.swagger.model.SwaggerHeader;
 
 import com.google.gson.JsonObject;
 
@@ -34,6 +36,25 @@ public class OpenApiHeader implements JsonDocumentationOwner, JsonModelObject {
 
     private String name;
     private JsonDocumentation documentation;
+    private boolean required;
+    private JsonSchema type;
+
+    /**
+     * Default constructor.
+     */
+    public OpenApiHeader() {}
+
+    /**
+     * Constructor that creates an OpenAPI header from the given Swagger header.
+     * 
+     * @param swaggerHeader the Swagger header instance
+     */
+    public OpenApiHeader(SwaggerHeader swaggerHeader) {
+        this.name = swaggerHeader.getName();
+        this.documentation = swaggerHeader.getDocumentation();
+        this.type = swaggerHeader.getType();
+        this.required = false;
+    }
 
     /**
      * Returns the value of the 'name' field.
@@ -72,6 +93,42 @@ public class OpenApiHeader implements JsonDocumentationOwner, JsonModelObject {
     }
 
     /**
+     * Returns the value of the 'required' field.
+     *
+     * @return boolean
+     */
+    public boolean isRequired() {
+        return required;
+    }
+
+    /**
+     * Assigns the value of the 'required' field.
+     *
+     * @param required the field value to assign
+     */
+    public void setRequired(boolean required) {
+        this.required = required;
+    }
+
+    /**
+     * Returns the value of the 'type' field.
+     *
+     * @return JsonSchema
+     */
+    public JsonSchema getType() {
+        return type;
+    }
+
+    /**
+     * Assigns the value of the 'type' field.
+     *
+     * @param type the field value to assign
+     */
+    public void setType(JsonSchema type) {
+        this.type = type;
+    }
+
+    /**
      * @see org.opentravel.schemacompiler.codegen.json.model.JsonDocumentationOwner#getEquivalentItems()
      */
     @Override
@@ -93,8 +150,12 @@ public class OpenApiHeader implements JsonDocumentationOwner, JsonModelObject {
     public JsonObject toJson() {
         JsonObject json = new JsonObject();
 
-        addProperty( json, "name", name );
         JsonSchemaCodegenUtils.createOtmAnnotations( json, this );
+        addProperty( json, "required", required );
+
+        if (type != null) {
+            json.add( "schema", type.toJson() );
+        }
         return json;
     }
 

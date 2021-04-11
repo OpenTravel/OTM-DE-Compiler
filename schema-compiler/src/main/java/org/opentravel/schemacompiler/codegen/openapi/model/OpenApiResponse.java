@@ -21,6 +21,9 @@ import org.opentravel.schemacompiler.codegen.json.model.JsonContextualValue;
 import org.opentravel.schemacompiler.codegen.json.model.JsonDocumentation;
 import org.opentravel.schemacompiler.codegen.json.model.JsonDocumentationOwner;
 import org.opentravel.schemacompiler.codegen.json.model.JsonModelObject;
+import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaNamedReference;
+import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaReference;
+import org.opentravel.schemacompiler.codegen.swagger.model.SwaggerResponse;
 
 import com.google.gson.JsonObject;
 
@@ -37,7 +40,41 @@ public class OpenApiResponse implements JsonDocumentationOwner, JsonModelObject 
     private Integer statusCode;
     private List<OpenApiMediaType> content = new ArrayList<>();
     private List<OpenApiHeader> headers = new ArrayList<>();
+    private List<JsonSchemaNamedReference> headerRefs = new ArrayList<>();
     private JsonDocumentation documentation;
+
+    /**
+     * Default constructor.
+     */
+    public OpenApiResponse() {}
+
+    /**
+     * Constructor that creates an OpenAPI response from the given Swagger response.
+     * 
+     * @param swaggerResponse the Swagger response instance
+     */
+    public OpenApiResponse(SwaggerResponse swaggerResponse) {
+        this.defaultResponse = swaggerResponse.isDefaultResponse();
+        this.statusCode = swaggerResponse.getStatusCode();
+        this.documentation = swaggerResponse.getDocumentation();
+
+        if (swaggerResponse.getSchema() != null) {
+            OpenApiMediaType jsonContent = new OpenApiMediaType();
+
+            jsonContent.setMediaType( "application/json" );
+            jsonContent.setRequestType( swaggerResponse.getSchema() );
+            content.add( jsonContent );
+        }
+        if (swaggerResponse.getXmlSchema() != null) {
+            JsonSchemaReference xmlSchema = new JsonSchemaReference( swaggerResponse.getXmlSchema().getSchemaPath() );
+            OpenApiMediaType xmlContent = new OpenApiMediaType();
+
+            xmlContent.setMediaType( "application/xml" );
+            xmlContent.setRequestType( xmlSchema );
+            content.add( xmlContent );
+        }
+        swaggerResponse.getHeaders().forEach( h -> headers.add( new OpenApiHeader( h ) ) );
+    }
 
     /**
      * Returns the value of the 'defaultResponse' field.
@@ -94,6 +131,15 @@ public class OpenApiResponse implements JsonDocumentationOwner, JsonModelObject 
     }
 
     /**
+     * Returns the value of the 'headerRefs' field.
+     *
+     * @return List&lt;JsonSchemaNamedReference&gt;
+     */
+    public List<JsonSchemaNamedReference> getHeaderRefs() {
+        return headerRefs;
+    }
+
+    /**
      * Returns the value of the 'documentation' field.
      *
      * @return JsonDocumentation
@@ -141,11 +187,14 @@ public class OpenApiResponse implements JsonDocumentationOwner, JsonModelObject 
             json.addProperty( "description", "" );
         }
 
-        if (!headers.isEmpty()) {
+        if (!headers.isEmpty() || !headerRefs.isEmpty()) {
             JsonObject headersJson = new JsonObject();
 
             for (OpenApiHeader header : headers) {
                 addJsonProperty( headersJson, header.getName(), header );
+            }
+            for (JsonSchemaNamedReference headerRef : headerRefs) {
+                headersJson.add( headerRef.getName(), headerRef.getSchema().toJson() );
             }
             json.add( "headers", headersJson );
         }

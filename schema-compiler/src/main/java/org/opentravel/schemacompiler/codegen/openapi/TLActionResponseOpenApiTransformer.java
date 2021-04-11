@@ -17,10 +17,11 @@
 package org.opentravel.schemacompiler.codegen.openapi;
 
 import org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts;
+import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaNamedReference;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaReference;
+import org.opentravel.schemacompiler.codegen.openapi.model.OpenApiHeader;
 import org.opentravel.schemacompiler.codegen.openapi.model.OpenApiMediaType;
 import org.opentravel.schemacompiler.codegen.openapi.model.OpenApiResponse;
-import org.opentravel.schemacompiler.codegen.swagger.AbstractSwaggerCodegenTransformer;
 import org.opentravel.schemacompiler.codegen.util.ResourceCodegenUtils;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLActionResponse;
@@ -31,7 +32,7 @@ import org.opentravel.schemacompiler.model.TLMimeType;
  * output.
  */
 public class TLActionResponseOpenApiTransformer
-    extends AbstractSwaggerCodegenTransformer<TLActionResponse,CodegenArtifacts> {
+    extends AbstractOpenApiCodegenTransformer<TLActionResponse,CodegenArtifacts> {
 
     /**
      * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
@@ -89,12 +90,23 @@ public class TLActionResponseOpenApiTransformer
             }
             response.getContent().add( mediaType );
         }
-
-        // TODO: Implement Global Response Headers for OpenAPI/Swagger bindings
-        // if ((swaggerBindings != null) && (swaggerBindings.getGlobalResponseHeaders() != null)) {
-        // response.getHeaders().addAll( swaggerBindings.getGlobalResponseHeaders() );
-        // }
+        applyBindingStyle( response );
         return response;
+    }
+
+    /**
+     * Applies the current binding style (if one is defined) to add global response headers to the response.
+     * 
+     * @param response the OpenAPI response instance
+     */
+    private void applyBindingStyle(OpenApiResponse response) {
+        if (openapiBindings != null) {
+            for (OpenApiHeader header : openapiBindings.getGlobalResponseHeaders()) {
+                JsonSchemaReference ref = new JsonSchemaReference( "#/components/headers/" + header.getName() );
+
+                response.getHeaderRefs().add( new JsonSchemaNamedReference( header.getName(), ref ) );
+            }
+        }
     }
 
 }

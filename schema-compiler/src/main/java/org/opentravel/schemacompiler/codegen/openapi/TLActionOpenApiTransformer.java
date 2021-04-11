@@ -21,11 +21,12 @@ import org.opentravel.schemacompiler.codegen.impl.CodegenArtifacts;
 import org.opentravel.schemacompiler.codegen.impl.DocumentationFinder;
 import org.opentravel.schemacompiler.codegen.impl.QualifiedAction;
 import org.opentravel.schemacompiler.codegen.impl.QualifiedParameter;
+import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaNamedReference;
+import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaReference;
 import org.opentravel.schemacompiler.codegen.openapi.model.OpenApiOperation;
 import org.opentravel.schemacompiler.codegen.openapi.model.OpenApiParameter;
 import org.opentravel.schemacompiler.codegen.openapi.model.OpenApiRequestBody;
 import org.opentravel.schemacompiler.codegen.openapi.model.OpenApiResponse;
-import org.opentravel.schemacompiler.codegen.swagger.AbstractSwaggerCodegenTransformer;
 import org.opentravel.schemacompiler.codegen.util.ResourceCodegenUtils;
 import org.opentravel.schemacompiler.model.TLAction;
 import org.opentravel.schemacompiler.model.TLActionRequest;
@@ -38,7 +39,7 @@ import java.util.List;
  * Performs the translation from <code>QualifiedAction</code> objects to the OpenAPI model objects used to produce the
  * output.
  */
-public class TLActionOpenApiTransformer extends AbstractSwaggerCodegenTransformer<QualifiedAction,OpenApiOperation> {
+public class TLActionOpenApiTransformer extends AbstractOpenApiCodegenTransformer<QualifiedAction,OpenApiOperation> {
 
     /**
      * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)
@@ -72,7 +73,29 @@ public class TLActionOpenApiTransformer extends AbstractSwaggerCodegenTransforme
 
             openapiOp.getResponses().addAll( artifacts.getArtifactsOfType( OpenApiResponse.class ) );
         }
+        applyBindingStyle( openapiOp );
+
         return openapiOp;
+    }
+
+    /**
+     * Applies the current binding style (if one is defined) to add global parameters and responses to the operation.
+     * 
+     * @param openapiOp the OpenAPI operation instance
+     */
+    private void applyBindingStyle(OpenApiOperation openapiOp) {
+        if (openapiBindings != null) {
+            for (OpenApiParameter param : openapiBindings.getGlobalParameters()) {
+                openapiOp.getParameterRefs()
+                    .add( new JsonSchemaReference( "#/components/parameters/" + param.getName() ) );
+            }
+            for (OpenApiResponse response : openapiBindings.getGlobalResponses()) {
+                JsonSchemaReference ref =
+                    new JsonSchemaReference( "#/components/responses/" + response.getStatusCode() );
+
+                openapiOp.getResponseRefs().add( new JsonSchemaNamedReference( response.getStatusCode() + "", ref ) );
+            }
+        }
     }
 
 }

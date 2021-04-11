@@ -21,7 +21,6 @@ import org.opentravel.schemacompiler.codegen.json.model.JsonSchema;
 import org.opentravel.schemacompiler.codegen.json.model.JsonType;
 import org.opentravel.schemacompiler.codegen.openapi.model.OpenApiParamType;
 import org.opentravel.schemacompiler.codegen.openapi.model.OpenApiParameter;
-import org.opentravel.schemacompiler.codegen.swagger.AbstractSwaggerCodegenTransformer;
 import org.opentravel.schemacompiler.codegen.util.EnumCodegenUtils;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLAttribute;
@@ -43,7 +42,7 @@ import java.util.List;
  * the output.
  */
 public class TLParameterOpenApiTransformer
-    extends AbstractSwaggerCodegenTransformer<QualifiedParameter,OpenApiParameter> {
+    extends AbstractOpenApiCodegenTransformer<QualifiedParameter,OpenApiParameter> {
 
     /**
      * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)

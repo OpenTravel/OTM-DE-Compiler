@@ -19,7 +19,6 @@ package org.opentravel.schemacompiler.codegen.openapi;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaReference;
 import org.opentravel.schemacompiler.codegen.openapi.model.OpenApiMediaType;
 import org.opentravel.schemacompiler.codegen.openapi.model.OpenApiRequestBody;
-import org.opentravel.schemacompiler.codegen.swagger.AbstractSwaggerCodegenTransformer;
 import org.opentravel.schemacompiler.codegen.util.ResourceCodegenUtils;
 import org.opentravel.schemacompiler.model.NamedEntity;
 import org.opentravel.schemacompiler.model.TLActionFacet;
@@ -33,7 +32,7 @@ import org.opentravel.schemacompiler.model.TLReferenceType;
  * output.
  */
 public class TLActionRequestOpenApiTransformer
-    extends AbstractSwaggerCodegenTransformer<TLActionRequest,OpenApiRequestBody> {
+    extends AbstractOpenApiCodegenTransformer<TLActionRequest,OpenApiRequestBody> {
 
     /**
      * @see org.opentravel.schemacompiler.transform.ObjectTransformer#transform(java.lang.Object)

@@ -24,6 +24,7 @@ import org.opentravel.schemacompiler.codegen.impl.QualifiedAction;
 import org.opentravel.schemacompiler.codegen.json.JsonSchemaCodegenUtils;
 import org.opentravel.schemacompiler.codegen.json.model.JsonLibraryInfo;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaNamedReference;
+import org.opentravel.schemacompiler.codegen.openapi.model.OpenApiComponents;
 import org.opentravel.schemacompiler.codegen.openapi.model.OpenApiDocument;
 import org.opentravel.schemacompiler.codegen.openapi.model.OpenApiInfo;
 import org.opentravel.schemacompiler.codegen.openapi.model.OpenApiOperation;
@@ -200,7 +201,14 @@ public class TLResourceOpenApiTransformer extends AbstractOpenApiCodegenTransfor
      * @param openapiDoc the OpenAPI document to which binding styles will be applied
      */
     private void applyBindingStyle(OpenApiDocument openapiDoc) {
-        // TODO: Implement OpenAPI binding style extensions
+        if (openapiBindings != null) {
+            OpenApiComponents components = openapiDoc.getComponents();
+
+            components.getParameters().addAll( openapiBindings.getGlobalParameters() );
+            components.getHeaders().addAll( openapiBindings.getGlobalResponseHeaders() );
+            components.getResponses().addAll( openapiBindings.getGlobalResponses() );
+            components.getSecuritySchemes().addAll( openapiBindings.getSecuritySchemes() );
+        }
     }
 
     /**

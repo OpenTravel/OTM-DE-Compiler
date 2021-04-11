@@ -21,6 +21,8 @@ import org.opentravel.schemacompiler.codegen.json.model.JsonContextualValue;
 import org.opentravel.schemacompiler.codegen.json.model.JsonDocumentation;
 import org.opentravel.schemacompiler.codegen.json.model.JsonDocumentationOwner;
 import org.opentravel.schemacompiler.codegen.json.model.JsonModelObject;
+import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaNamedReference;
+import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaReference;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -38,8 +40,10 @@ public class OpenApiOperation implements JsonDocumentationOwner, JsonModelObject
     private JsonDocumentation documentation;
     private String operationId;
     private List<OpenApiParameter> parameters = new ArrayList<>();
+    private List<JsonSchemaReference> parameterRefs = new ArrayList<>();
     private OpenApiRequestBody requestBody;
     private List<OpenApiResponse> responses = new ArrayList<>();
+    private List<JsonSchemaNamedReference> responseRefs = new ArrayList<>();
     private boolean deprecated;
 
     /**
@@ -106,6 +110,15 @@ public class OpenApiOperation implements JsonDocumentationOwner, JsonModelObject
     }
 
     /**
+     * Returns the value of the 'parameterRefs' field.
+     *
+     * @return List<JsonSchemaReference>
+     */
+    public List<JsonSchemaReference> getParameterRefs() {
+        return parameterRefs;
+    }
+
+    /**
      * Returns the value of the 'requestBody' field.
      *
      * @return OpenApiRequestBody
@@ -130,6 +143,15 @@ public class OpenApiOperation implements JsonDocumentationOwner, JsonModelObject
      */
     public List<OpenApiResponse> getResponses() {
         return responses;
+    }
+
+    /**
+     * Returns the value of the 'responseRefs' field.
+     *
+     * @return List&lt;JsonSchemaNamedReference&gt;
+     */
+    public List<JsonSchemaNamedReference> getResponseRefs() {
+        return responseRefs;
     }
 
     /**
@@ -176,17 +198,18 @@ public class OpenApiOperation implements JsonDocumentationOwner, JsonModelObject
         JsonSchemaCodegenUtils.createOtmAnnotations( json, this );
         addProperty( json, "operationId", operationId );
 
-        if (!parameters.isEmpty()) {
+        if (!parameters.isEmpty() || !parameterRefs.isEmpty()) {
             JsonArray jsonArray = new JsonArray();
 
             parameters.forEach( p -> jsonArray.add( p.toJson() ) );
+            parameterRefs.forEach( pref -> jsonArray.add( pref.toJson() ) );
             json.add( "parameters", jsonArray );
         }
 
         if (requestBody != null) {
             json.add( "requestBody", requestBody.toJson() );
         }
-        if (!responses.isEmpty()) {
+        if (!responses.isEmpty() || !responseRefs.isEmpty()) {
             JsonObject responsesJson = new JsonObject();
 
             for (OpenApiResponse response : responses) {
@@ -196,6 +219,7 @@ public class OpenApiOperation implements JsonDocumentationOwner, JsonModelObject
                     responsesJson.add( response.getStatusCode() + "", response.toJson() );
                 }
             }
+            responseRefs.forEach( rref -> responsesJson.add( rref.getName(), rref.getSchema().toJson() ) );
             json.add( "responses", responsesJson );
         }
 

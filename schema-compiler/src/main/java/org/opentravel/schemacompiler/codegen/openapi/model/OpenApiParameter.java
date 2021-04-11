@@ -23,6 +23,7 @@ import org.opentravel.schemacompiler.codegen.json.model.JsonDocumentationOwner;
 import org.opentravel.schemacompiler.codegen.json.model.JsonModelObject;
 import org.opentravel.schemacompiler.codegen.json.model.JsonNamedProperty;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchema;
+import org.opentravel.schemacompiler.codegen.swagger.model.SwaggerParameter;
 
 import com.google.gson.JsonObject;
 
@@ -41,6 +42,26 @@ public class OpenApiParameter implements JsonDocumentationOwner, JsonNamedProper
     private List<JsonContextualValue> exampleItems = new ArrayList<>();
     private boolean required;
     private JsonSchema type;
+
+    /**
+     * Default constructor.
+     */
+    public OpenApiParameter() {}
+
+    /**
+     * Constructor that creates an OpenAPI parameter from the given Swagger parameter.
+     * 
+     * @param swaggerParam the Swagger parameter instance
+     */
+    public OpenApiParameter(SwaggerParameter swaggerParam) {
+        this.name = swaggerParam.getName();
+        this.in = OpenApiParamType.fromSwaggerParamType( swaggerParam.getIn() );
+        this.documentation = swaggerParam.getDocumentation();
+        this.equivalentItems.addAll( swaggerParam.getEquivalentItems() );
+        this.exampleItems.addAll( swaggerParam.getExampleItems() );
+        this.required = swaggerParam.isRequired();
+        this.type = swaggerParam.getType();
+    }
 
     /**
      * Returns the value of the 'name' field.

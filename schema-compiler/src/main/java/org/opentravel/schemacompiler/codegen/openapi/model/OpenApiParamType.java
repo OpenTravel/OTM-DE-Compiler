@@ -16,6 +16,8 @@
 
 package org.opentravel.schemacompiler.codegen.openapi.model;
 
+import org.opentravel.schemacompiler.codegen.swagger.model.SwaggerParamType;
+
 /**
  * Enumeration of valid parameter types for OpenAPI documents.
  */
@@ -41,6 +43,34 @@ public enum OpenApiParamType {
      */
     public String getInValue() {
         return inValue;
+    }
+
+    /**
+     * Returns the corresponding OpenAPI parameter type for the given Swagger type. For any types that do not directly
+     * map, the <code>QUERY</code> type will be returned.
+     * 
+     * @param swaggerParamType the Swagger parameter type value
+     * @return OpenApiParamType
+     */
+    public static OpenApiParamType fromSwaggerParamType(SwaggerParamType swaggerParamType) {
+        OpenApiParamType openapiType = null;
+
+        if (swaggerParamType != null) {
+            switch (swaggerParamType) {
+                case QUERY:
+                    openapiType = QUERY;
+                    break;
+                case PATH:
+                    openapiType = PATH;
+                    break;
+                case HEADER:
+                    openapiType = HEADER;
+                    break;
+                default:
+                    break;
+            }
+        }
+        return openapiType;
     }
 
 }
