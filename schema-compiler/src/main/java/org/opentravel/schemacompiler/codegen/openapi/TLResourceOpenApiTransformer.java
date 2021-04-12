@@ -231,7 +231,10 @@ public class TLResourceOpenApiTransformer extends AbstractOpenApiCodegenTransfor
 
             for (LibraryMember member : getLibraryMembers( library )) {
                 if (member instanceof TLResource) {
-                    for (TLActionFacet actionFacet : ((TLResource) member).getActionFacets()) {
+                    List<TLActionFacet> actionFacets =
+                        ResourceCodegenUtils.getInheritedActionFacets( (TLResource) member );
+
+                    for (TLActionFacet actionFacet : actionFacets) {
                         transformEntity( actionFacet, definitions );
                     }
 
