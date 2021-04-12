@@ -147,6 +147,14 @@ public class CommandLineCompilerTaskOptions implements CompileAllTaskOptions {
         return commandLineArgs.hasOption( "S" );
     }
 
+    /**
+     * @see org.opentravel.schemacompiler.task.CompileAllTaskOptions#isCompileOpenApi()
+     */
+    @Override
+    public boolean isCompileOpenApi() {
+        return commandLineArgs.hasOption( "O" );
+    }
+
     @Override
     public boolean isCompileHtml() {
         return commandLineArgs.hasOption( "H" );

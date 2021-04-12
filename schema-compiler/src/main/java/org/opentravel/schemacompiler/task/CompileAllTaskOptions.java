@@ -54,6 +54,13 @@ public interface CompileAllTaskOptions
     public boolean isCompileSwagger();
 
     /**
+     * Returns the option flag indicating that OpenAPI descriptors should be generated for resource definitions.
+     * 
+     * @return boolean
+     */
+    public boolean isCompileOpenApi();
+
+    /**
      * Returns the option flag indicating that HTML documentation files should be generated for user libraries.
      * 
      * @return boolean

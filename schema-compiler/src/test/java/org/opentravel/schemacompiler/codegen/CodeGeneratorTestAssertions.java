@@ -21,6 +21,13 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
+import org.openapi4j.core.exception.ResolutionException;
+import org.openapi4j.core.validation.ValidationException;
+import org.openapi4j.core.validation.ValidationResults;
+import org.openapi4j.core.validation.ValidationResults.ValidationItem;
+import org.openapi4j.parser.OpenApi3Parser;
+import org.openapi4j.parser.model.v3.OpenApi3;
+import org.openapi4j.parser.validation.v3.OpenApi3Validator;
 import org.opentravel.schemacompiler.codegen.json.JsonSchemaCodegenUtils;
 import org.opentravel.schemacompiler.ioc.SchemaDeclarations;
 import org.opentravel.schemacompiler.util.ClasspathResourceResolver;
@@ -151,6 +158,9 @@ public class CodeGeneratorTestAssertions {
 
             } else if (filename.endsWith( ".swagger" )) {
                 validateSwaggerDocument( generatedFile );
+
+            } else if (filename.endsWith( ".openapi" )) {
+                validateOpenApiDocument( generatedFile );
 
             } else if (filename.endsWith( ".json" )) {
                 if (validateExamples) {
@@ -370,7 +380,7 @@ public class CodeGeneratorTestAssertions {
      * 
      * @param swaggerFile the Swagger document to validate
      */
-    public static void validateSwaggerDocument(File swaggerFile) {
+    private static void validateSwaggerDocument(File swaggerFile) {
         try {
             JsonNode swaggerNode = JsonLoader.fromFile( swaggerFile );
             ProcessingReport report = swaggerSchema.validate( swaggerNode );
@@ -450,6 +460,44 @@ public class CodeGeneratorTestAssertions {
                 System.out.println( e.getMessage() );
             }
             throw new AssertionFailedError( "Error validating Swagger document: " + swaggerFile.getName() );
+        }
+    }
+
+    /**
+     * Validates that the given OpenAPI specification is syntactically and symantically correct.
+     * 
+     * @param openapiFile the OpenAPI document to validate
+     */
+    private static void validateOpenApiDocument(File openapiFile) {
+        try {
+            OpenApi3 api = new OpenApi3Parser().parse( openapiFile, false );
+            ValidationResults results = OpenApi3Validator.instance().validate( api );
+
+            if (!results.items().isEmpty()) {
+                if (DEBUG) {
+                    System.out.println( "Validation warnings in OpenAPI document: " + openapiFile.getAbsolutePath() );
+
+                    for (ValidationItem item : results.items()) {
+                        System.out.println( "  " + item.message() );
+                    }
+                }
+                throw new AssertionFailedError( "Validation warnings in OpenAPI document: " + openapiFile.getName() );
+            }
+
+        } catch (ResolutionException e) {
+            e.printStackTrace( System.out );
+            throw new AssertionFailedError(
+                "Error resolving references in OpenAPI document: " + openapiFile.getName() );
+
+        } catch (ValidationException e) {
+            if (DEBUG) {
+                System.out.println( "Error validating OpenAPI document: " + openapiFile.getAbsolutePath() );
+
+                for (ValidationItem item : e.results().items()) {
+                    System.out.println( "  " + item.message() );
+                }
+            }
+            throw new AssertionFailedError( "Error validating OpenAPI document: " + openapiFile.getName() );
         }
     }
 

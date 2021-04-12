@@ -183,6 +183,7 @@ public class Main {
         options.addOption( "W", "compileWSDL", false, messageBundle.getString( "compileWSDL" ) );
         options.addOption( "J", "compileJSON", false, messageBundle.getString( "compileJSON" ) );
         options.addOption( "S", "compileSwagger", false, messageBundle.getString( "compileSwagger" ) );
+        options.addOption( "O", "compileOpenApi", false, messageBundle.getString( "compileOpenApi" ) );
         options.addOption( "H", "compileHTML", false, messageBundle.getString( "compileHTML" ) );
         options.addOption( "E", "generateExamples", false, messageBundle.getString( "generateExamples" ) );
         options.addOption( "C", "exampleContext", true, messageBundle.getString( "exampleContext" ) );

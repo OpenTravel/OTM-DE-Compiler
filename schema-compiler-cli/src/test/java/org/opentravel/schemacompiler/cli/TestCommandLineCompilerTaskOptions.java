@@ -33,7 +33,7 @@ public class TestCommandLineCompilerTaskOptions {
     public void testTaskOptions() throws Exception {
         String[] args = new String[] {"-b", "OTA2", "-c", "catalog-location", "-d", "output-folder", "-C",
             "example-context", "-D", "5", "-r", "4", "-p", "resource-path", "-s", "service-endpoint", "-M", "-E", "-e",
-            "-J", "-S", "-W", "-X", "-H", "-o", "TestLibrary.otm"};
+            "-J", "-S", "-O", "-W", "-X", "-H", "-o", "TestLibrary.otm"};
         CommandLine commandLineArgs = new GnuParser().parse( Main.getCommandLineOptions(), args );
         CommandLineCompilerTaskOptions taskOptions = new CommandLineCompilerTaskOptions( commandLineArgs );
 
@@ -50,6 +50,7 @@ public class TestCommandLineCompilerTaskOptions {
         assertEquals( true, taskOptions.isCompileSchemas() );
         assertEquals( true, taskOptions.isCompileServices() );
         assertEquals( true, taskOptions.isCompileSwagger() );
+        assertEquals( true, taskOptions.isCompileOpenApi() );
         assertEquals( true, taskOptions.isSuppressOtmExtensions() );
         assertEquals( true, taskOptions.isCompileHtml() );
         assertEquals( "resource-path", taskOptions.getResourceBaseUrl() );

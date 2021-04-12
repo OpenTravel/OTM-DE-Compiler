@@ -25,6 +25,8 @@ import org.opentravel.schemacompiler.codegen.impl.DocumentationFinder;
 import org.opentravel.schemacompiler.codegen.json.AbstractJsonSchemaTransformer;
 import org.opentravel.schemacompiler.codegen.json.JsonSchemaCodegenUtils;
 import org.opentravel.schemacompiler.codegen.json.JsonTypeNameBuilder;
+import org.opentravel.schemacompiler.codegen.json.model.JsonDiscriminator;
+import org.opentravel.schemacompiler.codegen.json.model.JsonDiscriminator.DiscriminatorFormat;
 import org.opentravel.schemacompiler.codegen.json.model.JsonDocumentation;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchema;
 import org.opentravel.schemacompiler.codegen.json.model.JsonSchemaNamedReference;
@@ -167,10 +169,16 @@ public class TLFacetJsonSchemaDelegate extends FacetJsonSchemaDelegate<TLFacet> 
             addCompileTimeDependency( baseFacetDependency );
 
         } else {
-            JsonSchemaNamedReference discriminator = createDiscriminatorProperty();
+            CodeGenerationContext context = getTransformerFactory().getContext().getCodegenContext();
+            DiscriminatorFormat discriminatorFormat = (context == null) ? DiscriminatorFormat.OPENAPI
+                : DiscriminatorFormat.valueOf( context.getValue( CodeGenerationContext.CK_JSON_DISCRIMINATOR_FORMAT ) );
+            JsonSchemaNamedReference discriminatorProperty = createDiscriminatorProperty();
+            JsonDiscriminator discriminator = new JsonDiscriminator();
 
-            localFacetSchema.getProperties().add( discriminator );
-            localFacetSchema.setDiscriminator( discriminator.getName() );
+            discriminator.setPropertyName( discriminatorProperty.getName() );
+            discriminator.setFormat( discriminatorFormat );
+            localFacetSchema.getProperties().add( discriminatorProperty );
+            localFacetSchema.setDiscriminator( discriminator );
             definition.setSchema( new JsonSchemaReference( localFacetSchema ) );
             facetSchema = localFacetSchema;
         }
@@ -449,17 +457,19 @@ public class TLFacetJsonSchemaDelegate extends FacetJsonSchemaDelegate<TLFacet> 
             for (SchemaDependency dependency : SchemaDependency.getAllDependencies()) {
                 if ((extensionPointName.getNamespaceURI().equals( dependency.getSchemaDeclaration().getNamespace() ))
                     && extensionPointName.getLocalPart().equals( dependency.getLocalName() )) {
-                    CodeGenerationContext cgContext = getTransformerFactory().getContext().getCodegenContext();
+                    CodeGenerationTransformerContext context = getTransformerFactory().getContext();
+                    CodeGenerationContext cgContext = context.getCodegenContext();
                     String builtInLocation = XsdCodegenUtils.getBuiltInSchemaOutputLocation( cgContext );
                     String referencedFilename =
                         dependency.getSchemaDeclaration().getFilename( CodeGeneratorFactory.JSON_SCHEMA_TARGET_FORMAT );
 
                     if ((referencedFilename != null) && !isLocalNameReferencesEnabled()) {
-                        schemaPath = builtInLocation + referencedFilename + JsonSchemaCodegenUtils.DEFINITIONS_PATH
-                            + dependency.getLocalName();
+                        schemaPath = builtInLocation + referencedFilename
+                            + JsonSchemaCodegenUtils.getBaseDefinitionsPath( context ) + dependency.getLocalName();
                         addCompileTimeDependency( dependency );
                     } else {
-                        schemaPath = JsonSchemaCodegenUtils.DEFINITIONS_PATH + dependency.getLocalName();
+                        schemaPath =
+                            JsonSchemaCodegenUtils.getBaseDefinitionsPath( context ) + dependency.getLocalName();
                     }
                 }
             }

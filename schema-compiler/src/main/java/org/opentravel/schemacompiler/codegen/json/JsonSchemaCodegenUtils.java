@@ -81,8 +81,6 @@ import javax.xml.namespace.QName;
  */
 public class JsonSchemaCodegenUtils {
 
-    public static final String DEFINITIONS_PATH = "#/definitions/";
-
     private static final String DESCRIPTION = "description";
 
     public static final String JSON_SCHEMA_FILENAME_EXT = "schema.json";
@@ -404,7 +402,12 @@ public class JsonSchemaCodegenUtils {
             referencePath
                 .append( buildLatestMinorVersionFilename( referencedEntity.getOwningLibrary(), filenameBuilder ) );
         }
-        referencePath.append( DEFINITIONS_PATH );
+
+        if (referencePath.length() != 0) {
+            referencePath.append( "#/definitions/" );
+        } else {
+            referencePath.append( getBaseDefinitionsPath( context ) );
+        }
         return referencePath;
     }
 
@@ -431,17 +434,16 @@ public class JsonSchemaCodegenUtils {
      * @return String
      */
     public String getSchemaReferencePath(SchemaDependency schemaDependency, NamedEntity referencingEntity) {
-        JsonTypeNameBuilder typeNameBuilder = getTypeNameBuilder();
         String referencedFilename =
             schemaDependency.getSchemaDeclaration().getFilename( CodeGeneratorFactory.JSON_SCHEMA_TARGET_FORMAT );
         String referencePath = null;
 
-        if ((typeNameBuilder == null) && (referencedFilename != null)) {
-            String builtInLocation = XsdCodegenUtils.getBuiltInSchemaOutputLocation( context.getCodegenContext() );
+        if (referencedFilename != null) {
+            referencePath = XsdCodegenUtils.getBuiltInSchemaOutputLocation( context.getCodegenContext() )
+                + referencedFilename + "#/definitions/" + schemaDependency.getLocalName();
 
-            referencePath = builtInLocation + referencedFilename + DEFINITIONS_PATH + schemaDependency.getLocalName();
         } else {
-            referencePath = DEFINITIONS_PATH + schemaDependency.getLocalName();
+            referencePath = getBaseDefinitionsPath( context ) + schemaDependency.getLocalName();
         }
         return referencePath;
     }
@@ -491,6 +493,23 @@ public class JsonSchemaCodegenUtils {
      */
     public JsonTypeNameBuilder getTypeNameBuilder() {
         return (JsonTypeNameBuilder) context.getContextCacheEntry( JsonTypeNameBuilder.class.getSimpleName() );
+    }
+
+    /**
+     * Returns the base JSON schema path to the 'definitions' section of a Swagger document (or the 'components' section
+     * for OpenAPI documents).
+     * 
+     * @param context the code generationn transformer context
+     * @return String
+     */
+    public static String getBaseDefinitionsPath(CodeGenerationTransformerContext context) {
+        CodeGenerationContext cgContext = (context == null) ? null : context.getCodegenContext();
+        String baseDefsPath = "#/definitions/";
+
+        if (cgContext != null) {
+            baseDefsPath = cgContext.getValue( CodeGenerationContext.CK_BASE_DEFINITIONS_PATH );
+        }
+        return baseDefsPath;
     }
 
     /**
