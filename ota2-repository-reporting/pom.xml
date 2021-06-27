@@ -16,7 +16,7 @@
 		<jasper.reports.version>6.4.3</jasper.reports.version>
 		<javax.transaction.version>1.2</javax.transaction.version>
 		<hibernate.version>5.0.6.Final</hibernate.version>
-		<mysql.version>5.1.38</mysql.version>
+		<mysql.version>8.0.16</mysql.version>
 		<checkstyle.config>${basedir}/../checkstyle.xml</checkstyle.config>
 		<license.file>${basedir}/../apache2-license.txt</license.file>
 	</properties>
