@@ -74,7 +74,7 @@
 		<fge.version>2.2.6</fge.version>
 		<swagger.parser.version>1.0.41</swagger.parser.version>
 		<openapi.parser.version>1.0.7</openapi.parser.version>
-		<guava.version>23.1-jre</guava.version>
+		<guava.version>29.0-jre</guava.version>
 		<velocity.version>1.7</velocity.version>
 		<commons-lang3.version>3.5</commons-lang3.version>
 
