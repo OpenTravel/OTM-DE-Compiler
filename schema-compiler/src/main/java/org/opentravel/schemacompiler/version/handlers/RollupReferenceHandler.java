@@ -352,7 +352,7 @@ public class RollupReferenceHandler {
             if (originalEntity != null) {
                 Object entity = symbols.getEntity( library.getNamespace(), originalEntity.getLocalName() );
 
-                if (originalEntity.getClass().equals( entity.getClass() )) {
+                if ((entity != null) && originalEntity.getClass().equals( entity.getClass() )) {
                     T namedEntity = (T) entity;
 
                     if (namedEntity.getOwningLibrary() == library) {
