@@ -66,7 +66,7 @@
 		<slf4j.version>1.7.10</slf4j.version>
 		<junit.version>4.12</junit.version>
 		<htmlunit.version>2.35.0</htmlunit.version>
-		<xercesimpl.version>2.12.0</xercesimpl.version>
+		<xercesimpl.version>2.12.2</xercesimpl.version>
 		<mockito.version>2.23.4</mockito.version>
 		<mockrunner.jms.version>2.0.1</mockrunner.jms.version>
 		<unboundid.ldap.version>4.0.9</unboundid.ldap.version>
