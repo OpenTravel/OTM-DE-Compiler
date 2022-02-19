@@ -16,11 +16,11 @@
 
 package org.opentravel.schemacompiler.util;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opentravel.schemacompiler.codegen.CodeGeneratorFactory;
 import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
 import org.opentravel.schemacompiler.ioc.SchemaDeclaration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.w3c.dom.ls.LSInput;
 import org.w3c.dom.ls.LSResourceResolver;
@@ -40,7 +40,7 @@ import java.util.Map;
 public class ClasspathResourceResolver implements LSResourceResolver {
 
     private static final String SYSTEM_ID_MAPPINGS_CONTEXT_ID = "systemIdMappings";
-    private static final Logger log = LoggerFactory.getLogger( ClasspathResourceResolver.class );
+    private static final Logger log = LogManager.getLogger( ClasspathResourceResolver.class );
 
     private Map<String,SchemaDeclaration> systemIdMappings;
 

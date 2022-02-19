@@ -16,7 +16,7 @@
 
 package org.opentravel.schemacompiler.index;
 
-import org.opentravel.schemacompiler.jmx.OTMStandardMBean;
+import org.opentravel.repocommon.jmx.OTMStandardMBean;
 
 import java.io.File;
 

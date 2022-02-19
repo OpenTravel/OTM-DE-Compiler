@@ -16,10 +16,10 @@
 
 package org.opentravel.schemacompiler.validate;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
 import org.opentravel.schemacompiler.validate.impl.CompositeValidator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 
 import java.util.ArrayList;
@@ -36,7 +36,7 @@ public class ValidatorFactory {
     public static final String SAVE_RULE_SET_ID = "defaultSaveValidationRules";
     public static final String ASSEMBLY_RULE_SET_ID = "assemblyValidationRules";
 
-    private static final Logger log = LoggerFactory.getLogger( ValidatorFactory.class );
+    private static final Logger log = LogManager.getLogger( ValidatorFactory.class );
 
     private ValidationRuleSet ruleSet;
     private ValidationContext context;
@@ -132,7 +132,7 @@ public class ValidatorFactory {
 
         try {
             if (validatorClass != null) {
-                Validator<T> newValidator = validatorClass.newInstance();
+                Validator<T> newValidator = validatorClass.getConstructor().newInstance();
 
                 newValidator.setValidatorFactory( this );
                 newValidator.setValidationContext( context );

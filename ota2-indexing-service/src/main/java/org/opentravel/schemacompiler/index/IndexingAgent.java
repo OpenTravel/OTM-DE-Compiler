@@ -16,8 +16,8 @@
 
 package org.opentravel.schemacompiler.index;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
@@ -25,12 +25,13 @@ import org.apache.lucene.index.IndexWriterConfig.OpenMode;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.opentravel.ns.ota2.repositoryinfoext_v01_00.SubscriptionTarget;
-import org.opentravel.schemacompiler.index.builder.IndexBuilder;
-import org.opentravel.schemacompiler.index.builder.IndexBuilderFactory;
+import org.opentravel.repocommon.index.IndexingConstants;
+import org.opentravel.repocommon.index.builder.IndexBuilder;
+import org.opentravel.repocommon.index.builder.IndexBuilderFactory;
+import org.opentravel.repocommon.subscription.SubscriptionNavigator;
 import org.opentravel.schemacompiler.repository.RepositoryException;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
-import org.opentravel.schemacompiler.subscription.SubscriptionNavigator;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.FileSystemXmlApplicationContext;
 import org.springframework.jms.core.JmsTemplate;
@@ -62,7 +63,7 @@ import javax.management.ObjectName;
  */
 public class IndexingAgent {
 
-    private static Log log = LogFactory.getLog( IndexingAgent.class );
+    private static Logger log = LogManager.getLogger( IndexingAgent.class );
 
     public static final String JMS_TEMPLATE_BEANID = "indexingJmsService";
     public static final String REPOSITORY_LOCATION_BEANID = "repositoryLocation";

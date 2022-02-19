@@ -21,14 +21,14 @@ import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opentravel.schemacompiler.ioc.CompilerExtensionRegistry;
 import org.opentravel.schemacompiler.task.CompileAllCompilerTask;
 import org.opentravel.schemacompiler.task.TaskFactory;
 import org.opentravel.schemacompiler.util.SchemaCompilerException;
 import org.opentravel.schemacompiler.validate.FindingMessageFormat;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -55,7 +55,7 @@ public class Main {
     private static final String MESSAGE_RB = "/org/opentravel/schemacompiler/cli/cli-messages.properties";
     private static final ResourceBundle messageBundle;
 
-    private static final Logger log = LoggerFactory.getLogger( Main.class );
+    private static final Logger log = LogManager.getLogger( Main.class );
 
     @SuppressWarnings("squid:S106")
     private PrintWriter out = new PrintWriter( System.out );

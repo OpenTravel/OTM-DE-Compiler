@@ -16,8 +16,8 @@
 
 package org.opentravel.schemacompiler.util;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.FileReader;
@@ -35,7 +35,7 @@ import javax.xml.bind.Unmarshaller;
  */
 public class FileUtils {
 
-    private static final Logger log = LoggerFactory.getLogger( FileUtils.class );
+    private static final Logger log = LogManager.getLogger( FileUtils.class );
 
     /**
      * Private constructor to prevent instantiation.

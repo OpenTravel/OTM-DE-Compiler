@@ -31,9 +31,10 @@ import org.opentravel.ns.ota2.repositoryinfo_v01_00.LibraryInfoType;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.LibraryStatus;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.RepositoryState;
 import org.opentravel.ns.ota2.repositoryinfoext_v01_00.SubscriptionTarget;
+import org.opentravel.repocommon.index.IndexingConstants;
+import org.opentravel.repocommon.util.RepositoryJaxbContext;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
 import org.opentravel.schemacompiler.repository.testutil.RepositoryTestUtils;
-import org.opentravel.schemacompiler.util.RepositoryJaxbContext;
 
 import java.io.File;
 import java.io.StringWriter;

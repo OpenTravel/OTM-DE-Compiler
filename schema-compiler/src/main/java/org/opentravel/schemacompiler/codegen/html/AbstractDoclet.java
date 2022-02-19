@@ -16,11 +16,11 @@
 
 package org.opentravel.schemacompiler.codegen.html;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opentravel.schemacompiler.codegen.CodeGenerationException;
 import org.opentravel.schemacompiler.codegen.html.writers.LibraryListWriter;
 import org.opentravel.schemacompiler.model.TLModel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * An abstract implementation of a Doclet.
@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractDoclet {
 
-    private static final Logger log = LoggerFactory.getLogger( AbstractDoclet.class );
+    private static final Logger log = LogManager.getLogger( AbstractDoclet.class );
 
     /**
      * The global configuration information for this run.

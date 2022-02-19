@@ -16,9 +16,9 @@
 
 package org.opentravel.schemacompiler.index;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.opentravel.schemacompiler.jmx.OTMStandardMBean;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.opentravel.repocommon.jmx.OTMStandardMBean;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -31,7 +31,7 @@ public class IndexingManagerStats extends OTMStandardMBean implements IndexingMa
 
     public static final String MBEAN_NAME = "org.opentravel.jmx:type=IndexingManagerStatsMBean";
 
-    private static Log log = LogFactory.getLog( IndexingManagerStats.class );
+    private static Logger log = LogManager.getLogger( IndexingManagerStats.class );
     private static IndexingManagerStats instance = new IndexingManagerStats();
 
     private boolean managerAvailable = true;

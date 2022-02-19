@@ -16,6 +16,8 @@
 
 package org.opentravel.schemacompiler.loader.impl;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opentravel.schemacompiler.codegen.CodeGeneratorFactory;
 import org.opentravel.schemacompiler.ioc.SchemaDeclarations;
 import org.opentravel.schemacompiler.loader.LibraryInputSource;
@@ -30,8 +32,6 @@ import org.opentravel.schemacompiler.util.ExceptionUtils;
 import org.opentravel.schemacompiler.util.URLUtils;
 import org.opentravel.schemacompiler.validate.FindingType;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.w3._2001.xmlschema.Schema;
 
 import java.io.IOException;
@@ -63,7 +63,7 @@ import javax.xml.validation.SchemaFactory;
  */
 public abstract class AbstractLibraryModuleLoader implements LibraryModuleLoader<InputStream> {
 
-    protected static final Logger log = LoggerFactory.getLogger( AbstractLibraryModuleLoader.class );
+    protected static final Logger log = LogManager.getLogger( AbstractLibraryModuleLoader.class );
 
     private static final String MISSING_URL = "[MISSING URL]";
     private static final String SCHEMA_CONTEXT = ":org.w3._2001.xmlschema";

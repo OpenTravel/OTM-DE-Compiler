@@ -18,6 +18,8 @@ package org.opentravel.schemacompiler.loader;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
 import org.opentravel.schemacompiler.loader.impl.DefaultLibraryNamespaceResolver;
 import org.opentravel.schemacompiler.loader.impl.LibraryValidationSource;
@@ -50,8 +52,6 @@ import org.opentravel.schemacompiler.validate.compile.TLModelCompileValidator;
 import org.opentravel.schemacompiler.version.VersionScheme;
 import org.opentravel.schemacompiler.version.VersionSchemeException;
 import org.opentravel.schemacompiler.version.VersionSchemeFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.w3._2001.xmlschema.Schema;
 import org.w3._2001.xmlschema.TopLevelElement;
 
@@ -88,7 +88,7 @@ public final class LibraryModelLoader<C> {
     private static final String INVALID_NAMESPACE_URI = "Invalid namespace URI on import: ";
     private static final boolean ENFORCE_CRC_VALIDATION = false;
 
-    private static final Logger log = LoggerFactory.getLogger( LibraryModelLoader.class );
+    private static final Logger log = LogManager.getLogger( LibraryModelLoader.class );
 
     /** Internal indicator used to define the possible types of loader operations. */
     private enum OperationType {
@@ -1214,7 +1214,7 @@ public final class LibraryModelLoader<C> {
     private void initializeDefaultModuleLoader() throws LibraryLoaderException {
         try {
             Class<?> moduleLoaderClass = MultiVersionLibraryModuleLoader.class;
-            setModuleLoader( (LibraryModuleLoader<C>) moduleLoaderClass.newInstance() );
+            setModuleLoader( (LibraryModuleLoader<C>) moduleLoaderClass.getConstructor().newInstance() );
 
         } catch (Exception e) {
             throw new LibraryLoaderException( e );

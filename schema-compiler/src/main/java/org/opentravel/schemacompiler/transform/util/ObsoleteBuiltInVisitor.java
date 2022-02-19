@@ -16,6 +16,8 @@
 
 package org.opentravel.schemacompiler.transform.util;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opentravel.schemacompiler.ic.ImportManagementIntegrityChecker;
 import org.opentravel.schemacompiler.loader.LibraryInputSource;
 import org.opentravel.schemacompiler.loader.LibraryModelLoader;
@@ -38,8 +40,6 @@ import org.opentravel.schemacompiler.repository.RepositoryManager;
 import org.opentravel.schemacompiler.transform.symbols.AbstractSymbolResolver;
 import org.opentravel.schemacompiler.util.URLUtils;
 import org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.InputStream;
@@ -62,7 +62,7 @@ public class ObsoleteBuiltInVisitor extends ModelElementVisitorAdapter {
     protected static final String OTA_REPOSITORY_ID = "Opentravel";
     protected static final String OTA_REPOSITORY_URL = "http://www.opentravelmodel.net";
 
-    private static Logger log = LoggerFactory.getLogger( ObsoleteBuiltInVisitor.class );
+    private static Logger log = LogManager.getLogger( ObsoleteBuiltInVisitor.class );
 
     private static List<String> obsoleteTypeNames = Arrays.asList( "String_AlphaNumeric", "String_Long", "String",
         "String_Short", "String_Tiny", "String_Character_One", "String_UpperCaseAlpha", "String_UpperCaseAlphaNumeric",

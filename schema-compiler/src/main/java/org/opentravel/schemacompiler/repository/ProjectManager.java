@@ -1752,7 +1752,8 @@ public final class ProjectManager {
                         new LibraryModelSaver().saveLibrary( itemLibrary );
 
                     } catch (LibrarySaveException e) {
-                        throw new RepositoryException( "Error saving current state of library: " + item.getFilename() );
+                        throw new RepositoryException( "Error saving current state of library: " + item.getFilename(),
+                            e );
                     }
                     ImportManagementIntegrityChecker.verifyReferencedLibraries( itemLibrary, libraryUrlOverrides );
                     preparedLibraries.add( itemLibrary );

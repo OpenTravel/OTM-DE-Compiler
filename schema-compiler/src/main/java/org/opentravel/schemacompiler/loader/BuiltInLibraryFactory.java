@@ -16,10 +16,10 @@
 
 package org.opentravel.schemacompiler.loader;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
 import org.opentravel.schemacompiler.model.BuiltInLibrary;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +32,7 @@ import java.util.List;
  */
 public final class BuiltInLibraryFactory {
 
-    private static final Logger log = LoggerFactory.getLogger( BuiltInLibraryFactory.class );
+    private static final Logger log = LogManager.getLogger( BuiltInLibraryFactory.class );
 
     private List<BuiltInLibraryLoader> loaders;
 

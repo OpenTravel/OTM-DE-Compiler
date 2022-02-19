@@ -20,6 +20,7 @@ import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.transform.SymbolResolver;
 import org.opentravel.schemacompiler.validate.ValidationContext;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -86,9 +87,10 @@ public class TLModelValidationContext implements ValidationContext {
     public <T> T getContextCacheEntry(String cacheKey, Class<T> entryType) {
         return (T) validationCache.computeIfAbsent( cacheKey, k -> {
             try {
-                return entryType.newInstance();
+                return entryType.getConstructor().newInstance();
 
-            } catch (InstantiationException | IllegalAccessException e) {
+            } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+                | InvocationTargetException | NoSuchMethodException | SecurityException e) {
                 return null;
             }
         } );

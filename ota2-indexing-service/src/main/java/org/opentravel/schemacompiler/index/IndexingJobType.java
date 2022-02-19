@@ -16,6 +16,8 @@
 
 package org.opentravel.schemacompiler.index;
 
+import org.opentravel.repocommon.index.IndexingConstants;
+
 import java.io.File;
 
 /**

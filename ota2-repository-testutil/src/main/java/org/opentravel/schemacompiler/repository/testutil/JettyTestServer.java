@@ -16,28 +16,25 @@
 
 package org.opentravel.schemacompiler.repository.testutil;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.jasper.compiler.TldCache;
 import org.apache.jasper.runtime.JspFactoryImpl;
 import org.apache.jasper.servlet.JspServlet;
 import org.apache.jasper.servlet.TldScanner;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.tomcat.InstanceManager;
 import org.apache.tomcat.JarScanner;
 import org.apache.tomcat.SimpleInstanceManager;
 import org.apache.tomcat.util.scan.StandardJarScanner;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.ErrorHandler;
-import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.eclipse.jetty.util.log.Logger;
 import org.glassfish.jersey.server.ResourceConfig;
-import org.glassfish.jersey.server.ServerProperties;
-import org.opentravel.schemacompiler.index.FreeTextSearchService;
-import org.opentravel.schemacompiler.index.FreeTextSearchServiceFactory;
+import org.opentravel.repocommon.index.FreeTextSearchService;
+import org.opentravel.repocommon.index.FreeTextSearchServiceFactory;
+import org.opentravel.repocommon.repository.RepositoryComponentFactory;
 import org.opentravel.schemacompiler.repository.RemoteRepository;
-import org.opentravel.schemacompiler.repository.RepositoryComponentFactory;
 import org.opentravel.schemacompiler.repository.RepositoryException;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
 import org.opentravel.schemacompiler.repository.impl.RemoteRepositoryUtils;
@@ -50,8 +47,6 @@ import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
@@ -70,11 +65,11 @@ public class JettyTestServer {
     private static final String CONTEXT_PATH = "/ota2-repository-service";
     @SuppressWarnings("squid:S1075")
     private static final String SEARCH_INDEX_PATH = "/search-index";
-    private static final String REPOSITORY_SERVLET_CLASS = "org.opentravel.schemacompiler.repository.RepositoryServlet";
-    private static final String AUTH_FILTER_CLASS = "org.opentravel.schemacompiler.repository.BasicAuthFilter";
+    private static final String REPOSITORY_SERVLET_CLASS = "org.opentravel.reposervice.repository.RepositoryServlet";
+    private static final String AUTH_FILTER_CLASS = "org.opentravel.reposervice.repository.BasicAuthFilter";
     private static final String USER_DIR = "user.dir";
 
-    private static Log log = LogFactory.getLog( JettyTestServer.class );
+    private static Logger log = LogManager.getLogger( JettyTestServer.class );
 
     private Server jettyServer;
     private File repositorySnapshotLocation;
@@ -96,9 +91,6 @@ public class JettyTestServer {
             "/target/test-workspace/" + testClass.getSimpleName() + "/test-repository" );
         this.repositoryIndexLocation = new File( repositoryRuntimeLocation.getParentFile(), SEARCH_INDEX_PATH );
         this.port = port;
-
-        // disable logging becouse of invalid slf4j version
-        org.eclipse.jetty.util.log.Log.setLog( new NoLogging() );
 
         if ((repositorySnapshotLocation != null) && !repositorySnapshotLocation.exists()) {
             throw new IllegalArgumentException(
@@ -138,11 +130,8 @@ public class JettyTestServer {
         Constructor<? extends Servlet> servletConstructor = servletClass.getConstructor( ResourceConfig.class );
         ServletContextHandler context = new ServletContextHandler( ServletContextHandler.SESSIONS );
         ResourceConfig resourceConfig = new ResourceConfig();
-        Map<String,Object> resourceProps = new HashMap<>();
 
-        resourceProps.put( ServerProperties.PROVIDER_PACKAGES,
-            "org.opentravel.schemacompiler.repository org.opentravel.schemacompiler.providers" );
-        resourceConfig.addProperties( resourceProps );
+        resourceConfig.packages( "org.opentravel.reposervice.repository", "org.opentravel.reposervice.providers" );
 
         context.setContextPath( CONTEXT_PATH );
         context.setResourceBase( System.getProperty( USER_DIR ) + "/src/main/webapp" );
@@ -179,7 +168,7 @@ public class JettyTestServer {
     private void configureConsoleSupport(ServletContextHandler context)
         throws IOException, SAXException, ClassNotFoundException {
         File targetTemp = new File( System.getProperty( USER_DIR ), "target/jsp-temp" );
-        ServletHolder holderDefault = new ServletHolder( "default", new DefaultServlet() );
+        // ServletHolder holderDefault = new ServletHolder( "default", new DefaultServlet() );
         ServletHolder holderJsp = new ServletHolder( "jsp", new JspServlet() );
         Class<? extends Filter> authFilterClass = (Class<? extends Filter>) Class.forName( AUTH_FILTER_CLASS );
         TldScanner scanner = new TldScanner( context.getServletContext(), true, false, true );
@@ -196,7 +185,8 @@ public class JettyTestServer {
         context.setClassLoader( new URLClassLoader( new URL[0], this.getClass().getClassLoader() ) );
 
         holderJsp.setInitOrder( 0 );
-        holderJsp.setInitParameter( "logVerbosityLevel", "DEBUG" );
+        // holderJsp.setInitParameter( "logVerbosityLevel", "DEBUG" );
+        holderJsp.setInitParameter( "development", "true" );
         holderJsp.setInitParameter( "fork", "false" );
         holderJsp.setInitParameter( "xpoweredBy", "false" );
         holderJsp.setInitParameter( "compilerTargetVM", "1.8" );
@@ -204,10 +194,10 @@ public class JettyTestServer {
         holderJsp.setInitParameter( "keepgenerated", "true" );
         JspFactory.setDefaultFactory( new JspFactoryImpl() );
 
-        holderDefault.setInitParameter( "resourceBase", context.getResourceBase() );
-        holderDefault.setInitParameter( "dirAllowed", "true" );
+        // holderDefault.setInitParameter( "resourceBase", context.getResourceBase() );
+        // holderDefault.setInitParameter( "dirAllowed", "true" );
 
-        context.addServlet( holderDefault, "/" );
+        // context.addServlet( holderDefault, "/" );
         context.addServlet( holderJsp, "*.jsp" );
 
         scanner.scan();
@@ -313,84 +303,6 @@ public class JettyTestServer {
             RepositoryTestUtils.copyContents( repositorySnapshotLocation, repositoryRuntimeLocation );
         }
         RepositoryTestUtils.deleteContents( repositoryIndexLocation );
-    }
-
-    public class NoLogging implements Logger {
-        @Override
-        public String getName() {
-            return "no";
-        }
-
-        @Override
-        public void warn(String msg, Object... args) {
-            // No action
-        }
-
-        @Override
-        public void warn(Throwable thrown) {
-            // No action
-        }
-
-        @Override
-        public void warn(String msg, Throwable thrown) {
-            // No action
-        }
-
-        @Override
-        public void info(String msg, Object... args) {
-            // No action
-        }
-
-        @Override
-        public void info(Throwable thrown) {
-            // No action
-        }
-
-        @Override
-        public void info(String msg, Throwable thrown) {
-            // No action
-        }
-
-        @Override
-        public boolean isDebugEnabled() {
-            return false;
-        }
-
-        @Override
-        public void setDebugEnabled(boolean enabled) {
-            // No action
-        }
-
-        @Override
-        public void debug(String msg, Object... args) {
-            // No action
-        }
-
-        @Override
-        public void debug(String msg, long level) {
-            // No action
-        }
-
-        @Override
-        public void debug(Throwable thrown) {
-            // No action
-        }
-
-        @Override
-        public void debug(String msg, Throwable thrown) {
-            // No action
-        }
-
-        @Override
-        public Logger getLogger(String name) {
-            return this;
-        }
-
-        @Override
-        public void ignore(Throwable ignored) {
-            // No action
-        }
-
     }
 
 }

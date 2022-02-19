@@ -1,26 +1,37 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	
+
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>ota2-indexing-service</artifactId>
 	<name>OTA2 Repository Indexing Service</name>
-	
+
 	<parent>
 		<groupId>org.opentravel.otm</groupId>
 		<artifactId>ota-parent-pom</artifactId>
-		<version>4.0-SNAPSHOT</version>
+		<version>5.0-SNAPSHOT</version>
 	</parent>
-	
+
 	<properties>
 		<checkstyle.config>${basedir}/../checkstyle.xml</checkstyle.config>
 		<license.file>${basedir}/../apache2-license.txt</license.file>
 	</properties>
-	
+
 	<dependencies>
 		<dependency>
 			<groupId>org.opentravel.otm</groupId>
 			<artifactId>ota2-repository-common</artifactId>
 			<version>${project.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>javax.jms</groupId>
+					<artifactId>jms</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>commons-logging</groupId>
+					<artifactId>commons-logging</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.activemq</groupId>
@@ -28,15 +39,23 @@
 		</dependency>
 		<dependency>
 			<groupId>org.apache.activemq</groupId>
-			<artifactId>activemq-broker</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.activemq</groupId>
 			<artifactId>activemq-spring</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.activemq</groupId>
+					<artifactId>activemq-broker</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.activemq</groupId>
 			<artifactId>activemq-kahadb-store</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.activemq</groupId>
+					<artifactId>activemq-broker</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
@@ -44,10 +63,21 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
+			<groupId>org.apache.activemq</groupId>
+			<artifactId>activemq-broker</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>org.opentravel.otm</groupId>
 			<artifactId>ota2-repository-testutil</artifactId>
 			<version>${project.version}</version>
 			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>jakarta.xml.bind</groupId>
+					<artifactId>jakarta.xml.bind-api</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.mockito</groupId>
@@ -55,7 +85,7 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-	
+
 	<build>
 		<defaultGoal>assembly:assembly</defaultGoal>
 		<plugins>
@@ -144,5 +174,5 @@
 			</plugins>
 		</pluginManagement>
 	</build>
-	
+
 </project>

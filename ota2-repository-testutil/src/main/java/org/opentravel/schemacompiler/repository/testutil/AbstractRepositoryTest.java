@@ -16,7 +16,7 @@
 
 package org.opentravel.schemacompiler.repository.testutil;
 
-import org.opentravel.schemacompiler.index.FreeTextSearchServiceFactory;
+import org.opentravel.repocommon.index.FreeTextSearchServiceFactory;
 import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.repository.Project;
 import org.opentravel.schemacompiler.repository.ProjectItem;
@@ -180,6 +180,7 @@ public abstract class AbstractRepositoryTest {
             jettyServer.get().start( enableWebConsole );
 
         } catch (Exception e) {
+            e.printStackTrace( System.out );
             throw new RepositoryException( "Error starting Jetty test server", e );
         }
 

@@ -16,8 +16,8 @@
 
 package org.opentravel.schemacompiler.repository;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.LibraryInfoType;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.ObjectFactory;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.RepositoryInfoType;
@@ -96,7 +96,7 @@ public abstract class RepositoryFileManager {
     private static final String SCHEMA_CONTEXT = ":org.w3._2001.xmlschema:org.opentravel.ns.ota2.repositoryinfo_v01_00";
     private static final String REPOSITORY_NAMESPACE = "http://www.OpenTravel.org/ns/OTA2/RepositoryInfo_v01_00";
 
-    private static Log log = LogFactory.getLog( RepositoryFileManager.class );
+    private static Logger log = LogManager.getLogger( RepositoryFileManager.class );
 
     private static final ThreadLocal<Set<File>> changeSet = ThreadLocal.withInitial( HashSet::new );
 

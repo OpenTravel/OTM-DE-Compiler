@@ -19,8 +19,8 @@ package org.opentravel.schemacompiler.index;
 import org.apache.commons.lang.SystemUtils;
 import org.junit.Rule;
 import org.junit.rules.TestName;
+import org.opentravel.repocommon.util.RepositoryJaxbContext;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
-import org.opentravel.schemacompiler.util.RepositoryJaxbContext;
 
 import java.io.File;
 import java.io.FileWriter;

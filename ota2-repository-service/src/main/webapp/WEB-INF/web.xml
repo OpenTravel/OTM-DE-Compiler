@@ -22,7 +22,7 @@
 
 	<servlet>
 		<servlet-name>jersey-serlvet</servlet-name>
-		<servlet-class>org.opentravel.schemacompiler.repository.RepositoryServlet</servlet-class>
+		<servlet-class>org.opentravel.reposervice.repository.RepositoryServlet</servlet-class>
 		<init-param>
 			<param-name>jersey.config.server.provider.classnames</param-name>
 			<param-value>
@@ -57,7 +57,7 @@
 
 	<filter>
 		<filter-name>BasicAuthFilter</filter-name>
-		<filter-class>org.opentravel.schemacompiler.repository.BasicAuthFilter</filter-class>
+		<filter-class>org.opentravel.reposervice.repository.BasicAuthFilter</filter-class>
 	</filter>
 
 	<filter-mapping>

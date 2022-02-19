@@ -16,10 +16,9 @@
 
 package org.opentravel.schemacompiler.index;
 
-import org.apache.activemq.broker.BrokerService;
 import org.apache.commons.lang3.SystemUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.FileSystemXmlApplicationContext;
 
@@ -57,13 +56,11 @@ public class IndexProcessManager {
     public static final String MANAGER_JMXPORT_BEANID = "jmxPort";
     public static final String AGENT_CONFIG_SYSPROP = "ota2.index.agent.config";
     public static final String AGENT_JVMOPTS_BEANID = "agentJvmOpts";
-    public static final String AMQ_BROKER_BEANID = "amqBroker";
 
     protected static boolean debugMode = true;
 
-    private static Log log = LogFactory.getLog( IndexProcessManager.class );
+    private static Logger log = LogManager.getLogger( IndexProcessManager.class );
 
-    private static BrokerService amqBroker;
     private static boolean shutdownRequested = false;
     private static Thread launcherThread;
     private static AgentLauncher launcher;
@@ -80,7 +77,6 @@ public class IndexProcessManager {
         try {
             running = false;
             initializeContext();
-            startActiveMQBroker();
             configureMonitoring();
             running = true;
             log.info( "Indexing process manager started." );
@@ -156,8 +152,6 @@ public class IndexProcessManager {
                     launcher.getAgentProcess().destroy();
                 }
                 launcherThread.interrupt();
-                amqBroker.stop();
-                amqBroker.waitUntilStopped();
                 log.info( "Indexing process manager shut down." );
 
             } catch (Exception e) {
@@ -191,22 +185,6 @@ public class IndexProcessManager {
 
         agentJvmOpts = (String) context.getBean( AGENT_JVMOPTS_BEANID );
         jmxPort = (Integer) context.getBean( MANAGER_JMXPORT_BEANID );
-        amqBroker = (BrokerService) context.getBean( AMQ_BROKER_BEANID );
-    }
-
-    /**
-     * Starts the embedded ActiveMQ broker that will handle JMS messaging between the indexing agent and the OTM
-     * repository server.
-     * 
-     * @throws IOException thrown if the JMX service cannot be launched
-     */
-    private static void startActiveMQBroker() throws IOException {
-        try {
-            amqBroker.start();
-
-        } catch (Exception e) {
-            throw new IOException( "Error starting embedded ActiveMQ broker", e );
-        }
     }
 
     /**

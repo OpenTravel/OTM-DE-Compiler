@@ -16,6 +16,8 @@
 
 package org.opentravel.schemacompiler.repository.impl;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opentravel.schemacompiler.loader.LibraryInputSource;
 import org.opentravel.schemacompiler.loader.LibraryLoaderException;
 import org.opentravel.schemacompiler.loader.LibraryModuleInfo;
@@ -27,8 +29,6 @@ import org.opentravel.schemacompiler.repository.RepositoryItem;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
 import org.opentravel.schemacompiler.util.URLUtils;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.w3._2001.xmlschema.Schema;
 
 import java.io.File;
@@ -45,7 +45,7 @@ import java.util.Map;
  */
 public class MultiReleaseModuleLoader implements LibraryModuleLoader<InputStream> {
 
-    private static final Logger log = LoggerFactory.getLogger( MultiReleaseModuleLoader.class );
+    private static final Logger log = LogManager.getLogger( MultiReleaseModuleLoader.class );
 
     private Map<String,ReleaseMember> libraryUrltoReleaseMemberMap = new HashMap<>();
     private LibraryModuleLoader<InputStream> delegate;

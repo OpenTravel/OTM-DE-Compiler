@@ -68,7 +68,7 @@ public class VersionSchemeFactory {
 
         if (versionSchemeClass != null) {
             try {
-                versionScheme = versionSchemeClass.newInstance();
+                versionScheme = versionSchemeClass.getConstructor().newInstance();
 
             } catch (Exception e) {
                 throw new VersionSchemeException(

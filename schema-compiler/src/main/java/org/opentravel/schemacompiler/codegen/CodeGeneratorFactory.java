@@ -109,7 +109,7 @@ public final class CodeGeneratorFactory {
 
             if (codegenClass != null) {
                 try {
-                    codeGenerator = codegenClass.newInstance();
+                    codeGenerator = codegenClass.getConstructor().newInstance();
 
                 } catch (Exception e) {
                     throw new CodeGenerationException( "Unable to create code generator instance.", e );

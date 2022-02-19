@@ -16,9 +16,9 @@
 
 package org.opentravel.schemacompiler.transform;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opentravel.schemacompiler.ioc.SchemaCompilerApplicationContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 
 import java.util.Collection;
@@ -38,7 +38,7 @@ import java.util.Set;
  */
 public class TransformerFactory<C extends ObjectTransformerContext> {
 
-    private static final Logger log = LoggerFactory.getLogger( TransformerFactory.class );
+    private static final Logger log = LogManager.getLogger( TransformerFactory.class );
 
     private Map<Class<?>,Map<Class<?>,Class<?>>> sourceTypeMappings = new HashMap<>();
     private C transformerContext;
@@ -193,7 +193,7 @@ public class TransformerFactory<C extends ObjectTransformerContext> {
 
             try {
                 if (transformerClass != null) {
-                    transformer = transformerClass.newInstance();
+                    transformer = transformerClass.getConstructor().newInstance();
                     transformer.setContext( transformerContext );
                 }
             } catch (Exception e) {

@@ -16,6 +16,8 @@
 
 package org.opentravel.schemacompiler.repository;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opentravel.schemacompiler.loader.LibraryInputSource;
 import org.opentravel.schemacompiler.loader.LibraryLoaderException;
 import org.opentravel.schemacompiler.loader.LibraryModelLoader;
@@ -39,8 +41,6 @@ import org.opentravel.schemacompiler.version.VersionSchemeFactory;
 import org.opentravel.schemacompiler.visitor.DependencyNavigator;
 import org.opentravel.schemacompiler.visitor.ModelElementVisitor;
 import org.opentravel.schemacompiler.visitor.ModelElementVisitorAdapter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -61,7 +61,7 @@ import javax.xml.namespace.QName;
  */
 public class ServiceAssemblyManager {
 
-    private static final Logger log = LoggerFactory.getLogger( ServiceAssemblyManager.class );
+    private static final Logger log = LogManager.getLogger( ServiceAssemblyManager.class );
 
     private RepositoryManager repositoryManager;
     private ServiceAssemblyFileUtils fileUtils;

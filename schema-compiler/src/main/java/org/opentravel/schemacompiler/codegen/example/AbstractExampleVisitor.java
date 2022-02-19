@@ -16,6 +16,8 @@
 
 package org.opentravel.schemacompiler.codegen.example;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opentravel.schemacompiler.codegen.util.AliasCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
 import org.opentravel.schemacompiler.codegen.util.XsdCodegenUtils;
@@ -52,8 +54,6 @@ import org.opentravel.schemacompiler.model.XSDComplexType;
 import org.opentravel.schemacompiler.model.XSDElement;
 import org.opentravel.schemacompiler.model.XSDSimpleType;
 import org.opentravel.schemacompiler.util.ClassSpecificFunction;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 
 import java.math.BigDecimal;
@@ -75,7 +75,7 @@ import javax.xml.namespace.QName;
  */
 public abstract class AbstractExampleVisitor<T> implements ExampleVisitor {
 
-    private static final Logger log = LoggerFactory.getLogger( AbstractExampleVisitor.class );
+    private static final Logger log = LogManager.getLogger( AbstractExampleVisitor.class );
 
     private static FacetCodegenDelegateFactory facetDelegateFactory = new FacetCodegenDelegateFactory( null );
 

@@ -33,6 +33,7 @@
 		<constructor-arg index="0" value="${org.opentravel.index.agent.jvmOpts}" />
 	</bean>
 	
+	<!--
 	<broker xmlns="http://activemq.apache.org/schema/core" id="amqBroker" brokerName="localhost" dataDirectory="${activemq.data}" start="false">
 		
 		<destinationPolicy>
@@ -79,5 +80,6 @@
 		</shutdownHooks>
 
 	</broker>
-
+	-->
+	
 </beans>

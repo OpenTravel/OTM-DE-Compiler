@@ -16,8 +16,8 @@
 
 package org.opentravel.schemacompiler.xml;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.ls.DOMImplementationLS;
 import org.w3c.dom.ls.LSOutput;
@@ -45,7 +45,7 @@ public class XMLPrettyPrinter {
     public static final String LINE_BREAK_TOKEN = "__LINE_BREAK__";
     public static final String LINE_BREAK_COMMENT = "<!--" + LINE_BREAK_TOKEN + "-->";
 
-    private static final Logger log = LoggerFactory.getLogger( XMLPrettyPrinter.class );
+    private static final Logger log = LogManager.getLogger( XMLPrettyPrinter.class );
 
     private static final DocumentBuilder docBuilder;
     private static final DOMImplementationLS domLS;

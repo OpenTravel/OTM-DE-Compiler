@@ -16,8 +16,8 @@
 
 package org.opentravel.schemacompiler.repository.testutil;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opentravel.schemacompiler.util.FileUtils;
 import org.opentravel.schemacompiler.validate.FindingMessageFormat;
 import org.opentravel.schemacompiler.validate.FindingType;
@@ -37,7 +37,7 @@ import java.io.OutputStream;
  */
 public class RepositoryTestUtils {
 
-    private static Log log = LogFactory.getLog( RepositoryTestUtils.class );
+    private static Logger log = LogManager.getLogger( RepositoryTestUtils.class );
 
     /**
      * Private constructor to prevent instantiation.

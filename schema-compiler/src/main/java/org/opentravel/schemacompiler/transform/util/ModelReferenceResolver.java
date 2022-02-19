@@ -16,21 +16,23 @@
 
 package org.opentravel.schemacompiler.transform.util;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opentravel.schemacompiler.model.TLLibrary;
 import org.opentravel.schemacompiler.model.TLModel;
 import org.opentravel.schemacompiler.model.TLParamGroup;
 import org.opentravel.schemacompiler.model.TLParameter;
 import org.opentravel.schemacompiler.model.TLResource;
 import org.opentravel.schemacompiler.visitor.ModelNavigator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * Provides a global static method for resolving all entity references within an OTM model.
  */
 public final class ModelReferenceResolver {
 
-    private static Logger log = LoggerFactory.getLogger( ModelReferenceResolver.class );
+    private static Logger log = LogManager.getLogger( ModelReferenceResolver.class );
 
     private static Class<? extends ObsoleteBuiltInVisitor> obsoleteBuiltInVisitorType = ObsoleteBuiltInVisitor.class;
 
@@ -90,12 +92,13 @@ public final class ModelReferenceResolver {
      */
     private static void resolveObsoleteBuiltInReferences(TLModel model) {
         try {
-            ObsoleteBuiltInVisitor visitor = obsoleteBuiltInVisitorType.newInstance();
+            ObsoleteBuiltInVisitor visitor = obsoleteBuiltInVisitorType.getConstructor().newInstance();
 
             ModelNavigator.navigate( model, visitor );
             visitor.resolveObsoleteBuiltInReferences();
 
-        } catch (InstantiationException | IllegalAccessException e) {
+        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
+            | NoSuchMethodException | SecurityException e) {
             log.error( "Error initializing ObsoleteBuiltInVisitor.", e );
         }
     }

@@ -16,8 +16,8 @@
 
 package org.opentravel.schemacompiler.index;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
@@ -29,7 +29,7 @@ import javax.management.remote.JMXServiceURL;
  */
 public class ShutdownIndexingService {
 
-    private static Log log = LogFactory.getLog( ShutdownIndexingService.class );
+    private static Logger log = LogManager.getLogger( ShutdownIndexingService.class );
 
     /**
      * Main method invoked from the command-line.

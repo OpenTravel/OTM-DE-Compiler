@@ -16,9 +16,9 @@
 
 package org.opentravel.schemacompiler.codegen.html;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opentravel.schemacompiler.util.SchemaCompilerRuntimeException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.text.MessageFormat;
@@ -36,7 +36,7 @@ import java.util.ResourceBundle;
  */
 public class Messager {
 
-    private static final Logger log = LoggerFactory.getLogger( Messager.class );
+    private static final Logger log = LogManager.getLogger( Messager.class );
 
     /**
      * The maximum number of errors/warnings that are reported.

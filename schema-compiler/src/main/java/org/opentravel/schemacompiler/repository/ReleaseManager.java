@@ -16,6 +16,8 @@
 
 package org.opentravel.schemacompiler.repository;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opentravel.ns.ota2.project_v01_00.ManagedProjectItemType;
 import org.opentravel.ns.ota2.project_v01_00.ProjectItemType;
 import org.opentravel.ns.ota2.project_v01_00.ProjectType;
@@ -43,8 +45,6 @@ import org.opentravel.schemacompiler.validate.ValidationFindings;
 import org.opentravel.schemacompiler.validate.compile.TLModelCompileValidator;
 import org.opentravel.schemacompiler.version.VersionScheme;
 import org.opentravel.schemacompiler.version.VersionSchemeFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -66,7 +66,7 @@ public class ReleaseManager {
 
     private static final String INITIAL_VERSION = "1.0.0";
 
-    private static final Logger log = LoggerFactory.getLogger( ReleaseManager.class );
+    private static final Logger log = LogManager.getLogger( ReleaseManager.class );
     private static final VersionScheme versionScheme;
 
     private Release release;

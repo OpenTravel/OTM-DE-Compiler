@@ -16,7 +16,7 @@
 
 package org.opentravel.schemacompiler.index;
 
-import org.opentravel.schemacompiler.jmx.OTMBasicStatsMBean;
+import org.opentravel.repocommon.jmx.OTMBasicStatsMBean;
 
 /**
  * MBean interface for monitoring and management of the <code>IndexProcessManager</code> process.

@@ -16,17 +16,17 @@
 
 package org.opentravel.schemacompiler.index;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.LibraryInfoListType;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.LibraryInfoType;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.ObjectFactory;
 import org.opentravel.ns.ota2.repositoryinfoext_v01_00.SubscriptionTarget;
+import org.opentravel.repocommon.util.RepositoryJaxbContext;
 import org.opentravel.schemacompiler.repository.RepositoryItem;
 import org.opentravel.schemacompiler.repository.RepositoryManager;
 import org.opentravel.schemacompiler.repository.impl.RepositoryUtils;
 import org.opentravel.schemacompiler.util.FileUtils;
-import org.opentravel.schemacompiler.util.RepositoryJaxbContext;
 
 import java.io.File;
 import java.io.FileReader;
@@ -49,6 +49,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
+
 /**
  * Manages the flow and sequence of indexing jobs. New jobs are saved to persistent storage ahead of processing to
  * prevent loss in case of system errors. As job batches are completed in the order received, the batches are deleted
@@ -59,7 +60,7 @@ public class IndexingJobManager {
     public static final int MAX_INDEXING_BATCH_SIZE = 10;
 
     private static final ObjectFactory objectFactory = new ObjectFactory();
-    private static Log log = LogFactory.getLog( IndexingJobManager.class );
+    private static Logger log = LogManager.getLogger( IndexingJobManager.class );
 
     private DateFormat baseFilenamePattern = new SimpleDateFormat( "yyyyMMddkkmmssSSS" );
     private RepositoryManager repositoryManager;

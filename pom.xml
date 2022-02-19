@@ -1,13 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-	xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.opentravel.otm</groupId>
 	<artifactId>ota-parent-pom</artifactId>
-	<version>4.0-SNAPSHOT</version>
+	<version>5.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<inceptionYear>2014</inceptionYear>
 
@@ -28,21 +25,20 @@
 
 	<properties>
 		<!-- General Build Properties -->
-		<java.version>1.8</java.version>
+		<java.version>17</java.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 		<!-- Dependency Versions -->
-		<jaxb.api.version>2.4.0-b180830.0359</jaxb.api.version>
-		<jaxb.core.version>2.3.0.1</jaxb.core.version>
-		<jaxb.runtime.version>2.4.0-b180830.0438</jaxb.runtime.version>
-		<jaxb.xjc.version>2.3.2</jaxb.xjc.version>
-		<jakarta.activation.version>1.2.1</jakarta.activation.version>
+		<jaxb.impl.version>2.3.3</jaxb.impl.version>
+		<jaxb.xjc.version>2.3.3</jaxb.xjc.version>
+		<jakarta.activation.version>2.0.0</jakarta.activation.version>
+		<jakarta.xml.bind.version>2.3.3</jakarta.xml.bind.version>
 		<gson.version>2.5</gson.version>
 		<jackson.version>2.10.3</jackson.version>
 		<jackson.databind.version>2.10.3</jackson.databind.version>
-		<spring.version>4.3.21.RELEASE</spring.version>
+		<spring.version>5.3.15</spring.version>
 		<httpcomponents.version>4.5.8</httpcomponents.version>
-		<maven.plugin.api.version>3.5.4</maven.plugin.api.version>
+		<maven.plugin.api.version>3.8.4</maven.plugin.api.version>
 		<maven.annotations.version>3.5.2</maven.annotations.version>
 		<maven.aether.provider.version>3.3.9</maven.aether.provider.version>
 		<maven.testing.harness.version>3.3.0</maven.testing.harness.version>
@@ -51,20 +47,21 @@
 		<commons.codec.version>1.9</commons.codec.version>
 		<commons.validator.version>1.6</commons.validator.version>
 		<commons.collections.version>3.2.2</commons.collections.version>
-		<jersey.version>2.28</jersey.version>
+		<jakarta.servlet.version>4.0.4</jakarta.servlet.version>
+		<jakarta.ws.rs.version>2.1.6</jakarta.ws.rs.version>
+		<jakarta.jms.version>2.0.3</jakarta.jms.version>
+		<jersey.version>2.34</jersey.version>
 		<lucene.version>5.0.0</lucene.version>
 		<svnkit.version>1.8.7</svnkit.version>
-		<jms.version>1.1</jms.version>
-		<activemq.version>5.15.9</activemq.version>
-		<activemq.broker.version>5.15.8</activemq.broker.version>
+		<activemq.version>5.16.3</activemq.version>
 		<javax.mail.version>1.5.5</javax.mail.version>
-		<tiles.version>3.0.5</tiles.version>
-		<jstl.version>1.2</jstl.version>
-		<jetty.version>9.4.17.v20190418</jetty.version>
-		<servlet.api.version>2.5</servlet.api.version>
+		<tiles.version>3.0.8</tiles.version>
+		<jstl.version>1.2.6</jstl.version>
+		<jetty.version>10.0.8</jetty.version>
 		<jsp.api.version>2.1</jsp.api.version>
-		<slf4j.version>1.7.10</slf4j.version>
-		<junit.version>4.12</junit.version>
+		<log4j.version>2.17.1</log4j.version>
+		<slf4j.nop.version>1.7.30</slf4j.nop.version>
+		<junit.version>4.13.2</junit.version>
 		<htmlunit.version>2.35.0</htmlunit.version>
 		<xercesimpl.version>2.12.0</xercesimpl.version>
 		<mockito.version>2.23.4</mockito.version>
@@ -79,23 +76,23 @@
 		<commons-lang3.version>3.5</commons-lang3.version>
 
 		<!-- Plugin Versions -->
-		<compiler.plugin.version>3.8.0</compiler.plugin.version>
+		<compiler.plugin.version>3.9.0</compiler.plugin.version>
 		<resources.plugin.version>3.1.0</resources.plugin.version>
 		<source.plugin.version>2.3</source.plugin.version>
 		<enforcer.plugin.version>3.0.0-M2</enforcer.plugin.version>
 		<versions.plugin.version>2.7</versions.plugin.version>
 		<dependency.plugin.version>2.8</dependency.plugin.version>
-		<jar.plugin.version>2.4</jar.plugin.version>
+		<jar.plugin.version>3.2.2</jar.plugin.version>
 		<war.plugin.version>3.2.2</war.plugin.version>
 		<install.plugin.version>3.0.0-M1</install.plugin.version>
 		<deploy.plugin.version>3.0.0-M1</deploy.plugin.version>
 		<clean.plugin.version>3.1.0</clean.plugin.version>
 		<site.plugin.version>3.7.1</site.plugin.version>
 		<assembly.plugin.version>2.2-beta-5</assembly.plugin.version>
-		<maven.plugin.plugin.version>3.6.0</maven.plugin.plugin.version>
+		<maven.plugin.plugin.version>3.6.2</maven.plugin.plugin.version>
 		<surefire.plugin.version>2.19.1</surefire.plugin.version>
-		<jacoco.plugin.version>0.8.3</jacoco.plugin.version>
-		<checkstyle.plugin.version>3.0.0</checkstyle.plugin.version>
+		<jacoco.plugin.version>0.8.7</jacoco.plugin.version>
+		<checkstyle.plugin.version>3.1.2</checkstyle.plugin.version>
 		<javadoc.plugin.version>3.1.0</javadoc.plugin.version>
 		<license.plugin.version>3.0</license.plugin.version>
 		<jaxb2.plugin.version>2.4</jaxb2.plugin.version>
@@ -182,21 +179,10 @@
 					</execution>
 				</executions>
 			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-checkstyle-plugin</artifactId>
-				<configuration>
-					<configLocation>${checkstyle.config}</configLocation>
-					<skip>${skipTests}</skip>
-				</configuration>
-				<executions>
-					<execution>
-						<goals>
-							<goal>check</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
+			<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-checkstyle-plugin</artifactId> 
+				<configuration> <configLocation>${checkstyle.config}</configLocation> <skip>${skipTests}</skip> 
+				</configuration> <executions> <execution> <goals> <goal>check</goal> </goals> 
+				</execution> </executions> </plugin> -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
@@ -231,6 +217,7 @@
 						<exclude>**/*.sql</exclude>
 						<exclude>**/*.jrxml</exclude>
 						<exclude>**/check_jmx</exclude>
+						<exclude>**/module-info.java</exclude>
 						<exclude>src/test/resources/**</exclude>
 						<exclude>src/main/resources/**</exclude>
 					</excludes>
@@ -358,19 +345,19 @@
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
-				<groupId>javax.xml.bind</groupId>
-				<artifactId>jaxb-api</artifactId>
-				<version>${jaxb.api.version}</version>
+				<groupId>jakarta.xml.bind</groupId>
+				<artifactId>jakarta.xml.bind-api</artifactId>
+				<version>${jakarta.xml.bind.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.glassfish.jaxb</groupId>
-				<artifactId>jaxb-core</artifactId>
-				<version>${jaxb.core.version}</version>
+				<groupId>com.sun.xml.bind</groupId>
+				<artifactId>jaxb-impl</artifactId>
+				<version>${jaxb.impl.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.glassfish.jaxb</groupId>
 				<artifactId>jaxb-runtime</artifactId>
-				<version>${jaxb.runtime.version}</version>
+				<version>${jaxb.xjc.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.google.code.gson</groupId>
@@ -463,6 +450,16 @@
 				<version>${commons.codec.version}</version>
 			</dependency>
 			<dependency>
+				<groupId>jakarta.servlet</groupId>
+				<artifactId>jakarta.servlet-api</artifactId>
+				<version>${jakarta.servlet.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>jakarta.ws.rs</groupId>
+				<artifactId>jakarta.ws.rs-api</artifactId>
+				<version>${jakarta.ws.rs.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>org.glassfish.jersey.core</groupId>
 				<artifactId>jersey-server</artifactId>
 				<version>${jersey.version}</version>
@@ -480,6 +477,11 @@
 			<dependency>
 				<groupId>org.glassfish.jersey.core</groupId>
 				<artifactId>jersey-common</artifactId>
+				<version>${jersey.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.glassfish.jersey.media</groupId>
+				<artifactId>jersey-media-jaxb</artifactId>
 				<version>${jersey.version}</version>
 			</dependency>
 			<dependency>
@@ -508,9 +510,14 @@
 				<version>${svnkit.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>javax.jms</groupId>
-				<artifactId>jms</artifactId>
-				<version>${jms.version}</version>
+				<groupId>jakarta.jms</groupId>
+				<artifactId>jakarta.jms-api</artifactId>
+				<version>${jakarta.jms.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.activemq</groupId>
+				<artifactId>activemq-broker</artifactId>
+				<version>${activemq.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.activemq</groupId>
@@ -524,13 +531,8 @@
 			</dependency>
 			<dependency>
 				<groupId>org.apache.activemq</groupId>
-				<artifactId>activemq-broker</artifactId>
-				<version>${activemq.broker.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.activemq</groupId>
 				<artifactId>activemq-kahadb-store</artifactId>
-				<version>${activemq.broker.version}</version>
+				<version>${activemq.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.sun.mail</groupId>
@@ -543,8 +545,8 @@
 				<version>${tiles.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>javax.servlet</groupId>
-				<artifactId>jstl</artifactId>
+				<groupId>org.glassfish.web</groupId>
+				<artifactId>jakarta.servlet.jsp.jstl</artifactId>
 				<version>${jstl.version}</version>
 			</dependency>
 			<dependency>
@@ -573,19 +575,14 @@
 				<version>${jetty.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>javax.servlet</groupId>
-				<artifactId>servlet-api</artifactId>
-				<version>${servlet.api.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>javax.servlet.jsp</groupId>
-				<artifactId>jsp-api</artifactId>
-				<version>${jsp.api.version}</version>
+				<groupId>org.apache.logging.log4j</groupId>
+				<artifactId>log4j-core</artifactId>
+				<version>${log4j.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.slf4j</groupId>
-				<artifactId>slf4j-log4j12</artifactId>
-				<version>${slf4j.version}</version>
+				<artifactId>slf4j-nop</artifactId>
+				<version>${slf4j.nop.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>junit</groupId>

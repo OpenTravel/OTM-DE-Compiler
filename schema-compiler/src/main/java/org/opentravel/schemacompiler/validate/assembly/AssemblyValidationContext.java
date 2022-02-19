@@ -16,6 +16,8 @@
 
 package org.opentravel.schemacompiler.validate.assembly;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opentravel.schemacompiler.repository.ReleaseItem;
 import org.opentravel.schemacompiler.repository.ReleaseManager;
 import org.opentravel.schemacompiler.repository.ReleaseMember;
@@ -29,8 +31,6 @@ import org.opentravel.schemacompiler.repository.ServiceAssemblyMember;
 import org.opentravel.schemacompiler.validate.FindingType;
 import org.opentravel.schemacompiler.validate.ValidationContext;
 import org.opentravel.schemacompiler.validate.ValidationFindings;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -45,7 +45,7 @@ import java.util.Set;
  */
 public class AssemblyValidationContext implements ValidationContext {
 
-    private static final Logger log = LoggerFactory.getLogger( ValidationContext.class );
+    private static final Logger log = LogManager.getLogger( ValidationContext.class );
 
     private RepositoryManager repositoryManager;
     private Map<String,Set<Integer>> libraryCommitNumbers = new HashMap<>();

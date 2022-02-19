@@ -16,6 +16,8 @@
 
 package org.opentravel.schemacompiler.version;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opentravel.schemacompiler.codegen.util.FacetCodegenUtils;
 import org.opentravel.schemacompiler.ic.ImportManagementIntegrityChecker;
 import org.opentravel.schemacompiler.model.AbstractLibrary;
@@ -43,8 +45,6 @@ import org.opentravel.schemacompiler.version.handlers.RollupReferenceHandler;
 import org.opentravel.schemacompiler.version.handlers.VersionHandler;
 import org.opentravel.schemacompiler.version.handlers.VersionHandlerFactory;
 import org.opentravel.schemacompiler.version.handlers.VersionHandlerMergeUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -62,7 +62,7 @@ import java.util.Set;
  */
 public final class MajorVersionHelper extends AbstractVersionHelper {
 
-    private static final Logger log = LoggerFactory.getLogger( MajorVersionHelper.class );
+    private static final Logger log = LogManager.getLogger( MajorVersionHelper.class );
 
     /**
      * Default constructor. NOTE: When working in an environment where a <code>ProjectManager</code> is being used, the

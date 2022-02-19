@@ -25,8 +25,6 @@ import org.opentravel.schemacompiler.model.AbstractLibrary;
 import org.opentravel.schemacompiler.model.ModelElement;
 import org.opentravel.schemacompiler.util.URLUtils;
 import org.opentravel.schemacompiler.validate.ValidationException;
-import org.slf4j.Logger;
-import org.slf4j.helpers.NOPLogger;
 
 import java.io.File;
 import java.net.URL;
@@ -48,7 +46,6 @@ public abstract class AbstractCodeGenerator<S extends ModelElement> implements C
     private CodeGenerationFilter filter;
     private CodeGenerationFilenameBuilder<S> filenameBuilder;
     private Map<String,File> generatedFiles = new TreeMap<>();
-    protected Logger log = NOPLogger.NOP_LOGGER;
 
     /**
      * Default constructor.

@@ -36,7 +36,7 @@
 		-->
 		<!--
 		<constructor-arg>
-			<bean class="org.opentravel.schemacompiler.repository.SVNRepositoryFileManager">
+			<bean class="org.opentravel.repocommon.repository.SVNRepositoryFileManager">
 				<constructor-arg ref="repositoryLocation" />
 				<constructor-arg ref="svnConfigFolder" />
 			</bean>
@@ -50,7 +50,7 @@
 		Provides all authentication and authorization services required for secure operation of the OTA2.0
 		repository.
 	-->
-	<bean id="securityManager" class="org.opentravel.schemacompiler.security.impl.DefaultRepositorySecurityManager">
+	<bean id="securityManager" class="org.opentravel.repocommon.security.impl.DefaultRepositorySecurityManager">
 		<constructor-arg ref="repositoryManager" />
 		<constructor-arg ref="authenticationProvider" />
 		<constructor-arg ref="authorizationProvider" />
@@ -65,7 +65,7 @@
 	-->
 	<!--
 	-->
-	<bean id="authenticationProvider" class="org.opentravel.schemacompiler.security.impl.FileAuthenticationProvider">
+	<bean id="authenticationProvider" class="org.opentravel.repocommon.security.impl.FileAuthenticationProvider">
 		<property name="repositoryManager" ref="repositoryManager" />
 	</bean>
 	
@@ -75,7 +75,7 @@
 		Provides information about which operations a particular user is authorized to perform on a namespace
 		in the OTA2.0 repository.
 	-->
-	<bean id="authorizationProvider" class="org.opentravel.schemacompiler.security.impl.DefaultAuthorizationProvider">
+	<bean id="authorizationProvider" class="org.opentravel.repocommon.security.impl.DefaultAuthorizationProvider">
 		<constructor-arg ref="repositoryManager" />
 	</bean>
 	
@@ -122,7 +122,7 @@
 		Optional configuration that defines the implementation class for the notification service and the
 		JMS connection factory and queues used to publish notification events.
 	-->
-	<bean id="notificationService" class="org.opentravel.schemacompiler.notification.JMSNotificationService">
+	<bean id="notificationService" class="org.opentravel.reposervice.notification.JMSNotificationService">
 		<constructor-arg ref="notificationJmsService" />
 	</bean>
 	
@@ -149,12 +149,12 @@
 		
 		Configuration settings used for subscriptions and email notifications.
 	-->
-	<bean id="subscriptionManager" class="org.opentravel.schemacompiler.subscription.SubscriptionManager">
+	<bean id="subscriptionManager" class="org.opentravel.repocommon.subscription.SubscriptionManager">
 		<constructor-arg index="0" ref="repositoryManager" />
 		<property name="baseRepositoryUrl" value="http://www.repohostname.com:8181/ota2-repository-service" />
 		<property name="notificationDelay" value="1000" />
 		<property name="smtpConfig">
-			<bean class="org.opentravel.schemacompiler.subscription.SMTPConfig">
+			<bean class="org.opentravel.repocommon.subscription.SMTPConfig">
 				<property name="smtpHost" value="localhost" />
 				<property name="smtpPort" value="#{systemProperties['smtp.port']}" />
 				<property name="smtpUser" value="testuser" />
