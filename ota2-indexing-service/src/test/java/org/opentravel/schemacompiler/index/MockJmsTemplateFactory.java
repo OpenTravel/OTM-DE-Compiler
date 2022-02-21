@@ -16,6 +16,14 @@
 
 package org.opentravel.schemacompiler.index;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import org.springframework.jms.core.JmsTemplate;
+
+import javax.jms.Connection;
+import javax.jms.ConnectionFactory;
+
 /**
  * Factory class used to inject a mock <code>JmsTemplate</code> into the indexing agent's application context.
  */
@@ -28,14 +36,14 @@ public class MockJmsTemplateFactory {
      * @return JmsTemplate
      * @throws Exception thrown if the mock cannot be created
      */
-    // public JmsTemplate newMockJmsTemplate() throws Exception {
-    // JmsTemplate jmsTemplate = mock( JmsTemplate.class );
-    // ConnectionFactory cnxFactory = mock( ConnectionFactory.class );
-    // Connection cnx = mock( Connection.class );
-    //
-    // when( cnxFactory.createConnection() ).thenReturn( cnx );
-    // when( jmsTemplate.getConnectionFactory() ).thenReturn( cnxFactory );
-    // return jmsTemplate;
-    // }
+    public JmsTemplate newMockJmsTemplate() throws Exception {
+        JmsTemplate jmsTemplate = mock( JmsTemplate.class );
+        ConnectionFactory cnxFactory = mock( ConnectionFactory.class );
+        Connection cnx = mock( Connection.class );
+
+        when( cnxFactory.createConnection() ).thenReturn( cnx );
+        when( jmsTemplate.getConnectionFactory() ).thenReturn( cnxFactory );
+        return jmsTemplate;
+    }
 
 }

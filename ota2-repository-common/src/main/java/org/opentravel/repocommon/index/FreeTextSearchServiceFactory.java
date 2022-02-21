@@ -36,8 +36,7 @@ import java.util.Set;
  */
 public class FreeTextSearchServiceFactory {
 
-    private static final String JMS_SEARCH_SERVICE_IMPL =
-        "org.opentravel.schemacompiler.index.JMSFreeTextSearchService";
+    private static final String JMS_SEARCH_SERVICE_IMPL = "org.opentravel.reposervice.index.JMSFreeTextSearchService";
 
     private static Logger log = LogManager.getLogger( FreeTextSearchServiceFactory.class );
 

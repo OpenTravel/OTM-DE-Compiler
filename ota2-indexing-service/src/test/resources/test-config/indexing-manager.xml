@@ -20,8 +20,7 @@
 	xmlns:context="http://www.springframework.org/schema/context"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-						http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
-						http://activemq.apache.org/schema/core http://activemq.apache.org/schema/core/activemq-core.xsd">
+						http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd">
 
 	<context:property-placeholder location="file:${user.dir}/target/test-output/config/indexing-service.properties" />
 	
@@ -31,72 +30,6 @@
 	
 	<bean id="agentJvmOpts" class="java.lang.String">
 		<constructor-arg index="0" value="${org.opentravel.index.agent.jvmOpts}" />
-	</bean>
-	
-	<broker xmlns="http://activemq.apache.org/schema/core" id="amqBroker" brokerName="localhost" dataDirectory="${activemq.data}" start="false">
-		
-		<destinationPolicy>
-			<policyMap>
-				<policyEntries>
-					<policyEntry topic=">">
-						<pendingMessageLimitStrategy>
-							<constantPendingMessageLimitStrategy limit="1000" />
-						</pendingMessageLimitStrategy>
-					</policyEntry>
-				</policyEntries>
-			</policyMap>
-		</destinationPolicy>
-
-		<managementContext>
-			<managementContext createConnector="false" />
-		</managementContext>
-
-		<persistenceAdapter>
-			<kahaDB directory="${activemq.data}" />
-		</persistenceAdapter>
-
-		<systemUsage>
-			<systemUsage>
-				<memoryUsage>
-					<memoryUsage percentOfJvmHeap="70" />
-				</memoryUsage>
-				<storeUsage>
-					<storeUsage limit="100 gb" />
-				</storeUsage>
-				<tempUsage>
-					<tempUsage limit="50 gb" />
-				</tempUsage>
-			</systemUsage>
-		</systemUsage>
-
-		<transportConnectors>
-			<transportConnector name="openwire"
-				uri="tcp://0.0.0.0:${activemq.connector.port}?maximumConnections=1000&amp;wireFormat.maxFrameSize=104857600" />
-		</transportConnectors>
-
-		<shutdownHooks>
-			<bean xmlns="http://www.springframework.org/schema/beans" class="org.apache.activemq.hooks.SpringContextHook" />
-		</shutdownHooks>
-
-	</broker>
-
-	<bean id="amqConnectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory" lazy-init="true">
-		<constructor-arg index="0" value="tcp://localhost:${activemq.connector.port}" />
-	</bean>
-	
-	<bean id="connectionFactory" class="org.springframework.jms.connection.CachingConnectionFactory" lazy-init="true">
-		<property name="targetConnectionFactory" ref="amqConnectionFactory" />
-		<property name="sessionCacheSize" value="${org.opentravel.index.jms.sessionCacheSize}" />
-	</bean>
-
-	<bean id="indexingJobQueue" class="org.apache.activemq.command.ActiveMQQueue" lazy-init="true">
-		<constructor-arg index="0" value="${org.opentravel.index.jms.queueName}" />
-	</bean>
-
-	<bean id="indexingJmsService" class="org.springframework.jms.core.JmsTemplate" lazy-init="true">
-		<property name="connectionFactory" ref="connectionFactory" />
-		<property name="defaultDestination" ref="indexingJobQueue" />
-		<property name="receiveTimeout" value="5000" />
 	</bean>
 	
 </beans>

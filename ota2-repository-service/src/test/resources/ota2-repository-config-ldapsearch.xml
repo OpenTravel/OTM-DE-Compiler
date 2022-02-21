@@ -102,20 +102,21 @@
 	<!--
 		Indexing Service JMS Configuration:
 		
-		Optional configuration that defines the ActiveMQ connection factory and queues used to communicate with
+		Optional configuration that defines the RabbitMQ connection factory and queues used to communicate with
 		the free-text indexing service.
 	-->
-	<bean id="localAMQConnectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
-		<constructor-arg index="0" value="tcp://localhost:61616" />
+	<bean id="localJMSConnectionFactory" class="com.rabbitmq.jms.admin.RMQConnectionFactory">
+		<property name="port" value="5672" />
 	</bean>
 	
 	<bean id="indexingConnectionFactory" class="org.springframework.jms.connection.CachingConnectionFactory">
-		<property name="targetConnectionFactory" ref="localAMQConnectionFactory" />
+		<property name="targetConnectionFactory" ref="localJMSConnectionFactory" />
 		<property name="sessionCacheSize" value="10" />
 	</bean>
 
-	<bean id="indexingJobQueue" class="org.apache.activemq.command.ActiveMQQueue">
-		<constructor-arg index="0" value="otm.indexing.jobQueue" />
+	<bean id="indexingJobQueue" class="com.rabbitmq.jms.admin.RMQDestination">
+		<property name="destinationName" value="otm.indexing.jobQueue" />
+		<property name="amqp" value="true" />
 	</bean>
 
 	<bean id="indexingJmsService" class="org.springframework.jms.core.JmsTemplate">

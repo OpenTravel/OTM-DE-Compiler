@@ -1,4 +1,4 @@
-module org.opentravel.schemacompiler {
+open module org.opentravel.schemacompiler {
     requires spring.context;
     requires spring.core;
     requires spring.beans;
@@ -6,7 +6,6 @@ module org.opentravel.schemacompiler {
     requires gson;
     requires commons.text;
     requires commons.collections;
-    requires commons.logging;
     requires transitive org.apache.httpcomponents.httpclient;
     requires commons.lang3;
     requires transitive org.apache.httpcomponents.httpcore;
@@ -21,6 +20,7 @@ module org.opentravel.schemacompiler {
     requires com.sun.xml.bind;
     requires transitive java.xml;
     requires java.xml.bind;
+    requires spring.jcl;
 
     exports org.opentravel.schemacompiler.codegen;
     exports org.opentravel.schemacompiler.codegen.example;
@@ -88,5 +88,7 @@ module org.opentravel.schemacompiler {
     exports org.w3._2001.xmlschema;
     exports org.xmlsoap.schemas.wsdl;
     exports org.xmlsoap.schemas.wsdl.soap;
+
+    uses org.opentravel.schemacompiler.extension.CompilerExtensionProvider;
 
 }

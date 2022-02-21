@@ -85,7 +85,7 @@ public class FacetIndexingService {
      * Performs post-process indexing for all root facet owners that have been registered with this service instance.
      */
     private void postProcessFacetOwners() {
-        try (SearcherManager searchManager = new SearcherManager( indexWriter, true, new SearcherFactory() )) {
+        try (SearcherManager searchManager = new SearcherManager( indexWriter, true, true, new SearcherFactory() )) {
             log.info( "Indexing contextual facet content..." );
             searchManager.maybeRefreshBlocking();
             IndexSearcher searcher = searchManager.acquire();
@@ -146,7 +146,7 @@ public class FacetIndexingService {
         TopDocs queryResults = searcher.search( query, Integer.MAX_VALUE );
         Document searchResult = null;
 
-        if (queryResults.totalHits > 0) {
+        if (queryResults.totalHits.value > 0) {
             searchResult = searcher.doc( queryResults.scoreDocs[0].doc );
         }
         return searchResult;
@@ -187,7 +187,7 @@ public class FacetIndexingService {
      */
     private List<Document> findDirectChildFacets(String facetOwnerId, IndexSearcher searcher) throws IOException {
         List<Document> searchResults = new ArrayList<>();
-        BooleanQuery query = new BooleanQuery();
+        BooleanQuery.Builder query = new BooleanQuery.Builder();
         TopDocs queryResults;
 
         query.add( new BooleanClause( new TermQuery( new Term( IndexingTerms.FACET_OWNER_FIELD, facetOwnerId ) ),
@@ -198,7 +198,7 @@ public class FacetIndexingService {
         query.add( new BooleanClause(
             new TermQuery( new Term( IndexingTerms.SEARCH_INDEX_FIELD, Boolean.FALSE.toString() ) ), Occur.MUST ) );
 
-        queryResults = searcher.search( query, Integer.MAX_VALUE );
+        queryResults = searcher.search( query.build(), Integer.MAX_VALUE );
 
         for (ScoreDoc queryDoc : queryResults.scoreDocs) {
             searchResults.add( searcher.doc( queryDoc.doc ) );
@@ -325,7 +325,7 @@ public class FacetIndexingService {
      * @return IndexBuilder&lt;ValidationFinding&gt;
      */
     public IndexBuilder<ValidationFinding> getIndexBuilder() {
-        return new IndexBuilder<ValidationFinding>() {
+        IndexBuilder<ValidationFinding> builder = new IndexBuilder<ValidationFinding>() {
             @Override
             public void performIndexingAction() {
                 setCreateIndex( true );
@@ -340,6 +340,9 @@ public class FacetIndexingService {
                 // No action - deletion of validation findings is handled by the LibraryIndexBuilder
             }
         };
+
+        builder.setIndexWriter( indexWriter );
+        return builder;
     }
 
 }

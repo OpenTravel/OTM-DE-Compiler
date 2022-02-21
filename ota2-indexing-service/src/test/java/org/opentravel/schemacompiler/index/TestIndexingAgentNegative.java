@@ -16,9 +16,14 @@
 
 package org.opentravel.schemacompiler.index;
 
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.jms.core.JmsTemplate;
+import org.springframework.jms.support.destination.DestinationResolutionException;
 
 import java.io.FileNotFoundException;
 
@@ -59,39 +64,39 @@ public class TestIndexingAgentNegative extends AbstractIndexingServiceTest {
         new IndexingAgent( "src/test/resources/test-config/indexing-agent-nojms.xml" );
     }
 
-    // @Test(expected = IndexingRuntimeException.class)
-    // public void testJmsReceiveError() throws Exception {
-    // synchronized (threadLock) {
-    // IndexingAgent agent = new IndexingAgent( "src/test/resources/test-config/indexing-agent-mockjms.xml" );
-    // try {
-    // JmsTemplate jmsTemplate = agent.getJmsService();
-    //
-    // when( jmsTemplate.receiveSelected( anyString() ) )
-    // .thenThrow( new DestinationResolutionException( "JMS receive error" ) );
-    // agent.startListening();
-    //
-    // } finally {
-    // agent.shutdown( false );
-    // agent.closeIndexWriter();
-    // }
-    // }
-    // }
-    //
-    // @Test(expected = IndexingRuntimeException.class)
-    // public void testUnknownReceiveError() throws Exception {
-    // synchronized (threadLock) {
-    // IndexingAgent agent = new IndexingAgent( "src/test/resources/test-config/indexing-agent-mockjms.xml" );
-    // try {
-    // JmsTemplate jmsTemplate = agent.getJmsService();
-    //
-    // when( jmsTemplate.receiveSelected( anyString() ) ).thenThrow( NullPointerException.class );
-    // agent.startListening();
-    //
-    // } finally {
-    // agent.shutdown( false );
-    // agent.closeIndexWriter();
-    // }
-    // }
-    // }
+    @Test(expected = IndexingRuntimeException.class)
+    public void testJmsReceiveError() throws Exception {
+        synchronized (threadLock) {
+            IndexingAgent agent = new IndexingAgent( "src/test/resources/test-config/indexing-agent-mockjms.xml" );
+            try {
+                JmsTemplate jmsTemplate = agent.getJmsService();
+
+                when( jmsTemplate.receiveSelected( anyString() ) )
+                    .thenThrow( new DestinationResolutionException( "JMS receive error" ) );
+                agent.startListening();
+
+            } finally {
+                agent.shutdown( false );
+                agent.closeIndexWriter();
+            }
+        }
+    }
+
+    @Test(expected = IndexingRuntimeException.class)
+    public void testUnknownReceiveError() throws Exception {
+        synchronized (threadLock) {
+            IndexingAgent agent = new IndexingAgent( "src/test/resources/test-config/indexing-agent-mockjms.xml" );
+            try {
+                JmsTemplate jmsTemplate = agent.getJmsService();
+
+                when( jmsTemplate.receiveSelected( anyString() ) ).thenThrow( NullPointerException.class );
+                agent.startListening();
+
+            } finally {
+                agent.shutdown( false );
+                agent.closeIndexWriter();
+            }
+        }
+    }
 
 }

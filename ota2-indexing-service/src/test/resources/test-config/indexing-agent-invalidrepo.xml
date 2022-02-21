@@ -32,16 +32,21 @@
 		<constructor-arg index="0" value="${org.opentravel.index.agent.searchIndexLocation}" />
 	</bean>
 	
-	<bean id="amqConnectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
-		<constructor-arg index="0" value="tcp://localhost:${activemq.connector.port}" />
+	<bean id="mockConnectionFactory" class="com.mockrunner.mock.jms.MockConnectionFactory">
+		<constructor-arg index="0">
+			<bean class="com.mockrunner.jms.DestinationManager"/>
+		</constructor-arg>
+		<constructor-arg index="1">
+			<bean class="com.mockrunner.jms.ConfigurationManager"/>
+		</constructor-arg>
 	</bean>
 	
 	<bean id="connectionFactory" class="org.springframework.jms.connection.CachingConnectionFactory">
-		<property name="targetConnectionFactory" ref="amqConnectionFactory" />
+		<property name="targetConnectionFactory" ref="mockConnectionFactory" />
 		<property name="sessionCacheSize" value="${org.opentravel.index.jms.sessionCacheSize}" />
 	</bean>
 
-	<bean id="indexingJobQueue" class="org.apache.activemq.command.ActiveMQQueue">
+	<bean id="indexingJobQueue" class="com.mockrunner.mock.jms.MockQueue">
 		<constructor-arg index="0" value="${org.opentravel.index.jms.queueName}" />
 	</bean>
 

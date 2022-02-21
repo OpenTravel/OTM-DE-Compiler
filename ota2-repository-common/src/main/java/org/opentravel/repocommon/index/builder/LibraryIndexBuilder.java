@@ -18,7 +18,6 @@ package org.opentravel.repocommon.index.builder;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.StoredField;
@@ -27,8 +26,6 @@ import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexableField;
 import org.apache.lucene.index.Term;
-import org.apache.lucene.queryparser.classic.ParseException;
-import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
@@ -384,9 +381,12 @@ public class LibraryIndexBuilder extends IndexBuilder<RepositoryItem> {
         RepositoryItem sourceObject = getSourceObject();
         String libraryIndexId = IndexingUtils.getIdentityKey( sourceObject );
 
-        try (SearcherManager searchManager = new SearcherManager( getIndexWriter(), true, new SearcherFactory() )) {
-            QueryParser parser = new QueryParser( IndexingTerms.OWNING_LIBRARY_FIELD, new StandardAnalyzer() );
-            Query entityQuery = parser.parse( "\"" + IndexingUtils.getIdentityKey( sourceObject ) + "\"" );
+        try (SearcherManager searchManager =
+            new SearcherManager( getIndexWriter(), true, true, new SearcherFactory() )) {
+            // QueryParser parser = new QueryParser( IndexingTerms.OWNING_LIBRARY_FIELD, new StandardAnalyzer() );
+            // Query entityQuery = parser.parse( "\"" + IndexingUtils.getIdentityKey( sourceObject ) + "\"" );
+            Query entityQuery = new TermQuery(
+                new Term( IndexingTerms.OWNING_LIBRARY_FIELD, IndexingUtils.getIdentityKey( sourceObject ) ) );
             Query validationQuery = new TermQuery( new Term( IndexingTerms.TARGET_LIBRARY_FIELD, libraryIndexId ) );
             IndexSearcher searcher = searchManager.acquire();
             IndexWriter indexWriter = getIndexWriter();
@@ -403,7 +403,7 @@ public class LibraryIndexBuilder extends IndexBuilder<RepositoryItem> {
                 indexWriter.deleteDocuments( new Term( IndexingTerms.IDENTITY_FIELD, documentId ) );
             }
 
-        } catch (IOException | ParseException e) {
+        } catch (IOException e) {
             log.error( "Error deleting search index for repository item.", e );
         }
     }

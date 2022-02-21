@@ -86,7 +86,7 @@ public class IndexingAgent {
      * @throws IOException thrown if the search index writer cannot be initialized
      */
     public IndexingAgent() throws RepositoryException, IOException {
-        this( null );
+        this( (String) null );
     }
 
     /**
@@ -100,21 +100,18 @@ public class IndexingAgent {
      */
     public IndexingAgent(String overrideConfigLocation) throws RepositoryException, IOException {
         initializeContext( overrideConfigLocation );
+    }
 
-        // Check to make sure the index was properly closed, and release any lock that might exist
-        if (!searchIndexLocation.exists()) {
-            searchIndexLocation.mkdirs();
-        }
-        this.indexDirectory = FSDirectory.open( searchIndexLocation.toPath() );
-
-        // Configure the indexing and search components
-        this.writerConfig = new IndexWriterConfig( new StandardAnalyzer() );
-        this.writerConfig.setOpenMode( OpenMode.CREATE_OR_APPEND );
-        this.indexWriter = new IndexWriter( indexDirectory, writerConfig );
-
-        // Run an empty commit of the index writer; this will initialize the search index directory
-        // if it was not already setup prior to launching this agent.
-        indexWriter.commit();
+    /**
+     * Constructor that allows the caller to supply a pre-configured Spring application context for the new agent
+     * instance.
+     * 
+     * @param context the Spring application context
+     * @throws RepositoryException thrown if the repository manager cannot be initialized
+     * @throws IOException thrown if the search index writer cannot be initialized
+     */
+    public IndexingAgent(ApplicationContext context) throws RepositoryException, IOException {
+        initializeContext( context );
     }
 
     /**
@@ -122,11 +119,11 @@ public class IndexingAgent {
      * 
      * @param overrideConfigLocation the override location for the agent's spring configuration file
      * @throws RepositoryException thrown if errors are detected in the agent configuration settings
-     * @throws FileNotFoundException thrown if the indexing agent configuration file does not exist in the specified
-     *         location
+     * @throws IOException thrown if the indexing agent configuration file does not exist in the specified location or
+     *         the search index cannot be initialized
      */
     @SuppressWarnings("resource")
-    private void initializeContext(String overrideConfigLocation) throws RepositoryException, FileNotFoundException {
+    private void initializeContext(String overrideConfigLocation) throws RepositoryException, IOException {
         String configFileLocation = overrideConfigLocation;
         File configFile;
 
@@ -147,8 +144,18 @@ public class IndexingAgent {
         if (!configFile.exists() || !configFile.isFile()) {
             throw new FileNotFoundException( "Index agent configuration file not found: " + configFileLocation );
         }
-        ApplicationContext context = new FileSystemXmlApplicationContext( configFileLocation );
+        initializeContext( new FileSystemXmlApplicationContext( configFileLocation ) );
+    }
 
+    /**
+     * Initializes the indexing agent using the Spring application context provided.
+     * 
+     * @param context the Spring application context
+     * @throws RepositoryException thrown if errors are detected in the agent configuration settings
+     * @throws IOException thrown if the indexing agent configuration file does not exist in the specified location or
+     *         the search index cannot be initialized
+     */
+    private void initializeContext(ApplicationContext context) throws RepositoryException, IOException {
         // Initialize the agent settings from the application context
         this.jmsTemplate = (JmsTemplate) context.getBean( JMS_TEMPLATE_BEANID );
         String repositoryLocationPath = (String) context.getBean( REPOSITORY_LOCATION_BEANID );
@@ -176,6 +183,21 @@ public class IndexingAgent {
         repositoryManager = new RepositoryManager( repositoryLocation );
         jobManager = new IndexingJobManager( repositoryManager, searchIndexLocation );
         running = false;
+
+        // Check to make sure the index was properly closed, and release any lock that might exist
+        if (!searchIndexLocation.exists()) {
+            searchIndexLocation.mkdirs();
+        }
+        this.indexDirectory = FSDirectory.open( searchIndexLocation.toPath() );
+
+        // Configure the indexing and search components
+        this.writerConfig = new IndexWriterConfig( new StandardAnalyzer() );
+        this.writerConfig.setOpenMode( OpenMode.CREATE_OR_APPEND );
+        this.indexWriter = new IndexWriter( indexDirectory, writerConfig );
+
+        // Run an empty commit of the index writer; this will initialize the search index directory
+        // if it was not already setup prior to launching this agent.
+        indexWriter.commit();
     }
 
     /**

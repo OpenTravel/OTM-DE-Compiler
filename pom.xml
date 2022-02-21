@@ -51,9 +51,11 @@
 		<jakarta.ws.rs.version>2.1.6</jakarta.ws.rs.version>
 		<jakarta.jms.version>2.0.3</jakarta.jms.version>
 		<jersey.version>2.34</jersey.version>
-		<lucene.version>5.0.0</lucene.version>
+		<lucene.version>9.0.0</lucene.version>
 		<svnkit.version>1.8.7</svnkit.version>
-		<activemq.version>5.16.3</activemq.version>
+		<rabbitmq.jms.version>2.4.0</rabbitmq.jms.version>
+		<activemq.version>5.16.4</activemq.version>
+		<glassfish.extras.version>5.1.0</glassfish.extras.version>
 		<javax.mail.version>1.5.5</javax.mail.version>
 		<tiles.version>3.0.8</tiles.version>
 		<jstl.version>1.2.6</jstl.version>
@@ -65,7 +67,7 @@
 		<htmlunit.version>2.35.0</htmlunit.version>
 		<xercesimpl.version>2.12.0</xercesimpl.version>
 		<mockito.version>2.23.4</mockito.version>
-		<mockrunner.jms.version>2.0.1</mockrunner.jms.version>
+		<mockrunner.jms.version>2.0.6</mockrunner.jms.version>
 		<unboundid.ldap.version>4.0.9</unboundid.ldap.version>
 		<greenmail.version>1.5.9</greenmail.version>
 		<fge.version>2.2.6</fge.version>
@@ -515,24 +517,9 @@
 				<version>${jakarta.jms.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.apache.activemq</groupId>
-				<artifactId>activemq-broker</artifactId>
-				<version>${activemq.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.activemq</groupId>
-				<artifactId>activemq-client</artifactId>
-				<version>${activemq.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.activemq</groupId>
-				<artifactId>activemq-spring</artifactId>
-				<version>${activemq.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.activemq</groupId>
-				<artifactId>activemq-kahadb-store</artifactId>
-				<version>${activemq.version}</version>
+				<groupId>com.rabbitmq.jms</groupId>
+				<artifactId>rabbitmq-jms</artifactId>
+				<version>${rabbitmq.jms.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.sun.mail</groupId>
@@ -608,6 +595,11 @@
 				<groupId>com.mockrunner</groupId>
 				<artifactId>mockrunner-jms</artifactId>
 				<version>${mockrunner.jms.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.glassfish.main.extras</groupId>
+				<artifactId>glassfish-embedded-all</artifactId>
+				<version>${glassfish.extras.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.unboundid</groupId>

@@ -424,15 +424,15 @@ public abstract class FreeTextSearchService {
      */
     private BooleanQuery buildSearchQuery(String freeText, TLLibraryStatus includeStatus, boolean latestVersionsOnly)
         throws ParseException {
-        BooleanQuery masterQuery;
+        BooleanQuery.Builder masterQuery;
         Query keywordQuery =
             new QueryParser( IndexingTerms.KEYWORDS_FIELD, new StandardAnalyzer() ).parse( freeText + "~" );
-        BooleanQuery statusQuery = null;
+        BooleanQuery.Builder statusQuery = null;
         Query latestVersionQuery = null;
 
         // Construct the search query...
         if (!latestVersionsOnly && (includeStatus != null) && (includeStatus != TLLibraryStatus.DRAFT)) {
-            statusQuery = new BooleanQuery();
+            statusQuery = new BooleanQuery.Builder();
 
             switch (includeStatus) {
                 case UNDER_REVIEW:
@@ -493,12 +493,12 @@ public abstract class FreeTextSearchService {
         masterQuery.add( new BooleanClause( keywordQuery, Occur.MUST ) );
 
         if (statusQuery != null) {
-            masterQuery.add( new BooleanClause( statusQuery, Occur.MUST ) );
+            masterQuery.add( new BooleanClause( statusQuery.build(), Occur.MUST ) );
         }
         if (latestVersionQuery != null) {
             masterQuery.add( new BooleanClause( latestVersionQuery, Occur.MUST ) );
         }
-        return masterQuery;
+        return masterQuery.build();
     }
 
     /**
@@ -659,7 +659,7 @@ public abstract class FreeTextSearchService {
         throws RepositoryException {
         RepositoryItemType itemType = RepositoryItemType.fromFilename( item.getFilename() );
         SearchResult<?> searchResult = null;
-        BooleanQuery query = newSearchIndexQuery();
+        BooleanQuery.Builder query = newSearchIndexQuery();
         Class<?> searchEntityType;
 
         switch (itemType) {
@@ -682,7 +682,7 @@ public abstract class FreeTextSearchService {
             Occur.MUST ) );
         query.add( new BooleanClause( new TermQuery( new Term( IndexingTerms.VERSION_FIELD, item.getVersion() ) ),
             Occur.MUST ) );
-        List<Document> queryResults = executeQuery( query, resolveContent ? null : nonContentAttrs );
+        List<Document> queryResults = executeQuery( query.build(), resolveContent ? null : nonContentAttrs );
 
         if (!queryResults.isEmpty()) {
             searchResult = buildSearchResult( queryResults.get( 0 ), itemType );
@@ -705,8 +705,8 @@ public abstract class FreeTextSearchService {
         List<SearchResult<?>> searchResults = new ArrayList<>();
 
         if ((searchIndexIds != null) && !searchIndexIds.isEmpty()) {
-            BooleanQuery identityQuery = new BooleanQuery();
-            BooleanQuery masterQuery = newSearchIndexQuery();
+            BooleanQuery.Builder identityQuery = new BooleanQuery.Builder();
+            BooleanQuery.Builder masterQuery = newSearchIndexQuery();
             Class<?> searchEntityType;
             List<Document> queryResults;
 
@@ -730,8 +730,8 @@ public abstract class FreeTextSearchService {
             masterQuery.add( new BooleanClause(
                 new TermQuery( new Term( IndexingTerms.ENTITY_TYPE_FIELD, searchEntityType.getName() ) ),
                 Occur.MUST ) );
-            masterQuery.add( identityQuery, Occur.MUST );
-            queryResults = executeQuery( masterQuery, resolveContent ? null : nonContentAttrs );
+            masterQuery.add( identityQuery.build(), Occur.MUST );
+            queryResults = executeQuery( masterQuery.build(), resolveContent ? null : nonContentAttrs );
 
             for (Document doc : queryResults) {
                 searchResults.add( buildSearchResult( doc, itemType ) );
@@ -778,7 +778,7 @@ public abstract class FreeTextSearchService {
     public List<LibrarySearchResult> getLockedLibraries(String userId, boolean resolveContent)
         throws RepositoryException {
         List<LibrarySearchResult> searchResults = new ArrayList<>();
-        BooleanQuery query = newSearchIndexQuery();
+        BooleanQuery.Builder query = newSearchIndexQuery();
         List<Document> queryResults;
 
         if ((userId == null) || (userId.length() == 0)) {
@@ -791,7 +791,7 @@ public abstract class FreeTextSearchService {
         }
         query.add( new BooleanClause(
             new TermQuery( new Term( IndexingTerms.ENTITY_TYPE_FIELD, TLLibrary.class.getName() ) ), Occur.MUST ) );
-        queryResults = executeQuery( query, resolveContent ? null : nonContentAttrs );
+        queryResults = executeQuery( query.build(), resolveContent ? null : nonContentAttrs );
 
         for (Document doc : queryResults) {
             searchResults.add( new LibrarySearchResult( doc, repositoryManager, this ) );
@@ -886,7 +886,7 @@ public abstract class FreeTextSearchService {
     private List<LibrarySearchResult> getDirectLibraryWhereUsed(IndexSearcher searcher,
         LibrarySearchResult libraryIndex, boolean resolveContent) throws RepositoryException {
         List<LibrarySearchResult> searchResults = new ArrayList<>();
-        BooleanQuery query = newSearchIndexQuery();
+        BooleanQuery.Builder query = newSearchIndexQuery();
         List<Document> queryResults;
 
         query.add( new BooleanClause(
@@ -895,7 +895,7 @@ public abstract class FreeTextSearchService {
             new TermQuery( new Term( IndexingTerms.REFERENCED_LIBRARY_FIELD, libraryIndex.getSearchIndexId() ) ),
             Occur.MUST ) );
 
-        queryResults = executeQuery( searcher, query, resolveContent ? null : nonContentAttrs );
+        queryResults = executeQuery( searcher, query.build(), resolveContent ? null : nonContentAttrs );
 
         for (Document doc : queryResults) {
             searchResults.add( new LibrarySearchResult( doc, repositoryManager, this ) );
@@ -918,7 +918,7 @@ public abstract class FreeTextSearchService {
         try {
             searchLock.readLock().lock();
             List<AssemblySearchResult> searchResults = new ArrayList<>();
-            BooleanQuery query = newSearchIndexQuery();
+            BooleanQuery.Builder query = newSearchIndexQuery();
             List<Document> queryResults;
 
             searcher = searchManager.acquire();
@@ -930,7 +930,7 @@ public abstract class FreeTextSearchService {
                 new TermQuery( new Term( IndexingTerms.REFERENCED_RELEASE_FIELD, releaseIndex.getSearchIndexId() ) ),
                 Occur.MUST ) );
 
-            queryResults = executeQuery( searcher, query, resolveContent ? null : nonContentAttrs );
+            queryResults = executeQuery( searcher, query.build(), resolveContent ? null : nonContentAttrs );
 
             for (Document doc : queryResults) {
                 searchResults.add( new AssemblySearchResult( doc, this ) );
@@ -968,7 +968,7 @@ public abstract class FreeTextSearchService {
         try {
             searchLock.readLock().lock();
             List<ReleaseSearchResult> searchResults = new ArrayList<>();
-            BooleanQuery query = newSearchIndexQuery();
+            BooleanQuery.Builder query = newSearchIndexQuery();
             List<Document> queryResults;
 
             searcher = searchManager.acquire();
@@ -979,7 +979,7 @@ public abstract class FreeTextSearchService {
                 new TermQuery( new Term( IndexingTerms.REFERENCED_LIBRARY_FIELD, libraryIndex.getSearchIndexId() ) ),
                 Occur.MUST ) );
 
-            queryResults = executeQuery( searcher, query, resolveContent ? null : nonContentAttrs );
+            queryResults = executeQuery( searcher, query.build(), resolveContent ? null : nonContentAttrs );
 
             for (Document doc : queryResults) {
                 searchResults.add( new ReleaseSearchResult( doc, this ) );
@@ -1031,7 +1031,7 @@ public abstract class FreeTextSearchService {
         EntitySearchResult searchResult = null;
 
         if (libraryIndexId != null) {
-            BooleanQuery query = newSearchIndexQuery();
+            BooleanQuery.Builder query = newSearchIndexQuery();
             List<Document> queryResults;
 
             query.add( new BooleanClause(
@@ -1041,7 +1041,7 @@ public abstract class FreeTextSearchService {
                 new TermQuery( new Term( IndexingTerms.OWNING_LIBRARY_FIELD, libraryIndexId ) ), Occur.MUST ) );
             query.add( new BooleanClause( new TermQuery( new Term( IndexingTerms.ENTITY_NAME_FIELD, entityName ) ),
                 Occur.MUST ) );
-            queryResults = executeQuery( query, resolveContent ? null : nonContentAttrs );
+            queryResults = executeQuery( query.build(), resolveContent ? null : nonContentAttrs );
 
             if (!queryResults.isEmpty()) {
                 searchResult = new EntitySearchResult( queryResults.get( 0 ), this );
@@ -1064,7 +1064,7 @@ public abstract class FreeTextSearchService {
         List<EntitySearchResult> searchResults = new ArrayList<>();
 
         if (libraryIndexId != null) {
-            BooleanQuery query = newSearchIndexQuery();
+            BooleanQuery.Builder query = newSearchIndexQuery();
             List<Document> queryResults;
 
             query.add( new BooleanClause(
@@ -1072,7 +1072,7 @@ public abstract class FreeTextSearchService {
                 Occur.MUST_NOT ) );
             query.add( new BooleanClause(
                 new TermQuery( new Term( IndexingTerms.OWNING_LIBRARY_FIELD, libraryIndexId ) ), Occur.MUST ) );
-            queryResults = executeQuery( query, resolveContent ? null : nonContentAttrs );
+            queryResults = executeQuery( query.build(), resolveContent ? null : nonContentAttrs );
 
             for (Document doc : queryResults) {
                 searchResults.add( new EntitySearchResult( doc, this ) );
@@ -1095,8 +1095,8 @@ public abstract class FreeTextSearchService {
         List<EntitySearchResult> searchResults = new ArrayList<>();
 
         if ((searchIndexIds != null) && !searchIndexIds.isEmpty()) {
-            BooleanQuery identityQuery = new BooleanQuery();
-            BooleanQuery masterQuery = newSearchIndexQuery();
+            BooleanQuery.Builder identityQuery = new BooleanQuery.Builder();
+            BooleanQuery.Builder masterQuery = newSearchIndexQuery();
             List<Document> queryResults;
 
             for (String searchIndexId : searchIndexIds) {
@@ -1106,8 +1106,8 @@ public abstract class FreeTextSearchService {
             masterQuery.add( new BooleanClause(
                 new TermQuery( new Term( IndexingTerms.ENTITY_TYPE_FIELD, TLLibrary.class.getName() ) ),
                 Occur.MUST_NOT ) );
-            masterQuery.add( identityQuery, Occur.MUST );
-            queryResults = executeQuery( masterQuery, resolveContent ? null : nonContentAttrs );
+            masterQuery.add( identityQuery.build(), Occur.MUST );
+            queryResults = executeQuery( masterQuery.build(), resolveContent ? null : nonContentAttrs );
 
             for (Document doc : queryResults) {
                 searchResults.add( new EntitySearchResult( doc, this ) );
@@ -1130,8 +1130,8 @@ public abstract class FreeTextSearchService {
         List<EntitySearchResult> searchResults = new ArrayList<>();
 
         if (searchIndexIds.length > 0) {
-            BooleanQuery identityQuery = new BooleanQuery();
-            BooleanQuery masterQuery = newSearchIndexQuery();
+            BooleanQuery.Builder identityQuery = new BooleanQuery.Builder();
+            BooleanQuery.Builder masterQuery = newSearchIndexQuery();
             List<Document> queryResults;
 
             for (String searchIndexId : searchIndexIds) {
@@ -1142,8 +1142,8 @@ public abstract class FreeTextSearchService {
             masterQuery.add( new BooleanClause(
                 new TermQuery( new Term( IndexingTerms.ENTITY_TYPE_FIELD, TLLibrary.class.getName() ) ),
                 Occur.MUST_NOT ) );
-            masterQuery.add( identityQuery, Occur.MUST );
-            queryResults = executeQuery( masterQuery, resolveContent ? null : nonContentAttrs );
+            masterQuery.add( identityQuery.build(), Occur.MUST );
+            queryResults = executeQuery( masterQuery.build(), resolveContent ? null : nonContentAttrs );
 
             for (Document doc : queryResults) {
                 searchResults.add( new EntitySearchResult( doc, this ) );
@@ -1266,8 +1266,8 @@ public abstract class FreeTextSearchService {
     private List<EntitySearchResult> getDirectEntityWhereUsed(IndexSearcher searcher, EntitySearchResult entityIndex,
         boolean resolveContent) throws RepositoryException {
         List<EntitySearchResult> searchResults = new ArrayList<>();
-        BooleanQuery masterQuery = newSearchIndexQuery();
-        BooleanQuery identityQuery = new BooleanQuery();
+        BooleanQuery.Builder masterQuery = newSearchIndexQuery();
+        BooleanQuery.Builder identityQuery = new BooleanQuery.Builder();
         List<Document> queryResults;
 
         for (String referenceIdentityId : entityIndex.getReferenceIdentityIds()) {
@@ -1277,9 +1277,9 @@ public abstract class FreeTextSearchService {
         }
         masterQuery.add( new BooleanClause(
             new TermQuery( new Term( IndexingTerms.ENTITY_TYPE_FIELD, TLLibrary.class.getName() ) ), Occur.MUST_NOT ) );
-        masterQuery.add( identityQuery, Occur.MUST );
+        masterQuery.add( identityQuery.build(), Occur.MUST );
 
-        queryResults = executeQuery( searcher, masterQuery, resolveContent ? null : nonContentAttrs );
+        queryResults = executeQuery( searcher, masterQuery.build(), resolveContent ? null : nonContentAttrs );
 
         for (Document doc : queryResults) {
             searchResults.add( new EntitySearchResult( doc, this ) );
@@ -1297,13 +1297,13 @@ public abstract class FreeTextSearchService {
     public List<SubscriptionSearchResult> getSubscriptions(String userId) throws RepositoryException {
         List<SubscriptionSearchResult> searchResults = new ArrayList<>();
         Map<String,SubscriptionSearchResult> resultMap = new HashMap<>();
-        BooleanQuery query = new BooleanQuery();
+        BooleanQuery.Builder query = new BooleanQuery.Builder();
         List<Document> queryResults;
 
         query.add( new BooleanClause(
             new TermQuery( new Term( IndexingTerms.ENTITY_TYPE_FIELD, Subscription.class.getName() ) ), Occur.MUST ) );
         query.add( new BooleanClause( new TermQuery( new Term( IndexingTerms.USERID_FIELD, userId ) ), Occur.MUST ) );
-        queryResults = executeQuery( query, null );
+        queryResults = executeQuery( query.build(), null );
 
         for (Document doc : queryResults) {
             SubscriptionEventType eventType =
@@ -1489,10 +1489,10 @@ public abstract class FreeTextSearchService {
     /**
      * Constructs a new <code>BooleanQuery</code> to be used for retrieving search index terms.
      * 
-     * @return BooleanQuery
+     * @return BooleanQuery.Builder
      */
-    private BooleanQuery newSearchIndexQuery() {
-        BooleanQuery query = new BooleanQuery();
+    private BooleanQuery.Builder newSearchIndexQuery() {
+        BooleanQuery.Builder query = new BooleanQuery.Builder();
 
         query.add( new BooleanClause(
             new TermQuery( new Term( IndexingTerms.SEARCH_INDEX_FIELD, Boolean.TRUE.toString() ) ), Occur.MUST ) );

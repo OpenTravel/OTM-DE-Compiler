@@ -53,8 +53,6 @@ public abstract class AbstractIndexingServiceTest {
         RepositoryJaxbContext.getExtContext();
 
         try (Writer out = new FileWriter( indexPropsFile )) {
-            indexProps.put( "activemq.connector.port", "62626" );
-            indexProps.put( "activemq.data", amqDataFolder.getAbsolutePath() );
             indexProps.put( "org.opentravel.index.manager.jmx.port", "12001" );
             indexProps.put( "org.opentravel.index.agent.repositoryLocation", repositoryFolder.getAbsolutePath() );
             indexProps.put( "org.opentravel.index.agent.searchIndexLocation", searchIndexFolder.getAbsolutePath() );

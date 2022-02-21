@@ -397,10 +397,9 @@ public class IndexProcessManager {
             String configFileLocation = System.getProperty( "log4j.agent.configuration" );
 
             if (configFileLocation == null) {
-                configFileLocation = (SystemUtils.IS_OS_WINDOWS ? "file:/" : "file://")
-                    + System.getProperty( "user.dir" ) + "/conf/log4j-agent.properties";
+                configFileLocation = System.getProperty( "user.dir" ) + "/conf/log4j2-agent.properties";
             }
-            return "-Dlog4j.configuration=" + configFileLocation;
+            return "-Dlog4j.configurationFile=" + configFileLocation;
         }
 
         /**

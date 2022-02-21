@@ -95,7 +95,7 @@ public class RealTimeFreeTextSearchService extends FreeTextSearchService {
      */
     @Override
     protected DirectoryReader newIndexReader(Directory indexDirectory) throws IOException {
-        return DirectoryReader.open( indexWriter, false );
+        return DirectoryReader.open( indexWriter, false, false );
     }
 
     /**

@@ -4,10 +4,6 @@ module org.opentravel.ota2repositorycommon {
     requires spring.beans;
     requires spring.context;
     requires spring.jms;
-    requires commons.logging;
-    requires lucene.core;
-    requires lucene.analyzers.common;
-    requires lucene.queryparser;
     requires svnkit;
     requires java.naming;
     requires velocity;
@@ -17,6 +13,8 @@ module org.opentravel.ota2repositorycommon {
     requires com.sun.xml.bind;
     requires jakarta.activation;
     requires commons.codec;
+    requires transitive org.apache.lucene.core;
+    requires org.apache.lucene.queryparser;
 
     exports org.opentravel.repocommon.config;
     exports org.opentravel.repocommon.index;
@@ -31,5 +29,8 @@ module org.opentravel.ota2repositorycommon {
     exports org.opentravel.repocommon.util;
     exports org.opentravel.ns.ota2.repositoryinfoext_v01_00;
     exports org.opentravel.ns.ota2.security_v01_00;
+
+    opens org.opentravel.ns.ota2.security_v01_00 to java.xml.bind;
+    opens org.opentravel.ns.ota2.repositoryinfoext_v01_00 to java.xml.bind;
 
 }

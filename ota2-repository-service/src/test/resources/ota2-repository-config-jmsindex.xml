@@ -94,7 +94,7 @@
 	<!--
 		Indexing Service JMS Configuration:
 		
-		Optional configuration that defines the ActiveMQ connection factory and queues used to communicate with
+		Optional configuration that defines the RabbitMQ connection factory and queues used to communicate with
 		the free-text indexing service.
 	-->
     <bean id="indexingJobQueue" factory-bean="destinationManager" factory-method="createTopic">

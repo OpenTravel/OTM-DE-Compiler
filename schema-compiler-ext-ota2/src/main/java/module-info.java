@@ -7,4 +7,7 @@ module org.opentravel.schemacompilerextota2 {
     exports org.opentravel.schemacompiler.extension;
     exports org.opentravel.schemacompiler.ota2;
 
+    provides org.opentravel.schemacompiler.extension.CompilerExtensionProvider
+        with org.opentravel.schemacompiler.ota2.OTA2CompilerExtensionProvider;
+
 }
