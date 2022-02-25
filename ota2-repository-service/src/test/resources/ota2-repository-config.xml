@@ -106,14 +106,18 @@
 		<property name="sessionCacheSize" value="10" />
 	</bean>
 
-	<bean id="indexingJobQueue" class="com.rabbitmq.jms.admin.RMQDestination">
-		<property name="destinationName" value="otm.indexing.jobQueue" />
+	<bean id="indexingJobRequestQueue" class="com.rabbitmq.jms.admin.RMQDestination">
+		<property name="destinationName" value="otm.indexing.jobRequestQueue" />
+		<property name="amqp" value="true" />
+	</bean>
+
+	<bean id="indexingJobResponseQueue" class="com.rabbitmq.jms.admin.RMQDestination">
+		<property name="destinationName" value="otm.indexing.jobResponseQueue" />
 		<property name="amqp" value="true" />
 	</bean>
 
 	<bean id="indexingJmsService" class="org.springframework.jms.core.JmsTemplate">
 		<property name="connectionFactory" ref="indexingConnectionFactory" />
-		<property name="defaultDestination" ref="indexingJobQueue" />
 		<property name="receiveTimeout" value="500" />
 	</bean>
 	

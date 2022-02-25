@@ -87,6 +87,9 @@ public class IndexProcessManager {
 
             launcherThread.start();
             launcherThread.join();
+            // System.setProperty( "ota2.index.agent.config",
+            // "/Users/livezeysm/Software/workspaces/OTM-DE/Servers/otm-indexing/indexing-agent.xml" );
+            // new AgentLauncher().run();
 
         } catch (Exception e) {
             log.error( "Error launching index process manager.", e );
@@ -295,7 +298,6 @@ public class IndexProcessManager {
             String log4jConfig = getAgentLog4jConfiguration();
             List<String> jmxConfig = getAgentJmxConfiguration();
             List<String> proxyConfig = getAgentProxyConfiguration();
-            String oomeOption = getJvmOptionForOutOfMemoryErrors();
             String classpath = System.getProperty( "java.class.path" );
 
             if (agentConfigLocation == null) {
@@ -308,7 +310,6 @@ public class IndexProcessManager {
             // they contain spaces.
             if (SystemUtils.IS_OS_WINDOWS) {
                 javaCmd = "\"" + javaCmd + ".exe\"";
-                oomeOption = "\"" + oomeOption + "\"";
                 agentConfigLocation = "\"" + agentConfigLocation + "\"";
                 log4jConfig = "\"" + log4jConfig + "\"";
                 classpath = "\"" + classpath + "\"";
@@ -326,7 +327,6 @@ public class IndexProcessManager {
             if (agentJvmOpts != null) {
                 command.addAll( Arrays.asList( agentJvmOpts.split( "\\s+" ) ) );
             }
-            command.add( oomeOption );
             command.add( agentConfigLocation );
             command.add( log4jConfig );
             command.addAll( jmxConfig );
@@ -337,53 +337,6 @@ public class IndexProcessManager {
 
             log.info( "Starting indexing agent process..." );
             return new ProcessBuilder().command( command ).redirectOutput( Redirect.PIPE ).start();
-        }
-
-        /**
-         * Returns the JVM option that will force a shutdown of the JVM if an <code>OutOfMemoryError</code> is
-         * encountered in the child process. The options returned by this method reflect the logic implemented in the
-         * GemFire open source server.
-         * 
-         * @return String
-         */
-        private static String getJvmOptionForOutOfMemoryErrors() {
-            String jvmOption = "";
-
-            if (isJVM( "HotSpot" )) {
-                if (SystemUtils.IS_OS_WINDOWS) {
-                    // ProcessBuilder "on Windows" needs every word (space separated) to be
-                    // a different element in the array/list. See #47312. Need to study why!
-                    jvmOption = "-XX:OnOutOfMemoryError=taskkill /F /PID %p";
-
-                } else { // All other platforms (Linux, Mac OS X, UNIX, etc)
-                    jvmOption = "-XX:OnOutOfMemoryError=kill -KILL %p";
-                }
-
-            } else if (SystemUtils.IS_JAVA_9) {
-                // NOTE IBM states the following IBM J9 JVM command-line option/switch has
-                // side-effects on "performance", as noted in the reference documentation...
-                // http://publib.boulder.ibm.com/infocenter/javasdk/v6r0/index.jsp?topic=/com.ibm.java.doc.diagnostics.60/diag/appendixes/cmdline/commands_jvm.html
-                jvmOption = "-Xcheck:memory";
-
-            } else if (isJVM( "JRockit" )) {
-                // NOTE the following Oracle JRockit JVM documentation was referenced to
-                // identify the appropriate JVM option to set when handling OutOfMemoryErrors.
-                // http://docs.oracle.com/cd/E13150_01/jrockit_jvm/jrockit/jrdocs/refman/optionXX.html
-                jvmOption = "-XXexitOnOutOfMemory";
-
-            } else if (isJVM( "OpenJDK" )) {
-                // NOTE this option was added in Java™ SE Development Kit 8, Update 92 (JDK 8u92)
-                jvmOption = "-XX:+ExitOnOutOfMemoryError";
-            }
-            return jvmOption;
-        }
-
-        /**
-         * @see java.lang.System#getProperty(String) with "java.vm.name".
-         */
-        private static boolean isJVM(final String expectedJvmName) {
-            String jvmName = System.getProperty( "java.vm.name" );
-            return (jvmName != null && jvmName.contains( expectedJvmName ));
         }
 
         /**

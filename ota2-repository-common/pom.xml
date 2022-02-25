@@ -21,12 +21,6 @@
 			<artifactId>schema-compiler</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-		<!--
-		<dependency>
-			<groupId>org.apache.lucene</groupId>
-			<artifactId>lucene-analyzers-common</artifactId>
-		</dependency>
-		-->
 		<dependency>
 			<groupId>org.apache.lucene</groupId>
 			<artifactId>lucene-queryparser</artifactId>

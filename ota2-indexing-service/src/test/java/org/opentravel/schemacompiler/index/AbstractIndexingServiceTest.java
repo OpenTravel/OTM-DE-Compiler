@@ -57,7 +57,8 @@ public abstract class AbstractIndexingServiceTest {
             indexProps.put( "org.opentravel.index.agent.repositoryLocation", repositoryFolder.getAbsolutePath() );
             indexProps.put( "org.opentravel.index.agent.searchIndexLocation", searchIndexFolder.getAbsolutePath() );
             indexProps.put( "org.opentravel.index.agent.jvmOpts", "-Xms256M -Xmx1024M -XX:MaxPermSize=256M" );
-            indexProps.put( "org.opentravel.index.jms.queueName", "otm.indexing.jobQueue" );
+            indexProps.put( "org.opentravel.index.jms.requestQueueName", "otm.indexing.jobRequestQueue" );
+            indexProps.put( "org.opentravel.index.jms.responseQueueName", "otm.indexing.jobResponseQueue" );
             indexProps.put( "org.opentravel.index.jms.sessionCacheSize", "10" );
             indexProps.put( "org.opentravel.index.jms.receiveTimeout", "500" );
             indexProps.store( out, null );
@@ -65,9 +66,9 @@ public abstract class AbstractIndexingServiceTest {
 
         System.setProperty( "ota2.index.manager.config", "src/test/resources/test-config/indexing-manager.xml" );
         System.setProperty( "ota2.index.agent.config", "src/test/resources/test-config/indexing-agent.xml" );
-        System.setProperty( "log4j.configuration", (SystemUtils.IS_OS_WINDOWS ? "file:/" : "file://")
-            + System.getProperty( "user.dir" ) + "/src/test/resources/log4j.properties" );
-        System.setProperty( "log4j.agent.configuration", System.getProperty( "log4j.configuration" ) );
+        System.setProperty( "log4j.configurationFile", (SystemUtils.IS_OS_WINDOWS ? "file:/" : "file://")
+            + System.getProperty( "user.dir" ) + "/src/test/resources/log4j2.properties" );
+        System.setProperty( "log4j.agent.configuration", System.getProperty( "log4j.configurationFile" ) );
 
         repositoryManager = new RepositoryManager( repositoryFolder );
         IndexProcessManager.getJmxPort(); // Forces initialization of the Spring context using the above information

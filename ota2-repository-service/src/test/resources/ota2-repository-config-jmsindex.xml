@@ -97,13 +97,16 @@
 		Optional configuration that defines the RabbitMQ connection factory and queues used to communicate with
 		the free-text indexing service.
 	-->
-    <bean id="indexingJobQueue" factory-bean="destinationManager" factory-method="createTopic">
-        <constructor-arg index="0" value="otm.indexing.jobQueue" />
+    <bean id="indexingJobRequestQueue" factory-bean="destinationManager" factory-method="createTopic">
+        <constructor-arg index="0" value="otm.indexing.jobRequestQueue" />
+    </bean>
+
+    <bean id="indexingJobResponseQueue" factory-bean="destinationManager" factory-method="createTopic">
+        <constructor-arg index="0" value="otm.indexing.jobResponseQueue" />
     </bean>
 
 	<bean id="indexingJmsService" class="org.springframework.jms.core.JmsTemplate">
 		<property name="connectionFactory" ref="jmsConnectionFactory" />
-		<property name="defaultDestination" ref="indexingJobQueue" />
 		<property name="receiveTimeout" value="500" />
 	</bean>
 	

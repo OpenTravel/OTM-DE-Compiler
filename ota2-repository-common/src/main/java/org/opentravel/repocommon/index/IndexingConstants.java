@@ -27,11 +27,8 @@ public class IndexingConstants {
     public static final String JOB_TYPE_SUBSCRIPTION = "subscription-index";
     public static final String JOB_TYPE_DELETE_ALL = "delete-all";
 
-    public static final String MSGPROP_SELECTOR = "indexSelector";
-    public static final int SELECTOR_VALUE_JOBMSG = 0;
-    public static final int SELECTOR_VALUE_COMMITMSG = 1;
-    public static final String SELECTOR_JOBMSG = MSGPROP_SELECTOR + " = " + SELECTOR_VALUE_JOBMSG;
-    public static final String SELECTOR_COMMITMSG = MSGPROP_SELECTOR + " = " + SELECTOR_VALUE_COMMITMSG;
+    public static final String MSGPROP_RESPONSE_TYPE = "responseType";
+    public static final String RESPONSE_TYPE_COMMIT = "index-commit";
 
     /**
      * Private constructor to prevent instantiation.

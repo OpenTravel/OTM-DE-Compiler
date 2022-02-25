@@ -29,6 +29,8 @@ import org.springframework.jms.core.JmsTemplate;
 
 import java.io.File;
 
+import javax.jms.Destination;
+
 /**
  * Handles the creation of key repository components using a Spring application context file.
  * 
@@ -47,6 +49,8 @@ public class RepositoryComponentFactory {
     private static final String SUBSCRIPTION_MANAGER_KEY = "subscriptionManager";
     private static final String NOTIFICATION_SERVICE_KEY = "notificationService";
     private static final String INDEXING_JMS_SERVICE_KEY = "indexingJmsService";
+    private static final String INDEXING_REQUEST_QUEUE_KEY = "indexingJobRequestQueue";
+    private static final String INDEXING_RESPONSE_QUEUE_KEY = "indexingJobResponseQueue";
 
     private static RepositoryComponentFactory defaultInstance;
     private static final Object defaultInstanceLock = new Object();
@@ -211,9 +215,45 @@ public class RepositoryComponentFactory {
             service = (JmsTemplate) appContext.getBean( INDEXING_JMS_SERVICE_KEY );
 
         } catch (NoSuchBeanDefinitionException e) {
-            // Ignore - subscription manager is an optional component
+            // Ignore and return null
         }
         return service;
+    }
+
+    /**
+     * Returns the JMS <code>Destination</code> that will serve as the request queue for the indexing service. If no
+     * notification JMS service has been configured, this method will return null.
+     * 
+     * @return Destination
+     */
+    public Destination getIndexingRequestQueue() {
+        Destination queue = null;
+
+        try {
+            queue = (Destination) appContext.getBean( INDEXING_REQUEST_QUEUE_KEY );
+
+        } catch (NoSuchBeanDefinitionException e) {
+            // Ignore and return null
+        }
+        return queue;
+    }
+
+    /**
+     * Returns the JMS <code>Destination</code> that will serve as the response queue for the indexing service. If no
+     * notification JMS service has been configured, this method will return null.
+     * 
+     * @return Destination
+     */
+    public Destination getIndexingResponseQueue() {
+        Destination queue = null;
+
+        try {
+            queue = (Destination) appContext.getBean( INDEXING_RESPONSE_QUEUE_KEY );
+
+        } catch (NoSuchBeanDefinitionException e) {
+            // Ignore and return null
+        }
+        return queue;
     }
 
     /**

@@ -42,13 +42,16 @@
 		<property name="sessionCacheSize" value="${org.opentravel.index.jms.sessionCacheSize}" />
 	</bean>
 
-	<bean id="indexingJobQueue" class="com.mockrunner.mock.jms.MockQueue">
-		<constructor-arg index="0" value="${org.opentravel.index.jms.queueName}" />
+	<bean id="indexingJobRequestQueue" class="com.mockrunner.mock.jms.MockQueue">
+		<constructor-arg index="0" value="${org.opentravel.index.jms.requestQueueName}" />
+	</bean>
+
+	<bean id="indexingJobResponseQueue" class="com.mockrunner.mock.jms.MockQueue">
+		<constructor-arg index="0" value="${org.opentravel.index.jms.responseQueueName}" />
 	</bean>
 
 	<bean id="indexingJmsService" class="org.springframework.jms.core.JmsTemplate">
 		<property name="connectionFactory" ref="connectionFactory" />
-		<property name="defaultDestination" ref="indexingJobQueue" />
 		<property name="receiveTimeout" value="${org.opentravel.index.jms.receiveTimeout}" />
 	</bean>
 	

@@ -44,6 +44,7 @@ import java.lang.management.ManagementFactory;
 import java.util.List;
 
 import javax.jms.Connection;
+import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.Session;
@@ -66,6 +67,8 @@ public class IndexingAgent {
     private static Logger log = LogManager.getLogger( IndexingAgent.class );
 
     public static final String JMS_TEMPLATE_BEANID = "indexingJmsService";
+    public static final String REQUEST_QUEUE_BEANID = "indexingJobRequestQueue";
+    public static final String RESPONSE_QUEUE_BEANID = "indexingJobResponseQueue";
     public static final String REPOSITORY_LOCATION_BEANID = "repositoryLocation";
     public static final String SEARCH_INDEX_LOCATION_BEANID = "searchIndexLocation";
 
@@ -77,6 +80,8 @@ public class IndexingAgent {
     private IndexWriterConfig writerConfig;
     private IndexWriter indexWriter;
     private JmsTemplate jmsTemplate;
+    private Destination requestQueue;
+    private Destination responseQueue;
     private boolean running;
 
     /**
@@ -158,6 +163,8 @@ public class IndexingAgent {
     private void initializeContext(ApplicationContext context) throws RepositoryException, IOException {
         // Initialize the agent settings from the application context
         this.jmsTemplate = (JmsTemplate) context.getBean( JMS_TEMPLATE_BEANID );
+        this.requestQueue = (Destination) context.getBean( REQUEST_QUEUE_BEANID );
+        this.responseQueue = (Destination) context.getBean( RESPONSE_QUEUE_BEANID );
         String repositoryLocationPath = (String) context.getBean( REPOSITORY_LOCATION_BEANID );
         String searchIndexLocationPath = (String) context.getBean( SEARCH_INDEX_LOCATION_BEANID );
 
@@ -270,7 +277,7 @@ public class IndexingAgent {
 
         while (!shutdownRequested) {
             try {
-                Message msg = jmsTemplate.receiveSelected( IndexingConstants.SELECTOR_JOBMSG );
+                Message msg = jmsTemplate.receive( requestQueue );
 
                 initialStartup = false;
 
@@ -476,11 +483,12 @@ public class IndexingAgent {
             indexWriter = new IndexWriter( indexDirectory, writerConfig );
         }
 
-        jmsTemplate.send( new MessageCreator() {
+        jmsTemplate.send( responseQueue, new MessageCreator() {
             public Message createMessage(Session session) throws JMSException {
                 TextMessage msg = session.createTextMessage();
 
-                msg.setIntProperty( IndexingConstants.MSGPROP_SELECTOR, IndexingConstants.SELECTOR_VALUE_COMMITMSG );
+                msg.setStringProperty( IndexingConstants.MSGPROP_RESPONSE_TYPE,
+                    IndexingConstants.RESPONSE_TYPE_COMMIT );
                 return msg;
             }
         } );

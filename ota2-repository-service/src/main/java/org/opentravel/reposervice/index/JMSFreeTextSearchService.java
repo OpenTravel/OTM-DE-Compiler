@@ -46,6 +46,7 @@ import java.util.List;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
+import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.Session;
@@ -239,14 +240,15 @@ public class JMSFreeTextSearchService extends FreeTextSearchService {
      * @param messageContent the message content that specifies the item to be indexed (may be null)
      */
     private void sendIndexingJob(final String jobType, final String messageContent) {
-        JmsTemplate indexingService = RepositoryComponentFactory.getDefault().getIndexingJmsService();
+        RepositoryComponentFactory factory = RepositoryComponentFactory.getDefault();
+        JmsTemplate indexingService = factory.getIndexingJmsService();
+        Destination requestQueue = factory.getIndexingRequestQueue();
 
-        indexingService.send( new MessageCreator() {
+        indexingService.send( requestQueue, new MessageCreator() {
             public Message createMessage(Session session) throws JMSException {
                 TextMessage msg = session.createTextMessage();
 
                 msg.setStringProperty( IndexingConstants.MSGPROP_JOB_TYPE, jobType );
-                msg.setIntProperty( IndexingConstants.MSGPROP_SELECTOR, IndexingConstants.SELECTOR_VALUE_JOBMSG );
                 msg.setText( messageContent );
                 return msg;
             }
@@ -265,16 +267,19 @@ public class JMSFreeTextSearchService extends FreeTextSearchService {
         @Override
         public void run() {
             while (!shutdownRequested) {
-                JmsTemplate indexingService = RepositoryComponentFactory.getDefault().getIndexingJmsService();
+                RepositoryComponentFactory factory = RepositoryComponentFactory.getDefault();
+                JmsTemplate indexingService = factory.getIndexingJmsService();
+                Destination responseQueue = factory.getIndexingResponseQueue();
 
                 waitForJmsProvider( indexingService );
                 log.info( "Indexing commit listener started." );
 
                 while (!shutdownRequested && jmsConnectionAvailable) {
                     try {
-                        Message msg = indexingService.receiveSelected( IndexingConstants.SELECTOR_COMMITMSG );
+                        Message msg = indexingService.receive( responseQueue );
 
-                        if (msg != null) {
+                        if ((msg != null) && msg.getStringProperty( IndexingConstants.MSGPROP_RESPONSE_TYPE )
+                            .equals( IndexingConstants.RESPONSE_TYPE_COMMIT )) {
                             log.debug( "Commit notification received from indexing agent." );
                             refreshIndexReader();
                         }

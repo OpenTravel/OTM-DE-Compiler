@@ -19,6 +19,6 @@
 set "SCRIPTDIR=%~dp0"
 
 set "MANAGER_CONFIG=%SCRIPTDIR%conf\indexing-manager.xml"
-set "LOG4J_CONFIG=%SCRIPTDIR%conf\log4j-manager.properties"
+set "LOG4J_CONFIG=%SCRIPTDIR%conf\log4j2-manager.properties"
 
-java.exe -Dota2.index.manager.config="%MANAGER_CONFIG%" -Dlog4j.configuration="file:/%LOG4J_CONFIG%" -cp ./lib/* org.opentravel.schemacompiler.index.ShutdownIndexingService %*
+java.exe -Dota2.index.manager.config="%MANAGER_CONFIG%" -Dlog4j.configurationFile="%LOG4J_CONFIG%"  -cp ./lib/* org.opentravel.schemacompiler.index.ShutdownIndexingService %*

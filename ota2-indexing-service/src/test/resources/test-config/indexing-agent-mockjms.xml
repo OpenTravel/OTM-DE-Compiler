@@ -34,6 +34,14 @@
 	
 	<bean id="mockJmsTemplateFactory" class="org.opentravel.schemacompiler.index.MockJmsTemplateFactory" />
 	
+	<bean id="indexingJobRequestQueue" class="org.opentravel.schemacompiler.index.MockJmsDestination">
+		<property name="name" value="otm.indexing.jobRequestQueue" />
+	</bean>
+	
+	<bean id="indexingJobResponseQueue" class="org.opentravel.schemacompiler.index.MockJmsDestination">
+		<property name="name" value="otm.indexing.jobResponseQueue" />
+	</bean>
+	
 	<bean id="indexingJmsService" factory-bean="mockJmsTemplateFactory" factory-method="newMockJmsTemplate"/>
 	
 </beans>

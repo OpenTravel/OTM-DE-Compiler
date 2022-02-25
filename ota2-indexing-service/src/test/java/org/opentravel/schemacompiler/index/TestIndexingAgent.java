@@ -35,6 +35,7 @@ import org.springframework.jms.core.MessageCreator;
 
 import java.io.StringWriter;
 
+import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.Session;
@@ -50,6 +51,8 @@ public class TestIndexingAgent extends AbstractIndexingServiceTest {
     private FileSystemXmlApplicationContext context;
     private IndexingAgent indexAgent;
     private JmsTemplate jmsService;
+    private Destination requestQueue;
+    private Destination responseQueue;
 
     @Before
     public void setup() throws Exception {
@@ -81,6 +84,8 @@ public class TestIndexingAgent extends AbstractIndexingServiceTest {
             fail( "Failed to start indexing agent." );
         }
         jmsService = (JmsTemplate) context.getBean( "indexingJmsService" );
+        requestQueue = (Destination) context.getBean( "indexingJobRequestQueue" );
+        responseQueue = (Destination) context.getBean( "indexingJobResponseQueue" );
     }
 
     @After
@@ -142,12 +147,11 @@ public class TestIndexingAgent extends AbstractIndexingServiceTest {
     }
 
     private void sendIndexingJob(final String jobType, final String messageContent) {
-        jmsService.send( new MessageCreator() {
+        jmsService.send( requestQueue, new MessageCreator() {
             public Message createMessage(Session session) throws JMSException {
                 TextMessage msg = session.createTextMessage();
 
                 msg.setStringProperty( IndexingConstants.MSGPROP_JOB_TYPE, jobType );
-                msg.setIntProperty( IndexingConstants.MSGPROP_SELECTOR, IndexingConstants.SELECTOR_VALUE_JOBMSG );
                 msg.setText( messageContent );
                 return msg;
             }
@@ -155,13 +159,13 @@ public class TestIndexingAgent extends AbstractIndexingServiceTest {
     }
 
     @SuppressWarnings({"squid:S2925", "squid:S2276"})
-    private synchronized void waitForCommitMessage() {
+    private synchronized void waitForCommitMessage() throws JMSException {
         Message message = null;
 
         // Under some test conditions, it may take some time for the JMS message to propagate. For
         // this reason, we will try up to three times to receive the message before failing.
         for (int i = 0; i < 3; i++) {
-            message = jmsService.receiveSelected( IndexingConstants.SELECTOR_COMMITMSG );
+            message = jmsService.receive( responseQueue );
 
             if (message == null) {
                 try {
@@ -171,7 +175,8 @@ public class TestIndexingAgent extends AbstractIndexingServiceTest {
                     Thread.currentThread().interrupt();
                 }
 
-            } else {
+            } else if (message.getStringProperty( IndexingConstants.MSGPROP_RESPONSE_TYPE )
+                .equals( IndexingConstants.RESPONSE_TYPE_COMMIT )) {
                 break;
             }
         }

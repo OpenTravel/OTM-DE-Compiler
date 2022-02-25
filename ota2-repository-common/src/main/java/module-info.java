@@ -3,7 +3,8 @@ module org.opentravel.ota2repositorycommon {
     requires transitive org.opentravel.schemacompiler;
     requires spring.beans;
     requires spring.context;
-    requires spring.jms;
+    requires transitive spring.jms;
+    requires transitive jakarta.jms.api;
     requires svnkit;
     requires java.naming;
     requires velocity;

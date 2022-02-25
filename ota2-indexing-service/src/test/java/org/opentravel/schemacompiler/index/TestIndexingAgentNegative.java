@@ -16,7 +16,7 @@
 
 package org.opentravel.schemacompiler.index;
 
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import org.junit.Before;
@@ -26,6 +26,8 @@ import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.support.destination.DestinationResolutionException;
 
 import java.io.FileNotFoundException;
+
+import javax.jms.Destination;
 
 /**
  * Performs negative test cases for the <code>IndexingAgent</code> class.
@@ -71,7 +73,7 @@ public class TestIndexingAgentNegative extends AbstractIndexingServiceTest {
             try {
                 JmsTemplate jmsTemplate = agent.getJmsService();
 
-                when( jmsTemplate.receiveSelected( anyString() ) )
+                when( jmsTemplate.receive( any( Destination.class ) ) )
                     .thenThrow( new DestinationResolutionException( "JMS receive error" ) );
                 agent.startListening();
 
@@ -89,7 +91,7 @@ public class TestIndexingAgentNegative extends AbstractIndexingServiceTest {
             try {
                 JmsTemplate jmsTemplate = agent.getJmsService();
 
-                when( jmsTemplate.receiveSelected( anyString() ) ).thenThrow( NullPointerException.class );
+                when( jmsTemplate.receive( any( Destination.class ) ) ).thenThrow( NullPointerException.class );
                 agent.startListening();
 
             } finally {
