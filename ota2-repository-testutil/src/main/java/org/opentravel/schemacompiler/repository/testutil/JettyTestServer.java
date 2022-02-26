@@ -168,7 +168,6 @@ public class JettyTestServer {
     private void configureConsoleSupport(ServletContextHandler context)
         throws IOException, SAXException, ClassNotFoundException {
         File targetTemp = new File( System.getProperty( USER_DIR ), "target/jsp-temp" );
-        // ServletHolder holderDefault = new ServletHolder( "default", new DefaultServlet() );
         ServletHolder holderJsp = new ServletHolder( "jsp", new JspServlet() );
         Class<? extends Filter> authFilterClass = (Class<? extends Filter>) Class.forName( AUTH_FILTER_CLASS );
         TldScanner scanner = new TldScanner( context.getServletContext(), true, false, true );
@@ -185,7 +184,6 @@ public class JettyTestServer {
         context.setClassLoader( new URLClassLoader( new URL[0], this.getClass().getClassLoader() ) );
 
         holderJsp.setInitOrder( 0 );
-        // holderJsp.setInitParameter( "logVerbosityLevel", "DEBUG" );
         holderJsp.setInitParameter( "development", "true" );
         holderJsp.setInitParameter( "fork", "false" );
         holderJsp.setInitParameter( "xpoweredBy", "false" );
@@ -194,10 +192,6 @@ public class JettyTestServer {
         holderJsp.setInitParameter( "keepgenerated", "true" );
         JspFactory.setDefaultFactory( new JspFactoryImpl() );
 
-        // holderDefault.setInitParameter( "resourceBase", context.getResourceBase() );
-        // holderDefault.setInitParameter( "dirAllowed", "true" );
-
-        // context.addServlet( holderDefault, "/" );
         context.addServlet( holderJsp, "*.jsp" );
 
         scanner.scan();

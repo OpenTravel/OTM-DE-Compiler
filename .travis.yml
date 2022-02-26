@@ -1,12 +1,10 @@
 language: java
-jdk: openjdk8
+jdk: openjdk17
 install: true
 script: mvn clean install -B -DskipTests=true -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
 cache:
   directories:
   - "$HOME/.m2"
-after_success:
-- bash <(curl -s https://copilot.blackducksoftware.com/ci/travis/scripts/upload)
 deploy:
   provider: releases
   api_key:

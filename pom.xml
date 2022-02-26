@@ -58,7 +58,7 @@
 		<glassfish.extras.version>5.1.0</glassfish.extras.version>
 		<javax.mail.version>1.5.5</javax.mail.version>
 		<tiles.version>3.0.8</tiles.version>
-		<jstl.version>1.2.6</jstl.version>
+		<taglibs.version>1.2.5</taglibs.version>
 		<jetty.version>10.0.8</jetty.version>
 		<jsp.api.version>2.1</jsp.api.version>
 		<log4j.version>2.17.1</log4j.version>
@@ -181,10 +181,22 @@
 					</execution>
 				</executions>
 			</plugin>
-			<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-checkstyle-plugin</artifactId> 
-				<configuration> <configLocation>${checkstyle.config}</configLocation> <skip>${skipTests}</skip> 
-				</configuration> <executions> <execution> <goals> <goal>check</goal> </goals> 
-				</execution> </executions> </plugin> -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-checkstyle-plugin</artifactId>
+				<configuration>
+					<configLocation>${checkstyle.config}</configLocation>
+					<excludes>**/module-info.java</excludes>
+					<skip>${skipTests}</skip>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>check</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
@@ -532,9 +544,14 @@
 				<version>${tiles.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.glassfish.web</groupId>
-				<artifactId>jakarta.servlet.jsp.jstl</artifactId>
-				<version>${jstl.version}</version>
+				<groupId>org.apache.taglibs</groupId>
+				<artifactId>taglibs-standard-spec</artifactId>
+				<version>${taglibs.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.taglibs</groupId>
+				<artifactId>taglibs-standard-impl</artifactId>
+				<version>${taglibs.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty</groupId>
