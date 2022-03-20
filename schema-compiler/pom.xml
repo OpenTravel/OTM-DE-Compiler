@@ -31,10 +31,6 @@
 			<artifactId>jaxb-impl</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.glassfish.jaxb</groupId>
-			<artifactId>jaxb-runtime</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
 		</dependency>
@@ -184,29 +180,6 @@
 						<artifactId>jaxb-impl</artifactId>
 						<version>${jaxb.impl.version}</version>
 					</dependency>
-
-					<!--
-					<dependency>
-						<groupId>javax.xml.bind</groupId>
-						<artifactId>jaxb-api</artifactId>
-						<version>${jaxb.api.version}</version>
-					</dependency>
-					<dependency>
-						<groupId>org.glassfish.jaxb</groupId>
-						<artifactId>jaxb-runtime</artifactId>
-						<version>${jaxb.runtime.version}</version>
-					</dependency>
-					<dependency>
-						<groupId>org.glassfish.jaxb</groupId>
-						<artifactId>jaxb-xjc</artifactId>
-						<version>${jaxb.xjc.version}</version>
-					</dependency>
-					<dependency>
-						<groupId>com.sun.activation</groupId>
-						<artifactId>jakarta.activation</artifactId>
-						<version>${jakarta.activation.version}</version>
-					</dependency>
-					-->
 				</dependencies>
 			</plugin>
 			<plugin>

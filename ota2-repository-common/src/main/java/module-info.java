@@ -13,7 +13,7 @@ module org.opentravel.ota2repositorycommon {
     requires org.apache.logging.log4j;
     requires com.sun.xml.bind;
     requires jakarta.activation;
-    requires commons.codec;
+    requires org.apache.commons.codec;
     requires transitive org.apache.lucene.core;
     requires org.apache.lucene.queryparser;
 

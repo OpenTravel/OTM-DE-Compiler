@@ -11,7 +11,7 @@ open module org.opentravel.schemacompiler {
     requires transitive org.apache.httpcomponents.httpcore;
     requires transitive org.apache.httpcomponents.httpmime;
     requires org.opentravel.schemacompilerextota2;
-    requires commons.codec;
+    requires org.apache.commons.codec;
     requires commons.lang;
     requires commons.beanutils;
     requires velocity;
