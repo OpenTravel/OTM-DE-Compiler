@@ -29,4 +29,9 @@ JMX_CONFIG="-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=1
 #NON_PROXY_HOSTS=localhost\|*.example.com
 #PROXY_SETTINGS=-Dhttp.proxyHost=$HTTP_PROXY_HOST\ -Dhttp.proxyPort=$HTTP_PROXY_PORT\ -Dhttps.proxyHost=$HTTPS_PROXY_HOST\ -Dhttps.proxyPort=$HTTPS_PROXY_PORT\ -Dhttp.nonProxyHosts=$NON_PROXY_HOSTS
 
-java -Dota2.index.manager.config=$MANAGER_CONFIG -Dota2.index.agent.config=$AGENT_CONFIG -Dlog4j.configurationFile=$LOG4J_CONFIG $JMX_CONFIG $PROXY_SETTINGS -cp $JAVA_CLASSPATH org.opentravel.schemacompiler.index.IndexProcessManager "$@" &
+if [ $# -ne 0 ]
+  then
+    $SCRIPTDIR/wait-for-it.sh $1 -t 60
+fi
+
+exec java -Dota2.index.manager.config=$MANAGER_CONFIG -Dota2.index.agent.config=$AGENT_CONFIG -Dlog4j.configurationFile=$LOG4J_CONFIG $JMX_CONFIG $PROXY_SETTINGS -cp "$JAVA_CLASSPATH" org.opentravel.schemacompiler.index.IndexProcessManager

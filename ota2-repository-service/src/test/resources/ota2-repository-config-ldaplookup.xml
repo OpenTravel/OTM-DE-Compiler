@@ -125,12 +125,18 @@
 
 	<bean id="indexingJobRequestQueue" class="com.rabbitmq.jms.admin.RMQDestination">
 		<property name="destinationName" value="otm.indexing.jobRequestQueue" />
-		<property name="amqp" value="true" />
+		<property name="amqp" value="false" />
+		<property name="amqpExchangeName" value="jms.durable.queue" />
+		<property name="amqpRoutingKey" value="otm.indexing.jobRequestQueue" />
+		<property name="amqpQueueName" value="otm.indexing.jobRequestQueue" />
 	</bean>
 
 	<bean id="indexingJobResponseQueue" class="com.rabbitmq.jms.admin.RMQDestination">
 		<property name="destinationName" value="otm.indexing.jobResponseQueue" />
-		<property name="amqp" value="true" />
+		<property name="amqp" value="false" />
+		<property name="amqpExchangeName" value="jms.durable.queue" />
+		<property name="amqpRoutingKey" value="otm.indexing.jobResponseQueue" />
+		<property name="amqpQueueName" value="otm.indexing.jobResponseQueue" />
 	</bean>
 
 	<bean id="indexingJmsService" class="org.springframework.jms.core.JmsTemplate">

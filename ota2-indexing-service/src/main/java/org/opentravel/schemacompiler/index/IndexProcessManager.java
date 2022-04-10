@@ -84,12 +84,10 @@ public class IndexProcessManager {
             launcher = new AgentLauncher();
             launcherThread = new Thread( launcher );
             shutdownRequested = false;
+            Runtime.getRuntime().addShutdownHook( new Thread( () -> shutdown() ) );
 
             launcherThread.start();
             launcherThread.join();
-            // System.setProperty( "ota2.index.agent.config",
-            // "/Users/livezeysm/Software/workspaces/OTM-DE/Servers/otm-indexing/indexing-agent.xml" );
-            // new AgentLauncher().run();
 
         } catch (Exception e) {
             log.error( "Error launching index process manager.", e );
