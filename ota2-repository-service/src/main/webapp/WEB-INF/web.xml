@@ -26,13 +26,13 @@
 		<init-param>
 			<param-name>jersey.config.server.provider.classnames</param-name>
 			<param-value>
-				org.opentravel.schemacompiler.repository.CustomLogoResource,
-				org.opentravel.schemacompiler.repository.RepositoryContentResource,
-				org.opentravel.schemacompiler.providers.JAXBContextResolver,
-				org.opentravel.schemacompiler.providers.RepositoryServiceExceptionMapper$RepositoryExceptionMapper,
-				org.opentravel.schemacompiler.providers.RepositoryServiceExceptionMapper$RepositorySecurityExceptionMapper,
-				org.opentravel.schemacompiler.providers.RepositoryServiceExceptionMapper$IOExceptionMapper,
-				org.opentravel.schemacompiler.providers.RepositoryServiceExceptionMapper$JAXBExceptionMapper,
+				org.opentravel.reposervice.repository.CustomLogoResource,
+				org.opentravel.reposervice.repository.RepositoryContentResource,
+				org.opentravel.reposervice.providers.JAXBContextResolver,
+				org.opentravel.reposervice.providers.RepositoryServiceExceptionMapper$RepositoryExceptionMapper,
+				org.opentravel.reposervice.providers.RepositoryServiceExceptionMapper$RepositorySecurityExceptionMapper,
+				org.opentravel.reposervice.providers.RepositoryServiceExceptionMapper$IOExceptionMapper,
+				org.opentravel.reposervice.providers.RepositoryServiceExceptionMapper$JAXBExceptionMapper,
 				org.glassfish.jersey.media.multipart.MultiPartFeature
 			</param-value>
 		</init-param>

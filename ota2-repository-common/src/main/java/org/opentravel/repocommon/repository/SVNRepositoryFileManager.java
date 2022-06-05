@@ -276,7 +276,7 @@ public class SVNRepositoryFileManager extends RepositoryFileManager {
             if (rootFolderLocation.exists()) {
                 SVNStatusClient c = svnClient.getStatusClient();
 
-                c.doStatus( rootFolderLocation, SVNRevision.HEAD, SVNDepth.INFINITY, false, false, false, false,
+                c.doStatus( rootFolderLocation, SVNRevision.HEAD, SVNDepth.INFINITY, false, true, false, false,
                     new RepositorySVNStatusHandler(), null );
             }
         } catch (SVNException e) {
@@ -296,9 +296,11 @@ public class SVNRepositoryFileManager extends RepositoryFileManager {
      */
     private File[] buildSvnChangeSet(Set<File> changeSet) throws SVNException {
         SVNStatusClient statusClient = svnClient.getStatusClient();
+        ISVNStatusHandler statusHandler = new RepositorySVNStatusHandler();
         SVNWCClient wcClient = svnClient.getWCClient();
         Set<File> threadLocalChangeSet = svnChangeSet.get();
         List<File> changeSetList = new ArrayList<>( changeSet );
+        String baseFolder = getRepositoryLocation().getAbsolutePath();
 
         changeSetList.sort( new Comparator<File>() {
             public int compare(File f1, File f2) {
@@ -309,20 +311,53 @@ public class SVNRepositoryFileManager extends RepositoryFileManager {
         log.info( "BUILDING SVN CHANGE SET:" );
 
         for (File file : changeSetList) {
+            File folder = file.getParentFile();
+
+            // For new/modified files, make sure that all parent folders are also under version control
+            if (file.exists()) {
+                while ((folder != null) && !folder.getAbsolutePath().equals( baseFolder )) {
+                    try {
+                        statusClient.doStatus( folder, SVNRevision.HEAD, SVNDepth.EMPTY, false, true, false, false,
+                            statusHandler, null );
+                        break; // If the parent folder is already under version control, there is no need to continue
+
+                    } catch (SVNException e) {
+                        handleStatusException( e, file, wcClient );
+                    }
+                    folder = folder.getParentFile();
+                }
+            }
+
+            // Add the new/modified file to the list of committed items
             try {
                 log.info( "  " + file.getAbsolutePath() );
                 statusClient.doStatus( file, SVNRevision.HEAD, SVNDepth.INFINITY, false, true, false, false,
-                    new RepositorySVNStatusHandler(), null );
+                    statusHandler, null );
 
             } catch (SVNException e) {
-                SVNErrorCode errorCode = e.getErrorMessage().getErrorCode();
-
-                if ((errorCode == SVNErrorCode.WC_NOT_DIRECTORY) || (errorCode == SVNErrorCode.WC_NOT_FILE)) {
-                    wcClient.doAdd( file, false, false, false, SVNDepth.FILES, false, true );
-                }
+                handleStatusException( e, file, wcClient );
             }
         }
         return threadLocalChangeSet.toArray( new File[threadLocalChangeSet.size()] );
+    }
+
+    /**
+     * Handles an SVN status exception by checking to see if it was thrown because a file or directory was not yet under
+     * version control. In those cases, the working copy client is used to add it to the list of items that will be
+     * committed.
+     * 
+     * @param e the SVN status exception that was thrown
+     * @param file the file (or directory) for which the exception was thrown
+     * @param wcClient the SVNKit working copy client
+     * @throws SVNException thrown if an error occurs while adding the item to the list of changes to commit
+     */
+    private void handleStatusException(SVNException e, File file, SVNWCClient wcClient) throws SVNException {
+        SVNErrorCode errorCode = e.getErrorMessage().getErrorCode();
+
+        if ((errorCode == SVNErrorCode.WC_NOT_DIRECTORY) || (errorCode == SVNErrorCode.WC_NOT_FILE)
+            || (errorCode == SVNErrorCode.WC_PATH_NOT_FOUND)) {
+            wcClient.doAdd( file, false, false, false, SVNDepth.FILES, false, true );
+        }
     }
 
     /**
@@ -339,7 +374,16 @@ public class SVNRepositoryFileManager extends RepositoryFileManager {
         public void handleStatus(SVNStatus status) throws SVNException {
             File file = status.getFile();
 
-            if (status.getContentsStatus() == SVNStatusType.STATUS_NORMAL) {
+            if (file.isDirectory() && (status.getCommittedRevision() == SVNRevision.UNDEFINED)) {
+                log.info( "Adding Directory to SVN Change Set: " + file.getAbsolutePath() );
+                svnChangeSet.get().add( file );
+
+            } else if (!file.exists()) {
+                // File will be deleted from the change set by the
+                // RepositorySVNEventHandler.handleEvent() callback
+                svnClient.getWCClient().doDelete( file, true, false, false );
+
+            } else if (status.getContentsStatus() == SVNStatusType.STATUS_NORMAL) {
                 // No action required
 
             } else if ((status.getContentsStatus() == SVNStatusType.CHANGED)
@@ -355,11 +399,6 @@ public class SVNRepositoryFileManager extends RepositoryFileManager {
                 || (status.getContentsStatus() == SVNStatusType.STATUS_NONE)) {
                 // File will be added to the change set by the RepositorySVNEventHandler.handleEvent() callback
                 svnClient.getWCClient().doAdd( file, false, false, false, SVNDepth.FILES, false, true );
-
-            } else if (status.getNodeStatus() == SVNStatusType.STATUS_MISSING) {
-                // File will be deleted from the change set by the
-                // RepositorySVNEventHandler.handleEvent() callback
-                svnClient.getWCClient().doDelete( file, true, false, false );
 
             } else {
                 log.error( "Unrecognized SVN status '" + status.getContentsStatus() + "' for file '" + file.getName()

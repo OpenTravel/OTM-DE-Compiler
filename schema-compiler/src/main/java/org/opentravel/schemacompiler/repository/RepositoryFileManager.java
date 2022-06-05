@@ -1011,6 +1011,7 @@ public abstract class RepositoryFileManager {
                 log.debug( "Adding file to repository change set: " + file.getName() + " [Change Set - "
                     + Thread.currentThread().getName() + "]" );
             }
+            log.debug( "Adding file to repository change set: " + file.getName() );
             RepositoryFileManager.changeSet.get().add( file );
         }
     }

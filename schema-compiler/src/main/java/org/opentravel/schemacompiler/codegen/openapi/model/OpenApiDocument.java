@@ -30,7 +30,7 @@ import java.util.List;
  */
 public class OpenApiDocument implements JsonModelObject {
 
-    public static final String OPENAPI_SPEC_V3 = "3.0";
+    public static final String OPENAPI_SPEC_V3 = "3.0.0";
 
     private String specVersion = OPENAPI_SPEC_V3;
     private OpenApiOtmResource otmResource;
