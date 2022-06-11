@@ -37,7 +37,7 @@
 		<jackson.version>2.10.3</jackson.version>
 		<jackson.databind.version>2.10.3</jackson.databind.version>
 		<spring.version>5.3.15</spring.version>
-		<httpcomponents.version>4.5.8</httpcomponents.version>
+		<httpcomponents.version>4.5.13</httpcomponents.version>
 		<maven.plugin.api.version>3.8.4</maven.plugin.api.version>
 		<maven.annotations.version>3.5.2</maven.annotations.version>
 		<maven.aether.provider.version>3.3.9</maven.aether.provider.version>
