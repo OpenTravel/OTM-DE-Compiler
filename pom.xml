@@ -36,7 +36,7 @@
 		<gson.version>2.5</gson.version>
 		<jackson.version>2.10.3</jackson.version>
 		<jackson.databind.version>2.10.3</jackson.databind.version>
-		<spring.version>5.3.15</spring.version>
+		<spring.version>5.3.18</spring.version>
 		<httpcomponents.version>4.5.8</httpcomponents.version>
 		<maven.plugin.api.version>3.8.4</maven.plugin.api.version>
 		<maven.annotations.version>3.5.2</maven.annotations.version>
