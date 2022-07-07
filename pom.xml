@@ -59,7 +59,7 @@
 		<javax.mail.version>1.5.5</javax.mail.version>
 		<tiles.version>3.0.8</tiles.version>
 		<taglibs.version>1.2.5</taglibs.version>
-		<jetty.version>10.0.8</jetty.version>
+		<jetty.version>10.0.10</jetty.version>
 		<jsp.api.version>2.1</jsp.api.version>
 		<log4j.version>2.17.1</log4j.version>
 		<slf4j.nop.version>1.7.30</slf4j.nop.version>
