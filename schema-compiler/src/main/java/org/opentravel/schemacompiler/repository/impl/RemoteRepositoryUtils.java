@@ -24,8 +24,18 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.config.Registry;
+import org.apache.http.config.RegistryBuilder;
+import org.apache.http.conn.socket.ConnectionSocketFactory;
+import org.apache.http.conn.socket.PlainConnectionSocketFactory;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.LaxRedirectStrategy;
+import org.apache.http.impl.conn.BasicHttpClientConnectionManager;
+import org.apache.http.ssl.SSLContexts;
+import org.apache.http.ssl.TrustStrategy;
 import org.opentravel.ns.ota2.repositoryinfo_v01_00.RepositoryInfoType;
 import org.opentravel.schemacompiler.repository.RepositoryException;
 import org.opentravel.schemacompiler.repository.RepositoryFileManager;
@@ -37,6 +47,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
+import javax.net.ssl.SSLContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
@@ -48,6 +59,8 @@ public class RemoteRepositoryUtils {
 
     public static final String SERVICE_CONTEXT = "/service";
     private static final String REPOSITORY_METADATA_ENDPOINT = SERVICE_CONTEXT + "/repository-metadata";
+
+    private static Registry<ConnectionSocketFactory> socketFactoryRegistry;
 
     private String userId;
     private String encryptedPassword;
@@ -121,7 +134,10 @@ public class RemoteRepositoryUtils {
      * @return HttpClient
      */
     private static HttpClient createHttpClient() {
-        return HttpClientBuilder.create().useSystemProperties()
+        BasicHttpClientConnectionManager connectionManager =
+            new BasicHttpClientConnectionManager( socketFactoryRegistry );
+        return HttpClientBuilder.create().useSystemProperties().setConnectionManager( connectionManager )
+            .setRedirectStrategy( new LaxRedirectStrategy() )
             .setDefaultCredentialsProvider( new NTLMSystemCredentialsProvider() ).build();
     }
 
@@ -230,6 +246,24 @@ public class RemoteRepositoryUtils {
             }
         }
         return errorMessage;
+    }
+
+    /**
+     * Static initializer that creates the SSL socket factory registry for the Apache <code>HttpClient</code>.
+     */
+    static {
+        try {
+            TrustStrategy acceptingTrustStrategy = (cert, authType) -> true;
+            SSLContext sslContext = SSLContexts.custom().loadTrustMaterial( null, acceptingTrustStrategy ).build();
+            SSLConnectionSocketFactory sslsf =
+                new SSLConnectionSocketFactory( sslContext, NoopHostnameVerifier.INSTANCE );
+
+            socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create().register( "https", sslsf )
+                .register( "http", new PlainConnectionSocketFactory() ).build();
+
+        } catch (Exception e) {
+            throw new ExceptionInInitializerError( e );
+        }
     }
 
 }
