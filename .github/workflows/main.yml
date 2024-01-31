@@ -1,0 +1,70 @@
+name: Publish OTM Build
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  build-publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'corretto'
+          java-version: 17
+          cache: maven
+
+      - name: Build with Maven
+        run: mvn clean install
+
+      - name: Get the version from the tag label
+        id: get_version
+        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+  
+      - name: Create release
+        uses: actions/create-release@v1
+        id: create_release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          draft: false
+          prerelease: false
+          release_name: ${{ steps.get_version.outputs.VERSION }}
+          tag_name: ${{ github.ref }}
+          body: 'Version ${{ steps.get_version.outputs.VERSION }} release'
+
+      - name: Upload OTM Repository Service artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./ota2-repository-service/target/ota2-repository-service.war
+          asset_name: ota2-repository-service.war
+          asset_content_type: application/java-archive
+
+      - name: Upload OTM Indexing Service artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./ota2-indexing-service/target/ota2-indexing-service.zip
+          asset_name: ota2-indexing-service.zip
+          asset_content_type: application/zip
+
+      - name: Upload Nagios JMX Plugin artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./nagios-jmx-plugin/target/nagios-jmx-plugin.zip
+          asset_name: nagios-jmx-plugin.zip
+          asset_content_type: application/zip
